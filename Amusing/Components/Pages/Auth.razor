@@ -1,0 +1,12 @@
+﻿@page "/auth"
+
+@using Microsoft.AspNetCore.Authorization
+
+<PageTitle>Auth</PageTitle>
+
+<h1>You are authenticated</h1>
+
+<AuthorizeView>
+    @context.User.Identity?.AuthenticationType
+    Hello @context.User.Identity?.Name!
+</AuthorizeView>

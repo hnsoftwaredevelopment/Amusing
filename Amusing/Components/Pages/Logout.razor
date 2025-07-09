@@ -1,0 +1,14 @@
+﻿@page "/logout"
+@using Amusing.Services
+@inject CustomAuthenticationService AuthService
+@inject NavigationManager NavMan
+
+<PageTitle>Logout</PageTitle>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        //
+        NavMan.NavigateTo("/");
+    }
+}

@@ -1,0 +1,33 @@
+﻿@page "/"
+@using Amusing.Components
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+
+@namespace Amusing.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="~/" />
+    <link rel="stylesheet" href="bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="app.css" />
+    <link rel="stylesheet" href="Amusing.styles.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <component type="typeof( HeadOutlet )" render-mode="ServerPrerendered" />
+</head>
+<body>
+    <component type="typeof( App )" render-mode="ServerPrerendered" />
+
+    <div id="blazor-error-ui">
+        Een onverwachte fout is opgetreden
+        <a href="" class="reload">Opnieuw proberen</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <script src="_framework/blazor.server.js"></script>
+</body>
+</html>

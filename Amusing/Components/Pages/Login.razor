@@ -1,0 +1,39 @@
+﻿@page "/login"
+@using Amusing.Services
+@using Amusing.Models
+@inject NavigationManager Navigation
+@inject CustomAuthenticationService AuthService
+
+<h3>Login</h3>
+<EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <InputText @bind-Value="loginModel.Username" placeholder="Gebruikersnaam" class="form-control" />
+    <InputText @bind-Value="loginModel.Password" type="password" placeholder="Wachtwoord" class="form-control" />
+
+    <button class="btn btn-primary" type="submit">Login</button>
+</EditForm>
+
+@if ( !string.IsNullOrWhiteSpace( ErrorMessage ) )
+{
+    <p class="text-danger">@ErrorMessage</p>
+}
+
+@code {
+    private LoginModel loginModel = new();
+    private string ErrorMessage = string.Empty;
+
+    private async Task HandleLogin()
+    {
+        var user = await AuthService.ValidateUserAsync(loginModel.Username, loginModel.Password);
+        if ( user != null )
+        {
+            Navigation.NavigateTo( $"/signin?username={user.Username}&role={user.Role}&userid={user.UserId}", true );
+        }
+        else
+        {
+            ErrorMessage = "Inloggen mislukt";
+        }
+    }
+}

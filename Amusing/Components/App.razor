@@ -1,0 +1,18 @@
+﻿@using Amusing.Components.Layout 
+@using Microsoft.AspNetCore.Components.Authorization
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof( App ).Assembly">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof( MainLayout )">
+                <NotAuthorized>
+                    <p class="text-danger">Je hebt geen toegang tot deze pagina.</p>
+                </NotAuthorized>
+            </AuthorizeRouteView>
+        </Found>
+        <NotFound>
+            <LayoutView Layout="@typeof( MainLayout )">
+                <p>Pagina niet gevonden</p>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>
