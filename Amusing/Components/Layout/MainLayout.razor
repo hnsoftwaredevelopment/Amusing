@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <div class="page">
     <div class="sidebar">
@@ -6,35 +7,64 @@
     </div>
 
     <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
+        <CascadingAuthenticationState>
+            <AuthorizeView>
+                <Authorized>
+                    @{
+                        var hour = DateTime.Now.Hour;
+                        var greeting = hour switch
+                        {
+                            >= 5 and < 12 => "Goedemorgen",
+                            >= 12 and < 18 => "Goedemiddag",
+                            _ => "Goedenavond"
+                        };
+                    }
+
+                    <div class="top-row px-4 auth d-flex">
+                        <div class="greeting text-success">@greeting @context.User.Identity.Name</div>
+                        <div class="ms-auto">
+                            <a href="https://amusing-hengelo.nl/" target="_blank">Over Amusing</a>
+                        </div>
+                    </div>
+                </Authorized>
+                <NotAuthorized>
+                    <div class="top-row px-4 auth d-flex">
+                        <div class="ms-auto">
+                            <a href="https://amusing-hengelo.nl/" target="_blank">Over Amusing</a>
+                        </div>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
+        </CascadingAuthenticationState>
 
         <article class="content px-4">
             @Body
         </article>
     </main>
 </div>
-
-<AuthorizeView>
-    <Authorized>
-        <p class="text-success">Ingelogd als: @context.User.Identity.Name</p>
-        <p class="text-info">IsAuthenticated: @context.User.Identity.IsAuthenticated.ToString()</p>
-        <p>Claims:</p>
-        <ul>
-            @foreach ( var claim in context.User.Claims )
-            {
-                <li>@claim.Type: @claim.Value</li>
-            }
-        </ul>
-    </Authorized>
-    <NotAuthorized>
-        <p class="text-danger">Niet ingelogd</p>
-    </NotAuthorized>
-</AuthorizeView>
-
 <div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
+    Er is een onverwachte fout opgetreden.
+    <a href="" class="reload">Opnieuw laden</a>
     <a class="dismiss">🗙</a>
 </div>
+
+@code {
+    private string? greeting;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if ( user.Identity?.IsAuthenticated == true )
+        {
+            var hour = DateTime.Now.Hour;
+            greeting = hour switch
+            {
+                >= 5 and < 12 => "Goedemorgen",
+                >= 12 and < 18 => "Goedemiddag",
+                _ => "Goedenavond"
+            } + $" {user.Identity.Name}";
+        }
+    }
+}

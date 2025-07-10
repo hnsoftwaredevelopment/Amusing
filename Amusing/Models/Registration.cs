@@ -1,0 +1,18 @@
+﻿namespace Amusing.Models;
+
+public class Registration
+{
+    public uint FestivalId { get; set; }
+    public DateTime Datum { get; set; }
+    public string Naam { get; set; }
+    public string Stad { get; set; }
+    public string Podium { get; set; }
+    public int Zangers { get; set; }
+    public string Genre { get; set; }
+    public decimal TeBetalen { get; set; }
+    public string Betaald { get; set; }
+    public string Bevestigd { get; set; }
+    public string Kleedkamer { get; set; }
+    public int Binnen { get; set; }
+    public int Buiten { get; set; }
+}

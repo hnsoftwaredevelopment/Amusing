@@ -1,0 +1,83 @@
+﻿@page "/Registrations"
+@using Amusing.Models
+@using Amusing.Services
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Grids
+@inject EditionService EditionService
+@inject RegistrationService RegistrationService
+
+<h3>Inschrijvingen per Amusing editie</h3>
+
+<SfComboBox 
+    TValue="string" 
+    TItem="Edition" 
+    Placeholder="Kies een editie" 
+    ValueChanged="OnEditionChanged"
+    DataSource="@Editions" 
+    Width="150px">
+    <ComboBoxFieldSettings Value="ID" Text="Text"></ComboBoxFieldSettings>
+</SfComboBox>
+<p></p>
+
+@if ( SelectedEditionId != null )
+{
+	<SfGrid @ref="GridRef" DataSource="@RegistrationList" Width="100%" AllowSorting="true" AllowMultiSorting="true">
+    <GridColumns>
+        <GridColumn Field="Datum" HeaderText="Datum" TextAlign="TextAlign.Center" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="90"></GridColumn>
+        <GridColumn Field="Naam" HeaderText="Naam"></GridColumn>
+        <GridColumn Field="Stad" HeaderText="Stad" Width="180"></GridColumn>
+			<GridColumn Field="Podium" HeaderText="Podium" Width="70" TextAlign="TextAlign.Center"></GridColumn>
+        <GridColumn Field="Zangers" HeaderText="Zangers" TextAlign="TextAlign.Center" Width="70"></GridColumn>
+        <GridColumn Field="Genre" HeaderText="Genre" Width="100"></GridColumn>
+        <GridColumn Field="TeBetalen" HeaderText="Te Betalen" Format="C2" Width="110" TextAlign="TextAlign.Right"></GridColumn>
+			<GridColumn Field="Betaald" HeaderText="Betaald" Width="75" TextAlign="TextAlign.Center"></GridColumn>
+			<GridColumn Field="Bevestigd" HeaderText="Bevestigd" Width="80" TextAlign="TextAlign.Center"></GridColumn>
+			<GridColumn Field="Kleedkamer" HeaderText="Kleedkamer" Width="100" TextAlign="TextAlign.Center"></GridColumn>
+			<GridColumn Field="Binnen" HeaderText="Binnen" Width="70" TextAlign="TextAlign.Center"></GridColumn>
+        <GridColumn Field="Buiten" HeaderText="Buiten" Width="70" TextAlign="TextAlign.Center"></GridColumn>
+    </GridColumns>
+</SfGrid>
+}
+
+@code {
+	public class Edition
+	{
+		public string? ID { get; set; }
+		public string? Text { get; set; }
+	}
+	private SfGrid<Registration> GridRef;
+	private List<Edition> Editions = new();
+	private List<Registration> RegistrationList = new();
+	private string? SelectedEditionId;
+
+	protected override async Task OnInitializedAsync()
+	{
+		Editions = await EditionService.GetEditionsAsync();
+
+		if ( Editions.Any() )
+		{
+			// Auto select the current festival edition
+			SelectedEditionId = Editions
+				.OrderByDescending( e => int.Parse( e.Text ) )
+				.First().ID;
+
+			// Get the registrations for the selected edition
+			RegistrationList = await RegistrationService.GetRegistrationsByFestivalIdAsync( Convert.ToUInt32( SelectedEditionId) );
+		}
+	}
+
+	// Whenever the selected edition changes the datagrid has to be updated
+	private async Task OnEditionChanged( string selectedId )
+	{
+		SelectedEditionId = selectedId;
+		await LoadRegistrationsAsync();
+		await GridRef.Refresh();
+	}
+	private async Task LoadRegistrationsAsync()
+	{
+		if ( Convert.ToUInt32( SelectedEditionId ) != 0 )
+		{
+			RegistrationList = await RegistrationService.GetRegistrationsByFestivalIdAsync( Convert.ToUInt32( SelectedEditionId ) );
+		}
+	}
+}

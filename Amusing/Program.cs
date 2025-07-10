@@ -3,11 +3,17 @@ using Amusing.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 
+using Syncfusion.Blazor;
+
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense( "Mgo+DSMBPh8sVXN0S0d+X1ZPd11dXmJWd1p/THNYflR1fV9DaUwxOX1dQl9mSXlSdkVgWHpfdXBVQmNXUkQ=;Mgo+DSMBMAY9C3t3VVhhQlJDfV5AQmBIYVp/TGpJfl96cVxMZVVBJAtUQF1hTH5Ud0VjWn5bcXFRR2lVWkd2;Mzk0NDI0MUAzMzMwMmUzMDJlMzAzYjMzMzAzYk1jRWttUUNkT0x3SGtCeTlNQUNKWlA4dEtPcHpPUG9DUGxTUXJLMGtPc0U9" );
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<EditionService>();
+builder.Services.AddScoped<RegistrationService>();
 
 builder.Services.AddAuthentication( CookieAuthenticationDefaults.AuthenticationScheme )
     .AddCookie( options =>
@@ -21,6 +27,9 @@ builder.Services.AddAuthorization();
 // Register de bestaande authenticatieservice
 builder.Services.AddScoped<CustomAuthenticationService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+
+//builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddSyncfusionBlazor();
 
 WebApplication app = builder.Build();
 

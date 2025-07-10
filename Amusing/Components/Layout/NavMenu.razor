@@ -4,74 +4,209 @@
 
 @inject NavigationManager NavigationManager
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Amusing</a>
+<nav class="flex-column">
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="">
+            <span class="fa-solid fa-house me-3 fs-4" aria-hidden="true" /> Amusing Beheer
+        </NavLink>
     </div>
-</div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Start
-            </NavLink>
-        </div>
-
-
-        <AuthorizeView>
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="counter">
-                        <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+    <AuthorizeView>
+        <Authorized>
+    <!-- Overview-menu -->
+    <div class="nav-item px-3">
+        <a href="#" class="nav-link d-flex justify-content-between align-items-center"
+           @onclick="@(() => ToggleSubMenu( "Overview" ))">
+            <span><span class="fa-solid fa-list-check me-3 fs-5" aria-hidden="true" />Overzichten</span>
+            <span class="fa-solid @(IsSubMenuOpen( "Overview" ) ? "fa-caret-down fs-2" : "fa-caret-right fs-2")" />
+        </a>
+        @if ( IsSubMenuOpen( "Overview" ) )
+        {
+            <ul class="submenu">
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Registrations">
+                        <span class="fa-solid fa-pen-fancy me-2 fs-6" aria-hidden="true" />Inschrijvingen
                     </NavLink>
-                </div>
-
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="weather">
-                        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+                </li>
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Volunteers">
+                        <span class="fa-solid fa-id-card-clip me-2 fs-6" aria-hidden="true" />Vrijwilligers
                     </NavLink>
-                </div>
-
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="auth">
-                        <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
+                </li>
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Emailaddresses">
+                        <span class="fa-solid fa-at me-2 fs-6" aria-hidden="true" />Email-adressen
                     </NavLink>
-                </div>
+                </li>
+            </ul>
+        }
+    </div>
 
-                <div class="nav-item px-3">
-                    <form action="Account/Logout" method="post">
-                        <AntiforgeryToken />
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                        </button>
-                    </form>
-                </div>
-            </Authorized>
-            <NotAuthorized>
-
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+    <!-- Lists-menu -->
+    <div class="nav-item px-3">
+        <a href="#" class="nav-link d-flex justify-content-between align-items-center"
+           @onclick="@(() => ToggleSubMenu( "Lists" ))">
+            <span><span class="fa-solid fa-clipboard-list me-3 fs-5" aria-hidden="true" />Lijsten</span>
+            <span class="fa-solid @(IsSubMenuOpen( "Lists" ) ? "fa-caret-down fs-2" : "fa-caret-right fs-2")" />
+        </a>
+        @if ( IsSubMenuOpen( "Lists" ) )
+        {
+            <ul class="submenu">
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Groups">
+                        <span class="fa-solid fa-people-group me-2 fs-6" aria-hidden="true" />Groepen
                     </NavLink>
-                </div>
-            </NotAuthorized>
-        </AuthorizeView>
+                </li>
+                <li>
+                    <NavLink class="nav-link small ps-4" href="People">
+                        <span class="fa-solid fa-person-half-dress me-2 fs-6" aria-hidden="true" />Personen
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Festivals">
+                        <span class="fa-solid fa-landmark-flag me-2 fs-6" aria-hidden="true" />Festivals
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Stages">
+                        <span class="fa-solid fa-store me-2 fs-6" aria-hidden="true" />Podia
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Stagetypes">
+                        <span class="fa-solid fa-tent-arrows-down me-2 fs-6" aria-hidden="true" />Podiumtypes
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Tasks">
+                        <span class="fa-solid fa-list-check me-2 fs-6" aria-hidden="true" />Taken
+                    </NavLink>
+                </li>
+            </ul>
+        }
+    </div>
 
-        <AuthorizeView Roles="admin">
+    <!-- Planning-menu -->
+    <div class="nav-item px-3">
+        <a href="#" class="nav-link d-flex justify-content-between align-items-center"
+           @onclick="@(() => ToggleSubMenu( "Planning" ))">
+            <span><span class="fa-solid fa-calendar-days me-3 fs-5" aria-hidden="true" />Planning</span>
+            <span class="fa-solid  @(IsSubMenuOpen( "Planning" ) ? "fa-caret-down fs-2" : "fa-caret-right fs-2")" />
+        </a>
+        @if ( IsSubMenuOpen( "Planning" ) )
+        {
+            <ul class="submenu">
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Overview">
+                        <span class="fa-solid fa-table-list me-2 fs-6" aria-hidden="true" />Overzicht
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Volunteers">
+                        <span class="fa-solid fa-solid fa-id-card-clip me-2 fs-6" aria-hidden="true" />Vrijwilligers
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Upload">
+                        <span class="fa-solid fa-upload me-2 fs-6" aria-hidden="true" />Uploaden
+                    </NavLink>
+                </li>
+            </ul>
+        }
+    </div>
+
+    <!-- Add-menu -->
+    <div class="nav-item px-3">
+        <a href="#" class="nav-link d-flex justify-content-between align-items-center"
+           @onclick="@(() => ToggleSubMenu( "Add" ))">
+            <span><span class="fa-solid fa-plus me-3 fs-5" aria-hidden="true" />Voeg toe...</span>
+            <span class="fa-solid @(IsSubMenuOpen( "Add" ) ? "fa-caret-down fs-2" : "fa-caret-right fs-2")" />
+        </a>
+        @if ( IsSubMenuOpen( "Add" ) )
+        {
+            <ul class="submenu">
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Festival">
+                        <span class="fa-solid fa-landmark-flag me-2 fs-6" aria-hidden="true" />Festival
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Stage">
+                        <span class="fa-solid fa-store me-2 fs-6" aria-hidden="true" />Podium
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Group">
+                        <span class="fa-solid fa-people-group me-2 fs-6" aria-hidden="true" />Groep
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Person">
+                        <span class="fa-solid fa-person-half-dress me-2 fs-6" aria-hidden="true" />Persoon
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Tasks">
+                        <span class="fa-solid fa-list-check me-2 fs-6" aria-hidden="true" />Taken
+                    </NavLink>
+                </li>
+            </ul>
+        }
+    </div>
+
+    <!-- Mailing-menu -->
+    <div class="nav-item px-3">
+        <a href="#" class="nav-link d-flex justify-content-between align-items-center"
+           @onclick="@(() => ToggleSubMenu( "Mailings" ))">
+            <span><span class="fa-solid fa-envelopes-bulk me-3 fs-5" aria-hidden="true" />Mailings</span>
+            <span class="fa-solid  @(IsSubMenuOpen( "Mailings" ) ? "fa-caret-down fs-2" : "fa-caret-right fs-2")" />
+        </a>
+        @if ( IsSubMenuOpen( "Mailings" ) )
+        {
+            <ul class="submenu">
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Templates">
+                        <span class="fa-solid fa-paste me-2 fs-6" aria-hidden="true" />Sjablonen
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Recipients">
+                        <span class="fa-solid fa-list-ul me-2 fs-6" aria-hidden="true" />Ontvangstlijsten
+                    </NavLink>
+                </li>
+            </ul>
+        }
+    </div>
+
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="Changes">
+            <span class="fa-solid fa-info me-3 fs-5" aria-hidden="true"></span>Wijzigingen
+        </NavLink>
+    </div>
+
+    <div class="nav-item px-3">
+        <a href="/logout" class="nav-link">
+           <span class="fa-solid fa-right-from-bracket me-3 fs-5" aria-hidden="true"></span> Uitloggen
+        </a>
+    </div>
+    </Authorized>
+        <NotAuthorized>
             <div class="nav-item px-3">
-                <NavLink class="nav-link" href="Account/Register">
-                    <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                <NavLink class="nav-link" href="Login">
+                    <span class="fa-solid fa-circle-user me-3 fs-5" aria-hidden="true"></span> Inloggen
                 </NavLink>
             </div>
-        </AuthorizeView>
+        </NotAuthorized>
+    </AuthorizeView>
 
-
-    </nav>
-</div>
+    <AuthorizeView Roles="admin">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="Account/Register">
+                <span class="fa-solid fa-person-circle-plus me-3 fs-5" aria-hidden="true"></span> Niewe gebruiker
+            </NavLink>
+        </div>
+    </AuthorizeView>
+</nav>
 
 @code {
     private string? currentUrl;
@@ -92,5 +227,14 @@
     {
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
+    private Dictionary<string, bool> subMenuStates = new();
+
+    private void ToggleSubMenu( string key )
+    {
+        subMenuStates [ key ] = !subMenuStates.GetValueOrDefault( key );
+    }
+
+    private bool IsSubMenuOpen( string key ) => subMenuStates.GetValueOrDefault( key );
+}
 }
 

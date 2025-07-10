@@ -9,10 +9,24 @@
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-    <InputText @bind-Value="loginModel.Username" placeholder="Gebruikersnaam" class="form-control" />
-    <InputText @bind-Value="loginModel.Password" type="password" placeholder="Wachtwoord" class="form-control" />
+    <div class="mb-3" style="max-width: 300px;">
+        <label for="username" class="form-label visually-hidden">Gebruikersnaam</label>
+        <InputText Id="username" Class="form-control" placeholder="Gebruikersnaam" @bind-Value="@loginModel.Username" />
+        <ValidationMessage For="@(() => loginModel.Username)" />
+    </div>
+    <div class="mb-3" style="max-width: 300px;">
+        <label for="password" class="form-label visually-hidden">Wachtwoord</label>
+        <div class="input-group">
+            <InputText id="password" type="@PasswordInputType" class="form-control" placeholder="Wachtwoord" @bind-Value="@loginModel.Password" />
+            <span class="input-group-text ms-2" @onclick="TogglePassword" style="cursor:pointer;">
+                <i class="bi @(ShowPassword ? "bi-eye" : "bi-eye-slash")"></i>
+            </span>
+        </div>
+        <ValidationMessage For="@(() => loginModel.Password)" />
+    </div>
 
-    <button class="btn btn-primary" type="submit">Login</button>
+
+    <button class="btn btn-primary" type="submit">Inloggen</button>
 </EditForm>
 
 @if ( !string.IsNullOrWhiteSpace( ErrorMessage ) )
@@ -23,6 +37,15 @@
 @code {
     private LoginModel loginModel = new();
     private string ErrorMessage = string.Empty;
+    private bool ShowPassword = false;
+
+    private string PasswordInputType => ShowPassword ? "text" : "password";
+
+    private void TogglePassword()
+    {
+        ShowPassword = !ShowPassword;
+    }
+
 
     private async Task HandleLogin()
     {
