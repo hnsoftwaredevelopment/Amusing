@@ -15,7 +15,7 @@ public class RegistrationService
 
     public async Task<List<Registration>> GetRegistrationsByFestivalIdAsync( uint festivalId )
     {
-        List<Registration> registrations = new();
+        List<Registration> registrations = [];
 
         string query = @"
             select

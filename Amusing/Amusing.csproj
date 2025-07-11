@@ -5,8 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-Amusing-d4b4dda8-27a3-4a96-94e4-f605690b8606</UserSecretsId>
-    <AssemblyVersion>25.7.11.1</AssemblyVersion>
-    <FileVersion>25.7.11.1</FileVersion>
+    <AssemblyVersion>25.7.11.29</AssemblyVersion>
+    <FileVersion>25.7.11.29</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,6 +31,30 @@
     <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="30.1.39" />
     <PackageReference Include="Syncfusion.Blazor.Grid" Version="30.1.39" />
     <PackageReference Include="Syncfusion.Blazor.Themes" Version="30.1.39" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources\SfResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SfResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\SfResources.de.resx">
+      <Generator></Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\SfResources.en-US.resx">
+      <Generator></Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\SfResources.nl.resx">
+      <Generator></Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\SfResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>SfResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,38 @@
+﻿@page "/EmailAdresses"
+@using Amusing.Models
+@using Amusing.Services
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Data
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+
+<AuthorizeView>
+	<Authorized>
+		<h3>E-mail adressen</h3>
+		<p/>
+		<p>Onderstaande excel files kun je downloaden. Ga discreet om met deze informatie!</p>
+		<p />
+		<p />
+		@* Niewsbrief *@
+		<h2>Niewsbrief mailinglijst</h2>
+		@* TODO: Kolom voor downloads *@
+		<p />
+		<p />
+		@* Contactpersonen *@
+		<h2>Niewsbrief mailinglijst</h2>
+		<p>Alleen mailadressen van contactpersonen staan in deze lijsten, ongeacht of ze wel of niet mail willen ontvangen</p>
+		<p><b>Gebruik deze niet voor nieuwsbrieven!</b></p>
+		@* TODO: Kolom voor downloads *@
+		<p />
+
+	</Authorized>
+	<NotAuthorized>
+		<p class="text-danger">Je hebt alleen toegang tot deze pagina wanneer je bent ingelogt</p>
+	</NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+}

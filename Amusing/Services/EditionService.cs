@@ -1,6 +1,6 @@
-﻿using MySql.Data.MySqlClient;
+﻿using Amusing.Models;
 
-using static Amusing.Components.Pages.Registrations;
+using MySql.Data.MySqlClient;
 
 namespace Amusing.Services;
 
