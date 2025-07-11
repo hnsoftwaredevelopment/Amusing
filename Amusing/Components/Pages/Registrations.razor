@@ -3,6 +3,8 @@
 @using Amusing.Services
 @using Syncfusion.Blazor
 @using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Data
+@using Syncfusion.Blazor.DropDowns
 @inject EditionService EditionService
 @inject RegistrationService RegistrationService
 
@@ -21,22 +23,29 @@
 
 @if ( SelectedEditionId != null )
 {
-	<SfGrid @ref="GridRef" DataSource="@RegistrationList" Width="100%" AllowSorting="true" AllowMultiSorting="true">
-    <GridColumns>
-        <GridColumn Field="Datum" HeaderText="Datum" TextAlign="TextAlign.Center" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="90"></GridColumn>
-        <GridColumn Field="Naam" HeaderText="Naam"></GridColumn>
-        <GridColumn Field="Stad" HeaderText="Stad" Width="180"></GridColumn>
-			<GridColumn Field="Podium" HeaderText="Podium" Width="70" TextAlign="TextAlign.Center"></GridColumn>
-        <GridColumn Field="Zangers" HeaderText="Zangers" TextAlign="TextAlign.Center" Width="70"></GridColumn>
-        <GridColumn Field="Genre" HeaderText="Genre" Width="100"></GridColumn>
-        <GridColumn Field="TeBetalen" HeaderText="Te Betalen" Format="C2" Width="110" TextAlign="TextAlign.Right"></GridColumn>
-			<GridColumn Field="Betaald" HeaderText="Betaald" Width="75" TextAlign="TextAlign.Center"></GridColumn>
-			<GridColumn Field="Bevestigd" HeaderText="Bevestigd" Width="80" TextAlign="TextAlign.Center"></GridColumn>
-			<GridColumn Field="Kleedkamer" HeaderText="Kleedkamer" Width="100" TextAlign="TextAlign.Center"></GridColumn>
-			<GridColumn Field="Binnen" HeaderText="Binnen" Width="70" TextAlign="TextAlign.Center"></GridColumn>
-        <GridColumn Field="Buiten" HeaderText="Buiten" Width="70" TextAlign="TextAlign.Center"></GridColumn>
-    </GridColumns>
-</SfGrid>
+	<div class="col-lg-12 control-section">
+	    <div class="content-wrapper">
+		    <div class="row">
+				<SfGrid @ref="GridRef" DataSource="@RegistrationList" Width="100%" AllowSorting="true" AllowMultiSorting="true" Toolbar="@(new List<string>() { "Search" })">
+					<GridSearchSettings IgnoreAccent="true"/>
+					<GridColumns>
+						<GridColumn Field="Datum" HeaderText="Datum" TextAlign="TextAlign.Center" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="90"></GridColumn>
+						<GridColumn Field="Naam" HeaderText="Naam"></GridColumn>
+						<GridColumn Field="Stad" HeaderText="Stad" Width="180"></GridColumn>
+						<GridColumn Field="Podium" HeaderText="Podium" Width="70" TextAlign="TextAlign.Center"></GridColumn>
+						<GridColumn Field="Zangers" HeaderText="Zangers" TextAlign="TextAlign.Center" Width="70"></GridColumn>
+						<GridColumn Field="Genre" HeaderText="Genre" Width="100"></GridColumn>
+						<GridColumn Field="TeBetalen" HeaderText="Te Betalen" Format="C2" Width="110" TextAlign="TextAlign.Right"></GridColumn>
+						<GridColumn Field="Betaald" HeaderText="Betaald" Width="75" TextAlign="TextAlign.Center"></GridColumn>
+						<GridColumn Field="Bevestigd" HeaderText="Bevestigd" Width="80" TextAlign="TextAlign.Center"></GridColumn>
+						<GridColumn Field="Kleedkamer" HeaderText="Kleedkamer" Width="100" TextAlign="TextAlign.Center"></GridColumn>
+						<GridColumn Field="Binnen" HeaderText="Binnen" Width="70" TextAlign="TextAlign.Center"></GridColumn>
+						<GridColumn Field="Buiten" HeaderText="Buiten" Width="70" TextAlign="TextAlign.Center"></GridColumn>
+					</GridColumns>
+				</SfGrid>
+			</div>
+		</div>
+	</div>
 }
 
 @code {
