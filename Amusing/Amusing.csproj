@@ -5,8 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-Amusing-d4b4dda8-27a3-4a96-94e4-f605690b8606</UserSecretsId>
-    <AssemblyVersion>25.7.11.29</AssemblyVersion>
-    <FileVersion>25.7.11.29</FileVersion>
+    <AssemblyVersion>25.7.14.17</AssemblyVersion>
+    <FileVersion>25.7.14.17</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,6 +28,7 @@
     </PackageReference>
     <PackageReference Include="MySql.Data" Version="9.3.0" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0-preview.3.efcore.9.0.0" />
+    <PackageReference Include="Syncfusion.Blazor.Core" Version="30.1.39" />
     <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="30.1.39" />
     <PackageReference Include="Syncfusion.Blazor.Grid" Version="30.1.39" />
     <PackageReference Include="Syncfusion.Blazor.Themes" Version="30.1.39" />

@@ -7,6 +7,7 @@
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
+@using System.ComponentModel.DataAnnotations
 @inject EditionService EditionService
 @inject RegistrationService RegistrationService
 
@@ -25,7 +26,7 @@
 		</SfComboBox>
 		<p />
 
-		@if ( SelectedEditionId != null )
+		@if ( SelectedEditionId != null)
 		{
 			<div class="col-lg-12 control-section">
 				<div class="content-wrapper">
@@ -34,10 +35,43 @@
 							@ref="GridRef" 
 							DataSource="@RegistrationList" 
 							Width="100%" 
+							AllowExcelExport="true" AllowPdfExport="true"
 							AllowSorting="true"
 							AllowMultiSorting="true">
+
 							<SfToolbar>
 								<ToolbarItems>
+									<ToolbarItem Type="ItemType.Button">
+										<Template>
+											<button class="custom-toolbar-btn" @onclick="ExportToExcel" title="Exporteer naar een Excel bestand">
+												<img src="icons/excel.svg" class="icon" alt="Excel"/>
+											</button>
+										</Template>
+									</ToolbarItem>
+
+									<ToolbarItem Type="ItemType.Button">
+										<Template>
+											<button class="custom-toolbar-btn" @onclick="ExportToCsv" title="Exporteer naar een CSV bestand">
+												<img src="icons/csv.svg" class="icon" alt="CSV" />
+											</button>
+										</Template>
+									</ToolbarItem>
+
+									<ToolbarItem Type="ItemType.Button">
+										<Template>
+											<button class="custom-toolbar-btn" @onclick="ExportToPdf" title="Maak een PDF bestand">
+												<img src="icons/pdf.svg" class="icon" alt="PDF" />
+											</button>
+										</Template>
+									</ToolbarItem>
+
+
+									<ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+										<Template>
+											<span class="toolbar-count">Aantal: @VisibleRowCount</span>
+										</Template>
+									</ToolbarItem>
+
 									<ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
 										<Template>
 											<SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
@@ -45,6 +79,19 @@
 									</ToolbarItem>
 								</ToolbarItems>
 							</SfToolbar>
+
+							<GridTemplates>
+								<EmptyRecordTemplate Context="data">
+									<div class="emptyRecordTemplate text-center">
+										<span>
+											@( ( SelectedEditionId == null )
+																					? "Geen festival editie geselecteerd"
+																					: $"Geen inschrijvingen gevonden voor editie {SelectedEditionText}")
+									</span>
+									</div>
+								</EmptyRecordTemplate>
+							</GridTemplates>
+
 							<GridColumns>
 								<GridColumn Field="Datum" HeaderText="Datum" TextAlign="TextAlign.Center" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="90"></GridColumn>
 								<GridColumn Field="Naam" HeaderText="Naam"></GridColumn>
@@ -52,7 +99,7 @@
 								<GridColumn Field="Podium" HeaderText="Podium" Width="70" TextAlign="TextAlign.Center"></GridColumn>
 								<GridColumn Field="Zangers" HeaderText="Zangers" TextAlign="TextAlign.Center" Width="70"></GridColumn>
 								<GridColumn Field="Genre" HeaderText="Genre" Width="100"></GridColumn>
-								<GridColumn Field="TeBetalen" HeaderText="Te Betalen" Format="C2" Width="110" TextAlign="TextAlign.Right"></GridColumn>
+								<GridColumn Field="TeBetalen (€)" HeaderText="Te Betalen" Format="N2" Width="110" TextAlign="TextAlign.Right"></GridColumn>
 								<GridColumn Field="Betaald" HeaderText="Betaald" Width="75" TextAlign="TextAlign.Center"></GridColumn>
 								<GridColumn Field="Bevestigd" HeaderText="Bevestigd" Width="80" TextAlign="TextAlign.Center"></GridColumn>
 								<GridColumn Field="Kleedkamer" HeaderText="Kleedkamer" Width="100" TextAlign="TextAlign.Center"></GridColumn>
@@ -76,6 +123,9 @@
 	private List<Edition> Editions = new();
 	private List<Registration> RegistrationList = new();
 	private string? SelectedEditionId;
+	private int VisibleRowCount = 0;
+
+	private string SelectedEditionText => Editions.FirstOrDefault( e => e.ID == SelectedEditionId )?.Text ?? "Onbekende editie";
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -90,15 +140,28 @@
 
 			// Get the registrations for the selected edition
 			RegistrationList = await RegistrationService.GetRegistrationsByFestivalIdAsync( Convert.ToUInt32( SelectedEditionId) );
+			if ( SelectedEditionId != null && RegistrationList.Count > 0 )
+			{
+				await UpdateVisibleRowCount();
+			}
 		}
 	}
 
 	// Whenever the selected edition changes the datagrid has to be updated
 	private async Task OnEditionChanged( string selectedId )
 	{
+		if ( string.IsNullOrWhiteSpace( selectedId ) )
+			return;
+
 		SelectedEditionId = selectedId;
+
 		await LoadRegistrationsAsync();
-		await GridRef.Refresh();
+
+		if ( GridRef != null )
+		{
+			await GridRef.Refresh();
+			VisibleRowCount = RegistrationList.Count;
+		}
 	}
 
 	private async Task LoadRegistrationsAsync()
@@ -109,8 +172,56 @@
 		}
 	}
 
+	// Manage direct search functionality
 	public void OnInput( InputEventArgs args )
 	{
 		this.GridRef.SearchAsync( args.Value );
+
+		// Count the number of visible rows
+		_ = Task.Run( async () =>
+		{
+			await Task.Delay( 100 ); // Short delay to handle fast typers
+			await InvokeAsync( UpdateVisibleRowCount );
+		} );
+	}
+
+	// Export functions
+	private async Task ExportToExcel()
+	{
+		var exportProps = new ExcelExportProperties
+		{
+			FileName = $"Inschrijvingen {SelectedEditionText}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx"
+		};
+
+		await GridRef!.ExportToExcelAsync( exportProps );
+	}
+
+	private async Task ExportToCsv()
+	{
+		var exportProps = new ExcelExportProperties
+		{
+			FileName = $"Inschrijvingen {SelectedEditionText}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv"
+		};
+
+		await GridRef!.ExportToCsvAsync( exportProps );
+	}
+
+	private async Task ExportToPdf()
+	{
+		var exportProps = new PdfExportProperties
+		{
+			FileName = $"Inschrijvingen {SelectedEditionText}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.pdf",
+			PageOrientation = PageOrientation.Landscape,
+			PageSize=PdfPageSize.A4,
+			AllowHorizontalOverflow = true
+		};
+		await GridRef!.ExportToPdfAsync( exportProps );
+	}
+
+	// Visible row count (Number of records on screen)
+	private async Task UpdateVisibleRowCount()
+	{
+		var data = await GridRef.GetCurrentViewRecordsAsync();
+		VisibleRowCount = data?.Count ?? 0;
 	}
 }

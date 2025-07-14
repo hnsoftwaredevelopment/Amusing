@@ -51,6 +51,18 @@ a, .btn-link {
     background-color: rgba(255, 255, 255, 0.95)
 }
 
+.excel-knop {
+    background-color: #1f6d42;
+    color: white;
+    border-radius: 4px;
+}
+
+.csv-knop {
+    background-color: #659a36;
+    color: white;
+    border-radius: 4px;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;

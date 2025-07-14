@@ -10,15 +10,6 @@
 @inject EditionService EditionService
 @inject VolunteerService VolunteerService
 
-<style>
-	.grid-layout {
-		display: grid;
-		grid-template-columns: 1fr auto; /* Linker kolom: flexibel, Rechter kolom: auto breedte */
-		align-items: center; /* Verticaal uitlijnen */
-		gap: 1rem;
-	}
-</style>
-
 <AuthorizeView>
 	<Authorized>
 		<h3>Vrijwilligerstaken</h3>
@@ -32,10 +23,11 @@
 					Width="150px">
 			<ComboBoxFieldSettings Value="ID" Text="Text"></ComboBoxFieldSettings>
 		</SfComboBox>
-@if ( SelectedEditionId != null && AllVolunteerList.Count > 0 )
-{
-		<Syncfusion.Blazor.Buttons.SfButton>Download</Syncfusion.Blazor.Buttons.SfButton>
-}
+
+		@if ( SelectedEditionId != null && AllVolunteerList.Count > 0 )
+		{
+				<Syncfusion.Blazor.Buttons.SfButton>Download</Syncfusion.Blazor.Buttons.SfButton>
+		}
 		</div>
 		<p />
 
@@ -50,10 +42,8 @@
 							@key="FilteredStageVolunteerList"
 								DataSource="@FilteredStageVolunteerList"
 								Width="100%"
-								AllowPaging="true"
 								AllowSorting="true"
 								AllowMultiSorting="true">
-								<GridPageSettings PageSize="50" PageSizes="@(new string[] { "10","20","30","40","50","All" })"/>
 							<SfToolbar>
 								<ToolbarItems>
 									<ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
@@ -179,6 +169,13 @@
 	private List<Volunteer> FilteredDroppedOutVolunteerList = new();
 	private string? SelectedEditionId;
 	private bool IsInitialized; // used to be sure all Refs are initialized
+	private int VisibleRowCount = 0;
+	private int VisibleRowCountStage = 0;
+	private int VisibleRowCountOther = 0;
+	private int VisibleRowCountDroppedOut = 0;
+
+	private string SelectedEditionText => Editions.FirstOrDefault( e => e.ID == SelectedEditionId )?.Text ?? "Onbekende editie";
+
 
 	// Editions list
 	protected override async Task OnInitializedAsync()
@@ -201,6 +198,9 @@
 	// Whenever the selected edition changes the datagrid has to be updated
 	private async Task OnEditionChanged( string selectedId )
 	{
+		if ( string.IsNullOrWhiteSpace( selectedId ) )
+			return;
+
 		SelectedEditionId = selectedId;
 		await LoadVolunteersAsync();
 		ApplyVolunteerFilters();
@@ -211,6 +211,10 @@
 			await StageGridRef.Refresh();
 			await OtherGridRef.Refresh();
 			await DroppedOutGridRef.Refresh();
+
+			VisibleRowCountStage = FilteredStageVolunteerList.Count;
+			VisibleRowCountOther = FilteredOtherVolunteerList.Count;
+			VisibleRowCountDroppedOut = FilteredDroppedOutVolunteerList.Count;
 		}
 	}
 
@@ -220,6 +224,8 @@
 		if ( Convert.ToUInt32( SelectedEditionId ) != 0 )
 		{
 			AllVolunteerList = await VolunteerService.GetVolunteersByFestivalIdAsync( Convert.ToUInt32( SelectedEditionId ) );
+
+			VisibleRowCount = AllVolunteerList.Count;
 		}
 	}
 
@@ -227,16 +233,37 @@
 	public void OnInputStage( InputEventArgs args )
 	{
 		this.StageGridRef.SearchAsync( args.Value );
+
+		// Count the number of visible rows
+		_ = Task.Run( async () =>
+		{
+			await Task.Delay( 100 ); // Short delay to handle fast typers
+			await InvokeAsync( UpdateVisibleRowCountStage );
+		} );
 	}
 
 	public void OnInputOther( InputEventArgs args )
 	{
 		this.OtherGridRef.SearchAsync( args.Value );
+
+		// Count the number of visible rows
+		_ = Task.Run( async () =>
+		{
+			await Task.Delay( 100 ); // Short delay to handle fast typers
+			await InvokeAsync( UpdateVisibleRowCountOther );
+		} );
 	}
 
 	public void OnInputDroppedOut( InputEventArgs args )
 	{
 		this.DroppedOutGridRef.SearchAsync( args.Value );
+
+		// Count the number of visible rows
+		_ = Task.Run( async () =>
+		{
+			await Task.Delay( 100 ); // Short delay to handle fast typers
+			await InvokeAsync( UpdateVisibleRowCountDroppedOut );
+		} );
 	}
 
 	// Make sure all Refs are initialized
@@ -248,11 +275,67 @@
 		}
 	}
 
+	// Export functions
+	private async Task ExportToExcel()
+	{
+		var exportProps = new ExcelExportProperties
+		{
+			FileName = $"Vrijwilligers {SelectedEditionText}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx"
+		};
+
+		//await GridRef!.ExportToExcelAsync( exportProps );
+	}
+
+	private async Task ExportToCsv()
+	{
+		var exportProps = new ExcelExportProperties
+		{
+			FileName = $"Vrijwilligers {SelectedEditionText}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv"
+		};
+
+		//await GridRef!.ExportToCsvAsync( exportProps );
+	}
+
+	private async Task ExportToPdf()
+	{
+		var exportProps = new PdfExportProperties
+		{
+			FileName = $"Vrijwilligers {SelectedEditionText}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.pdf",
+			PageOrientation = PageOrientation.Landscape,
+			PageSize=PdfPageSize.A4,
+			AllowHorizontalOverflow = true
+		};
+		//await GridRef!.ExportToPdfAsync( exportProps );
+	}
+
 	// Apply filtering for the Datasurces of the DataGrids
 	private void ApplyVolunteerFilters()
 	{
 		FilteredStageVolunteerList = AllVolunteerList.Where( v => v.Afgehaakt == "nee" && v.Podiumdienst == "ja" ).ToList();
 		FilteredOtherVolunteerList = AllVolunteerList.Where( v => v.Afgehaakt == "nee" && v.Podiumdienst == "nee" ).ToList();
 		FilteredDroppedOutVolunteerList = AllVolunteerList.Where( v => v.Afgehaakt == "ja" ).ToList();
+
+		VisibleRowCountStage = FilteredStageVolunteerList.Count;
+		VisibleRowCountOther = FilteredOtherVolunteerList.Count;
+		VisibleRowCountDroppedOut = FilteredDroppedOutVolunteerList.Count;
+	}
+
+	// Row Counts
+	private async Task UpdateVisibleRowCountStage()
+	{
+		var data = await StageGridRef.GetCurrentViewRecordsAsync();
+		VisibleRowCountStage = data?.Count ?? 0;
+	}
+
+	private async Task UpdateVisibleRowCountOther()
+	{
+		var data = await OtherGridRef.GetCurrentViewRecordsAsync();
+		VisibleRowCountOther = data?.Count ?? 0;
+	}
+
+	private async Task UpdateVisibleRowCountDroppedOut()
+	{
+		var data = await DroppedOutGridRef.GetCurrentViewRecordsAsync();
+		VisibleRowCountDroppedOut = data?.Count ?? 0;
 	}
 }
