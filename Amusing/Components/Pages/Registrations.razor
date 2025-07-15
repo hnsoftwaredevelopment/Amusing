@@ -68,7 +68,7 @@
 
 									<ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
 										<Template>
-											<span class="toolbar-count">Aantal: @VisibleRowCount</span>
+											<span class="toolbar-count">Inschrijvingen: @VisibleRowCount</span>
 										</Template>
 									</ToolbarItem>
 
@@ -180,7 +180,7 @@
 		// Count the number of visible rows
 		_ = Task.Run( async () =>
 		{
-			await Task.Delay( 100 ); // Short delay to handle fast typers
+			await Task.Delay( 200 ); // Short delay to handle fast typers
 			await InvokeAsync( UpdateVisibleRowCount );
 		} );
 	}

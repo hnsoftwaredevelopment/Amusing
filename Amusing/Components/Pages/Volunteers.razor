@@ -7,8 +7,12 @@
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
+@using System.Text
+@using System.Drawing
+@using Syncfusion.XlsIO
 @inject EditionService EditionService
 @inject VolunteerService VolunteerService
+@inject IJSRuntime JS
 
 <AuthorizeView>
 	<Authorized>
@@ -26,10 +30,50 @@
 
 		@if ( SelectedEditionId != null && AllVolunteerList.Count > 0 )
 		{
-				<Syncfusion.Blazor.Buttons.SfButton>Download</Syncfusion.Blazor.Buttons.SfButton>
-		}
+				<button @onclick="ExportToExcel" title="Exporteer alle vrijwilligers naar een Excel bestand">
+					<img src="/icons/excel.svg" width="25" class="icon" alt="Excel" />
+                </button>
+
+				<button @onclick="ExportToCsv" title="Exporteer alle vrijwilligers naar een CSV bestand">
+					<img src="icons/csv.svg" width="25" class="icon" alt="CSV" />
+				</button>
+
+				<button @onclick="ExportToPdf" title="Maak een PDF bestand met alle vrijwilligers">
+					<img src="icons/pdf.svg" width="25" class="icon" alt="PDF" />
+				</button>
+			}
 		</div>
 		<p />
+
+		@* This DataGrid should always be invisible, it is only used to be able to export all vulunteers *@ 
+		@if ( 1 == 0 )
+		{<div class="col-lg-12 control-section">
+			<div class="content-wrapper">
+				<div class="row">
+					<SfGrid @ref="GridRef"
+							@key="AllVolunteerList"
+							DataSource="@AllVolunteerList" AllowExcelExport="true" AllowPdfExport="true"
+							Width="100%">
+
+						<GridColumns>
+							<GridColumn Field="Datum" HeaderText="Datum" TextAlign="TextAlign.Center" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="90" />
+							<GridColumn Field="Naam" HeaderText="Naam" />
+							<GridColumn Field="Van" HeaderText="Van" Width="70" />
+							<GridColumn Field="Tot" HeaderText="Tot" Width="70" />
+							<GridColumn Field="Uren" HeaderText="Uren" Width="70" TextAlign="TextAlign.Right" />
+							<GridColumn Field="Lunch" HeaderText="Lunch" Width="80" TextAlign="TextAlign.Center" />
+							<GridColumn Field="Vegetarisch" HeaderText="Vegetarisch" Width="80" TextAlign="TextAlign.Center" />
+							<GridColumn Field="Bijeenkomst" HeaderText="Bijeenkomst" Width="80" TextAlign="TextAlign.Center" />
+							<GridColumn Field="Ervaring" HeaderText="Ervaring" Width="80" TextAlign="TextAlign.Center" />
+                            <GridColumn Field="Podiumdienst" HeaderText="Podiumdienst" Width="70" />
+                            <GridColumn Field="Overige" HeaderText="Overige" Width="70" />
+                            <GridColumn Field="Afgehaakt" HeaderText="Afgehaakt" Width="70" />
+                        </GridColumns>
+					</SfGrid>
+				</div>
+			</div>
+		</div>
+		}
 
 		@if ( SelectedEditionId != null && AllVolunteerList.Count > 0 )
 		{
@@ -44,8 +88,15 @@
 								Width="100%"
 								AllowSorting="true"
 								AllowMultiSorting="true">
+
 							<SfToolbar>
 								<ToolbarItems>
+									<ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+										<Template>
+											<span class="toolbar-count">Vrijwilligers: @VisibleRowCountStage</span>
+										</Template>
+									</ToolbarItem>
+
 									<ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
 										<Template>
 											<SfTextBox Placeholder="Zoek" Input="OnInputStage"></SfTextBox>
@@ -53,6 +104,7 @@
 									</ToolbarItem>
 								</ToolbarItems>
 							</SfToolbar>
+
 							<GridColumns>
 								<GridColumn Field="Datum" HeaderText="Datum" TextAlign="TextAlign.Center" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="90"/>
 								<GridColumn Field="Naam" HeaderText="Naam"/>
@@ -80,12 +132,17 @@
 							@key="FilteredOtherVolunteerList"
 								DataSource="@FilteredOtherVolunteerList"
 								Width="100%"
-								AllowPaging="true"
 								AllowSorting="true"
 								AllowMultiSorting="true">
-							<GridPageSettings PageSize="50" PageSizes="@(new string [ ] { "10", "20", "30", "40", "50", "All" })" />
+
 							<SfToolbar>
 								<ToolbarItems>
+									<ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+										<Template>
+											<span class="toolbar-count">Vrijwilligers: @VisibleRowCountOther</span>
+										</Template>
+									</ToolbarItem>
+
 									<ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
 										<Template>
 											<SfTextBox Placeholder="Zoek" Input="OnInputOther"></SfTextBox>
@@ -93,6 +150,7 @@
 									</ToolbarItem>
 								</ToolbarItems>
 							</SfToolbar>
+
 							<GridColumns>
 								<GridColumn Field="Datum" HeaderText="Datum" TextAlign="TextAlign.Center" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="90"/>
 								<GridColumn Field="Naam" HeaderText="Naam"/>
@@ -120,12 +178,17 @@
 							@key="FilteredDroppedOutVolunteerList"
 								DataSource="@FilteredDroppedOutVolunteerList"
 								Width="100%"
-								AllowPaging="true"
 								AllowSorting="true"
 								AllowMultiSorting="true">
-							<GridPageSettings PageSize="50" PageSizes="@(new string [ ] { "10", "20", "30", "40", "50", "All" })" />
+
 							<SfToolbar>
 								<ToolbarItems>
+									<ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+										<Template>
+											<span class="toolbar-count">Vrijwilligers: @VisibleRowCountDroppedOut</span>
+										</Template>
+									</ToolbarItem>
+
 									<ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
 										<Template>
 											<SfTextBox Placeholder="Zoek" Input="OnInputDroppedOut"></SfTextBox>
@@ -133,6 +196,7 @@
 									</ToolbarItem>
 								</ToolbarItems>
 							</SfToolbar>
+
 							<GridColumns>
 								<GridColumn Field="Datum" HeaderText="Datum" TextAlign="TextAlign.Center" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="90"/>
 								<GridColumn Field="Naam" HeaderText="Naam"/>
@@ -143,7 +207,7 @@
 								<GridColumn Field="Vegetarisch" HeaderText="Vegetarisch" Width="80" TextAlign="TextAlign.Center"/>
 								<GridColumn Field="Bijeenkomst" HeaderText="Bijeenkomst" Width="80" TextAlign="TextAlign.Center"/>
 								<GridColumn Field="Ervaring" HeaderText="Ervaring" Width="80" TextAlign="TextAlign.Center"/>
-								<GridColumn Field="Afgehaakt" HeaderText="Overige" Width="0"/>
+								<GridColumn Field="Afgehaakt" HeaderText="Afgehaakt" Width="0"/>
 							</GridColumns>
 						</SfGrid>
 					</div>
@@ -158,124 +222,161 @@
 
 @code 
 {
-	// Declarations
-	private SfGrid<Volunteer> StageGridRef;
-	private SfGrid<Volunteer> OtherGridRef;
-	private SfGrid<Volunteer> DroppedOutGridRef;
-	private List<Edition> Editions = new();
-	private List<Volunteer> AllVolunteerList = new();
-	private List<Volunteer> FilteredStageVolunteerList = new();
-	private List<Volunteer> FilteredOtherVolunteerList = new();
-	private List<Volunteer> FilteredDroppedOutVolunteerList = new();
-	private string? SelectedEditionId;
-	private bool IsInitialized; // used to be sure all Refs are initialized
-	private int VisibleRowCount = 0;
-	private int VisibleRowCountStage = 0;
-	private int VisibleRowCountOther = 0;
-	private int VisibleRowCountDroppedOut = 0;
+    // Declarations
+    private SfGrid<Volunteer> GridRef;
+    private SfGrid<Volunteer> StageGridRef;
+    private SfGrid<Volunteer> OtherGridRef;
+    private SfGrid<Volunteer> DroppedOutGridRef;
+    private List<Edition> Editions = new();
+    private List<Volunteer> AllVolunteerList = new();
+    private List<Volunteer> FilteredStageVolunteerList = new();
+    private List<Volunteer> FilteredOtherVolunteerList = new();
+    private List<Volunteer> FilteredDroppedOutVolunteerList = new();
+    private string? SelectedEditionId;
+    private bool IsInitialized; // used to be sure all Refs are initialized
+    private int VisibleRowCount = 0;
+    private int VisibleRowCountStage = 0;
+    private int VisibleRowCountOther = 0;
+    private int VisibleRowCountDroppedOut = 0;
 
-	private string SelectedEditionText => Editions.FirstOrDefault( e => e.ID == SelectedEditionId )?.Text ?? "Onbekende editie";
+    private string SelectedEditionText => Editions.FirstOrDefault( e => e.ID == SelectedEditionId )?.Text ?? "Onbekende editie";
 
 
-	// Editions list
-	protected override async Task OnInitializedAsync()
-	{
-		Editions = await EditionService.GetEditionsAsync();
+    // Editions list
+    protected override async Task OnInitializedAsync()
+    {
+        Editions = await EditionService.GetEditionsAsync();
 
-		if ( Editions.Any() )
-		{
-			// Auto select the current festival edition
-			SelectedEditionId = Editions
-				.OrderByDescending( e => int.Parse( e.Text ) )
-				.First().ID;
+        if ( Editions.Any() )
+        {
+            // Auto select the current festival edition
+            SelectedEditionId = Editions
+                .OrderByDescending( e => int.Parse( e.Text ) )
+                .First().ID;
 
-			// Get the volunteers for the selected edition
-			AllVolunteerList = await VolunteerService.GetVolunteersByFestivalIdAsync( Convert.ToUInt32( SelectedEditionId ) );
-			ApplyVolunteerFilters();
-		}
-	}
+            // Get the volunteers for the selected edition
+            AllVolunteerList = await VolunteerService.GetVolunteersByFestivalIdAsync( Convert.ToUInt32( SelectedEditionId ) );
+            ApplyVolunteerFilters();
+            if ( SelectedEditionId != null && AllVolunteerList.Count > 0 )
+            {
+                await UpdateVisibleRowCountStage();
+                await UpdateVisibleRowCountOther();
+                await UpdateVisibleRowCountDroppedOut();
+            }
+        }
+    }
 
-	// Whenever the selected edition changes the datagrid has to be updated
-	private async Task OnEditionChanged( string selectedId )
-	{
-		if ( string.IsNullOrWhiteSpace( selectedId ) )
-			return;
+    // Whenever the selected edition changes the datagrid has to be updated
+    private async Task OnEditionChanged( string selectedId )
+    {
+        if ( string.IsNullOrWhiteSpace( selectedId ) )
+            return;
 
-		SelectedEditionId = selectedId;
-		await LoadVolunteersAsync();
-		ApplyVolunteerFilters();
-		StateHasChanged(); // Force UI rerender to initializeall Refs
+        SelectedEditionId = selectedId;
+        await LoadVolunteersAsync();
+        ApplyVolunteerFilters();
+        StateHasChanged(); // Force UI rerender to initializeall Refs
 
-		if ( IsInitialized )
-		{
-			await StageGridRef.Refresh();
-			await OtherGridRef.Refresh();
-			await DroppedOutGridRef.Refresh();
+        if ( IsInitialized )
+        {
+            await StageGridRef.Refresh();
+            await OtherGridRef.Refresh();
+            await DroppedOutGridRef.Refresh();
 
-			VisibleRowCountStage = FilteredStageVolunteerList.Count;
-			VisibleRowCountOther = FilteredOtherVolunteerList.Count;
-			VisibleRowCountDroppedOut = FilteredDroppedOutVolunteerList.Count;
-		}
-	}
+            VisibleRowCountStage = FilteredStageVolunteerList.Count;
+            VisibleRowCountOther = FilteredOtherVolunteerList.Count;
+            VisibleRowCountDroppedOut = FilteredDroppedOutVolunteerList.Count;
+        }
+    }
 
-	// Volunteers
-	private async Task LoadVolunteersAsync()
-	{
-		if ( Convert.ToUInt32( SelectedEditionId ) != 0 )
-		{
-			AllVolunteerList = await VolunteerService.GetVolunteersByFestivalIdAsync( Convert.ToUInt32( SelectedEditionId ) );
+    // Volunteers
+    private async Task LoadVolunteersAsync()
+    {
+        if ( Convert.ToUInt32( SelectedEditionId ) != 0 )
+        {
+            AllVolunteerList = await VolunteerService.GetVolunteersByFestivalIdAsync( Convert.ToUInt32( SelectedEditionId ) );
 
-			VisibleRowCount = AllVolunteerList.Count;
-		}
-	}
+            VisibleRowCount = AllVolunteerList.Count;
+        }
+    }
 
-	// Search
-	public void OnInputStage( InputEventArgs args )
-	{
-		this.StageGridRef.SearchAsync( args.Value );
+    // Search
+    public void OnInputStage( InputEventArgs args )
+    {
+        this.StageGridRef.SearchAsync( args.Value );
 
-		// Count the number of visible rows
-		_ = Task.Run( async () =>
-		{
-			await Task.Delay( 100 ); // Short delay to handle fast typers
-			await InvokeAsync( UpdateVisibleRowCountStage );
-		} );
-	}
+        // Count the number of visible rows
+        _ = Task.Run( async () =>
+        {
+            await Task.Delay( 200 ); // Short delay to handle fast typers
+            await InvokeAsync( UpdateVisibleRowCountStage );
+        } );
+    }
 
-	public void OnInputOther( InputEventArgs args )
-	{
-		this.OtherGridRef.SearchAsync( args.Value );
+    public void OnInputOther( InputEventArgs args )
+    {
+        this.OtherGridRef.SearchAsync( args.Value );
 
-		// Count the number of visible rows
-		_ = Task.Run( async () =>
-		{
-			await Task.Delay( 100 ); // Short delay to handle fast typers
-			await InvokeAsync( UpdateVisibleRowCountOther );
-		} );
-	}
+        // Count the number of visible rows
+        _ = Task.Run( async () =>
+        {
+            await Task.Delay( 200 ); // Short delay to handle fast typers
+            await InvokeAsync( UpdateVisibleRowCountOther );
+        } );
+    }
 
-	public void OnInputDroppedOut( InputEventArgs args )
-	{
-		this.DroppedOutGridRef.SearchAsync( args.Value );
+    public void OnInputDroppedOut( InputEventArgs args )
+    {
+        this.DroppedOutGridRef.SearchAsync( args.Value );
 
-		// Count the number of visible rows
-		_ = Task.Run( async () =>
-		{
-			await Task.Delay( 100 ); // Short delay to handle fast typers
-			await InvokeAsync( UpdateVisibleRowCountDroppedOut );
-		} );
-	}
+        // Count the number of visible rows
+        _ = Task.Run( async () =>
+        {
+            await Task.Delay( 200 ); // Short delay to handle fast typers
+            await InvokeAsync( UpdateVisibleRowCountDroppedOut );
+        } );
+    }
 
-	// Make sure all Refs are initialized
-	protected override async Task OnAfterRenderAsync( bool firstRender )
-	{
-		if ( firstRender )
-		{
-			IsInitialized = true;
-		}
-	}
+    // Make sure all Refs are initialized
+    protected override async Task OnAfterRenderAsync( bool firstRender )
+    {
+        if ( firstRender )
+        {
+            IsInitialized = true;
+        }
+    }
 
-	// Export functions
+    // Apply filtering for the Datasurces of the DataGrids
+    private void ApplyVolunteerFilters()
+    {
+        FilteredStageVolunteerList = AllVolunteerList.Where( v => v.Afgehaakt == "nee" && v.Podiumdienst == "ja" ).ToList();
+        FilteredOtherVolunteerList = AllVolunteerList.Where( v => v.Afgehaakt == "nee" && v.Podiumdienst == "nee" ).ToList();
+        FilteredDroppedOutVolunteerList = AllVolunteerList.Where( v => v.Afgehaakt == "ja" ).ToList();
+
+        VisibleRowCountStage = FilteredStageVolunteerList.Count;
+        VisibleRowCountOther = FilteredOtherVolunteerList.Count;
+        VisibleRowCountDroppedOut = FilteredDroppedOutVolunteerList.Count;
+    }
+
+    // Row Counts
+    private async Task UpdateVisibleRowCountStage()
+    {
+        var data = await StageGridRef.GetCurrentViewRecordsAsync();
+        VisibleRowCountStage = data?.Count ?? 0;
+    }
+
+    private async Task UpdateVisibleRowCountOther()
+    {
+        var data = await OtherGridRef.GetCurrentViewRecordsAsync();
+        VisibleRowCountOther = data?.Count ?? 0;
+    }
+
+    private async Task UpdateVisibleRowCountDroppedOut()
+    {
+        var data = await DroppedOutGridRef.GetCurrentViewRecordsAsync();
+        VisibleRowCountDroppedOut = data?.Count ?? 0;
+    }
+
 	private async Task ExportToExcel()
 	{
 		var exportProps = new ExcelExportProperties
@@ -283,7 +384,7 @@
 			FileName = $"Vrijwilligers {SelectedEditionText}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx"
 		};
 
-		//await GridRef!.ExportToExcelAsync( exportProps );
+		await GridRef!.ExportToExcelAsync( exportProps );
 	}
 
 	private async Task ExportToCsv()
@@ -293,7 +394,7 @@
 			FileName = $"Vrijwilligers {SelectedEditionText}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv"
 		};
 
-		//await GridRef!.ExportToCsvAsync( exportProps );
+		await GridRef!.ExportToCsvAsync( exportProps );
 	}
 
 	private async Task ExportToPdf()
@@ -305,37 +406,6 @@
 			PageSize=PdfPageSize.A4,
 			AllowHorizontalOverflow = true
 		};
-		//await GridRef!.ExportToPdfAsync( exportProps );
-	}
-
-	// Apply filtering for the Datasurces of the DataGrids
-	private void ApplyVolunteerFilters()
-	{
-		FilteredStageVolunteerList = AllVolunteerList.Where( v => v.Afgehaakt == "nee" && v.Podiumdienst == "ja" ).ToList();
-		FilteredOtherVolunteerList = AllVolunteerList.Where( v => v.Afgehaakt == "nee" && v.Podiumdienst == "nee" ).ToList();
-		FilteredDroppedOutVolunteerList = AllVolunteerList.Where( v => v.Afgehaakt == "ja" ).ToList();
-
-		VisibleRowCountStage = FilteredStageVolunteerList.Count;
-		VisibleRowCountOther = FilteredOtherVolunteerList.Count;
-		VisibleRowCountDroppedOut = FilteredDroppedOutVolunteerList.Count;
-	}
-
-	// Row Counts
-	private async Task UpdateVisibleRowCountStage()
-	{
-		var data = await StageGridRef.GetCurrentViewRecordsAsync();
-		VisibleRowCountStage = data?.Count ?? 0;
-	}
-
-	private async Task UpdateVisibleRowCountOther()
-	{
-		var data = await OtherGridRef.GetCurrentViewRecordsAsync();
-		VisibleRowCountOther = data?.Count ?? 0;
-	}
-
-	private async Task UpdateVisibleRowCountDroppedOut()
-	{
-		var data = await DroppedOutGridRef.GetCurrentViewRecordsAsync();
-		VisibleRowCountDroppedOut = data?.Count ?? 0;
+		await GridRef!.ExportToPdfAsync( exportProps );
 	}
 }
