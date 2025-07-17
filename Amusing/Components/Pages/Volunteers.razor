@@ -46,14 +46,13 @@
 		<p />
 
 		@* This DataGrid should always be invisible, it is only used to be able to export all vulunteers *@ 
-		@if ( 1 == 0 )
-		{<div class="col-lg-12 control-section">
+		<div class="col-lg-12 control-section">
 			<div class="content-wrapper">
 				<div class="row">
 					<SfGrid @ref="GridRef"
 							@key="AllVolunteerList"
 							DataSource="@AllVolunteerList" AllowExcelExport="true" AllowPdfExport="true"
-							Width="100%">
+								Width="100%" style="display: none;">
 
 						<GridColumns>
 							<GridColumn Field="Datum" HeaderText="Datum" TextAlign="TextAlign.Center" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="90" />
@@ -73,7 +72,6 @@
 				</div>
 			</div>
 		</div>
-		}
 
 		@if ( SelectedEditionId != null && AllVolunteerList.Count > 0 )
 		{
@@ -223,15 +221,15 @@
 @code 
 {
     // Declarations
-    private SfGrid<Volunteer> GridRef;
-    private SfGrid<Volunteer> StageGridRef;
-    private SfGrid<Volunteer> OtherGridRef;
-    private SfGrid<Volunteer> DroppedOutGridRef;
+    private SfGrid<VolunteerModel> GridRef;
+    private SfGrid<VolunteerModel> StageGridRef;
+    private SfGrid<VolunteerModel> OtherGridRef;
+    private SfGrid<VolunteerModel> DroppedOutGridRef;
     private List<Edition> Editions = new();
-    private List<Volunteer> AllVolunteerList = new();
-    private List<Volunteer> FilteredStageVolunteerList = new();
-    private List<Volunteer> FilteredOtherVolunteerList = new();
-    private List<Volunteer> FilteredDroppedOutVolunteerList = new();
+    private List<VolunteerModel> AllVolunteerList = new();
+    private List<VolunteerModel> FilteredStageVolunteerList = new();
+    private List<VolunteerModel> FilteredOtherVolunteerList = new();
+    private List<VolunteerModel> FilteredDroppedOutVolunteerList = new();
     private string? SelectedEditionId;
     private bool IsInitialized; // used to be sure all Refs are initialized
     private int VisibleRowCount = 0;

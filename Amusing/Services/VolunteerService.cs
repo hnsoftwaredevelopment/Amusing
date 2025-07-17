@@ -13,9 +13,9 @@ public class VolunteerService
         _connection = new MySqlConnection( configuration.GetConnectionString( "DefaultConnection" ) );
     }
 
-    public async Task<List<Volunteer>> GetVolunteersByFestivalIdAsync( uint festivalId )
+    public async Task<List<VolunteerModel>> GetVolunteersByFestivalIdAsync( uint festivalId )
     {
-        List<Volunteer> volunteers = [];
+        List<VolunteerModel> volunteers = [];
 
         string query = @"
             select 
@@ -56,7 +56,7 @@ public class VolunteerService
 
         while ( await reader.ReadAsync() )
         {
-            volunteers.Add( new Volunteer
+            volunteers.Add( new VolunteerModel
             {
                 FestivalId = Convert.ToUInt32( reader [ "festival_id" ] ),
                 Datum = Convert.ToDateTime( reader [ "Datum" ] ),

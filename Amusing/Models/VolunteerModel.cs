@@ -1,6 +1,6 @@
 ﻿namespace Amusing.Models;
 
-public class Volunteer
+public class VolunteerModel
 {
     public uint FestivalId { get; set; }
     public DateTime Datum { get; set; }

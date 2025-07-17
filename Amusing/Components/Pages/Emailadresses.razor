@@ -1,4 +1,4 @@
-﻿@page "/EmailAdresses"
+﻿@page "/EmailAddresses"
 @using Amusing.Models
 @using Amusing.Services
 @using Syncfusion.Blazor
@@ -7,6 +7,8 @@
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
+@inject EmailAddressesService EmailAddressesService
+@inject IJSRuntime JS
 
 <AuthorizeView>
 	<Authorized>
@@ -14,17 +16,167 @@
 		<p/>
 		<p>Onderstaande excel files kun je downloaden. Ga discreet om met deze informatie!</p>
 		<p />
-		<p />
+		<p>De lijsten kunnen worden opgemaakt voor Nederlandse, Duitse, of Overige zang groepen</p>
+		<p>Kies eerst het gewenste land van herkomst</p>
+		<div class="grid-layout">
+			<SfComboBox
+				TValue="string" 
+				TItem="Countries"
+				Placeholder="Selecteer een land"
+				ValueChanged="OnCountryChanged"
+				DataSource="@CountryList"
+				Width="250px">
+
+				<ComboBoxTemplates TItem="Countries">
+					<ItemTemplate Context="country">
+						<div>
+							<img class="countryImage" src="icons/@((country as Countries).Code).svg" alt="country" />
+							<div class="countryName"> @((country as Countries).Name) </div>
+						</div>
+					</ItemTemplate>
+				</ComboBoxTemplates>
+
+				<ComboBoxFieldSettings Text="Name" Value="Code" />
+			</SfComboBox>
+		</div>
+		<p /> 
+		<p/>
 		@* Niewsbrief *@
 		<h2>Niewsbrief mailinglijst</h2>
-		@* TODO: Kolom voor downloads *@
+		<p/>
+		@if ( SelectedCountry != null && NewsletterEmailAddressesListVisibleRowCount > 0 )
+		{
+			<table class="table">
+				<thead>
+					<th>Aantal</th>
+					<th>Excel</th>
+					<th>CSV</th>
+					<th>PDF</th>
+					<th style="width: 85%" />
+				</thead>
+				<tbody>
+					<tr>
+						<td class="one-row-cel" ">@NewsletterEmailAddressesListVisibleRowCount</td>
+						<td>
+							<button @onclick="ExportToExcel" title="Exporteer alle e-mail adressen naar een Excel bestand">
+								<img src="/icons/excel.svg" width="25" class="icon" alt="Excel" />
+							</button>
+						</td>
+
+						<td>
+							<button @onclick="ExportToCsv" title="Exporteer alle e-mail adressen naar een CSV bestand">
+								<img src="icons/csv.svg" width="25" class="icon" alt="CSV" />
+							</button>
+						</td>
+
+						<td>
+							<button @onclick="ExportToPdf" title="Maak een PDF bestand met alle e-mail adressen">
+								<img src="icons/pdf.svg" width="25" class="icon" alt="PDF" />
+							</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		}
+
+		@* The datagrid should never been shown, only available for easy export *@
+		<div class="col-lg-12 control-section">
+			<div class="content-wrapper">
+				<div class="row">
+					<SfGrid @ref="NewsletterEmailAddressesGridRef"
+							@key="FilteredNewsletterEmailAddressesList"
+							DataSource="@FilteredNewsletterEmailAddressesList" AllowExcelExport="true" AllowPdfExport="true"
+							Width="100%" 
+							style="display: none;">
+
+						<GridColumns>
+							<GridColumn Field="Groep" HeaderText="Groep" />
+							<GridColumn Field="Naam" HeaderText="Naam" />
+							<GridColumn Field="Email" HeaderText="Email" />
+							<GridColumn Field="Land" HeaderText="Land" />
+						</GridColumns>
+					</SfGrid>
+				</div>
+			</div>
+		</div>
 		<p />
 		<p />
 		@* Contactpersonen *@
-		<h2>Niewsbrief mailinglijst</h2>
+		<h2>Contactpersonen mailinglijst</h2>
 		<p>Alleen mailadressen van contactpersonen staan in deze lijsten, ongeacht of ze wel of niet mail willen ontvangen</p>
 		<p><b>Gebruik deze niet voor nieuwsbrieven!</b></p>
 		@* TODO: Kolom voor downloads *@
+		@*
+			Alle bekende groepen (Ongeacht compleet profiel of ingeschreven)
+			Toegevoegd sinds het laatste festival maar nog steeds niet ingeschreven (Groepen toegevoegd in de afgelopen maand zijn weggelaten)
+			Oude deelnemers, nog niet ingeschreven voor het komende festival
+			Groepen ingeschreven voor het vorige festival (Uitgezonderd wachtlijst)
+			Groepen ingeschreven voor het komende festival (Uitgezonderd wachtlijst)
+			Wachtlijst voor het komende festival
+			Incomplete profielen (Groep is aangemaakt, maar nog niet ingelogd en ingeschreven)
+		*@
+		<table class="table">
+			<thead>
+				<th style="width: 350px">Omschrijving</th>
+				<th>Aantal</th>
+				<th>Excel</th>
+				<th>CSV</th>
+				<th>PDF</th>
+				<th style="width: 35%" />
+			</thead>
+			<tbody>
+				<tr>
+					<td class="two-row-cel">
+						<div class="first-row">Alle bekende groepen</div>
+						<div class="second-row">Ongeacht compleet profiel of ingeschreven</div>
+					</td>
+					<td class="one-row-cel">@NewsletterEmailAddressesListVisibleRowCount</td>
+					<td>
+						<button @onclick="ExportToExcel" title="Exporteer alle e-mail adressen naar een Excel bestand">
+							<img src="/icons/excel.svg" width="25" class="icon" alt="Excel" />
+						</button>
+					</td>
+
+					<td>
+						<button @onclick="ExportToCsv" title="Exporteer alle e-mail adressen naar een CSV bestand">
+							<img src="icons/csv.svg" width="25" class="icon" alt="CSV" />
+						</button>
+					</td>
+
+					<td>
+						<button @onclick="ExportToPdf" title="Maak een PDF bestand met alle e-mail adressen">
+							<img src="icons/pdf.svg" width="25" class="icon" alt="PDF" />
+						</button>
+					</td>
+				</tr>
+
+				<tr>
+					<td class="two-row-cel">
+						<div class="first-row">Toegevoegd sinds het laatste festival maar nog steeds niet ingeschreven</div>
+						<div class="second-row">Groepen toegevoegd in de afgelopen maand zijn weggelaten</div>
+					</td>
+					<td class="one-row-cel">@NewsletterEmailAddressesListVisibleRowCount</td>
+					<td>
+						<button @onclick="ExportToExcel" title="Exporteer alle e-mail adressen naar een Excel bestand">
+							<img src="/icons/excel.svg" width="25" class="icon" alt="Excel" />
+						</button>
+					</td>
+
+					<td>
+						<button @onclick="ExportToCsv" title="Exporteer alle e-mail adressen naar een CSV bestand">
+							<img src="icons/csv.svg" width="25" class="icon" alt="CSV" />
+						</button>
+					</td>
+
+					<td>
+						<button @onclick="ExportToPdf" title="Maak een PDF bestand met alle e-mail adressen">
+							<img src="icons/pdf.svg" width="25" class="icon" alt="PDF" />
+						</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
 		<p />
 
 	</Authorized>
@@ -33,6 +185,138 @@
 	</NotAuthorized>
 </AuthorizeView>
 
-@code {
+@code 
+{
+	private string? SelectedCountry;
+	private bool IsInitialized;
+	private SfGrid<EmailAddressesModel>? NewsletterEmailAddressesGridRef;
+	private List<EmailAddressesModel> AllNewsletterEmailAddressesList = new();
+	private List<EmailAddressesModel> FilteredNewsletterEmailAddressesList = new();
+	private int NewsletterEmailAddressesListVisibleRowCount;
 
+
+	public class Countries
+	{
+		public string Code { get; set; } = "nl";
+		public string Name { get; set; } = "Nederland";
+	}
+
+	List<Countries> CountryList = new List<Countries> 
+	{
+		new Countries() { Code= "nl", Name= "Nederland" },
+		new Countries() { Code= "de", Name= "Duitsland" },
+		new Countries() { Code= "uk", Name= "Overige" },
+	};
+
+	private async Task OnCountryChanged( string selectedCountry )
+	{
+		if ( string.IsNullOrWhiteSpace( selectedCountry ) )
+			return;
+
+		SelectedCountry = selectedCountry;
+
+		await LoadNewsletterEmailAddressesAsync();
+		ApplyCountryFilters();
+		NewsletterEmailAddressesListVisibleRowCount = FilteredNewsletterEmailAddressesList.Count;
+		StateHasChanged(); // Force UI rerender to initializeall Refs
+
+		if ( IsInitialized )
+		{
+			await NewsletterEmailAddressesGridRef.Refresh();
+		}
+	}
+
+	private async Task LoadNewsletterEmailAddressesAsync()
+	{
+		if ( SelectedCountry != "" )
+		{
+			AllNewsletterEmailAddressesList = await EmailAddressesService.GetEmailAddressesAsync();
+
+			NewsletterEmailAddressesListVisibleRowCount = AllNewsletterEmailAddressesList.Count;
+		}
+	}
+
+	// Apply filtering for the Datasurces of the DataGrids
+	private void ApplyCountryFilters()
+	{
+		if ( SelectedCountry == "nl" || SelectedCountry == "de" )
+		{ FilteredNewsletterEmailAddressesList = AllNewsletterEmailAddressesList.Where( v => v.Land.ToLower() == SelectedCountry ).ToList(); }
+		else 
+		{ FilteredNewsletterEmailAddressesList = AllNewsletterEmailAddressesList.Where( v => v.Land.ToLower() != "nl" && v.Land.ToLower() != "de" ).ToList(); }
+
+		NewsletterEmailAddressesListVisibleRowCount = FilteredNewsletterEmailAddressesList.Count;
+	}
+
+	// Export functions
+	private async Task ExportToExcel()
+	{
+		var exportProps = new ExcelExportProperties
+		{
+			FileName = $"Nieuwsbrief mail adressen {(SelectedCountry == "uk" ? "Overige" : SelectedCountry)}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx",
+		};
+
+		await NewsletterEmailAddressesGridRef!.ExportToExcelAsync( exportProps );
+	}
+
+	private async Task ExportToCsv()
+	{
+		var exportProps = new ExcelExportProperties
+		{
+			FileName = $"Nieuwsbrief mail adressen {(SelectedCountry == "uk" ? "Overige" : SelectedCountry)}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv",
+		};
+
+		await NewsletterEmailAddressesGridRef!.ExportToCsvAsync( exportProps );
+	}
+
+	private async Task ExportToPdf()
+	{
+		var exportProps = new PdfExportProperties
+		{
+			FileName = $"Nieuwsbrief mail adressen {(SelectedCountry == "uk" ? "Overige" : SelectedCountry)}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.pdf",
+			PageOrientation = PageOrientation.Landscape,
+			PageSize=PdfPageSize.A4,
+			AllowHorizontalOverflow = true
+		};
+		await NewsletterEmailAddressesGridRef!.ExportToPdfAsync( exportProps );
+	}
 }
+
+	<style>
+		.countryImage
+		{
+			margin: 4px 16px;
+			float: left;
+			width: 24px;
+			height: 18x;
+		}
+
+		.countryName
+		{
+			display: block !important;
+			opacity: .87;
+			font-size: 14px;
+		}
+
+	.two-row-cel 
+	{
+		vertical-align: middle;
+		text-align: left;
+	}
+
+	.first-row
+	{
+		font-size: 14px
+	}
+
+	.second-row
+	{
+		font-size: 12px;
+		font-style: italic;
+	}
+
+	.one-row-cel
+	{
+		font-size: 14px;
+		vertical-align: middle;
+	}
+	</style>

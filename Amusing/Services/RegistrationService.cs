@@ -13,9 +13,9 @@ public class RegistrationService
         _connection = new MySqlConnection( configuration.GetConnectionString( "DefaultConnection" ) );
     }
 
-    public async Task<List<Registration>> GetRegistrationsByFestivalIdAsync( uint festivalId )
+    public async Task<List<RegistrationModel>> GetRegistrationsByFestivalIdAsync( uint festivalId )
     {
-        List<Registration> registrations = [];
+        List<RegistrationModel> registrations = [];
 
         string query = @"
             select
@@ -61,7 +61,7 @@ public class RegistrationService
 
         while ( await reader.ReadAsync() )
         {
-            registrations.Add( new Registration
+            registrations.Add( new RegistrationModel
             {
                 FestivalId = Convert.ToUInt32( reader [ "festival_id" ] ),
                 Datum = Convert.ToDateTime( reader [ "Datum" ] ),
