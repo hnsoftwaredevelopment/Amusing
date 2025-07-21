@@ -6,4 +6,5 @@ public class EmailAddressesModel
     public string? Naam { get; set; }
     public string? Email { get; set; }
     public string? Land { get; set; }
+    public string? Ontbreekt { get; set; }
 }

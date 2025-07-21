@@ -1,51 +1,122 @@
-﻿using Amusing.Models;
-
-using MySql.Data.MySqlClient;
+﻿using Amusing.Helpers;
+using Amusing.Models;
 
 namespace Amusing.Services;
 
-public class EmailAddressesService
+public class EmailAddressesService( GenericDataService dataService )
 {
-    private readonly MySqlConnection _connection;
+    private readonly GenericDataService _dataService = dataService;
 
-    public EmailAddressesService( IConfiguration configuration )
+    public Task<List<EmailAddressesModel>> GetNewsletterEmailAddressesAsync()
     {
-        _connection = new MySqlConnection( configuration.GetConnectionString( "DefaultConnection" ) );
-    }
-
-    public async Task<List<EmailAddressesModel>> GetEmailAddressesAsync()
-    {
-        List<EmailAddressesModel> emailaddresses = [];
-
-        string query = @"
-            select distinct  
-    	        grp.naam as Groep,
-	            CONCAT_WS(' ', pers.voornaam, pers.tussenvoegsel, pers.achternaam) AS 'Naam' ,
-	            pers.email as 'E-Mail',
-                grp.land as Land
-            from amusing.ah_personen pers
-                join amusing.ah_personen_rollen prol on pers.persoon_id = prol.persoon_id 
-                join amusing.ah_zanggroepen grp on prol.zanggroep_id = grp.zanggroep_id
-            where pers.infomailing = 1;
-        ";
-
-        using MySqlCommand cmd = new(query, _connection);
-
-        await _connection.OpenAsync();
-        using System.Data.Common.DbDataReader reader = await cmd.ExecuteReaderAsync();
-
-        while ( await reader.ReadAsync() )
-        {
-            emailaddresses.Add( new EmailAddressesModel
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetNewsletterEmailAddresses,
+            reader => new EmailAddressesModel
             {
                 Groep = reader [ "Groep" ].ToString(),
                 Naam = reader [ "Naam" ].ToString(),
                 Email = reader [ "E-Mail" ].ToString(),
                 Land = reader [ "Land" ].ToString().ToLower(),
-            } );
-        }
+            }
+        );
+    }
 
-        await _connection.CloseAsync();
-        return emailaddresses;
+    public Task<List<EmailAddressesModel>> GetAllKnownEmailAddressesAsync()
+    {
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetAllKnownEmailAddresses,
+            reader => new EmailAddressesModel
+            {
+                Groep = reader [ "Groep" ].ToString(),
+                Naam = reader [ "Naam" ].ToString(),
+                Email = reader [ "E-Mail" ].ToString(),
+                Land = reader [ "Land" ].ToString().ToLower(),
+            }
+        );
+    }
+    public Task<List<EmailAddressesModel>> GetNewlyAddedEmailAddressesAsync()
+    {
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetNewlyAddedEmailAddresses,
+            reader => new EmailAddressesModel
+            {
+                Groep = reader [ "Groep" ].ToString(),
+                Naam = reader [ "Naam" ].ToString(),
+                Email = reader [ "E-Mail" ].ToString(),
+                Land = reader [ "Land" ].ToString().ToLower(),
+            }
+        );
+    }
+
+    public Task<List<EmailAddressesModel>> GetOldEmailAddressesAsync()
+    {
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetOldEmailAddresses,
+            reader => new EmailAddressesModel
+            {
+                Groep = reader [ "Groep" ].ToString(),
+                Naam = reader [ "Naam" ].ToString(),
+                Email = reader [ "E-Mail" ].ToString(),
+                Land = reader [ "Land" ].ToString().ToLower(),
+            }
+        );
+    }
+
+    public Task<List<EmailAddressesModel>> GetPreviousEmailAddressesAsync()
+    {
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetPreviousEmailAddresses,
+            reader => new EmailAddressesModel
+            {
+                Groep = reader [ "Groep" ].ToString(),
+                Naam = reader [ "Naam" ].ToString(),
+                Email = reader [ "E-Mail" ].ToString(),
+                Land = reader [ "Land" ].ToString().ToLower(),
+            }
+        );
+    }
+
+    public Task<List<EmailAddressesModel>> GetUpcommingEmailAddressesAsync()
+    {
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetUpcommingEmailAddresses,
+            reader => new EmailAddressesModel
+            {
+                Groep = reader [ "Groep" ].ToString(),
+                Naam = reader [ "Naam" ].ToString(),
+                Email = reader [ "E-Mail" ].ToString(),
+                Land = reader [ "Land" ].ToString().ToLower(),
+            }
+        );
+    }
+
+    public Task<List<EmailAddressesModel>> GetQueueUpcommingEmailAddressesAsync()
+    {
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetQueueUpcommingEmailAddresses,
+            reader => new EmailAddressesModel
+            {
+                Groep = reader [ "Groep" ].ToString(),
+                Naam = reader [ "Naam" ].ToString(),
+                Email = reader [ "E-Mail" ].ToString(),
+                Land = reader [ "Land" ].ToString().ToLower(),
+            }
+        );
+    }
+
+
+    public Task<List<EmailAddressesModel>> GetIncompleteEmailAddressesAsync()
+    {
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetIncompleteEmailAddresses,
+            reader => new EmailAddressesModel
+            {
+                Groep = reader [ "Groep" ].ToString(),
+                Naam = reader [ "Naam" ].ToString(),
+                Email = reader [ "E-Mail" ].ToString(),
+                Ontbreekt = reader [ "Ontbreekt" ].ToString(),
+                Land = reader [ "Land" ].ToString().ToLower(),
+            }
+        );
     }
 }

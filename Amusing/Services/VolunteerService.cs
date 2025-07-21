@@ -1,62 +1,17 @@
-﻿using Amusing.Models;
-
-using MySql.Data.MySqlClient;
+﻿using Amusing.Helpers;
+using Amusing.Models;
 
 namespace Amusing.Services;
 
-public class VolunteerService
+public class VolunteerService( GenericDataService dataService )
 {
-    private readonly MySqlConnection _connection;
+    private readonly GenericDataService _dataService = dataService;
 
-    public VolunteerService( IConfiguration configuration )
+    public Task<List<VolunteerModel>> GetVolunteersByFestivalIdAsync( uint festivalId )
     {
-        _connection = new MySqlConnection( configuration.GetConnectionString( "DefaultConnection" ) );
-    }
-
-    public async Task<List<VolunteerModel>> GetVolunteersByFestivalIdAsync( uint festivalId )
-    {
-        List<VolunteerModel> volunteers = [];
-
-        string query = @"
-            select 
-        	    vw.festival_id ,
-        	    DATE(vw.datum) as 'Datum',
-        	    CONCAT_WS(' ', pers.voornaam, pers.tussenvoegsel, pers.achternaam) AS 'Naam',
-        	    TIME_FORMAT(vw.beschikbaar_van, '%H:%i') as 'Van',
-        	    TIME_FORMAT(vw.beschikbaar_tot, '%H:%i') as 'Tot',
-        	    vw.uren_achtereen as 'Uren',
-        	    vw.lunch as 'Lunch',
-        	    vw.vegetarisch as 'Vegetarisch',
-        	    vw.bijeenkomst as 'Bijeenkomst',
-        	    vw.ervaring as 'Ervaring',
-        	
-        	    CASE 
-                    WHEN vw.Podiumdienst = 'ja' AND vw.afgehaakt = 'nee' THEN 'ja'
-                    ELSE 'nee'
-                END AS 'Podiumdienst',
-            
-        	    CASE 
-                    WHEN vw.Podiumdienst = 'nee' AND vw.afgehaakt = 'nee' THEN 'ja'
-                    ELSE 'nee'
-                END AS 'Overige',
-            
-                vw.afgehaakt as 'Afgehaakt'
-            from amusing.ah_vrijwilligers vw 
-            join amusing.ah_personen pers on vw.persoon_id = pers.persoon_id 
-            join amusing.ah_festivals fest on vw.festival_id = fest.festival_id 
-            where
-                vw.festival_id = @festivalId;
-        ";
-
-        using MySqlCommand cmd = new(query, _connection);
-        cmd.Parameters.AddWithValue( "@festivalId", festivalId );
-
-        await _connection.OpenAsync();
-        using System.Data.Common.DbDataReader reader = await cmd.ExecuteReaderAsync();
-
-        while ( await reader.ReadAsync() )
-        {
-            volunteers.Add( new VolunteerModel
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetVolunteersByFestivalId,
+            reader => new VolunteerModel
             {
                 FestivalId = Convert.ToUInt32( reader [ "festival_id" ] ),
                 Datum = Convert.ToDateTime( reader [ "Datum" ] ),
@@ -71,10 +26,8 @@ public class VolunteerService
                 Podiumdienst = reader [ "Podiumdienst" ].ToString().ToLower(),
                 Overige = reader [ "Overige" ].ToString().ToLower(),
                 Afgehaakt = reader [ "Afgehaakt" ].ToString().ToLower(),
-            } );
-        }
-
-        await _connection.CloseAsync();
-        return volunteers;
+            },
+            new Dictionary<string, object> { { "@festivalId", festivalId } }
+        );
     }
 }

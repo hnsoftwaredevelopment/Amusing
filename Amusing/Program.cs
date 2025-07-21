@@ -17,6 +17,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<GenericDataService>();
 builder.Services.AddScoped<EditionService>();
 builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<VolunteerService>();
