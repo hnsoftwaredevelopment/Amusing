@@ -5,7 +5,7 @@
 @inject NavigationManager NavigationManager
 
 <nav class="flex-column">
-    <div class="nav-item px-3">
+    <div class="nav-item px-3 nav-menu">
         <NavLink class="nav-link" href="">
             <span class="fa-solid fa-house me-3 fs-4" aria-hidden="true" /> Amusing Beheer
         </NavLink>
@@ -24,17 +24,17 @@
         {
             <ul class="submenu">
                 <li>
-                    <NavLink class="nav-link small ps-4" href="Registrations">
+                    <NavLink class="nav-link small ps-4" href="Overview-Registrations">
                         <span class="fa-solid fa-pen-fancy me-2 fs-6" aria-hidden="true" />Inschrijvingen
                     </NavLink>
                 </li>
                 <li>
-                    <NavLink class="nav-link small ps-4" href="VolunteerTasks">
+                            <NavLink class="nav-link small ps-4" href="Overview-VolunteerTasks">
                         <span class="fa-solid fa-id-card-clip me-2 fs-6" aria-hidden="true" />Vrijwilligers
                     </NavLink>
                 </li>
                 <li>
-                    <NavLink class="nav-link small ps-4" href="EmailAddresses">
+                            <NavLink class="nav-link small ps-4" href="Overview-EmailAddresses">
                         <span class="fa-solid fa-at me-2 fs-6" aria-hidden="true" />Email-adressen
                     </NavLink>
                 </li>
@@ -53,7 +53,7 @@
         {
             <ul class="submenu">
                 <li>
-                    <NavLink class="nav-link small ps-4" href="Groups">
+                    <NavLink class="nav-link small ps-4" href="Lists-Groups">
                         <span class="fa-solid fa-people-group me-2 fs-6" aria-hidden="true" />Groepen
                     </NavLink>
                 </li>
@@ -238,3 +238,12 @@
 }
 }
 
+<style>
+    .nav-menu 
+    {
+        width: 250px;
+        min-width: 250px;
+        max-width: 250px;
+        flex-shrink: 0;
+    }
+</style>

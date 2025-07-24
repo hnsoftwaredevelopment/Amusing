@@ -15,12 +15,16 @@ public class GenericDataService
 
     public async Task<List<T>> ExecuteQueryAsync<T>(
         string query,
-        Func<DbDataReader, T> mapFunc,
-        Dictionary<string, object>? parameters = null )
+    Func<DbDataReader, T> mapFunc,
+    Dictionary<string, object>? parameters = null )
     {
         List<T> results = [];
 
-        using MySqlCommand cmd = new(query, _connection);
+        await using MySqlConnection connection = new(_connection.ConnectionString);
+        await connection.OpenAsync();
+
+        using MySqlCommand cmd = new(query, connection);
+
         if ( parameters is not null )
         {
             foreach ( KeyValuePair<string, object> param in parameters )
@@ -29,7 +33,6 @@ public class GenericDataService
             }
         }
 
-        await _connection.OpenAsync();
         using DbDataReader reader = await cmd.ExecuteReaderAsync();
 
         while ( await reader.ReadAsync() )
@@ -37,7 +40,6 @@ public class GenericDataService
             results.Add( mapFunc( reader ) );
         }
 
-        await _connection.CloseAsync();
         return results;
     }
 }

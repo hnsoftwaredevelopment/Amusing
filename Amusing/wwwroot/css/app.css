@@ -45,6 +45,35 @@ a, .btn-link {
     margin-bottom: 0.25rem;
 }
 
+.layout-container {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+    flex-shrink: 0;
+    background-color: #f8f9fa;
+    overflow-y: auto;
+    border-right: 1px solid #ccc;
+}
+
+.main-content {
+    flex-grow: 1;
+    overflow-x: auto;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    flex-grow: 1;
+    min-width: 800px; /* kan aangepast worden */
+}
+
 .form-wrapper {
     max-width: 400px;
     width: 100%;
@@ -88,6 +117,41 @@ a, .btn-link {
     color: white;
 }
 
-    .blazor-error-boundary::after {
-        content: "An error has occurred."
-    }
+.blazor-error-boundary::after {
+    content: "An error has occurred."
+}
+
+.spacer-extrasmall {
+    height: 0.25rem;
+}
+.spacer-small { height: 0.5rem; }
+
+.spacer-medium { height: 1rem; }
+
+.spacer-large {
+    height: 2rem;
+}
+
+.spacer-extralarge {
+    height: 3rem;
+}
+
+.spacer-extraextralarge {
+    height: 5rem;
+}
+
+.spacer-left-small {
+    margin-left: 0.5rem;
+}
+
+.spacer-left-medium {
+    margin-left: 1rem;
+}
+
+.spacer-right-small {
+    margin-right: 0.5rem;
+}
+
+.spacer-right-medium {
+    margin-right: 1rem;
+}

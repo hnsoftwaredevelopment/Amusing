@@ -292,23 +292,37 @@ public static class QueryDefinitions
         WHERE vw.festival_id = @festivalId;
     ";
 
-    //The query objectget the registratiions per festival is dynamcly created because the number of years will grow.
-    public static string BuildFestivalOverviewQuery( int oldestYear, int newestYear, bool filterOutOldGroups )
+    public const string GetFestivalYearRange = @"
+        SELECT MIN(YEAR(festivaldatum)) AS Oudste, 
+               MAX(YEAR(festivaldatum)) AS Nieuwste 
+        FROM ah_festivals;
+    ";
+
+    public static string GetCurrentFestival = @"SELECT MAX(YEAR(festivaldatum)) AS Huidige FROM ah_festivals";
+
+    public static string GetFestivalOverviewQuery( int oldestYear, int newestYear, bool filterOutOldGroups )
     {
+        int NumberOfYearsForExclusion = 3;
+
         StringBuilder sb = new();
 
         sb.AppendLine( "SELECT" );
+        sb.AppendLine( "    zg.zanggroep_id," );
         sb.AppendLine( "    zg.naam AS `Naam`," );
         sb.AppendLine( "    zg.standplaats AS `Stad`," );
-        sb.AppendLine( "    DATE_FORMAT(p.datecreate, '%Y-%m-%d') AS `Aangemaakt`," );
+        sb.AppendLine( "    CASE WHEN p.datecreate IS NULL OR YEAR(p.datecreate) = 0 THEN '' ELSE DATE_FORMAT(p.datecreate, '%d-%m-%Y') END AS `Aangemaakt`," );
 
         // Dynamisch jaartal-kolommen toevoegen
         for ( int year = oldestYear; year <= newestYear; year++ )
         {
-            sb.AppendLine( $@"    MAX(CASE YEAR(f.festivaldatum) WHEN {year} THEN i.ingeschreven END) AS `{year}`," );
+            sb.AppendLine( $"    MAX(CASE YEAR(f.festivaldatum) WHEN {year} THEN " +
+                "CASE " +
+                "WHEN i.ingeschreven IS NULL OR YEAR(i.ingeschreven) = 0 THEN '' " +
+                $"ELSE DATE_FORMAT(i.ingeschreven, '%d-%m-%Y') END " +
+                $"END) AS `{year}`," );
         }
 
-        // Laatste komma verwijderen (schoonheid)
+        // Remove last semicolun
         sb.Length -= 3;
         sb.AppendLine();
 
@@ -316,19 +330,20 @@ public static class QueryDefinitions
         sb.AppendLine( "LEFT JOIN ah_inschrijvingen i ON zg.zanggroep_id = i.zanggroep_id" );
         sb.AppendLine( "LEFT JOIN ah_festivals f ON f.festival_id = i.festival_id" );
         sb.AppendLine( "LEFT JOIN ah_profielen p ON p.zanggroep_id = zg.zanggroep_id" );
+
         sb.AppendLine( "WHERE zg.actief = 1 AND p.datecreate IS NOT NULL" );
 
         if ( filterOutOldGroups )
         {
-            whereClause += $@"
-          AND YEAR(p.datecreate) <= {currentFestivalYear - 3}
-          AND (
-              SELECT COUNT(*) 
-              FROM ah_inschrijvingen ins
-              JOIN ah_festivals fs ON fs.festival_id = ins.festival_id
-              WHERE ins.zanggroep_id = zg.zanggroep_id
-                AND YEAR(fs.festivaldatum) >= {currentFestivalYear - 2}
-          ) = 0";
+            sb.AppendLine( "  AND NOT (" );
+            sb.AppendLine( $"       YEAR(p.datecreate) < {newestYear - NumberOfYearsForExclusion}" );
+            sb.AppendLine( "       AND NOT EXISTS(" );
+            sb.AppendLine( "           SELECT 1" );
+            sb.AppendLine( "           FROM ah_inschrijvingen ins" );
+            sb.AppendLine( "           JOIN ah_festivals fs ON fs.festival_id = ins.festival_id" );
+            sb.AppendLine( $"         WHERE zg.zanggroep_id = zg.zanggroep_id AND YEAR(f.festivaldatum) > {newestYear - NumberOfYearsForExclusion}" );
+            sb.AppendLine( "       )" );
+            sb.AppendLine( "   )" );
         }
 
         sb.AppendLine( "GROUP BY zg.zanggroep_id" );
