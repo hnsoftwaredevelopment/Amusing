@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Amusing.Data
 {
-    [Table( "AH_Beheer" )]
+    [Table( "ah_beheer" )]
     public class ApplicationUser : IdentityUser
     {
         [Key]

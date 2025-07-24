@@ -1,6 +1,7 @@
 ﻿using System.Data.Common;
 
-using MySql.Data.MySqlClient;
+//using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace Amusing.Services;
 
