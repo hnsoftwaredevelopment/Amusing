@@ -22,6 +22,9 @@ builder.Services.AddScoped<EditionService>();
 builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<VolunteerService>();
 builder.Services.AddScoped<EmailAddressesService>();
+builder.Services.AddScoped<PersonService>();
+builder.Services.AddScoped<FestivalService>();
+builder.Services.AddScoped<StageService>();
 
 builder.Services.AddAuthentication( CookieAuthenticationDefaults.AuthenticationScheme )
     .AddCookie( options =>

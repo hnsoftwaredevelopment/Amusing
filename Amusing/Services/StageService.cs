@@ -1,0 +1,48 @@
+﻿using Amusing.Helpers;
+using Amusing.Models;
+
+namespace Amusing.Services;
+
+public class StageService( GenericDataService dataService )
+{
+    private readonly GenericDataService _dataService = dataService;
+
+    public Task<List<StageModel>> GetActiveStagesAsync()
+    {
+        return _dataService.ExecuteQueryAsync( QueryDefinitions.GetActiveStages,
+    reader => new StageModel
+    {
+        PodiumId = Convert.ToUInt32( reader [ "Podium-Id" ] ),
+        Naam = reader [ "Naam" ].ToString(),
+        Soort = reader [ "Bi/Bu" ].ToString(),
+        Type = reader [ "Type" ].ToString().ToUpper(),
+        Kwaliteit = Convert.ToInt32( reader [ "Kwaliteit" ] ),
+        MaxZangers = Convert.ToInt32( reader [ "Max. zangers" ] ),
+        Vrijwilligers = reader [ "Vrijwilligers" ].ToString(),
+        Start = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "Optredens Start" ] ),
+        Eind = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "Optredens Eind" ] ),
+        Van = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "Vrijwilligers Van" ] ),
+        Tot = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "Vrijwilligers Tot" ] ),
+        KaartId = Convert.ToUInt32( reader [ "Kaart-Id" ] )
+    } );
+    }
+    public Task<List<StageModel>> GetInActiveStagesAsync()
+    {
+        return _dataService.ExecuteQueryAsync( QueryDefinitions.GetInActiveStages,
+    reader => new StageModel
+    {
+        PodiumId = Convert.ToUInt32( reader [ "Podium-Id" ] ),
+        Naam = reader [ "Naam" ].ToString(),
+        Soort = reader [ "Bi/Bu" ].ToString(),
+        Type = reader [ "Type" ].ToString().ToUpper(),
+        Kwaliteit = Convert.ToInt32( reader [ "Kwaliteit" ] ),
+        MaxZangers = Convert.ToInt32( reader [ "Max. zangers" ] ),
+        Vrijwilligers = reader [ "Vrijwilligers" ].ToString(),
+        Start = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "Optredens Start" ] ),
+        Eind = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "Optredens Eind" ] ),
+        Van = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "Vrijwilligers Van" ] ),
+        Tot = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "Vrijwilligers Tot" ] ),
+        KaartId = Convert.ToUInt32( reader [ "Kaart-Id" ] )
+    } );
+    }
+}

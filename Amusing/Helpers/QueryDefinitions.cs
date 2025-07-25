@@ -292,6 +292,55 @@ public static class QueryDefinitions
         WHERE vw.festival_id = @festivalId;
     ";
 
+    public static readonly string GetPersonsOverview = @"
+        SELECT 
+            p.persoon_id AS PersonId,
+            CONCAT_WS(' ', p.voornaam, p.tussenvoegsel, p.achternaam) AS Name,
+            p.email AS Email,
+            rollen.rollen AS Role,
+            vrijwilligers.vrijwilligers AS Volunteer
+        FROM 
+            ah_personen p
+        LEFT JOIN (
+            SELECT 
+                pr.persoon_id,
+                GROUP_CONCAT(DISTINCT
+                    CASE
+                        WHEN pr.rol IS NOT NULL AND zg.naam IS NOT NULL THEN 
+                            CONCAT(pr.rol, ' ', zg.naam)
+                        WHEN pr.rol IS NOT NULL THEN
+                            pr.rol
+                        ELSE NULL
+                    END
+                    ORDER BY pr.rol SEPARATOR ', '
+                ) AS rollen
+            FROM 
+                ah_personen_rollen pr
+            LEFT JOIN 
+                ah_zanggroepen zg ON zg.zanggroep_id = pr.zanggroep_id
+            GROUP BY 
+                pr.persoon_id
+        ) rollen ON rollen.persoon_id = p.persoon_id
+        LEFT JOIN (
+            SELECT 
+                v.persoon_id,
+                GROUP_CONCAT(DISTINCT
+                    CONCAT('Vrijwilliger ', YEAR(f.festivaldatum))
+                    ORDER BY f.festivaldatum SEPARATOR ', '
+                ) AS vrijwilligers
+            FROM 
+                ah_vrijwilligers v
+            LEFT JOIN 
+                ah_festivals f ON f.festival_id = v.festival_id
+            GROUP BY 
+                v.persoon_id
+        ) vrijwilligers ON vrijwilligers.persoon_id = p.persoon_id
+        WHERE p.email IS NOT NULL AND p.email <> ''
+        GROUP BY 
+            p.persoon_id, p.email
+        ORDER BY 
+            p.persoon_id ASC;";
+
     public const string GetFestivalYearRange = @"
         SELECT MIN(YEAR(festivaldatum)) AS Oudste, 
                MAX(YEAR(festivaldatum)) AS Nieuwste 
@@ -299,6 +348,54 @@ public static class QueryDefinitions
     ";
 
     public static string GetCurrentFestival = @"SELECT MAX(YEAR(festivaldatum)) AS Huidige FROM ah_festivals";
+
+    public static readonly string GetFestivals = @"
+        SELECT
+            festival_Id, 
+	        YEAR(festivaldatum) as `Festival`, 
+	        DATE(festivaldatum) as `Datum`, 
+	        CASE 
+                WHEN planning_publiceren = 1 THEN 'ja' 
+                ELSE 'nee' 
+            END AS `Gepubliceerd`
+        FROM ah_festivals
+        ORDER BY YEAR(festivaldatum) DESC;";
+
+    public static readonly string GetActiveStages = @"
+        SELECT  
+	        podium_id AS `Podium-Id`, 
+	        naam AS `Naam`, 
+	        soort AS `Bi/Bu`, 
+	        TYPE AS `Type`, 
+	        kwaliteit AS `Kwaliteit`, 
+	        max_zangers AS `Max. zangers`, 
+	        aantal_vrijwilligers AS `Vrijwilligers`, 
+	        opening AS `Optredens Start`, 
+	        sluiting AS `Optredens Eind`, 
+	        vrijwilligers_vanaf AS `Vrijwilligers Van`, 
+	        vrijwilligers_tot AS `Vrijwilligers Tot`, 
+	        kaart_nummer AS `Kaart-Id` 
+        FROM ah_podia
+        WHERE kaart_nummer IS NOT NULL AND kaart_nummer > 0
+        ORDER BY kaart_nummer ASC;";
+
+    public static readonly string GetInActiveStages = @"
+        SELECT  
+         podium_id AS `Podium-Id`, 
+         naam AS `Naam`, 
+         soort AS `Bi/Bu`, 
+         TYPE AS `Type`, 
+         kwaliteit AS `Kwaliteit`, 
+         max_zangers AS `Max. zangers`, 
+         aantal_vrijwilligers AS `Vrijwilligers`, 
+         opening AS `Optredens Start`, 
+         sluiting AS `Optredens Eind`, 
+         vrijwilligers_vanaf AS `Vrijwilligers Van`, 
+         vrijwilligers_tot AS `Vrijwilligers Tot`, 
+         kaart_nummer AS `Kaart-Id` 
+        FROM ah_podia
+        WHERE kaart_nummer IS NULL OR kaart_nummer = 0
+        ORDER BY kaart_nummer ASC;";
 
     public static string GetFestivalOverviewQuery( int oldestYear, int newestYear, bool filterOutOldGroups )
     {
