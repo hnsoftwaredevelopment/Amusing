@@ -12,18 +12,18 @@ public class StageService( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetActiveStages,
     reader => new StageModel
     {
-        PodiumId = Convert.ToUInt32( reader [ "Podium-Id" ] ),
+        PodiumId = Convert.ToInt32( reader [ "Podium-Id" ] ),
         Naam = reader [ "Naam" ].ToString(),
-        Soort = reader [ "Bi/Bu" ].ToString(),
+        Soort = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(reader["Bi/Bu"].ToString().ToLower()),
         Type = reader [ "Type" ].ToString().ToUpper(),
         Kwaliteit = Convert.ToInt32( reader [ "Kwaliteit" ] ),
         MaxZangers = Convert.ToInt32( reader [ "Max. zangers" ] ),
-        Vrijwilligers = reader [ "Vrijwilligers" ].ToString(),
+        Vrijwilligers = reader["Vrijwilligers"].ToString().Equals("geen", StringComparison.OrdinalIgnoreCase) ? "0" : reader["Vrijwilligers"].ToString(),
         Start = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "Optredens Start" ] ),
         Eind = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "Optredens Eind" ] ),
         Van = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "Vrijwilligers Van" ] ),
         Tot = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "Vrijwilligers Tot" ] ),
-        KaartId = Convert.ToUInt32( reader [ "Kaart-Id" ] )
+        KaartId = Convert.ToInt32(reader["Kaart-Id"])
     } );
     }
     public Task<List<StageModel>> GetInActiveStagesAsync()
@@ -31,18 +31,17 @@ public class StageService( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetInActiveStages,
     reader => new StageModel
     {
-        PodiumId = Convert.ToUInt32( reader [ "Podium-Id" ] ),
+        PodiumId = Convert.ToInt32( reader [ "Podium-Id" ] ),
         Naam = reader [ "Naam" ].ToString(),
-        Soort = reader [ "Bi/Bu" ].ToString(),
+        Soort = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(reader["Bi/Bu"].ToString().ToLower()),
         Type = reader [ "Type" ].ToString().ToUpper(),
         Kwaliteit = Convert.ToInt32( reader [ "Kwaliteit" ] ),
         MaxZangers = Convert.ToInt32( reader [ "Max. zangers" ] ),
-        Vrijwilligers = reader [ "Vrijwilligers" ].ToString(),
+        Vrijwilligers = reader["Vrijwilligers"].ToString().Equals("geen", StringComparison.OrdinalIgnoreCase) ? "0" : reader["Vrijwilligers"].ToString(),
         Start = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "Optredens Start" ] ),
         Eind = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "Optredens Eind" ] ),
         Van = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "Vrijwilligers Van" ] ),
-        Tot = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "Vrijwilligers Tot" ] ),
-        KaartId = Convert.ToUInt32( reader [ "Kaart-Id" ] )
+        Tot = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "Vrijwilligers Tot" ] )
     } );
     }
 }

@@ -391,8 +391,7 @@ public static class QueryDefinitions
          opening AS `Optredens Start`, 
          sluiting AS `Optredens Eind`, 
          vrijwilligers_vanaf AS `Vrijwilligers Van`, 
-         vrijwilligers_tot AS `Vrijwilligers Tot`, 
-         kaart_nummer AS `Kaart-Id` 
+         vrijwilligers_tot AS `Vrijwilligers Tot` 
         FROM ah_podia
         WHERE kaart_nummer IS NULL OR kaart_nummer = 0
         ORDER BY kaart_nummer ASC;";
