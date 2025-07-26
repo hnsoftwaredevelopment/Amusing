@@ -396,6 +396,52 @@ public static class QueryDefinitions
         WHERE kaart_nummer IS NULL OR kaart_nummer = 0
         ORDER BY kaart_nummer ASC;";
 
+    public static readonly string GetStageTypes = @"
+        SELECT 
+            pt.type,
+            CONCAT('€ ', FORMAT(pt.prijs, 2, 'nl_NL')) AS prijs,
+            TRIM(TRAILING ', ' FROM 
+                CONCAT(
+                    CASE 
+                        WHEN pt.piano = 0 THEN ''
+                        WHEN pt.piano = 1 THEN 'piano, '
+                        ELSE CONCAT(pt.piano, ' piano\'s, ')
+                    END,
+                    CASE 
+                        WHEN pt.electra = 0 THEN ''
+                        WHEN pt.electra = 1 THEN 'electra, '
+                        ELSE CONCAT(pt.electra, ' electra\'s, ')
+                    END,
+                    CASE 
+                        WHEN pt.drum = 0 THEN ''
+                        WHEN pt.drum = 1 THEN 'drum, '
+                        ELSE CONCAT(pt.drum, ' drums, ')
+                    END,
+                    CASE 
+                        WHEN pt.gitaarversterkers = 0 THEN ''
+                        WHEN pt.gitaarversterkers = 1 THEN 'gitaarversterker, '
+                        ELSE CONCAT(pt.gitaarversterkers, ' gitaarversterkers, ')
+                    END,
+                    CASE 
+                        WHEN pt.microfoons = 0 THEN ''
+                        WHEN pt.microfoons = 1 THEN 'microfoon, '
+                        ELSE CONCAT(pt.microfoons, ' microfoons, ')
+                    END
+                )
+            ) AS omschrijving
+        FROM (
+            SELECT *,
+                   ROW_NUMBER() OVER (PARTITION BY type ORDER BY versie DESC) as rn
+            FROM ah_podia_typen
+            WHERE prijs > 0
+        ) pt
+        INNER JOIN (
+            SELECT DISTINCT type 
+            FROM ah_podia 
+            WHERE kaart_nummer > 0 AND kaart_nummer IS NOT NULL
+        ) p ON pt.type = p.type
+        WHERE pt.rn = 1;";
+
     public static string GetFestivalOverviewQuery( int oldestYear, int newestYear, bool filterOutOldGroups )
     {
         int NumberOfYearsForExclusion = 3;
