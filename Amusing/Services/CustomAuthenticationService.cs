@@ -5,8 +5,10 @@ using Amusing.Models;
 
 using Microsoft.AspNetCore.Authentication;
 
-using MySqlCommand = MySql.Data.MySqlClient.MySqlCommand;
-using MySqlConnection = MySql.Data.MySqlClient.MySqlConnection;
+//using MySqlCommand = MySql.Data.MySqlClient.MySqlCommand;
+//using MySqlConnection = MySql.Data.MySqlClient.MySqlConnection;
+using MySqlCommand = MySqlConnector.MySqlCommand;
+using MySqlConnection = MySqlConnector.MySqlConnection;
 
 namespace Amusing.Services;
 
@@ -29,7 +31,7 @@ public class CustomAuthenticationService
         string hashedPassword = ComputeMd5Hash(password);
 
         using MySqlCommand command = new(
-            "SELECT user_id, username, role FROM AH_Beheer WHERE username = @username AND password = @password",
+            "SELECT user_id, username, role FROM ah_beheer WHERE username = @username AND password = @password",
             connection);
 
         command.Parameters.AddWithValue( "@username", username );

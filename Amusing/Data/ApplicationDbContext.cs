@@ -12,7 +12,7 @@ public class ApplicationDbContext( DbContextOptions<ApplicationDbContext> option
         // Configure de ApplicationUser entity - alleen map wat echt bestaat
         builder.Entity<ApplicationUser>( entity =>
         {
-            entity.ToTable( "AH_Beheer" );
+            entity.ToTable( "ah_beheer" );
 
             // Primaire sleutel
             entity.HasKey( e => e.Id );

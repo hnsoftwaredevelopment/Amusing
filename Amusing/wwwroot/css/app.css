@@ -155,3 +155,96 @@ a, .btn-link {
 .spacer-right-medium {
     margin-right: 1rem;
 }
+
+.countryImage {
+    margin: 4px 16px;
+    float: left;
+    width: 24px;
+    height: 18px;
+}
+
+.countryName {
+    display: block !important;
+    opacity: .87;
+    font-size: 14px;
+}
+
+.two-row-cel {
+    vertical-align: middle;
+    text-align: left;
+}
+
+.first-row {
+    font-size: 14px
+}
+
+.second-row {
+    font-size: 12px;
+    font-style: italic;
+}
+
+.one-row-cel {
+    font-size: 14px;
+    vertical-align: middle;
+}
+
+.row-count {
+    font-family: Courier New, Courier, monospace; 
+    font-size: 14px;
+    font-style: italic;
+    font-weight: bold;
+    text-align: right;
+    vertical-align: middle;
+}
+
+.egrid .e-gridheader {
+    background-color: #062666;
+}
+.e-grid .e-gridheader .e-headercell {
+    background-color: #062666 !important;
+    color: #ebebf1 !important;
+    accent-color: red;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+    .e-grid .e-gridheader .e-headercell .e-headertext {
+        color: #ebebf1 !important;
+    }
+
+    /* Eventueel: ook bij hover/focus of sortering actief */
+    .e-grid .e-gridheader .e-headercell.e-active,
+    .e-grid .e-gridheader .e-headercell:focus,
+    .e-grid .e-gridheader .e-headercell:hover {
+        background-color: #062666 !important;
+        color: #ebebf1 !important;
+    }
+
+        .e-grid .e-gridheader .e-headercell.e-active .e-headertext,
+        .e-grid .e-gridheader .e-headercell:hover .e-headertext,
+        .e-grid .e-gridheader .e-headercell:focus .e-headertext {
+            color: #ebebf1 !important;
+        }
+
+/* Sorteericoon (pijltje omhoog/omlaag) in geel */
+.e-grid .e-gridheader .e-sortfilterdiv::before {
+    color: yellow !important;
+}
+
+/* Eventueel ook op hover of actief */
+.e-grid .e-gridheader .e-headercell:hover .e-sortfilterdiv::before,
+.e-grid .e-gridheader .e-headercell.e-active .e-sortfilterdiv::before {
+    color: yellow !important;
+}
+
+.e-grid .e-rowcell {
+    vertical-align: top !important;
+}
+
+.toolbar-count {
+    font-family: 13_Misa !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    text-align: right !important;
+    vertical-align: middle !important;
+}
