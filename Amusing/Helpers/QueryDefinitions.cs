@@ -442,6 +442,52 @@ public static class QueryDefinitions
         ) p ON pt.type = p.type
         WHERE pt.rn = 1;";
 
+    public static readonly string GetActiveTasks = @"
+        SELECT 
+            t.taak_id AS 'TaakId',
+            t.naam,
+            t.minimumduur,
+            t.maximumduur,
+            bezetting_data.Van,
+            bezetting_data.Tot,
+            bezetting_data.Aantal
+        FROM ah_taken t
+        CROSS JOIN JSON_TABLE(
+            t.bezetting,
+            '$[*]' COLUMNS(
+                Van VARCHAR(10) PATH '$.from',
+                Tot VARCHAR(10) PATH '$.until', 
+                Aantal VARCHAR(10) PATH '$.number'
+            )
+        ) AS bezetting_data
+        WHERE t.actief = 'ja'
+        ORDER BY t.taak_id, bezetting_data.Van;";
+
+    public static readonly string GetInActiveTasks = @"
+        SELECT 
+            t.taak_id AS 'TaakId',
+            t.naam,
+            t.minimumduur,
+            t.maximumduur,
+            COALESCE(bezetting_data.Van, '') AS 'Van',
+            COALESCE(bezetting_data.Tot, '') AS 'Tot', 
+            COALESCE(bezetting_data.Aantal, '') AS 'Aantal'
+        FROM ah_taken t
+        LEFT JOIN JSON_TABLE(
+            CASE 
+                WHEN t.bezetting IS NULL OR t.bezetting = '' OR t.bezetting = '[]' 
+                THEN '[{}]'  -- Dummy object voor lege bezetting
+                ELSE t.bezetting 
+            END,
+            '$[*]' COLUMNS(
+                Van VARCHAR(10) PATH '$.from',
+                Tot VARCHAR(10) PATH '$.until', 
+                Aantal VARCHAR(10) PATH '$.number'
+            )
+        ) AS bezetting_data ON TRUE
+        WHERE t.actief = 'Nee'
+        ORDER BY t.taak_id, COALESCE(bezetting_data.Van, '');";
+
     public static string GetFestivalOverviewQuery( int oldestYear, int newestYear, bool filterOutOldGroups )
     {
         int NumberOfYearsForExclusion = 3;

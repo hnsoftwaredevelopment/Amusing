@@ -26,6 +26,7 @@ builder.Services.AddScoped<PersonService>();
 builder.Services.AddScoped<FestivalService>();
 builder.Services.AddScoped<StageService>();
 builder.Services.AddScoped<StageTypeService>();
+builder.Services.AddScoped<TaskService>();
 
 builder.Services.AddAuthentication( CookieAuthenticationDefaults.AuthenticationScheme )
     .AddCookie( options =>
