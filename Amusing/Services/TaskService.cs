@@ -13,10 +13,10 @@ public class TaskService(GenericDataService dataService)
             QueryDefinitions.GetActiveTasks,
             reader => new TaskModel
             {
-                TaakId = Convert.ToUInt32(reader["taak_id"]),
+                TaakId = Convert.ToUInt32(reader["taakid"]),
                 Naam = reader["naam"].ToString() ?? string.Empty,
-                MinimumDuur = reader["minimum_duur"].ToString() ?? string.Empty,
-                MaximumDuur = reader["maximum_duur"].ToString() ?? string.Empty,
+                MinimumDuur = reader["minimumduur"].ToString() ?? string.Empty,
+                MaximumDuur = reader["maximumduur"].ToString() ?? string.Empty,
                 Van = reader["van"].ToString() ?? string.Empty,
                 Tot = reader["tot"].ToString() ?? string.Empty,
                 Aantal = reader["aantal"].ToString() ?? string.Empty
@@ -28,10 +28,10 @@ public class TaskService(GenericDataService dataService)
             QueryDefinitions.GetInActiveTasks,
             reader => new TaskModel
             {
-                TaakId = Convert.ToUInt32(reader["taak_id"]),
+                TaakId = Convert.ToUInt32(reader["taakid"]),
                 Naam = reader["naam"].ToString() ?? string.Empty,
-                MinimumDuur = reader["minimum_duur"].ToString() ?? string.Empty,
-                MaximumDuur = reader["maximum_duur"].ToString() ?? string.Empty,
+                MinimumDuur = reader["minimumduur"].ToString() ?? string.Empty,
+                MaximumDuur = reader["maximumduur"].ToString() ?? string.Empty,
                 Van = reader["van"].ToString() ?? string.Empty,
                 Tot = reader["tot"].ToString() ?? string.Empty,
                 Aantal = reader["aantal"].ToString() ?? string.Empty,
