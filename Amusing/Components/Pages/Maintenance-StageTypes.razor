@@ -1,0 +1,177 @@
+﻿@page "/Maintenance-StageTypes"
+@using Amusing.Models
+@using Amusing.Services
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+
+@inject StageTypeService StageTypeService;
+
+// TODO: Replace all the grid columns with the generated Omschrijving field
+
+<h3>Onderhous Podium types</h3>
+@if (IsLoading)
+{
+    <div class="text-center p-2">
+        <SfSpinner CssClass="e-spin-center" />
+        <p>@FileName worden geladen...</p>
+    </div>
+}
+else
+{
+    <div class="spacer-small"></div>
+    @if ( SelectedStageType is not null )
+    {
+        <EditForm Model="SelectedStageType" OnValidSubmit="SaveStageType">
+            <div class="form-grid">
+                <SfTextBox @bind-Value="SelectedStageType.Type" Placeholder="Type" FloatLabelType="FloatLabelType.Always" />
+                <SfTextBox @bind-Value="SelectedStageType.Price" Placeholder="Prijs" Format="c2" FloatLabelType="FloatLabelType.Always" />
+                <SfNumericTextBox TValue="int" @bind-Value="SelectedStageType.Piano">Piano</SfNumericTextBox>
+                <SfNumericTextBox TValue="int" @bind-Value="SelectedStageType.Lectern">Lessenaar</SfNumericTextBox>
+                <SfNumericTextBox TValue="int" @bind-Value="SelectedStageType.Electronics">Electra</SfNumericTextBox>
+                <SfNumericTextBox TValue="int" @bind-Value="SelectedStageType.Drums">Drums</SfNumericTextBox>
+                <SfNumericTextBox TValue="int" @bind-Value="SelectedStageType.GitarEmplifiers">Gitaarversterker</SfNumericTextBox>
+                <SfNumericTextBox TValue="int" @bind-Value="SelectedStageType.BassEmplifiers">Basversterker</SfNumericTextBox>
+                <SfNumericTextBox TValue="int" @bind-Value="SelectedStageType.ChoirEmplifiers">Koorversterker</SfNumericTextBox>
+                <SfNumericTextBox TValue="int" @bind-Value="SelectedStageType.Microphones">Microfoons</SfNumericTextBox>
+                <SfNumericTextBox TValue="int" @bind-Value="SelectedStageType.Monitors">Monitoren</SfNumericTextBox>
+                <SfNumericTextBox TValue="int" @bind-Value="SelectedStageType.Speakers">Speakers</SfNumericTextBox>
+                <SfCheckBox @bind-Checked="SelectedStageType.MixingConsole">Mengpaneel</SfCheckBox>
+                <SfCheckBox @bind-Checked="SelectedStageType.Mp3">MD/MP3</SfCheckBox>
+                <SfTextBox @bind-Value="SelectedStageType.Compatibel" Placeholder="Compatibel met" FloatLabelType="FloatLabelType.Always" />
+                <SfCheckBox @bind-Checked="SelectedStageType.Active">Aktive</SfCheckBox>
+
+                <SfButton OnClick="SaveStageType" CssClass="e-primary mt-2">Opslaan</SfButton>
+            </div>
+        </EditForm>
+    }
+    <div class="spacer-medium"></div>
+    <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+        <SfGrid @ref="GridRef"
+                TValue="StageTypeModel"
+                DataSource="@StageTypes"
+                AllowExcelExport="true"
+                AllowResizing="true"
+                AllowMultiSorting="true"
+                AllowSelection="true"
+                AllowSorting="true" 
+                AllowTextWrap="true">
+
+            <GridTextWrapSettings WrapMode=" WrapMode.Header"></GridTextWrapSettings>
+            <GridSelectionSettings 
+                Mode="Syncfusion.Blazor.Grids.SelectionMode.Row" 
+                Type="Syncfusion.Blazor.Grids.SelectionType.Single">
+            </GridSelectionSettings>
+
+            <GridEvents TValue="StageTypeModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
+
+            <SfToolbar>
+                <ToolbarItems>
+                    <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                        <Template>
+                            <span class="toolbar-count">@FileName: @VisibleRowCount</span>
+                        </Template>
+                    </ToolbarItem>
+
+                    <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                        <Template>
+                            <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
+                        </Template>
+                    </ToolbarItem>
+                </ToolbarItems>
+            </SfToolbar>
+
+            <GridColumns>
+                <GridColumn Field="Type" HeaderText="Type" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="60px" />
+                <GridColumn Field="Price" HeaderText="Prijs" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="90px" />
+                <GridColumn Field="Piano" HeaderText="Piano" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="70px" />
+                <GridColumn Field="Lectern" HeaderText="Lessenaar" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="95px" />
+                <GridColumn Field="Electronics" HeaderText="Electra" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="75px" />
+                <GridColumn Field="Drums" HeaderText="Drums" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="75px" />
+                <GridColumn HeaderText="Versterkers" TextAlign="TextAlign.Center" Width="150px">
+                    <GridColumns>
+                        <GridColumn Field="GitarEmplifiers" HeaderText="Gitaar" TextAlign="TextAlign.Center" AllowSorting=false AllowResizing="true" Width="70px" />
+                        <GridColumn Field="BassEmplifiers" HeaderText="Bas" TextAlign="TextAlign.Center" AllowSorting=false AllowResizing="true" Width="60px" />
+                        <GridColumn Field="ChoirEmplifiers" HeaderText="Koor" TextAlign="TextAlign.Center" AllowSorting=false AllowResizing="true" Width="65px" />
+                    </GridColumns>
+                </GridColumn>
+                <GridColumn Field="Microphones" HeaderText="Microfoons" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="105px" />
+                <GridColumn Field="Monitors" HeaderText="Monitoren" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="100px" />
+                <GridColumn Field="Speakers" HeaderText="Speakers" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="90px" />
+                <GridColumn Field="MixingConsole" HeaderText="Meng-paneel" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="75px" />
+                <GridColumn Field="Mp3" HeaderText="MD/MP3" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="90px" />
+                <GridColumn Field="Compatibel" HeaderText="Compatibel met" TextAlign="TextAlign.Center" AllowSorting=false AllowResizing="true" Width="105px" />
+                <GridColumn Field="Active" HeaderText="Aktive" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="80px" />
+            </GridColumns>
+        </SfGrid>
+    </div>
+}
+@code {
+    private bool IsLoading = false;
+    private bool _initialLoadDone = false;
+    private SfGrid<StageTypeModel> GridRef;
+    private int VisibleRowCount = 0;
+    private List<StageTypeModel> StageTypes = [];
+    private string FileName = "Podium types";
+    private StageTypeModel? SelectedStageType;
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+        StageTypes = await StageTypeService.GetAllStageTypesAsync();
+        IsLoading = false;
+    }
+
+    // Manage direct search functionality
+    public async void OnInput(InputEventArgs args)
+    {
+        await GridRef.SearchAsync(args.Value);
+
+        await Task.Delay(50);
+        await UpdateVisibleRowCountAsync();
+    }
+
+    private async Task UpdateVisibleRowCountAsync()
+    {
+        if (GridRef is not null)
+        {
+            await GridRef.Refresh();
+            await Task.Delay(50);
+            var records = await GridRef.GetCurrentViewRecordsAsync();
+            await Task.Delay(150);
+            VisibleRowCount = records?.Count ?? 0;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnGridDataBound()
+    {
+        if (!_initialLoadDone)
+        {
+            _initialLoadDone = true;
+            await UpdateVisibleRowCountAsync();
+        }
+    }
+
+    private void OnRowSelected( RowSelectEventArgs<StageTypeModel> args )
+    {
+        SelectedStageType = args.Data;
+    }
+
+    private async Task SaveStageType()
+    {
+        if ( SelectedStageType is null )
+            return;
+
+        // Hier update je de backend (API of Db) via je service
+        //await StageTypeService.UpdateAsync( SelectedStageType );
+
+        // Optioneel: herladen van grid
+        ///StageTypes = await StageTypeService.GetAllAsync();
+        await GridRef.Refresh();
+
+        // Bevestiging
+        Console.WriteLine( "StageType opgeslagen!" );
+    }
+}

@@ -396,6 +396,188 @@ public static class QueryDefinitions
         WHERE kaart_nummer IS NULL OR kaart_nummer = 0
         ORDER BY kaart_nummer ASC;";
 
+    public static readonly string GetAllStageTypes = @"
+        SELECT 
+            type,
+            CONCAT('€ ', FORMAT(prijs, 2, 'nl_NL')) AS prijs,
+            piano,
+            lessenaar,
+            electra,
+            drum,
+            gitaarversterkers,
+            basversterkers,
+            koorversterking,
+            microfoons,
+            monitoren,
+            speakers,
+            mengpaneel,
+            md_mp3,
+            TRIM(TRAILING ', ' FROM 
+                CONCAT(
+                    CASE 
+                        WHEN piano = 0 THEN ''
+                        WHEN piano = 1 THEN 'piano, '
+                        ELSE CONCAT(piano, ' piano\'s, ')
+                    END,
+                    CASE 
+                        WHEN lessenaar = 0 THEN ''
+                        WHEN lessenaar = 1 THEN 'lessenaar, '
+                        ELSE CONCAT(lessenaar, ' lessenaar\'s, ')
+                    END,
+                    CASE 
+                        WHEN electra = 0 THEN ''
+                        WHEN electra = 1 THEN 'electra, '
+                        ELSE CONCAT(electra, ' electra, ')
+                    END,
+                    CASE 
+                        WHEN drum = 0 THEN ''
+                        WHEN drum = 1 THEN 'drum, '
+                        ELSE CONCAT(drum, ' drums, ')
+                    END,
+                    CASE 
+                        WHEN gitaarversterkers = 0 THEN ''
+                        WHEN gitaarversterkers = 1 THEN 'gitaarversterker, '
+                        ELSE CONCAT(gitaarversterkers, ' gitaarversterkers, ')
+                    END,
+                    CASE 
+                        WHEN basversterkers = 0 THEN ''
+                        WHEN basversterkers = 1 THEN 'basversterker, '
+                        ELSE CONCAT(basversterkers, ' basversterkers, ')
+                    END,
+                    CASE 
+                        WHEN koorversterking = 0 THEN ''
+                        WHEN koorversterking = 1 THEN 'koorversterking, '
+                        ELSE CONCAT(koorversterking, ' koorversterkers, ')
+                    END,
+                    CASE 
+                        WHEN microfoons = 0 THEN ''
+                        WHEN microfoons = 1 THEN 'microfoon, '
+                        ELSE CONCAT(microfoons, ' microfoons, ')
+                    END,
+                    CASE 
+                        WHEN monitoren = 0 THEN ''
+                        WHEN monitoren = 1 THEN 'monitor, '
+                        ELSE CONCAT(monitoren, ' monitoren, ')                    
+                    END,
+                    CASE 
+                        WHEN speakers = 0 THEN ''
+                        WHEN speakers = 1 THEN 'speaker, '
+                        ELSE CONCAT(speakers, ' speakers, ')                   
+                    END,
+                    CASE 
+                        WHEN mengpaneel = 0 THEN ''
+                        WHEN mengpaneel = 1 THEN 'mengpaneel, '
+                        ELSE CONCAT(mengpaneel, ' mengpanelen, ')                    
+                    END,
+                    CASE 
+                        WHEN md_mp3 = 0 THEN ''
+                        WHEN md_mp3 = 1 THEN 'md/mp3, '
+                        ELSE CONCAT(md_mp3, ' md/mp3, ')
+                    END
+                )
+            ) AS omschrijving,
+            compatibel_met AS compatibel,
+            aktief
+        FROM (
+            SELECT *,
+                   ROW_NUMBER() OVER (PARTITION BY type ORDER BY versie DESC) as rn
+            FROM ah_podia_typen
+        ) pt
+        WHERE pt.rn = 1;";
+
+    public static readonly string GetStageTypes = @"
+        SELECT 
+            pt.type,
+            CONCAT('€ ', FORMAT(pt.prijs, 2, 'nl_NL')) AS prijs,
+            TRIM(TRAILING ', ' FROM 
+                CONCAT(
+                    CASE 
+                        WHEN pt.piano = 0 THEN ''
+                        WHEN pt.piano = 1 THEN 'piano, '
+                        ELSE CONCAT(pt.piano, ' piano\'s, ')
+                    END,
+                    CASE 
+                        WHEN pt.electra = 0 THEN ''
+                        WHEN pt.electra = 1 THEN 'electra, '
+                        ELSE CONCAT(pt.electra, ' electra\'s, ')
+                    END,
+                    CASE 
+                        WHEN pt.drum = 0 THEN ''
+                        WHEN pt.drum = 1 THEN 'drum, '
+                        ELSE CONCAT(pt.drum, ' drums, ')
+                    END,
+                    CASE 
+                        WHEN pt.gitaarversterkers = 0 THEN ''
+                        WHEN pt.gitaarversterkers = 1 THEN 'gitaarversterker, '
+                        ELSE CONCAT(pt.gitaarversterkers, ' gitaarversterkers, ')
+                    END,
+                    CASE 
+                        WHEN pt.microfoons = 0 THEN ''
+                        WHEN pt.microfoons = 1 THEN 'microfoon, '
+                        ELSE CONCAT(pt.microfoons, ' microfoons, ')
+                    END
+                )
+            ) AS omschrijving,
+            aktief AS aktief
+        FROM (
+            SELECT *,
+                   ROW_NUMBER() OVER (PARTITION BY type ORDER BY versie DESC) as rn
+            FROM ah_podia_typen
+            WHERE prijs > 0
+        ) pt
+        INNER JOIN (
+            SELECT DISTINCT type 
+            FROM ah_podia 
+            WHERE kaart_nummer > 0 AND kaart_nummer IS NOT NULL
+        ) p ON pt.type = p.type
+        WHERE pt.rn = 1;";
+
+    public static readonly string GetActiveTasks = @"
+        SELECT 
+            t.taak_id AS 'TaakId',
+            t.naam,
+            t.minimumduur,
+            t.maximumduur,
+            bezetting_data.Van,
+            bezetting_data.Tot,
+            bezetting_data.Aantal
+        FROM ah_taken t
+        CROSS JOIN JSON_TABLE(
+            t.bezetting,
+            '$[*]' COLUMNS(
+                Van VARCHAR(10) PATH '$.from',
+                Tot VARCHAR(10) PATH '$.until', 
+                Aantal VARCHAR(10) PATH '$.number'
+            )
+        ) AS bezetting_data
+        WHERE t.actief = 'ja'
+        ORDER BY t.taak_id, bezetting_data.Van;";
+
+    public static readonly string GetInActiveTasks = @"
+        SELECT 
+            t.taak_id AS 'TaakId',
+            t.naam,
+            t.minimumduur,
+            t.maximumduur,
+            COALESCE(bezetting_data.Van, '') AS 'Van',
+            COALESCE(bezetting_data.Tot, '') AS 'Tot', 
+            COALESCE(bezetting_data.Aantal, '') AS 'Aantal'
+        FROM ah_taken t
+        LEFT JOIN JSON_TABLE(
+            CASE 
+                WHEN t.bezetting IS NULL OR t.bezetting = '' OR t.bezetting = '[]' 
+                THEN '[{}]'  -- Dummy object voor lege bezetting
+                ELSE t.bezetting 
+            END,
+            '$[*]' COLUMNS(
+                Van VARCHAR(10) PATH '$.from',
+                Tot VARCHAR(10) PATH '$.until', 
+                Aantal VARCHAR(10) PATH '$.number'
+            )
+        ) AS bezetting_data ON TRUE
+        WHERE t.actief = 'Nee'
+        ORDER BY t.taak_id, COALESCE(bezetting_data.Van, '');";
+
     public static string GetFestivalOverviewQuery( int oldestYear, int newestYear, bool filterOutOldGroups )
     {
         int NumberOfYearsForExclusion = 3;

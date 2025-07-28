@@ -248,3 +248,10 @@ a, .btn-link {
     text-align: right !important;
     vertical-align: middle !important;
 }
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 10px;
+    padding-bottom: 10px;
+}

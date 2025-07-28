@@ -5,8 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-Amusing-d4b4dda8-27a3-4a96-94e4-f605690b8606</UserSecretsId>
-    <AssemblyVersion>25.7.25.17</AssemblyVersion>
-    <FileVersion>25.7.25.17</FileVersion>
+    <AssemblyVersion>25.7.28.12</AssemblyVersion>
+    <FileVersion>25.7.28.12</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
