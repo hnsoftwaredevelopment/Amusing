@@ -3,6 +3,7 @@ using Amusing.Models;
 
 namespace Amusing.Services;
 
+
 public class StageTypeService( GenericDataService dataService )
 {
     private readonly GenericDataService _dataService = dataService;
@@ -40,5 +41,6 @@ public class StageTypeService( GenericDataService dataService )
         Compatibel = reader [ "compatibel" ].ToString(),
         Active = reader.GetInt32( reader.GetOrdinal( "aktief" ) )
     } );
+
     }
 }

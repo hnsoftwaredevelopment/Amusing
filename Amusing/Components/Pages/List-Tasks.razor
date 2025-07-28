@@ -1,0 +1,341 @@
+﻿@page "/List-Tasks"
+@using Amusing.Models
+@using Amusing.Services
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+
+@inject TaskService TaskService;
+
+<h3>@FileNameActive</h3>
+@if (IsLoading)
+{
+    <div class="text-center p-2">
+        <SfSpinner CssClass="e-spin-center" />
+        <p>@FileNameActive worden geladen...</p>
+    </div>
+}
+else
+{
+    <div class="spacer-small"></div>
+    <div style="overflow-x:auto; min-width: 800px; padding-right: 10px; margin-top: 10px;">
+        <SfGrid @ref="GridRefActive"
+                TValue="TaskModel"
+                DataSource="@ActieveTaken"
+                AllowExcelExport="true" Width="100%"
+                AllowResizing="true"
+                AllowPdfExport="true"
+                AllowMultiSorting="true"
+                AllowSorting="true"
+                AllowTextWrap="true">
+
+            <GridEvents TValue="TaskModel"
+                        DataBound="OnGridDataBoundActive" />
+
+             <GridSortSettings>
+                <GridSortColumns>
+                    <GridSortColumn Field="Naam" Direction="SortDirection.Ascending"></GridSortColumn>
+                </GridSortColumns>
+            </GridSortSettings>
+
+            <GridTextWrapSettings WrapMode=WrapMode.Content></GridTextWrapSettings>
+
+            <SfToolbar>
+                <ToolbarItems>
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn" @onclick="ExportToExcelActive" title="Exporteer naar een Excel bestand">
+                                <img src="icons/excel.svg" class="icon" alt="Excel" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn" @onclick="ExportToCsvActive" title="Exporteer naar een CSV bestand">
+                                <img src="icons/csv.svg" class="icon" alt="CSV" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn" @onclick="ExportToPdfActive" title="Maak een PDF bestand">
+                                <img src="icons/pdf.svg" class="icon" alt="PDF" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+
+
+                    <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                        <Template>
+                            <span class="toolbar-count">@FileNameActive: @VisibleRowCountActive</span>
+                        </Template>
+                    </ToolbarItem>
+
+                    <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                        <Template>
+                            <SfTextBox Placeholder="Zoek" Input="OnInputActive"></SfTextBox>
+                        </Template>
+                    </ToolbarItem>
+                </ToolbarItems>
+            </SfToolbar>
+
+            <GridColumns>
+                <GridColumn Field="Naam" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" />
+                <GridColumn Field="MinimumDuur" HeaderText="Soort" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="65px" />
+                <GridColumn Field="Maximumduur" HeaderText="Type" TextAlign="TextAlign.Center" AllowSorting=false AllowResizing="true" Width="60px" />
+
+                <GridColumn HeaderText="Vrijwilligers" TextAlign="TextAlign.Center" Width="160px">
+                    <GridColumns>
+                        <GridColumn Field="Van" HeaderText="Van" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="80px" />
+                        <GridColumn Field="Tot" HeaderText="Tot" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="80px" />
+                        <GridColumn Field="Aantal" HeaderText="Tot" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="80px" />
+                    </GridColumns>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </div>
+}
+
+<div class="spacer-extraextralarge"></div>
+
+<h3>@FileNameInactive</h3>
+@if (IsLoading)
+{
+    <div class="text-center p-2">
+        <SfSpinner CssClass="e-spin-center" />
+        <p>@FileNameInactive worden geladen...</p>
+    </div>
+}
+else
+{
+    <div class="spacer-small"></div>
+    <div style="overflow-x:auto; min-width: 800px; padding-right: 10px; margin-top: 10px;">
+        <SfGrid @ref="GridRefInactive"
+                TValue="TaskModel"
+                DataSource="@InactieveTaken"
+                AllowExcelExport="true" Width="100%"
+                AllowResizing="true"
+                AllowPdfExport="true"
+                AllowMultiSorting="true"
+                AllowSorting="true"
+                AllowTextWrap="true">
+
+            <GridEvents TValue="TaskModel"
+                        DataBound="OnGridDataBoundInactive" />
+
+            <GridSortSettings>
+                <GridSortColumns>
+                    <GridSortColumn Field="Naam" Direction="SortDirection.Ascending"></GridSortColumn>
+                </GridSortColumns>
+            </GridSortSettings>
+
+            <GridTextWrapSettings WrapMode=WrapMode.Content></GridTextWrapSettings>
+
+            <SfToolbar>
+                <ToolbarItems>
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn" @onclick="ExportToExcelInactive" title="Exporteer naar een Excel bestand">
+                                <img src="icons/excel.svg" class="icon" alt="Excel" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn" @onclick="ExportToCsvInactive" title="Exporteer naar een CSV bestand">
+                                <img src="icons/csv.svg" class="icon" alt="CSV" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn" @onclick="ExportToPdfInactive" title="Maak een PDF bestand">
+                                <img src="icons/pdf.svg" class="icon" alt="PDF" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+
+
+                    <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                        <Template>
+                            <span class="toolbar-count">@FileNameInactive: @VisibleRowCountInactive</span>
+                        </Template>
+                    </ToolbarItem>
+
+                    <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                        <Template>
+                            <SfTextBox Placeholder="Zoek" Input="OnInputInactive"></SfTextBox>
+                        </Template>
+                    </ToolbarItem>
+                </ToolbarItems>
+            </SfToolbar>
+
+            <GridColumns>
+                <GridColumn Field="Naam" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" />
+                <GridColumn Field="MinimumDuur" HeaderText="Soort" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="65px" />
+                <GridColumn Field="Maximumduur" HeaderText="Type" TextAlign="TextAlign.Center" AllowSorting=false AllowResizing="true" Width="60px" />
+
+                <GridColumn HeaderText="Vrijwilligers" TextAlign="TextAlign.Center" Width="160px">
+                    <GridColumns>
+                        <GridColumn Field="Van" HeaderText="Van" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="80px" />
+                        <GridColumn Field="Tot" HeaderText="Tot" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="80px" />
+                        <GridColumn Field="Aantal" HeaderText="Tot" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="80px" />
+                    </GridColumns>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </div>
+}
+
+@code {
+    private bool IsLoading = false;
+    private bool _initialLoadDoneActive = false;
+    private bool _initialLoadDoneInactive = false;
+    private SfGrid<TaskModel> GridRefActive;
+    private SfGrid<TaskModel> GridRefInactive;
+    private int VisibleRowCountActive = 0;
+    private int VisibleRowCountInactive = 0;
+    private List<TaskModel> ActieveTaken = [];
+    private List<TaskModel> InactieveTaken = [];
+    private string FileNameActive = "Actieve taken";
+    private string FileNameInactive = "Inactieve taken";
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+        ActieveTaken = await TaskService.GetActiveTasksAsync();
+        InactieveTaken = await TaskService.GetInActiveTasksAsync();
+        IsLoading = false;
+    }
+
+    // Manage direct search functionality
+    public async void OnInputActive(InputEventArgs args)
+    {
+        await GridRefActive.SearchAsync(args.Value);
+
+        await Task.Delay(50);
+        await UpdateVisibleRowCountActiveAsync();
+    }
+
+    public async void OnInputInactive(InputEventArgs args)
+    {
+        await GridRefInactive.SearchAsync(args.Value);
+         =
+        await Task.Delay(50);
+        await UpdateVisibleRowCountInactiveAsync();
+    }
+
+    private async Task UpdateVisibleRowCountActiveAsync()
+    {
+        if (GridRefActive is not null)
+        {
+            await GridRefActive.Refresh();
+            await Task.Delay(50);
+            var records = await GridRefActive.GetCurrentViewRecordsAsync();
+            await Task.Delay(150);
+            VisibleRowCountActive = records?.Count ?? 0;
+            StateHasChanged();
+        }
+    }
+
+    private async Task UpdateVisibleRowCountInactiveAsync()
+    {
+        if (GridRefInactive is not null)
+        {
+            await GridRefInactive.Refresh();
+            await Task.Delay(50);
+            var records = await GridRefInactive.GetCurrentViewRecordsAsync();
+            await Task.Delay(150);
+            VisibleRowCountInactive = records?.Count ?? 0;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnGridDataBoundActive()
+    {
+        if (!_initialLoadDoneActive)
+        {
+            _initialLoadDoneActive = true;
+            await UpdateVisibleRowCountActiveAsync();
+        }
+    }
+
+    private async Task OnGridDataBoundInactive()
+    {
+        if (!_initialLoadDoneInactive)
+        {
+            _initialLoadDoneInactive = true;
+            await UpdateVisibleRowCountInactiveAsync();
+        }
+    }
+
+    // Export functions
+    private async Task ExportToExcelActive()
+    {
+        var exportProps = new ExcelExportProperties
+        {
+            FileName = $"{FileNameActive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx"
+        };
+
+        await GridRefActive!.ExportToExcelAsync(exportProps);
+    }
+
+    private async Task ExportToExcelInactive()
+    {
+        var exportProps = new ExcelExportProperties
+        {
+            FileName = $"{FileNameInactive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx"
+        };
+
+        await GridRefInactive!.ExportToExcelAsync(exportProps);
+    }
+
+    private async Task ExportToCsvActive()
+    {
+        var exportProps = new ExcelExportProperties
+        {
+            FileName = $"{FileNameActive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv"
+        };
+
+        await GridRefActive!.ExportToCsvAsync(exportProps);
+    }
+
+    private async Task ExportToCsvInactive()
+    {
+        var exportProps = new ExcelExportProperties
+        {
+            FileName = $"{FileNameInactive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv"
+        };
+
+        await GridRefInactive!.ExportToCsvAsync(exportProps);
+    }
+
+    private async Task ExportToPdfActive()
+    {
+        var exportProps = new PdfExportProperties
+        {
+            FileName = $"{FileNameActive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.pdf",
+            PageOrientation = PageOrientation.Landscape,
+            PageSize = PdfPageSize.A4,
+            AllowHorizontalOverflow = true
+        };
+        await GridRefActive!.ExportToPdfAsync(exportProps);
+    }
+
+    private async Task ExportToPdfInactive()
+    {
+        var exportProps = new PdfExportProperties
+        {
+            FileName = $"{FileNameInactive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.pdf",
+            PageOrientation = PageOrientation.Landscape,
+            PageSize = PdfPageSize.A4,
+            AllowHorizontalOverflow = true
+        };
+        await GridRefInactive!.ExportToPdfAsync(exportProps);
+    }
+}

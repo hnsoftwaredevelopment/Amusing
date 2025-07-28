@@ -485,7 +485,7 @@ public static class QueryDefinitions
         ) pt
         WHERE pt.rn = 1;";
 
-    public static readonly string GetStageTypes = @"
+  public static readonly string GetStageTypes = @"
         SELECT 
             pt.type,
             CONCAT('€ ', FORMAT(pt.prijs, 2, 'nl_NL')) AS prijs,

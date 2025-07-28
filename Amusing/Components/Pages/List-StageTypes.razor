@@ -1,0 +1,106 @@
+﻿@page "/List-StageTypes"
+@using Amusing.Models
+@using Amusing.Services
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+
+@inject StageTypeService StageTypeService;
+
+<h3>Podium types</h3>
+@if (IsLoading)
+{
+    <div class="text-center p-2">
+        <SfSpinner CssClass="e-spin-center" />
+        <p>@FileName worden geladen...</p>
+    </div>
+}
+else
+{
+    <div class="spacer-small"></div>
+    <div style="overflow-x:auto; min-width: 800px; padding-right: 10px; margin-top: 10px;">
+        <SfGrid @ref="GridRef"
+                TValue="StageTypeModel"
+                DataSource="@StageTypes"
+                AllowExcelExport="true" Width="100%"
+                AllowResizing="true"
+                AllowMultiSorting="true"
+                AllowSorting="true">
+
+            <GridEvents TValue="StageTypeModel"
+                        DataBound="OnGridDataBound" />
+
+            <SfToolbar>
+                <ToolbarItems>
+                    <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                        <Template>
+                            <span class="toolbar-count">@FileName: @VisibleRowCount</span>
+                        </Template>
+                    </ToolbarItem>
+
+                    <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                        <Template>
+                            <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
+                        </Template>
+                    </ToolbarItem>
+                </ToolbarItems>
+            </SfToolbar>
+
+            <GridColumns>
+                <GridColumn Field="Type" HeaderText="Type" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="60px" />
+                <GridColumn Field="Price" HeaderText="Prijs" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="80px" />
+                <GridColumn Field="Description" HeaderText="Omschrijving" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" />
+            </GridColumns>
+        </SfGrid>
+    </div>
+}
+
+
+@code {
+    private bool IsLoading = false;
+    private bool _initialLoadDone = false;
+    private SfGrid<StageTypeModel> GridRef;
+    private int VisibleRowCount = 0;
+    private List<StageTypeModel> StageTypes = [];
+    private string FileName = "Podium types";
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+        StageTypes = await StageTypeService.GetStageTypesAsync();
+        IsLoading = false;
+    }
+
+    // Manage direct search functionality
+    public async void OnInput(InputEventArgs args)
+    {
+        await GridRef.SearchAsync(args.Value);
+
+        await Task.Delay(50);
+        await UpdateVisibleRowCountAsync();
+    }
+
+    private async Task UpdateVisibleRowCountAsync()
+    {
+        if (GridRef is not null)
+        {
+            await GridRef.Refresh();
+            await Task.Delay(50);
+            var records = await GridRef.GetCurrentViewRecordsAsync();
+            await Task.Delay(150);
+            VisibleRowCount = records?.Count ?? 0;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnGridDataBound()
+    {
+        if (!_initialLoadDone)
+        {
+            _initialLoadDone = true;
+            await UpdateVisibleRowCountAsync();
+        }
+    }
+
+}
