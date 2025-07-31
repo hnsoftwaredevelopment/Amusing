@@ -225,7 +225,6 @@ else
     public async void OnInputInactive(InputEventArgs args)
     {
         await GridRefInactive.SearchAsync(args.Value);
-         =
         await Task.Delay(50);
         await UpdateVisibleRowCountInactiveAsync();
     }

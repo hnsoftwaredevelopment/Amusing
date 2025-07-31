@@ -1,0 +1,383 @@
+﻿@page "/Maintenance-StageTypes"
+@using Amusing.Models
+@using Amusing.Services
+@using Bit.BlazorUI
+@using Bit.BlazorUI.Extras
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+
+@inject StageTypeService StageTypeService;
+
+<h3>Onderhoud Podium types</h3>
+@if (IsLoading)
+{
+    <div class="text-center p-2">
+        <SfSpinner CssClass="e-spin-center" />
+        <p>@FileName worden geladen...</p>
+    </div>
+}
+else
+{
+    <div class="spacer-small"></div>
+    <SfDataForm Model="SelectedStageType" OnValidSubmit="SaveStageType" LabelPosition="FormLabelPosition.Top">
+        <div class="form-floating-switch">
+            <h5>Algemeen</h5>
+            <SfTextBox @bind-Value="SelectedStageType.Type" Placeholder="Type" FloatLabelType="FloatLabelType.Always" Width="60px" CssClass="e-ntstyle center-textbox" Enabled=@ActiveChecked/>
+            <SfNumericTextBox TValue="decimal" @bind-Value="SelectedStageType.Price" Placeholder="Prijs" Format="c2" FloatLabelType="FloatLabelType.Always" Width="140px" Step="5" CssClass="e-ntstyle"  Enabled=@ActiveChecked />
+            <SfMultiSelect TValue="List<string>"
+                            TItem="string"
+                            Placeholder="Compatibel met"
+                            FloatLabelType="FloatLabelType.Always"
+                            @bind-Value="CompatibelTypes"
+                            DataSource="@AvailableStageTypes"
+                            Mode="VisualMode.CheckBox"
+                            CssClass="e-ntstyle"
+                            Width="130px"  Enabled=@ActiveChecked>
+            </SfMultiSelect>
+            <BitToggleButton @bind-IsChecked="ActiveChecked" Text="@(ActiveChecked ? "Aktief" : "Niet aktief")" Styles="@(new() { Root = "--toggle-background: gray; background: var(--toggle-background); border: none",
+                Checked = "--toggle-background: green;",
+                Text = "color: white;" })"/>
+            <hr />
+            <h5>Instrumenten e.d</h5>
+            <div Width="50%">
+            <SfNumericTextBox TValue="int" Min="0" Max="2" @bind-Value="SelectedStageType.Piano" Placeholder="Piano" Width="10%" FloatLabelType="@FloatLabelType.Auto" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+            <SfNumericTextBox TValue="int" Min="0" Max="10" @bind-Value="SelectedStageType.Lectern" Placeholder="Lessenaar" Width="10%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+            <SfNumericTextBox TValue="int" Min="0" Max="10" @bind-Value="SelectedStageType.Microphones" Placeholder="Microfoons" Width="10%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+            <SfNumericTextBox TValue="int" Min="0" Max="2" @bind-Value="SelectedStageType.Drums" Placeholder="Drums" Width="10%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+            </div> 
+            <hr />
+            <h5>Techniek</h5>
+            <div width="75%">
+            <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="SelectedStageType.GitarAmplifiers" Placeholder="Gitaar versterkers" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+            <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="SelectedStageType.BassAmplifiers" Placeholder="Bas versterkers" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+            <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="SelectedStageType.ChoirAmplifiers" Placeholder="Koor versterking" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+            <SfNumericTextBox TValue="int" Min="0" Max="4" @bind-Value="SelectedStageType.Monitors" Placeholder="Monitoren" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+            <SfNumericTextBox TValue="int" Min="0" Max="4" @bind-Value="SelectedStageType.Speakers" Placeholder="Speakers" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+            </div>
+            <div class="spacer-medium"></div>
+            <SfCheckBox @bind-Checked="ElectronicsChecked" Disabled="!ActiveChecked">Electra</SfCheckBox>
+            <SfCheckBox @bind-Checked="MixingConsoleChecked" Disabled="!ActiveChecked">Mengpaneel</SfCheckBox>
+            <SfCheckBox @bind-Checked="Mp3Checked" Disabled="!ActiveChecked">MD/MP3</SfCheckBox>
+            <hr />
+        </div>
+    </SfDataForm>
+
+    <div class="spacer-medium"></div>
+    <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+        <SfGrid @ref="GridRef"
+                TValue="StageTypeModel"
+                DataSource="@StageTypes"
+                AllowResizing="true"
+                AllowMultiSorting="true"
+                AllowSelection="true"
+                AllowSorting="true" >
+
+            <GridTextWrapSettings WrapMode=" WrapMode.Header"></GridTextWrapSettings>
+            <GridSelectionSettings 
+                Mode="Syncfusion.Blazor.Grids.SelectionMode.Row" 
+                Type="Syncfusion.Blazor.Grids.SelectionType.Single">
+            </GridSelectionSettings>
+
+            <GridEvents TValue="StageTypeModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
+
+            <SfToolbar>
+                <ToolbarItems>
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn" @onclick="SaveStageType" title="Sla het podiumtype als nieuwe, of ge-(in)activeerde versie">
+                                <img src="icons/button-save.svg" class="icon" alt="SAVE" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn" @onclick="AddNewStageType" title="Voeg een nieuw podium type toe">
+                                <img src="icons/button-add.svg" class="icon" alt="ADD" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn" @onclick="DeleteStageTypeClicked" title="Verwijder geselecteerde podium type (versie)">
+                                <img src="icons/button-del.svg" class="icon" alt="DEL" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+                    <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                        <Template>
+                            <span class="toolbar-count">@FileName: @VisibleRowCount</span>
+                        </Template>
+                    </ToolbarItem>
+
+                    <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                        <Template>
+                            <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
+                        </Template>
+                    </ToolbarItem>
+                </ToolbarItems>
+            </SfToolbar>
+
+            <GridColumns>
+                <GridColumn Field="Type" HeaderText="Type" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="60px" />
+                <GridColumn Field="Description" HeaderText="Omvat" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" />
+                <GridColumn Field="Price" HeaderText="Prijs" Format="C2" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="90px" />
+                <GridColumn Field="Compatibel" HeaderText="Compatibel met" TextAlign="TextAlign.Left" AllowSorting=false AllowResizing="true" Width="135px" />
+                <GridColumn Field="Active" HeaderText="Aktive" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="80px" />
+            </GridColumns>
+        </SfGrid>
+        <div class="spacer-large"></div>
+        <BitMessage Color="BitColor.Secondary" Visibility="@ShowDeletedMessage">
+            <div>Let op: wanneer je een podium type verwijdert, verwijder je alleen de laatste versie van dat type.</div>
+            <div>De regel kan dus gewoon zichtbaar blijven in de lijst, dit is dan de vorige versie.</div>
+            <div>Wil je een podium type niet meer gebruiken, zet hem dan op disabled en sla het type op.</div>
+        </BitMessage>    </div>
+}
+@code {
+    private bool IsLoading = false;
+    private bool _initialLoadDone = false;
+    private SfGrid<StageTypeModel> GridRef;
+    private int VisibleRowCount = 0;
+    private List<StageTypeModel> StageTypes = [];
+    private string FileName = "Podium types";
+    private StageTypeModel? SelectedStageType;
+    private StageTypeModel? SelectedStageTypeOriginal;
+    private List<string> ChangedFields = new();
+    private List<string> AvailableStageTypes = [];
+    private List<string> CompatibelTypes = [];
+    private bool IsDirty = false;
+    private BitVisibility ShowDeletedMessage = BitVisibility.Collapsed;
+
+    private bool ElectronicsChecked
+    {
+        get => SelectedStageType?.Electronics == 1;
+        set => SelectedStageType.Electronics = value ? 1 : 0;
+    }
+
+    private bool MixingConsoleChecked
+    {
+        get => SelectedStageType?.MixingConsole == 1;
+        set => SelectedStageType.MixingConsole = value ? 1 : 0;
+    }
+
+    private bool Mp3Checked
+    {
+        get => SelectedStageType?.Mp3 == 1;
+        set => SelectedStageType.Mp3 = value ? 1 : 0;
+    }
+
+    private bool ActiveChecked
+    {
+        get => SelectedStageType?.Active == 1;
+        set => SelectedStageType.Active = value ? 1 : 0;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+
+        var stageTypeModels = await StageTypeService.GetActiveStageTypesListAsync();
+        AvailableStageTypes = stageTypeModels
+                                .Select( s => s.Type )
+                                .Where( t => !string.IsNullOrWhiteSpace( t ) )
+                                .Distinct()
+                                .ToList();
+
+        StageTypes = await StageTypeService.GetAllStageTypesAsync();
+        SelectedStageType = StageTypes.FirstOrDefault( x => x.Type == "A" );
+        IsLoading = false;
+    }
+
+    // Manage direct search functionality
+    public async Task OnInput(InputEventArgs args)
+    {
+        await GridRef.SearchAsync(args.Value);
+
+        await Task.Delay(50);
+        await UpdateVisibleRowCountAsync();
+    }
+
+    private async Task UpdateVisibleRowCountAsync()
+    {
+        if (GridRef is not null)
+        {
+            await GridRef.Refresh();
+            await Task.Delay(50);
+            var records = await GridRef.GetCurrentViewRecordsAsync();
+            await Task.Delay(150);
+            VisibleRowCount = records?.Count ?? 0;
+            StateHasChanged();
+        }
+    }
+
+    private async Task OnGridDataBound()
+    {
+        if (!_initialLoadDone)
+        {
+            _initialLoadDone = true;
+            await UpdateVisibleRowCountAsync();
+        }
+    }
+
+    private void OnRowSelected( RowSelectEventArgs<StageTypeModel> args )
+    {
+        SelectedStageType = args.Data;
+
+        // Clone the selected row, to compare changed values with the original values
+        SelectedStageTypeOriginal = new StageTypeModel
+        {
+            Type = args.Data.Type,
+            Price = args.Data.Price,
+            Piano = args.Data.Piano,
+            Lectern = args.Data.Lectern,
+            Electronics = args.Data.Electronics,
+            Drums = args.Data.Drums,
+            GitarAmplifiers = args.Data.GitarAmplifiers,
+            BassAmplifiers = args.Data.BassAmplifiers,
+            ChoirAmplifiers = args.Data.ChoirAmplifiers,
+            Microphones = args.Data.Microphones,
+            Monitors = args.Data.Monitors,
+            Speakers = args.Data.Speakers,
+            MixingConsole = args.Data.MixingConsole,
+            Mp3 = args.Data.Mp3,
+            Compatibel = args.Data.Compatibel,
+            Active = args.Data.Active
+        };
+
+        CompatibelTypes = SelectedStageType.Compatibel?
+        .Split( ',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries )
+        .ToList() ?? new List<string>();
+
+        ShowDeletedMessage = BitVisibility.Collapsed;
+    }
+
+    private async Task SaveStageType()
+    {
+        if ( SelectedStageType is null )
+            return;
+
+        // Make sure the selected compatible stage types are sorted before save
+        SelectedStageType.Compatibel = string.Join( ",", CompatibelTypes
+        .Where( t => !string.IsNullOrWhiteSpace( t ) )
+        .OrderBy( t => t ) );
+
+        UpdateIsDirty();
+
+        // Hier update je de backend (API of Db) via je service
+        //await StageTypeService.UpdateAsync( SelectedStageType );
+
+        StageTypes = await StageTypeService.GetAllStageTypesAsync();
+        await GridRef.Refresh();
+        await GridRef.SelectRowAsync( StageTypes.IndexOf( SelectedStageType ) );
+
+    }
+
+    // Check if content of a field is changed after selecting a row
+    private async Task UpdateIsDirty()
+    {
+        ChangedFields.Clear();
+
+        var compatibelSorted = string.Join(",", CompatibelTypes.OrderBy(x => x));
+        var originalCompatibelSorted = string.Join(",", (SelectedStageTypeOriginal.Compatibel ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).OrderBy(x => x));
+
+        bool vuilelucht = SelectedStageType != SelectedStageTypeOriginal;
+
+        IsDirty = SelectedStageType.Type != SelectedStageTypeOriginal.Type ||
+                  SelectedStageType.Price != SelectedStageTypeOriginal.Price ||
+                  SelectedStageType.Piano != SelectedStageTypeOriginal.Piano ||
+                  SelectedStageType.Lectern != SelectedStageTypeOriginal.Lectern ||
+                  SelectedStageType.Electronics != SelectedStageTypeOriginal.Electronics ||
+                  SelectedStageType.Drums != SelectedStageTypeOriginal.Drums ||
+                  SelectedStageType.GitarAmplifiers != SelectedStageTypeOriginal.GitarAmplifiers ||
+                  SelectedStageType.BassAmplifiers != SelectedStageTypeOriginal.BassAmplifiers ||
+                  SelectedStageType.ChoirAmplifiers != SelectedStageTypeOriginal.ChoirAmplifiers ||
+                  SelectedStageType.Microphones != SelectedStageTypeOriginal.Microphones ||
+                  SelectedStageType.Monitors != SelectedStageTypeOriginal.Monitors ||
+                  SelectedStageType.Speakers != SelectedStageTypeOriginal.Speakers ||
+                  SelectedStageType.MixingConsole != SelectedStageTypeOriginal.MixingConsole ||
+                  SelectedStageType.Mp3 != SelectedStageTypeOriginal.Mp3 ||
+                  compatibelSorted != originalCompatibelSorted ||
+                  SelectedStageType.Active != SelectedStageTypeOriginal.Active;
+
+        if(IsDirty)
+        {
+            var newVersion = await StageTypeService.GetNewStageTypeVersionByTypeAsync(SelectedStageType.Type);
+            SelectedStageType.Version = newVersion;
+            await StageTypeService.InsertStageTypeAsync( SelectedStageType );
+        }
+    }
+
+    private async Task AddNewStageType()
+    {
+        var newType = await StageTypeService.GetNextAvailableStageTypeAsync();
+
+        SelectedStageType = new StageTypeModel
+        {
+            Type = newType,
+            Price = 0,
+            Piano = 0,
+            Lectern = 0,
+            Electronics = 0,
+            Drums = 0,
+            GitarAmplifiers = 0,
+            BassAmplifiers = 0,
+            ChoirAmplifiers = 0,
+            Microphones = 0,
+            Monitors = 0,
+            Speakers = 0,
+            MixingConsole = 0,
+            Mp3 = 0,
+            Beschrijving = " ",
+            Description = " ",
+            Compatibel= newType,
+            Version=1,
+            Active = 1
+        };
+
+        // Save the new record in the database
+        await StageTypeService.InsertStageTypeAsync( SelectedStageType );
+
+        // refresh the table
+        var stageTypeModels = await StageTypeService.GetActiveStageTypesListAsync();
+        AvailableStageTypes = stageTypeModels
+                                .Select( s => s.Type )
+                                .Where( t => !string.IsNullOrWhiteSpace( t ) )
+                                .Distinct()
+                                .ToList();
+
+        StageTypes = await StageTypeService.GetAllStageTypesAsync();
+
+        await GridRef.Refresh();
+
+        // select the newly created StageType in the list
+        SelectedStageType = StageTypes.FirstOrDefault( x => x.Type == newType );
+        await GridRef.SelectRowAsync( StageTypes.IndexOf( SelectedStageType ) );
+    }
+
+    private async Task DeleteStageType( string type, int version)
+    {
+     await StageTypeService.DeleteStageTypeAsync( type, version );   
+    }
+
+    private async Task AddStageTypeClicked( )
+    {
+        await AddNewStageType();
+    }
+
+    private async Task DeleteStageTypeClicked( )
+    {
+        string type = SelectedStageType.Type.ToString();
+        int version = ( int ) SelectedStageType.Version;
+
+        if (type != "" && version != 0)
+        {
+            ShowDeletedMessage = BitVisibility.Visible;
+            await DeleteStageType(type, version);
+
+            StageTypes = await StageTypeService.GetAllStageTypesAsync();
+            await GridRef.Refresh();
+            await GridRef.SelectRowAsync( StageTypes.IndexOf( SelectedStageType ) );
+        }
+    }
+}

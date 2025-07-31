@@ -43,4 +43,24 @@ public class GenericDataService
 
         return results;
     }
+
+    public async Task<int> ExecuteNonQueryAsync(
+    string query,
+    Dictionary<string, object>? parameters = null )
+    {
+        await using MySqlConnection connection = new(_connection.ConnectionString);
+        await connection.OpenAsync();
+
+        using MySqlCommand cmd = new(query, connection);
+
+        if ( parameters is not null )
+        {
+            foreach ( KeyValuePair<string, object> param in parameters )
+            {
+                cmd.Parameters.AddWithValue( param.Key, param.Value );
+            }
+        }
+
+        return await cmd.ExecuteNonQueryAsync();
+    }
 }
