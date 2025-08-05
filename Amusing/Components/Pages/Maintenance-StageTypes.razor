@@ -124,7 +124,22 @@ else
                 <GridColumn Field="Description" HeaderText="Omvat" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" />
                 <GridColumn Field="Price" HeaderText="Prijs" Format="C2" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="90px" />
                 <GridColumn Field="Compatibel" HeaderText="Compatibel met" TextAlign="TextAlign.Left" AllowSorting=false AllowResizing="true" Width="135px" />
-                <GridColumn Field="Active" HeaderText="Aktive" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="80px" />
+                <GridColumn Field="Active" HeaderText="Aktief" TextAlign="TextAlign.Center" Width="120px">
+                    <Template>
+                        @{
+                            var stage = (context as StageTypeModel);
+                            var activeState = stage.Active == 1 ? "Aktief" : "Niet aktief";
+                            var activeStateColor = stage.Active == 1 ? "e-success" : "e-danger";
+                            <div class="template_checkbox">
+                                <SfChip id="chip">
+                                    <ChipItems>
+                                        <ChipItem Text="@activeState" CssClass="@($"{activeStateColor} custom-chip")" Width="120px"/>
+                                    </ChipItems>
+                                </SfChip>
+                            </div>
+                        }
+                    </Template>
+                </GridColumn>
             </GridColumns>
         </SfGrid>
         <div class="spacer-large"></div>
