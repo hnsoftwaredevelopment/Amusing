@@ -1,0 +1,166 @@
+﻿@page "/Maintenance-Festivals"
+@using Amusing.Models
+@using Amusing.Services
+@using Bit.BlazorUI
+@using Bit.BlazorUI.Extras
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+
+@inject FestivalService FestivalService;
+
+<h3>Onderhoud festivals</h3>
+@if (IsLoading)
+{
+    <div class="text-center p-2">
+        <SfSpinner CssClass="e-spin-center" />
+        <p>@FileName worden geladen...</p>
+    </div>
+}
+else
+{
+    <div class="spacer-small"></div>
+
+
+    <div class="spacer-medium"></div>
+    <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+        <SfGrid @ref="GridRef"
+                TValue="FestivalModel"
+                DataSource="@Festivals"
+                AllowResizing="true"
+                AllowSelection="true" >
+
+            <GridTextWrapSettings WrapMode=" WrapMode.Header" />
+            <GridSelectionSettings Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"
+                                   Type="Syncfusion.Blazor.Grids.SelectionType.Single" />
+
+            <GridEvents TValue="FestivalModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
+
+            
+        </SfGrid>
+        <div class="spacer-large"></div>
+        </div>
+}
+
+
+@code {
+    private bool IsLoading = false;
+    private bool _initialLoadDone = false;
+    private SfGrid<FestivalModel> GridRef;
+    private string FileName = "Amusing edities";
+    private FestivalModel? SelectedFestival;
+    private FestivalModel? SelectedFestivalOriginal;
+    private List<string> ChangedFields = new();
+    private List<string> AvailableStageTypes = [];
+    private List<string> CompatibelTypes = [];
+    private bool FestivalIsDirty = false;
+    private bool ConditionsIsDirty = false;
+    private int VisibleRowCount = 0;
+    private List<FestivalModel> Festivals = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+
+        var festivalModels = await FestivalService.GetFestivalDataAsync();
+
+        Festivals = await FestivalService.GetFestivalDataAsync();
+        SelectedFestival = Festivals.FirstOrDefault( x => x.Festival == DateTime.Parse( DateTime.Now.ToString() ).Year.ToString() );
+        IsLoading = false;
+    }
+
+    private async Task OnGridDataBound()
+    {
+        if ( !_initialLoadDone )
+        {
+            _initialLoadDone = true;
+            await UpdateVisibleRowCountAsync();
+        }
+    }
+
+    private async Task UpdateVisibleRowCountAsync()
+    {
+        if ( GridRef is not null )
+        {
+            await GridRef.Refresh();
+            await Task.Delay( 50 );
+            var records = await GridRef.GetCurrentViewRecordsAsync();
+            await Task.Delay( 150 );
+            VisibleRowCount = records?.Count ?? 0;
+            StateHasChanged();
+        }
+    }
+
+    public async Task OnInput( InputEventArgs args )
+    {
+        await GridRef.SearchAsync( args.Value );
+
+        await Task.Delay( 50 );
+        await UpdateVisibleRowCountAsync();
+    }
+
+    private void OnRowSelected( RowSelectEventArgs<FestivalModel> args )
+    {
+        SelectedFestival = args.Data;
+
+        // Clone the selected row, to compare changed values with the original values
+        SelectedFestivalOriginal = new FestivalModel
+        {
+            FestivalId = args.Data.FestivalId,
+            Festival = args.Data.Festival,
+            Festivaldatum = args.Data.Festivaldatum,
+            StartInschrijving = args.Data.StartInschrijving,
+            EindeInschrijving = args.Data.EindeInschrijving,
+            Wachtlijst = args.Data.Wachtlijst,
+            PubliceerPlanning = args.Data.PubliceerPlanning,
+            MinutenTussenOptredens = args.Data.MinutenTussenOptredens,
+            MaximumMinutenTussenOptredens = args.Data.MaximumMinutenTussenOptredens,
+            MaximumUrenVrijwilligers = args.Data.MaximumUrenVrijwilligers,
+            BoeteOnderbrekingOptredens = args.Data.BoeteOnderbrekingOptredens,
+            StartVrijwilligersTaken = args.Data.StartVrijwilligersTaken,
+            EindeVrijwilligersTaken = args.Data.EindeVrijwilligersTaken,
+            StartVrijwilligersPauze = args.Data.StartVrijwilligersPauze,
+            EindeVrijwilligersPauze = args.Data.EindeVrijwilligersPauze,
+            EindeVasteVrijwilligersTaken = args.Data.EindeVasteVrijwilligersTaken
+        };
+    }
+
+    private async Task UpdateIsDirty()
+    {
+        ChangedFields.Clear();
+
+
+        bool vuilelucht = SelectedFestival != SelectedFestivalOriginal;
+
+        FestivalIsDirty = SelectedFestival.FestivalId != SelectedFestivalOriginal.FestivalId ||
+                  SelectedFestival.Festival != SelectedFestivalOriginal.Festival ||
+                  SelectedFestival.Festivaldatum != SelectedFestivalOriginal.Festivaldatum ||
+                  SelectedFestival.StartInschrijving != SelectedFestivalOriginal.StartInschrijving ||
+                  SelectedFestival.EindeInschrijving != SelectedFestivalOriginal.EindeInschrijving ||
+                  SelectedFestival.Wachtlijst != SelectedFestivalOriginal.Wachtlijst ||
+                  SelectedFestival.PubliceerPlanning != SelectedFestivalOriginal.PubliceerPlanning ||
+                  SelectedFestival.StartVrijwilligersTaken != SelectedFestivalOriginal.StartVrijwilligersTaken ||
+                  SelectedFestival.EindeVrijwilligersTaken != SelectedFestivalOriginal.EindeVrijwilligersTaken ||
+                  SelectedFestival.StartVrijwilligersPauze != SelectedFestivalOriginal.StartVrijwilligersPauze ||
+                  SelectedFestival.EindeVrijwilligersPauze != SelectedFestivalOriginal.EindeVrijwilligersPauze ||
+                  SelectedFestival.EindeVasteVrijwilligersTaken != SelectedFestivalOriginal.EindeVasteVrijwilligersTaken;
+
+        ConditionsIsDirty = SelectedFestival.MinutenTussenOptredens != SelectedFestivalOriginal.MinutenTussenOptredens ||
+                  SelectedFestival.MaximumMinutenTussenOptredens != SelectedFestivalOriginal.MaximumMinutenTussenOptredens ||
+                  SelectedFestival.MaximumUrenVrijwilligers != SelectedFestivalOriginal.MaximumUrenVrijwilligers ||
+                  SelectedFestival.BoeteOnderbrekingOptredens != SelectedFestivalOriginal.BoeteOnderbrekingOptredens;
+
+
+        if ( FestivalIsDirty )
+        {
+            await FestivalService.ModifyFestivalAsync( SelectedFestival );
+        }
+
+        if ( ConditionsIsDirty )
+        {
+            await FestivalService.ModifyConditionsAsync( SelectedFestival );
+        }
+    }
+
+}
