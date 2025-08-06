@@ -317,3 +317,24 @@ a, .btn-link {
     border-color: green;
     background-color: green;
 }
+
+.page-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - Xpx); /* Gebruik volledige schermhoogte */
+}
+
+.fixed-header {
+    flex: 0 0 auto; /* Niet laten meegroeien */
+    background-color: #f8f9fa; /* of wat je wilt */
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+    z-index: 10;
+}
+
+.scrollable-content {
+    flex: 1 1 auto; /* Neemt resterende ruimte in */
+    overflow-y: auto;
+    padding: 10px;
+    background-color: white;
+}

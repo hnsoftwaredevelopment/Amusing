@@ -50,11 +50,11 @@ else
             <hr />
             <h5>Techniek</h5>
             <div width="75%">
-            <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="SelectedStageType.GitarAmplifiers" Placeholder="Gitaar versterkers" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+            <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="SelectedStageType.GuitarAmplifiers" Placeholder="Gitaar versterkers" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
             <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="SelectedStageType.BassAmplifiers" Placeholder="Bas versterkers" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
             <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="SelectedStageType.ChoirAmplifiers" Placeholder="Koor versterking" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
             <SfNumericTextBox TValue="int" Min="0" Max="4" @bind-Value="SelectedStageType.Monitors" Placeholder="Monitoren" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
-            <SfNumericTextBox TValue="int" Min="0" Max="4" @bind-Value="SelectedStageType.Speakers" Placeholder="Speakers" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+            <SfNumericTextBox TValue="int" Min="0" Max="4" @bind-Value="SelectedStageType.Monitors" Placeholder="Speakers" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
             </div>
             <div class="spacer-medium"></div>
             <SfCheckBox @bind-Checked="ElectronicsChecked" Disabled="!ActiveChecked">Electra</SfCheckBox>
@@ -124,7 +124,22 @@ else
                 <GridColumn Field="Description" HeaderText="Omvat" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" />
                 <GridColumn Field="Price" HeaderText="Prijs" Format="C2" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="90px" />
                 <GridColumn Field="Compatibel" HeaderText="Compatibel met" TextAlign="TextAlign.Left" AllowSorting=false AllowResizing="true" Width="135px" />
-                <GridColumn Field="Active" HeaderText="Aktive" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="80px" />
+                <GridColumn Field="Active" HeaderText="Aktief" TextAlign="TextAlign.Center" Width="120px">
+                    <Template>
+                        @{
+                            var stage = (context as StageTypeModel);
+                            var activeState = stage.Active == 1 ? "Aktief" : "Niet aktief";
+                            var activeStateColor = stage.Active == 1 ? "e-success" : "e-danger";
+                            <div class="template_checkbox">
+                                <SfChip id="chip">
+                                    <ChipItems>
+                                        <ChipItem Text="@activeState" CssClass="@($"{activeStateColor} custom-chip")" Width="120px"/>
+                                    </ChipItems>
+                                </SfChip>
+                            </div>
+                        }
+                    </Template>
+                </GridColumn>
             </GridColumns>
         </SfGrid>
         <div class="spacer-large"></div>
@@ -233,7 +248,7 @@ else
             Lectern = args.Data.Lectern,
             Electronics = args.Data.Electronics,
             Drums = args.Data.Drums,
-            GitarAmplifiers = args.Data.GitarAmplifiers,
+            GuitarAmplifiers = args.Data.GuitarAmplifiers,
             BassAmplifiers = args.Data.BassAmplifiers,
             ChoirAmplifiers = args.Data.ChoirAmplifiers,
             Microphones = args.Data.Microphones,
@@ -241,11 +256,11 @@ else
             Speakers = args.Data.Speakers,
             MixingConsole = args.Data.MixingConsole,
             Mp3 = args.Data.Mp3,
-            Compatibel = args.Data.Compatibel,
+            Compatible = args.Data.Compatible,
             Active = args.Data.Active
         };
 
-        CompatibelTypes = SelectedStageType.Compatibel?
+        CompatibelTypes = SelectedStageType.Compatible?
         .Split( ',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries )
         .ToList() ?? new List<string>();
 
@@ -258,13 +273,13 @@ else
             return;
 
         // Make sure the selected compatible stage types are sorted before save
-        SelectedStageType.Compatibel = string.Join( ",", CompatibelTypes
+        SelectedStageType.Compatible = string.Join( ",", CompatibelTypes
         .Where( t => !string.IsNullOrWhiteSpace( t ) )
         .OrderBy( t => t ) );
 
         UpdateIsDirty();
 
-        // Hier update je de backend (API of Db) via je service
+        // Hier update je de backend (Db) via je service
         //await StageTypeService.UpdateAsync( SelectedStageType );
 
         StageTypes = await StageTypeService.GetAllStageTypesAsync();
@@ -279,7 +294,7 @@ else
         ChangedFields.Clear();
 
         var compatibelSorted = string.Join(",", CompatibelTypes.OrderBy(x => x));
-        var originalCompatibelSorted = string.Join(",", (SelectedStageTypeOriginal.Compatibel ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).OrderBy(x => x));
+        var originalCompatibelSorted = string.Join(",", (SelectedStageTypeOriginal.Compatible ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).OrderBy(x => x));
 
         bool vuilelucht = SelectedStageType != SelectedStageTypeOriginal;
 
@@ -289,7 +304,7 @@ else
                   SelectedStageType.Lectern != SelectedStageTypeOriginal.Lectern ||
                   SelectedStageType.Electronics != SelectedStageTypeOriginal.Electronics ||
                   SelectedStageType.Drums != SelectedStageTypeOriginal.Drums ||
-                  SelectedStageType.GitarAmplifiers != SelectedStageTypeOriginal.GitarAmplifiers ||
+                  SelectedStageType.GuitarAmplifiers != SelectedStageTypeOriginal.GuitarAmplifiers ||
                   SelectedStageType.BassAmplifiers != SelectedStageTypeOriginal.BassAmplifiers ||
                   SelectedStageType.ChoirAmplifiers != SelectedStageTypeOriginal.ChoirAmplifiers ||
                   SelectedStageType.Microphones != SelectedStageTypeOriginal.Microphones ||
@@ -320,7 +335,7 @@ else
             Lectern = 0,
             Electronics = 0,
             Drums = 0,
-            GitarAmplifiers = 0,
+            GuitarAmplifiers = 0,
             BassAmplifiers = 0,
             ChoirAmplifiers = 0,
             Microphones = 0,
@@ -330,7 +345,7 @@ else
             Mp3 = 0,
             Beschrijving = " ",
             Description = " ",
-            Compatibel= newType,
+            Compatible= newType,
             Version=1,
             Active = 1
         };

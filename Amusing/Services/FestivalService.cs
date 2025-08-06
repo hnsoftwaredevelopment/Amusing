@@ -14,7 +14,7 @@ public class FestivalService( GenericDataService dataService )
     {
         FestivalId = Convert.ToUInt32( reader [ "festival_id" ] ),
         Festival = reader [ "Festival" ].ToString(),
-        Datum = DateOnly.FromDateTime( reader.GetDateTime( reader.GetOrdinal( "Datum" ) ) ),
+        Festivaldatum = DateOnly.FromDateTime( reader.GetDateTime( reader.GetOrdinal( "Datum" ) ) ),
         Gepubliceerd = reader [ "Gepubliceerd" ].ToString()
     } );
     }
@@ -29,8 +29,8 @@ public class FestivalService( GenericDataService dataService )
         Festivaldatum = DateOnly.FromDateTime( reader.GetDateTime( reader.GetOrdinal( "Datum" ) ) ),
         StartInschrijving = DateOnly.FromDateTime( reader.GetDateTime( reader.GetOrdinal( "StartInschrijving" ) ) ),
         EindeInschrijving = DateOnly.FromDateTime( reader.GetDateTime( reader.GetOrdinal( "EindeInschrijving" ) ) ),
-        Wachtlijst = Convert.ToByte( reader [ "Wachtlijst" ] ),
-        PubliceerPlanning = Convert.ToByte( reader [ "PubliceerPlanning" ] ),
+        Wachtlijst = Convert.ToInt16( reader [ "Wachtlijst" ] ),
+        PubliceerPlanning = Convert.ToInt16( reader [ "PubliceerPlanning" ] ),
         MinutenTussenOptredens = Convert.ToUInt16( reader [ "MinutenTussenOptredens" ] ),
         MaximumMinutenTussenOptredens = Convert.ToUInt16( reader [ "MaximumMinutenTussenOptredens" ] ),
         MaximumUrenVrijwilligers = Convert.ToUInt16( reader [ "MaximumUrenVrijwilligers" ] ),
@@ -40,6 +40,7 @@ public class FestivalService( GenericDataService dataService )
         StartVrijwilligersPauze = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "StartVrijwilligersPauze" ] ),
         EindeVrijwilligersPauze = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "EindeVrijwilligersPauze" ] ),
         EindeVasteVrijwilligersTaken = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "EindeVasteVrijwilligersTaken" ] ),
+        Aktief = Convert.ToInt16( reader [ "Aktief" ] )
     } );
     }
 

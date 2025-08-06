@@ -654,12 +654,20 @@ public static class QueryDefinitions
 	        f.einde_festivaldag AS EindeVrijwilligersTaken,
 	        f.begin_pauze AS StartVrijwilligersPauze,
 	        f.einde_pauze AS EindeVrijwilligersPauze,
-	        f.einde_ervaren_reserve AS EindeVasteVrijwilligersTaken
+	        f.einde_ervaren_reserve AS EindeVasteVrijwilligersTaken,
+            CASE 
+                WHEN EXISTS (SELECT 1 FROM amusing.ah_inschrijvingen i WHERE i.festival_id = f.festival_id)
+                   OR EXISTS (SELECT 1 FROM amusing.ah_vrijwilligers v WHERE v.festival_id = f.festival_id)
+                   OR EXISTS (SELECT 1 FROM amusing.planner_optredens o WHERE o.festival_id = f.festival_id)
+                   OR EXISTS (SELECT 1 FROM amusing.planner_vrijwilligersdiensten vd WHERE vd.festival_id = f.festival_id)
+                THEN 1
+                ELSE 0
+             END AS Aktief
         FROM amusing.ah_festivals f 
         LEFT JOIN amusing.planner_voorwaarden pv ON f.festival_id = pv.festival_id
         ORDER BY YEAR(f.festivaldatum) DESC;";
 
-    public static readonly string ModifyFestifal = @"
+    public static readonly string ModifyFestival = @"
         INSERT INTO ah_festivals (
             type, versie, prijs, piano, lessenaar, electra, drum, gitaarversterkers, 
             basversterkers, koorversterking, microfoons, monitoren, speakers, mengpaneel, 
