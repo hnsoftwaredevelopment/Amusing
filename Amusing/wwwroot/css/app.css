@@ -126,7 +126,7 @@ a, .btn-link {
 }
 .spacer-small { height: 0.5rem; }
 
-.spacer-medium { height: 1rem; }
+.spacer-medium { height: 1.5rem; }
 
 .spacer-large {
     height: 2rem;
@@ -249,9 +249,83 @@ a, .btn-link {
     vertical-align: middle !important;
 }
 
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 10px;
-    padding-bottom: 10px;
+/* Sf(Numeric)TextBox: Specify Label style */
+.e-control-wrapper.e-float-input.e-ntstyle.e-input-group .e-float-text {
+    font-size: small;
+    margin: -4px 0px 0px 3px;
+}
+
+/* SfNumericTextBox: Specify Input text */
+.e-numeric.e-ntstyle .e-control.e-numerictextbox {
+    font-size: medium;
+    border: 0px;
+    text-align: right;
+    outline:none;
+    margin-right: 6px;
+}
+
+.e-control-wrapper.e-float-input.e-ntstyle input.e-input {
+    font-size: medium;
+    border: none;
+    outline: none;
+    padding: 4px;
+}
+
+/* SfNumericTextBox::after Border Style */
+.e-input-group.e-ntstyle.e-control-wrapper:not(.e-success):not(.e-warning):not(.e-error):not(.e-float-icon-left), .e-float-input.e-control-wrapper:hover:not(.e-success):not(.e-warning):not(.e-error):not(.e-disabled):not(.e-float-icon-left) {
+    border-color: #062666;
+    border-radius: 5px;
+    border-left: none;
+    border-top: none;
+    border-right: none;
+    margin-right: 30px;
+    outline: none;
+}
+
+   /* SfNumericTextBox: To specify font size and background color of the Up and Down arrow */
+.e-numeric.e-control-wrapper.e-input-group .e-input-group-icon {
+    font-size: 20px;
+    color: #ccc;
+    font-weight: bolder;
+    background-color: #062666;
+}
+
+.center-textbox .e-textbox {
+    margin-left: -6px;
+    text-align: center !important;
+    outline: none;
+}
+
+.custom-toolbar-btn {
+    border: none;
+    background: transparent; /* optioneel om ook achtergrondkleur weg te halen */
+    padding: 4px; /* optioneel, anders wordt de knop heel klein */
+    cursor: pointer; /* geeft visuele feedback van een klikbare knop */
+}
+
+.custom-toolbar-btn:focus {
+    outline: none; /* voorkomt blauwe focusring op klik/tab */
+}
+
+/*Bit.BlazorUI Toggle styles*/
+.custom-class:hover {
+    border-color: magenta;
+    background-color: magenta;
+}
+
+.custom-class:active{
+    border-color: green;
+    background-color: green;
+}
+
+/* chip settings*/
+.custom-chip.e-chip {
+    width: 100px !important;
+    justify-content: center !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    overflow: hidden;
+    padding: 4px 0 !important;
+    font-weight: bold !important;
+    font-size: 12px !important;
 }
