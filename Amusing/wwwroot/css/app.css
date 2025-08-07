@@ -342,3 +342,13 @@ a, .btn-link {
     padding: 5px;
     background-color: #f8f9fa;
 }
+
+.custom-toolbar-btn.disabled {
+    opacity: 0.5;
+    cursor: default;
+    pointer-events: none; /* voorkomt klik */
+}
+
+.custom-toolbar-btn.disabled img {
+    filter: grayscale(100%);
+}

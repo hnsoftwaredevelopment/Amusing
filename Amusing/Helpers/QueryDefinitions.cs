@@ -668,21 +668,25 @@ public static class QueryDefinitions
         ORDER BY YEAR(f.festivaldatum) DESC;";
 
     public static readonly string ModifyFestival = @"
-        INSERT INTO ah_festivals (
-            type, versie, prijs, piano, lessenaar, electra, drum, gitaarversterkers, 
-            basversterkers, koorversterking, microfoons, monitoren, speakers, mengpaneel, 
-            md_mp3, compatibel_met, aktief, beschrijving, description )
-        VALUES (
-            @type, @versie, @prijs, @piano, @lessenaar, @electra, @drum, @gitaarversterkers,
-            @basversterkers, @koorversterking, @microfoons, @monitoren, @speakers, @mengpaneel, 
-            @md_mp3, @compatibel, @aktief, @beschrijving, @description);";
+        UPDATE amusing.ah_festivals 
+        SET festivaldatum = @Festivaldatum,
+            start_inschrijving = @StartInschrijving,
+            eind_inschrijving = @EindeInschrijving,
+            wachtlijst = @Wachtlijst,
+            planning_publiceren = @PubliceerPlanning,
+            start_festivaldag = @StartVrijwilligersTaken,
+            einde_festivaldag = @EindeVrijwilligersTaken,
+            begin_pauze = @StartVrijwilligersPauze,
+            einde_pauze = @EindeVrijwilligersPauze,
+            einde_ervaren_reserve = @EindeVasteVrijwilligersTaken
+        WHERE festival_id = @festivalId;";
 
     public static readonly string ModifyCondition = @"
         UPDATE amusing.planner_voorwaarden
-        SET WensTijdTussenOptredens = @wenstijdtussenoptredens, 
-            MaxTijdTussenOptredens = @maxtijdtussenoptredens, 
-            MaxLengteVrijwilligerDienst = @maxlengtevrijwilligerdienst, 
-            BoeteOnderbrekingOptredens = @boeteonderbrekingoptredens
+        SET WensTijdTussenOptredens = @MinutenTussenOptredens, 
+            MaxTijdTussenOptredens = @MaximumMinutenTussenOptredens, 
+            MaxLengteVrijwilligerDienst = @MaximumUrenVrijwilligers, 
+            BoeteOnderbrekingOptredens = @BoeteOnderbrekingOptredens
         WHERE festival_id = @festivalid";
 
     public static readonly string InsertNewFestival = @"

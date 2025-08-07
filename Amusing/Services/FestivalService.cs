@@ -77,16 +77,16 @@ public class FestivalService( GenericDataService dataService )
             {
                 { "@festivalid", model.FestivalId },
                 { "@Festival", model.Festival },
-                { "@Festivaldatum", model.Festivaldatum },
+                { "@Festivaldatum", model.Festivaldatum.ToString("yyyy-MM-dd") },
                 { "@StartInschrijving", model.StartInschrijving },
                 { "@EindeInschrijving", model.EindeInschrijving },
                 { "@Wachtlijst", model.Wachtlijst },
                 { "@PubliceerPlanning", model.PubliceerPlanning },
-                { "@StartVrijwilligersTaken", model.StartVrijwilligersTaken },
-                { "@EindeVrijwilligersTaken", model.EindeVrijwilligersTaken },
-                { "@StartVrijwilligersPauze", model.StartVrijwilligersPauze },
-                { "@EindeVrijwilligersPauze", model.EindeVrijwilligersPauze },
-                { "@EindeVasteVrijwilligersTaken", model.EindeVasteVrijwilligersTaken }
+                { "@StartVrijwilligersTaken", model.StartVrijwilligersTaken.ToTimeSpan() },
+                { "@EindeVrijwilligersTaken", model.EindeVrijwilligersTaken.ToTimeSpan() },
+                { "@StartVrijwilligersPauze", model.StartVrijwilligersPauze.ToTimeSpan() },
+                { "@EindeVrijwilligersPauze", model.EindeVrijwilligersPauze.ToTimeSpan() },
+                { "@EindeVasteVrijwilligersTaken", model.EindeVasteVrijwilligersTaken.ToTimeSpan() }
             };
 
         await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyFestival, parameters );

@@ -7,6 +7,7 @@
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
+@using System.ComponentModel.DataAnnotations
 
 @inject FestivalService FestivalService;
 
@@ -23,7 +24,7 @@ else
         <div class="fixed-header">
                 <h3>Onderhoud Amusing editie: @SelectedFestival.Festival</h3>
                 @* Detail Fields *@
-                <SfDataForm Model="SelectedFestival" OnValidSubmit="SaveFestival" LabelPosition="FormLabelPosition.Top">
+                <SfDataForm Model="SelectedFestival" OnValidSubmit="SaveFestival" OnInvalidSubmit="HandleValidationFailed" LabelPosition="FormLabelPosition.Top">
                 <div class="form-floating-switch">
                     <hr />
                     <Syncfusion.Blazor.Calendars.SfDatePicker TValue="DateOnly" @bind-Value="SelectedFestival.Festivaldatum" Placeholder="Festival datum" Format="dd-MM-yyyy" FloatLabelType="FloatLabelType.Always" Width="150px" />
@@ -56,18 +57,13 @@ else
         @* DataGrid *@ 
         <div class="spacer-medium"></div>
         <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
-            <SfGrid @ref="GridRef"
-                    TValue="FestivalModel"
-                    DataSource="@Festivals" EnableStickyHeader="true"
-                    AllowResizing="true" Width="550px"
-                    AllowSelection="true" >
-                <GridEvents TValue="FestivalModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
-
-                <SfToolbar>
+                <SfToolbar Width="550px">
                     <ToolbarItems>
                         <ToolbarItem Type="ItemType.Button">
                             <Template>
-                                <button class="custom-toolbar-btn" @onclick="SaveFestival" title="Sla het podiumtype als nieuwe, of ge-(in)activeerde versie">
+                                <button class="custom-toolbar-btn"
+                                        @onclick="SaveFestival"
+                                        title="Sla het podiumtype als nieuwe, of ge-(in)activeerde versie">
                                     <img src="icons/button-save.svg" class="icon" alt="SAVE" />
                                 </button>
                             </Template>
@@ -81,7 +77,10 @@ else
                         </ToolbarItem>
                         <ToolbarItem Type="ItemType.Button">
                             <Template>
-                                <button class="custom-toolbar-btn" @onclick="DeleteFestival" title="Verwijder geselecteerde podium type (versie)">
+                                <button class="custom-toolbar-btn @(SelectedFestival?.Aktief == 1 ? "disabled" : "")"
+                                        @onclick="DeleteFestival"
+                                        title="Verwijder geselecteerde podium type (versie)"
+                                        disabled="@(SelectedFestival?.Aktief == 1)">
                                     <img src="icons/button-del.svg" class="icon" alt="DEL" />
                                 </button>
                             </Template>
@@ -99,6 +98,14 @@ else
                         </ToolbarItem>
                     </ToolbarItems>
                 </SfToolbar>
+    
+                <SfGrid @ref="GridRef"
+                    TValue="FestivalModel"
+                    DataSource="@Festivals" EnableStickyHeader="true"
+                    AllowResizing="true" Width="550px"
+                    AllowSelection="true" >
+                <GridEvents TValue="FestivalModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
+
 
                 <GridColumns>
                     <GridColumn Field="Festival" HeaderText="Editie" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="60px" />
@@ -231,6 +238,9 @@ else
             EindeVasteVrijwilligersTaken = args.Data.EindeVasteVrijwilligersTaken,
             Aktief = args.Data.Aktief
         };
+        FestivalIsDirty = false;
+
+        StateHasChanged();
     }
 
     private async Task UpdateIsDirty()
@@ -251,23 +261,11 @@ else
                   SelectedFestival.EindeVrijwilligersTaken != SelectedFestivalOriginal.EindeVrijwilligersTaken ||
                   SelectedFestival.StartVrijwilligersPauze != SelectedFestivalOriginal.StartVrijwilligersPauze ||
                   SelectedFestival.EindeVrijwilligersPauze != SelectedFestivalOriginal.EindeVrijwilligersPauze ||
-                  SelectedFestival.EindeVasteVrijwilligersTaken != SelectedFestivalOriginal.EindeVasteVrijwilligersTaken;
-
-        ConditionsIsDirty = SelectedFestival.MinutenTussenOptredens != SelectedFestivalOriginal.MinutenTussenOptredens ||
+                  SelectedFestival.EindeVasteVrijwilligersTaken != SelectedFestivalOriginal.EindeVasteVrijwilligersTaken ||
+                  SelectedFestival.MinutenTussenOptredens != SelectedFestivalOriginal.MinutenTussenOptredens ||
                   SelectedFestival.MaximumMinutenTussenOptredens != SelectedFestivalOriginal.MaximumMinutenTussenOptredens ||
                   SelectedFestival.MaximumUrenVrijwilligers != SelectedFestivalOriginal.MaximumUrenVrijwilligers ||
                   SelectedFestival.BoeteOnderbrekingOptredens != SelectedFestivalOriginal.BoeteOnderbrekingOptredens;
-
-
-        if ( FestivalIsDirty )
-        {
-            await FestivalService.ModifyFestivalAsync( SelectedFestival );
-        }
-
-        if ( ConditionsIsDirty )
-        {
-            await FestivalService.ModifyConditionAsync( SelectedFestival );
-        }
     }
 
     private async Task SaveFestival()
@@ -275,15 +273,12 @@ else
         if ( SelectedFestival is null )
             return;
 
-        await UpdateIsDirty();
-
         await FestivalService.ModifyFestivalAsync( SelectedFestival );
-
+        await FestivalService.ModifyConditionAsync( SelectedFestival );
 
         Festivals = await FestivalService.GetFestivalDataAsync();
         await GridRef.Refresh();
         await GridRef.SelectRowAsync( Festivals.IndexOf( SelectedFestival ) );
-
     }
 
     private async Task AddNewFestival()
@@ -295,8 +290,8 @@ else
 
         // What is the first Saterday of June for that year
         DateOnly firstSaterday = Enumerable.Range(1, 7)
-    .Select(newDate => new DateOnly(newFestival, 6, newDate))
-    .First(d => d.DayOfWeek == DayOfWeek.Saturday);
+            .Select(newDate => new DateOnly(newFestival, 6, newDate))
+            .First(d => d.DayOfWeek == DayOfWeek.Saturday);
 
         // Insert new record for this year in the table, and get the Festival-Id
         var festivalId = await FestivalService.InsertNewFestivalAsync( firstSaterday );
@@ -331,5 +326,4 @@ else
             .FirstOrDefault();
         await GridRef.Refresh();
     }
-
 }
