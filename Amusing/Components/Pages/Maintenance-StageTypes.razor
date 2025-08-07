@@ -155,6 +155,93 @@ else
         </div>
     </div>
 
+    </SfDataForm>
+
+    <div class="spacer-medium"></div>
+    <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+        <SfGrid @ref="GridRef"
+                TValue="StageTypeModel"
+                DataSource="@StageTypes"
+                AllowResizing="true"
+                AllowMultiSorting="true"
+                AllowSelection="true"
+                AllowSorting="true" >
+
+            <GridTextWrapSettings WrapMode=" WrapMode.Header"></GridTextWrapSettings>
+            <GridSelectionSettings 
+                Mode="Syncfusion.Blazor.Grids.SelectionMode.Row" 
+                Type="Syncfusion.Blazor.Grids.SelectionType.Single">
+            </GridSelectionSettings>
+
+            <GridEvents TValue="StageTypeModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
+
+            <SfToolbar>
+                <ToolbarItems>
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn" @onclick="SaveStageType" title="Sla het podiumtype als nieuwe, of ge-(in)activeerde versie">
+                                <img src="icons/button-save.svg" class="icon" alt="SAVE" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn" @onclick="AddNewStageType" title="Voeg een nieuw podium type toe">
+                                <img src="icons/button-add.svg" class="icon" alt="ADD" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn" @onclick="DeleteStageTypeClicked" title="Verwijder geselecteerde podium type (versie)">
+                                <img src="icons/button-del.svg" class="icon" alt="DEL" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+                    <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                        <Template>
+                            <span class="toolbar-count">@FileName: @VisibleRowCount</span>
+                        </Template>
+                    </ToolbarItem>
+
+                    <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                        <Template>
+                            <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
+                        </Template>
+                    </ToolbarItem>
+                </ToolbarItems>
+            </SfToolbar>
+
+            <GridColumns>
+                <GridColumn Field="Type" HeaderText="Type" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="60px" />
+                <GridColumn Field="Description" HeaderText="Omvat" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" />
+                <GridColumn Field="Price" HeaderText="Prijs" Format="C2" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="90px" />
+                <GridColumn Field="Compatibel" HeaderText="Compatibel met" TextAlign="TextAlign.Left" AllowSorting=false AllowResizing="true" Width="135px" />
+                <GridColumn Field="Active" HeaderText="Aktief" TextAlign="TextAlign.Center" Width="120px">
+                    <Template>
+                        @{
+                            var stage = (context as StageTypeModel);
+                            var activeState = stage.Active == 1 ? "Aktief" : "Niet aktief";
+                            var activeStateColor = stage.Active == 1 ? "e-success" : "e-danger";
+                            <div class="template_checkbox">
+                                <SfChip id="chip">
+                                    <ChipItems>
+                                        <ChipItem Text="@activeState" CssClass="@($"{activeStateColor} custom-chip")" Width="120px"/>
+                                    </ChipItems>
+                                </SfChip>
+                            </div>
+                        }
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+        <div class="spacer-large"></div>
+        <BitMessage Color="BitColor.Secondary" Visibility="@ShowDeletedMessage">
+            <div>Let op: wanneer je een podium type verwijdert, verwijder je alleen de laatste versie van dat type.</div>
+            <div>De regel kan dus gewoon zichtbaar blijven in de lijst, dit is dan de vorige versie.</div>
+            <div>Wil je een podium type niet meer gebruiken, zet hem dan op disabled en sla het type op.</div>
+        </BitMessage>    </div>
+
 }
 @code {
     private bool IsLoading = false;

@@ -351,4 +351,15 @@ a, .btn-link {
 
 .custom-toolbar-btn.disabled img {
     filter: grayscale(100%);
+
+ /* chip settings*/
+.custom-chip.e-chip {
+    width: 100px !important;
+    justify-content: center !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    overflow: hidden;
+    padding: 4px 0 !important;
+    font-weight: bold !important;
+    font-size: 12px !important;
 }
