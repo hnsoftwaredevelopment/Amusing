@@ -106,7 +106,7 @@ public class FestivalService( GenericDataService dataService )
         await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyCondition, parameters );
     }
 
-    public async Task<bool> DeleteFestivalAsync( int festivalId )
+    public async Task<bool> DeleteFestivalAsync( uint festivalId )
     {
         Dictionary<string, object> parameters = new()
         {
@@ -118,7 +118,7 @@ public class FestivalService( GenericDataService dataService )
         return affectedRows > 0;
     }
 
-    public async Task<bool> DeleteConditionAsync( int festivalId )
+    public async Task<bool> DeleteConditionAsync( uint festivalId )
     {
         Dictionary<string, object> parameters = new()
     {

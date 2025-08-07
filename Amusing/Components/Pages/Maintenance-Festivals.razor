@@ -295,8 +295,8 @@ else
 
         // What is the first Saterday of June for that year
         DateOnly firstSaterday = Enumerable.Range(1, 7)
-        .Select(newDate => new DateOnly(newFestival, 6, newDate))
-        .First(d => d.DayOfWeek == DayOfWeek.Saturday);
+    .Select(newDate => new DateOnly(newFestival, 6, newDate))
+    .First(d => d.DayOfWeek == DayOfWeek.Saturday);
 
         // Insert new record for this year in the table, and get the Festival-Id
         var festivalId = await FestivalService.InsertNewFestivalAsync( firstSaterday );
@@ -312,13 +312,24 @@ else
             .OrderByDescending( f => int.Parse( f.Festival ) ) // Festival is een string
             .FirstOrDefault();
         await GridRef.Refresh();
-
     }
 
     private async Task DeleteFestival()
     {
         if ( SelectedFestival is null )
             return;
+
+        await FestivalService.DeleteConditionAsync( SelectedFestival.FestivalId );
+        await FestivalService.DeleteFestivalAsync( SelectedFestival.FestivalId );
+
+        // refresh the table
+        var festivalModels = await FestivalService.GetFestivalDataAsync();
+
+        Festivals = await FestivalService.GetFestivalDataAsync();
+        SelectedFestival = Festivals
+            .OrderByDescending( f => int.Parse( f.Festival ) ) // Festival is een string
+            .FirstOrDefault();
+        await GridRef.Refresh();
     }
 
 }
