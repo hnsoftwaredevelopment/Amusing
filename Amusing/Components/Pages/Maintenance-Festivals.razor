@@ -1,0 +1,329 @@
+﻿@page "/Maintenance-Festivals"
+@using Amusing.Models
+@using Amusing.Services
+@using Bit.BlazorUI
+@using Bit.BlazorUI.Extras
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+@using System.ComponentModel.DataAnnotations
+
+@inject FestivalService FestivalService;
+
+@if (IsLoading)
+{
+    <div class="text-center p-2">
+        <SfSpinner CssClass="e-spin-center" />
+        <p>@FileName worden geladen...</p>
+    </div>
+}
+else
+{
+    <div class="page-container">
+        <div class="fixed-header">
+                <h3>Onderhoud Amusing editie: @SelectedFestival.Festival</h3>
+                @* Detail Fields *@
+                <SfDataForm Model="SelectedFestival" OnValidSubmit="SaveFestival" OnInvalidSubmit="HandleValidationFailed" LabelPosition="FormLabelPosition.Top">
+                <div class="form-floating-switch">
+                    <hr />
+                    <Syncfusion.Blazor.Calendars.SfDatePicker TValue="DateOnly" @bind-Value="SelectedFestival.Festivaldatum" Placeholder="Festival datum" Format="dd-MM-yyyy" FloatLabelType="FloatLabelType.Always" Width="150px" />
+                    <Syncfusion.Blazor.Calendars.SfDatePicker TValue="DateOnly" @bind-Value="SelectedFestival.StartInschrijving" Placeholder="Start inschrijving" Format="dd-MM-yyyy" FloatLabelType="FloatLabelType.Always" Width="150px" />
+                    <Syncfusion.Blazor.Calendars.SfDatePicker TValue="DateOnly" @bind-Value="SelectedFestival.EindeInschrijving" Placeholder="Einde inschrijving" Format="dd-MM-yyyy" FloatLabelType="FloatLabelType.Always" Width="150px" />
+                    <hr />
+                    <SfCheckBox @bind-Checked="WaitlistChecked">Wachtlijst</SfCheckBox>
+                    <SfCheckBox @bind-Checked="PublicateChecked">Publiceer planning</SfCheckBox>
+                    <hr />
+                    <div>
+                        <SfNumericTextBox TValue="int" Min="0" Max="90" @bind-Value="SelectedFestival.MinutenTussenOptredens" Placeholder="Min. tussen optredens" Width="250px" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"/>
+                        <SfNumericTextBox TValue="int" Min="0" Max="90" @bind-Value="SelectedFestival.MaximumMinutenTussenOptredens" Placeholder="Max. min. tussen optredens" Width="270px" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" />
+                        <SfNumericTextBox TValue="int" Min="0" Max="24" @bind-Value="SelectedFestival.MaximumUrenVrijwilligers" Placeholder="Max. uren vrijwilligers" Width="220px" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" />
+                        <SfNumericTextBox TValue="decimal" ValidateDecimalOnType=true Decimals=2 Format="c2" Min="0" @bind-Value="SelectedFestival.BoeteOnderbrekingOptredens" Placeholder="Boete onderbreking optredens" Width="290px" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" />
+                    </div>
+                    <hr />
+                    <div>
+                        <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="SelectedFestival.StartVrijwilligersTaken" Placeholder="Start vrijwilligers taken" Width="200px" FloatLabelType="FloatLabelType.Always" />
+                        <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="SelectedFestival.EindeVrijwilligersTaken" Placeholder="Einde vrijwilligers taken" Width="200px" FloatLabelType="FloatLabelType.Always" />
+                        <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="SelectedFestival.StartVrijwilligersPauze" Placeholder="Start vrijwilligers Pauze" Width="200px" FloatLabelType="FloatLabelType.Always" />
+                        <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="SelectedFestival.EindeVrijwilligersPauze" Placeholder="Einde vrijwilligers Pauze" Width="200px" FloatLabelType="FloatLabelType.Always" />
+                        <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="SelectedFestival.EindeVasteVrijwilligersTaken" Placeholder="Einde vaste vrijwilligers taken" Width="230px" FloatLabelType="FloatLabelType.Always" />
+                    </div>
+                    <hr />
+                </div>
+            </SfDataForm>
+        </div>
+
+        <div class="scrollable-content">
+        @* DataGrid *@ 
+        <div class="spacer-medium"></div>
+        <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+                <SfToolbar Width="550px">
+                    <ToolbarItems>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn"
+                                        @onclick="SaveFestival"
+                                        title="Sla het podiumtype als nieuwe, of ge-(in)activeerde versie">
+                                    <img src="icons/button-save.svg" class="icon" alt="SAVE" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn" @onclick="AddNewFestival" title="Voeg een nieuw podium type toe">
+                                    <img src="icons/button-add.svg" class="icon" alt="ADD" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn @(SelectedFestival?.Aktief == 1 ? "disabled" : "")"
+                                        @onclick="DeleteFestival"
+                                        title="Verwijder geselecteerde podium type (versie)"
+                                        disabled="@(SelectedFestival?.Aktief == 1)">
+                                    <img src="icons/button-del.svg" class="icon" alt="DEL" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                            <Template>
+                                <span class="toolbar-count">@FileName: @VisibleRowCount</span>
+                            </Template>
+                        </ToolbarItem>
+
+                        <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                            <Template>
+                                <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
+                            </Template>
+                        </ToolbarItem>
+                    </ToolbarItems>
+                </SfToolbar>
+    
+                <SfGrid @ref="GridRef"
+                    TValue="FestivalModel"
+                    DataSource="@Festivals" EnableStickyHeader="true"
+                    AllowResizing="true" Width="550px"
+                    AllowSelection="true" >
+                <GridEvents TValue="FestivalModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
+
+
+                <GridColumns>
+                    <GridColumn Field="Festival" HeaderText="Editie" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="60px" />
+                    <GridColumn Field="Festivaldatum" HeaderText="Datum" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="80px"/>
+                    <GridColumn Field="StartInschrijving" HeaderText="Start inschrijving" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="130px" />
+                    <GridColumn Field="EindeInschrijving" HeaderText="Einde inschrijving" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="130px" />
+                    <GridColumn Field="Aktief" HeaderText="Aktief" TextAlign="TextAlign.Center" Width="140px">
+                        <Template>
+                            @{
+                                var festival = (context as FestivalModel);
+                                var activeState = festival.Aktief == 1 ? "Gebruikt" : "Niet gebruikt";
+                                var activeStateColor = festival.Aktief == 1 ? "e-success" : "e-danger";
+                                <div class="template_checkbox">
+                                    <SfChip id="chip">
+                                        <ChipItems>
+                                            <ChipItem Text="@activeState" CssClass="@($"{activeStateColor} custom-chip")" Width="120px" />
+                                        </ChipItems>
+                                    </SfChip>
+                                </div>
+                            }
+                        </Template>
+                    </GridColumn>
+                </GridColumns>          
+            </SfGrid>
+            <div class="spacer-large"></div>
+            </div>
+        </div>
+    </div>
+}
+
+
+@code {
+    private bool IsLoading = false;
+    private bool _initialLoadDone = false;
+    private SfGrid<FestivalModel> GridRef;
+    private string FileName = "Amusing edities";
+    private FestivalModel? SelectedFestival;
+    private FestivalModel? SelectedFestivalOriginal;
+    private List<string> ChangedFields = new();
+    private List<string> AvailableStageTypes = [];
+    private List<string> CompatibelTypes = [];
+    private bool FestivalIsDirty = false;
+    private bool ConditionsIsDirty = false;
+    private int VisibleRowCount = 0;
+    private List<FestivalModel> Festivals = [];
+
+    private bool WaitlistChecked
+    {
+        get => SelectedFestival?.Wachtlijst == 1;
+        set => SelectedFestival.Wachtlijst = value ? 1 : 0;
+    }
+
+    private bool PublicateChecked
+    {
+        get => SelectedFestival?.PubliceerPlanning == 1;
+        set => SelectedFestival.PubliceerPlanning = value ? 1 : 0;
+    }
+
+    private bool ActiveChecked
+    {
+        get => SelectedFestival?.Aktief == 1;
+        set => SelectedFestival.Aktief = value ? 1 : 0;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+
+        var festivalModels = await FestivalService.GetFestivalDataAsync();
+
+        Festivals = await FestivalService.GetFestivalDataAsync();
+        SelectedFestival = Festivals
+            .OrderByDescending( f => int.Parse( f.Festival ) ) // Festival is een string
+            .FirstOrDefault();
+        IsLoading = false;
+    }
+
+    private async Task OnGridDataBound()
+    {
+        if ( !_initialLoadDone )
+        {
+            _initialLoadDone = true;
+            await UpdateVisibleRowCountAsync();
+        }
+    }
+
+    private async Task UpdateVisibleRowCountAsync()
+    {
+        if ( GridRef is not null )
+        {
+            await GridRef.Refresh();
+            await Task.Delay( 50 );
+            var records = await GridRef.GetCurrentViewRecordsAsync();
+            await Task.Delay( 150 );
+            VisibleRowCount = records?.Count ?? 0;
+            StateHasChanged();
+        }
+    }
+
+    public async Task OnInput( InputEventArgs args )
+    {
+        await GridRef.SearchAsync( args.Value );
+
+        await Task.Delay( 50 );
+        await UpdateVisibleRowCountAsync();
+    }
+
+    private void OnRowSelected( RowSelectEventArgs<FestivalModel> args )
+    {
+        SelectedFestival = args.Data;
+
+        // Clone the selected row, to compare changed values with the original values
+        SelectedFestivalOriginal = new FestivalModel
+        {
+            FestivalId = args.Data.FestivalId,
+            Festival = args.Data.Festival,
+            Festivaldatum = args.Data.Festivaldatum,
+            StartInschrijving = args.Data.StartInschrijving,
+            EindeInschrijving = args.Data.EindeInschrijving,
+            Wachtlijst = args.Data.Wachtlijst,
+            PubliceerPlanning = args.Data.PubliceerPlanning,
+            MinutenTussenOptredens = args.Data.MinutenTussenOptredens,
+            MaximumMinutenTussenOptredens = args.Data.MaximumMinutenTussenOptredens,
+            MaximumUrenVrijwilligers = args.Data.MaximumUrenVrijwilligers,
+            BoeteOnderbrekingOptredens = args.Data.BoeteOnderbrekingOptredens,
+            StartVrijwilligersTaken = args.Data.StartVrijwilligersTaken,
+            EindeVrijwilligersTaken = args.Data.EindeVrijwilligersTaken,
+            StartVrijwilligersPauze = args.Data.StartVrijwilligersPauze,
+            EindeVrijwilligersPauze = args.Data.EindeVrijwilligersPauze,
+            EindeVasteVrijwilligersTaken = args.Data.EindeVasteVrijwilligersTaken,
+            Aktief = args.Data.Aktief
+        };
+        FestivalIsDirty = false;
+
+        StateHasChanged();
+    }
+
+    private async Task UpdateIsDirty()
+    {
+        ChangedFields.Clear();
+
+
+        bool vuilelucht = SelectedFestival != SelectedFestivalOriginal;
+
+        FestivalIsDirty = SelectedFestival.FestivalId != SelectedFestivalOriginal.FestivalId ||
+                  SelectedFestival.Festival != SelectedFestivalOriginal.Festival ||
+                  SelectedFestival.Festivaldatum != SelectedFestivalOriginal.Festivaldatum ||
+                  SelectedFestival.StartInschrijving != SelectedFestivalOriginal.StartInschrijving ||
+                  SelectedFestival.EindeInschrijving != SelectedFestivalOriginal.EindeInschrijving ||
+                  SelectedFestival.Wachtlijst != SelectedFestivalOriginal.Wachtlijst ||
+                  SelectedFestival.PubliceerPlanning != SelectedFestivalOriginal.PubliceerPlanning ||
+                  SelectedFestival.StartVrijwilligersTaken != SelectedFestivalOriginal.StartVrijwilligersTaken ||
+                  SelectedFestival.EindeVrijwilligersTaken != SelectedFestivalOriginal.EindeVrijwilligersTaken ||
+                  SelectedFestival.StartVrijwilligersPauze != SelectedFestivalOriginal.StartVrijwilligersPauze ||
+                  SelectedFestival.EindeVrijwilligersPauze != SelectedFestivalOriginal.EindeVrijwilligersPauze ||
+                  SelectedFestival.EindeVasteVrijwilligersTaken != SelectedFestivalOriginal.EindeVasteVrijwilligersTaken ||
+                  SelectedFestival.MinutenTussenOptredens != SelectedFestivalOriginal.MinutenTussenOptredens ||
+                  SelectedFestival.MaximumMinutenTussenOptredens != SelectedFestivalOriginal.MaximumMinutenTussenOptredens ||
+                  SelectedFestival.MaximumUrenVrijwilligers != SelectedFestivalOriginal.MaximumUrenVrijwilligers ||
+                  SelectedFestival.BoeteOnderbrekingOptredens != SelectedFestivalOriginal.BoeteOnderbrekingOptredens;
+    }
+
+    private async Task SaveFestival()
+    {
+        if ( SelectedFestival is null )
+            return;
+
+        await FestivalService.ModifyFestivalAsync( SelectedFestival );
+        await FestivalService.ModifyConditionAsync( SelectedFestival );
+
+        Festivals = await FestivalService.GetFestivalDataAsync();
+        await GridRef.Refresh();
+        await GridRef.SelectRowAsync( Festivals.IndexOf( SelectedFestival ) );
+    }
+
+    private async Task AddNewFestival()
+    {
+        if ( SelectedFestival is null )
+            return;
+
+        var newFestival = await FestivalService.GetLatestFestivalAsync() + 1;
+
+        // What is the first Saterday of June for that year
+        DateOnly firstSaterday = Enumerable.Range(1, 7)
+            .Select(newDate => new DateOnly(newFestival, 6, newDate))
+            .First(d => d.DayOfWeek == DayOfWeek.Saturday);
+
+        // Insert new record for this year in the table, and get the Festival-Id
+        var festivalId = await FestivalService.InsertNewFestivalAsync( firstSaterday );
+
+        // Insert a new record in planner_conditions table with new festivalId
+        var record = await FestivalService.InsertNewConditionsAsync(festivalId);
+
+        // refresh the table
+        var festivalModels = await FestivalService.GetFestivalDataAsync();
+
+        Festivals = await FestivalService.GetFestivalDataAsync();
+        SelectedFestival = Festivals
+            .OrderByDescending( f => int.Parse( f.Festival ) ) // Festival is een string
+            .FirstOrDefault();
+        await GridRef.Refresh();
+    }
+
+    private async Task DeleteFestival()
+    {
+        if ( SelectedFestival is null )
+            return;
+
+        await FestivalService.DeleteConditionAsync( SelectedFestival.FestivalId );
+        await FestivalService.DeleteFestivalAsync( SelectedFestival.FestivalId );
+
+        // refresh the table
+        var festivalModels = await FestivalService.GetFestivalDataAsync();
+
+        Festivals = await FestivalService.GetFestivalDataAsync();
+        SelectedFestival = Festivals
+            .OrderByDescending( f => int.Parse( f.Festival ) ) // Festival is een string
+            .FirstOrDefault();
+        await GridRef.Refresh();
+    }
+}

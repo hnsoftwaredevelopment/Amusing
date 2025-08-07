@@ -318,7 +318,41 @@ a, .btn-link {
     background-color: green;
 }
 
-/* chip settings*/
+/* Make part of the screen static: Definition of the total screen*/
+.page-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 80px); /* 100vh is total screen height 80px is the height of the top area */
+}
+
+/* Make part of the screen static: Definition of the static part of screen*/
+.fixed-header {
+    flex: 0 0 auto; /* Niet laten meegroeien */
+    background-color: #e9f0f6;
+    padding: 5px;
+    border-bottom: 1px solid #ccc;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+/* Make part of the screen static: Definition of the scrollable part of the screen*/
+.scrollable-content {
+    flex: 1 1 auto; /* Neemt resterende ruimte in */
+    overflow-y: auto;
+    padding: 5px;
+    background-color: #f8f9fa;
+}
+
+.custom-toolbar-btn.disabled {
+    opacity: 0.5;
+    cursor: default;
+    pointer-events: none; /* voorkomt klik */
+}
+
+.custom-toolbar-btn.disabled img {
+    filter: grayscale(100%);
+
+ /* chip settings*/
 .custom-chip.e-chip {
     width: 100px !important;
     justify-content: center !important;

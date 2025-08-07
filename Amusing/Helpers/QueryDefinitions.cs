@@ -629,6 +629,79 @@ public static class QueryDefinitions
         WHERE t.actief = 'Nee'
         ORDER BY t.taak_id, COALESCE(bezetting_data.Van, '');";
 
+    public static readonly string GetFestivalData = @"
+        SELECT 
+	        f.festival_id AS FestivalId,
+	        YEAR(f.festivaldatum) as `Festival`,
+	        f.festivaldatum AS Datum,
+	        DATE(f.start_inschrijving) AS StartInschrijving,
+	        DATE(f.eind_inschrijving) AS EindeInschrijving,
+	        f.wachtlijst AS Wachtlijst,
+	        f.planning_publiceren AS PubliceerPlanning,
+	        IFNULL(pv.WensTijdTussenOptredens ,
+                (SELECT MAX(WensTijdTussenOptredens) FROM amusing.planner_voorwaarden)
+            ) AS MinutenTussenOptredens,
+	        IFNULL(pv.MaxTijdTussenOptredens,
+                (SELECT MAX(MaxTijdTussenOptredens) FROM amusing.planner_voorwaarden)
+            ) AS MaximumMinutenTussenOptredens,
+	        IFNULL(pv.MaxLengteVrijwilligerDienst,
+                (SELECT MAX(MaxLengteVrijwilligerDienst) FROM amusing.planner_voorwaarden)
+            ) AS MaximumUrenVrijwilligers,
+	        IFNULL(pv.BoeteOnderbrekingOptredens,
+                (SELECT MIN(BoeteOnderbrekingOptredens) FROM amusing.planner_voorwaarden)
+            ) AS BoeteOnderbrekingOptredens,
+	        f.start_festivaldag AS StartVrijwilligersTaken,
+	        f.einde_festivaldag AS EindeVrijwilligersTaken,
+	        f.begin_pauze AS StartVrijwilligersPauze,
+	        f.einde_pauze AS EindeVrijwilligersPauze,
+	        f.einde_ervaren_reserve AS EindeVasteVrijwilligersTaken,
+            CASE 
+                WHEN EXISTS (SELECT 1 FROM amusing.ah_inschrijvingen i WHERE i.festival_id = f.festival_id)
+                   OR EXISTS (SELECT 1 FROM amusing.ah_vrijwilligers v WHERE v.festival_id = f.festival_id)
+                   OR EXISTS (SELECT 1 FROM amusing.planner_optredens o WHERE o.festival_id = f.festival_id)
+                   OR EXISTS (SELECT 1 FROM amusing.planner_vrijwilligersdiensten vd WHERE vd.festival_id = f.festival_id)
+                THEN 1
+                ELSE 0
+             END AS Aktief
+        FROM amusing.ah_festivals f 
+        LEFT JOIN amusing.planner_voorwaarden pv ON f.festival_id = pv.festival_id
+        ORDER BY YEAR(f.festivaldatum) DESC;";
+
+    public static readonly string ModifyFestival = @"
+        UPDATE amusing.ah_festivals 
+        SET festivaldatum = @Festivaldatum,
+            start_inschrijving = @StartInschrijving,
+            eind_inschrijving = @EindeInschrijving,
+            wachtlijst = @Wachtlijst,
+            planning_publiceren = @PubliceerPlanning,
+            start_festivaldag = @StartVrijwilligersTaken,
+            einde_festivaldag = @EindeVrijwilligersTaken,
+            begin_pauze = @StartVrijwilligersPauze,
+            einde_pauze = @EindeVrijwilligersPauze,
+            einde_ervaren_reserve = @EindeVasteVrijwilligersTaken
+        WHERE festival_id = @festivalId;";
+
+    public static readonly string ModifyCondition = @"
+        UPDATE amusing.planner_voorwaarden
+        SET WensTijdTussenOptredens = @MinutenTussenOptredens, 
+            MaxTijdTussenOptredens = @MaximumMinutenTussenOptredens, 
+            MaxLengteVrijwilligerDienst = @MaximumUrenVrijwilligers, 
+            BoeteOnderbrekingOptredens = @BoeteOnderbrekingOptredens
+        WHERE festival_id = @festivalid";
+
+    public static readonly string InsertNewFestival = @"
+        INSERT INTO ah_festivals (festivaldatum) VALUES (@festivaldatum);
+        SELECT LAST_INSERT_ID();";
+
+    public static readonly string InsertNewCondition = @"
+        INSERT INTO amusing.planner_voorwaarden 
+            (festival_id, WensTijdTussenOptredens, MaxTijdTussenOptredens, MaxLengteVrijwilligerDienst, BoeteOnderbrekingOptredens) 
+        VALUES ( @festivalid, 4, 6, 10,  0);";
+
+    public static readonly string DeleteFestival = @"DELETE FROM ah_festivals WHERE festival_id = @festivalid;";
+
+    public static readonly string DeleteCondition = @"DELETE FROM planner_voorwaarden WHERE festival_id = @festivalid;";
+
     public static string GetFestivalOverviewQuery( int oldestYear, int newestYear, bool filterOutOldGroups )
     {
         int NumberOfYearsForExclusion = 3;

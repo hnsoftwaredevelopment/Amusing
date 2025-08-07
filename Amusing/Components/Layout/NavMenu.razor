@@ -97,16 +97,6 @@
         {
             <ul class="submenu">
                 <li>
-                    <NavLink class="nav-link small ps-4" href="Maintenance-Groups">
-                        <span class="fa-solid fa-people-group me-2 fs-6" aria-hidden="true" />Groepen
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink class="nav-link small ps-4" href="Maintenance-Persons">
-                        <span class="fa-solid fa-person-half-dress me-2 fs-6" aria-hidden="true" />Personen
-                    </NavLink>
-                </li>
-                <li>
                     <NavLink class="nav-link small ps-4" href="Maintenance-Festivals">
                         <span class="fa-solid fa-landmark-flag me-2 fs-6" aria-hidden="true" />Festivals
                     </NavLink>
@@ -119,6 +109,16 @@
                 <li>
                     <NavLink class="nav-link small ps-4" href="Maintenance-StageTypes">
                         <span class="fa-solid fa-tent-arrows-down me-2 fs-6" aria-hidden="true" />Podiumtypes
+                    </NavLink>
+                </li>
+                 <li>
+                    <NavLink class="nav-link small ps-4" href="Maintenance-Groups">
+                        <span class="fa-solid fa-people-group me-2 fs-6" aria-hidden="true" />Groepen
+                    </NavLink>
+                </li>
+                <li>
+                    <NavLink class="nav-link small ps-4" href="Maintenance-Persons">
+                        <span class="fa-solid fa-person-half-dress me-2 fs-6" aria-hidden="true" />Personen
                     </NavLink>
                 </li>
                 <li>
@@ -165,45 +165,6 @@
                 <li>
                     <NavLink class="nav-link small ps-4" href="Upload">
                         <span class="fa-solid fa-upload me-2 fs-6" aria-hidden="true" />Uploaden
-                    </NavLink>
-                </li>
-            </ul>
-        }
-    </div>
-
-    <!-- Add-menu -->
-    <div class="nav-item px-3">
-        <a href="#" class="nav-link d-flex justify-content-between align-items-center"
-           @onclick="@(() => ToggleSubMenu( "Add" ))">
-            <span><span class="fa-solid fa-plus me-3 fs-5" aria-hidden="true" />Voeg toe...</span>
-            <span class="fa-solid @(IsSubMenuOpen( "Add" ) ? "fa-caret-down fs-2" : "fa-caret-right fs-2")" />
-        </a>
-        @if ( IsSubMenuOpen( "Add" ) )
-        {
-            <ul class="submenu">
-                <li>
-                    <NavLink class="nav-link small ps-4" href="Festival">
-                        <span class="fa-solid fa-landmark-flag me-2 fs-6" aria-hidden="true" />Festival
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink class="nav-link small ps-4" href="Stage">
-                        <span class="fa-solid fa-store me-2 fs-6" aria-hidden="true" />Podium
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink class="nav-link small ps-4" href="Group">
-                        <span class="fa-solid fa-people-group me-2 fs-6" aria-hidden="true" />Groep
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink class="nav-link small ps-4" href="Person">
-                        <span class="fa-solid fa-person-half-dress me-2 fs-6" aria-hidden="true" />Persoon
-                    </NavLink>
-                </li>
-                <li>
-                    <NavLink class="nav-link small ps-4" href="Tasks">
-                        <span class="fa-solid fa-list-check me-2 fs-6" aria-hidden="true" />Taken
                     </NavLink>
                 </li>
             </ul>
