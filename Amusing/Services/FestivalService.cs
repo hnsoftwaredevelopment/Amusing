@@ -1,4 +1,6 @@
-﻿using Amusing.Helpers;
+﻿using System.Data.Common;
+
+using Amusing.Helpers;
 using Amusing.Models;
 
 namespace Amusing.Services;
@@ -6,6 +8,8 @@ namespace Amusing.Services;
 public class FestivalService( GenericDataService dataService )
 {
     private readonly GenericDataService _dataService = dataService;
+
+    public async Task<int> GetLatestFestivalAsync() => await _dataService.ExecuteScalarAsync<int>( QueryDefinitions.GetCurrentFestival );
 
     public Task<List<FestivalModel>> GetFestivalOverviewAsync()
     {
@@ -27,8 +31,8 @@ public class FestivalService( GenericDataService dataService )
         FestivalId = Convert.ToUInt32( reader [ "FestivalId" ] ),
         Festival = reader [ "Festival" ].ToString(),
         Festivaldatum = DateOnly.FromDateTime( reader.GetDateTime( reader.GetOrdinal( "Datum" ) ) ),
-        StartInschrijving = DateOnly.FromDateTime( reader.GetDateTime( reader.GetOrdinal( "StartInschrijving" ) ) ),
-        EindeInschrijving = DateOnly.FromDateTime( reader.GetDateTime( reader.GetOrdinal( "EindeInschrijving" ) ) ),
+        StartInschrijving = SafeGetDateOnly( reader, "StartInschrijving" ) ?? DateOnly.MinValue,
+        EindeInschrijving = SafeGetDateOnly( reader, "EindeInschrijving" ) ?? DateOnly.MinValue,
         Wachtlijst = Convert.ToInt16( reader [ "Wachtlijst" ] ),
         PubliceerPlanning = Convert.ToInt16( reader [ "PubliceerPlanning" ] ),
         MinutenTussenOptredens = Convert.ToUInt16( reader [ "MinutenTussenOptredens" ] ),
@@ -42,6 +46,29 @@ public class FestivalService( GenericDataService dataService )
         EindeVasteVrijwilligersTaken = TimeOnly.FromTimeSpan( ( TimeSpan ) reader [ "EindeVasteVrijwilligersTaken" ] ),
         Aktief = Convert.ToInt16( reader [ "Aktief" ] )
     } );
+    }
+
+    public async Task<uint> InsertNewFestivalAsync( DateOnly festivalDatum )
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { "@festivaldatum", festivalDatum }
+        };
+
+        return await _dataService.ExecuteScalarAsync<uint>(
+            QueryDefinitions.InsertNewFestival,
+            parameters
+        );
+    }
+
+    public async Task<int> InsertNewConditionsAsync( uint festivalId )
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { "@festivalid", festivalId }
+        };
+
+        return await _dataService.ExecuteScalarAsync<int>( QueryDefinitions.InsertNewCondition, parameters );
     }
 
     public async Task ModifyFestivalAsync( FestivalModel model )
@@ -101,5 +128,22 @@ public class FestivalService( GenericDataService dataService )
         int affectedRows = await _dataService.ExecuteNonQueryAsync( QueryDefinitions.DeleteCondition, parameters );
 
         return affectedRows > 0;
+    }
+
+    private DateOnly? SafeGetDateOnly( DbDataReader reader, string columnName )
+    {
+        int ordinal = reader.GetOrdinal(columnName);
+        if ( reader.IsDBNull( ordinal ) )
+        {
+            return null;
+        }
+
+        DateTime dt = reader.GetDateTime(ordinal);
+        if ( dt.Year < 1000 )
+        {
+            return null;
+        }
+
+        return DateOnly.FromDateTime( dt );
     }
 }

@@ -686,7 +686,8 @@ public static class QueryDefinitions
         WHERE festival_id = @festivalid";
 
     public static readonly string InsertNewFestival = @"
-        INSERT INTO ah_festivals;";
+        INSERT INTO ah_festivals (festivaldatum) VALUES (@festivaldatum);
+        SELECT LAST_INSERT_ID();";
 
     public static readonly string InsertNewCondition = @"
         INSERT INTO amusing.planner_voorwaarden 

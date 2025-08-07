@@ -20,134 +20,141 @@
 }
 else
 {
-    <div class="spacer-small"></div>
-    <SfDataForm Model="SelectedStageType" OnValidSubmit="SaveStageType" LabelPosition="FormLabelPosition.Top">
-        <div class="form-floating-switch">
-            <h5>Algemeen</h5>
-            <SfTextBox @bind-Value="SelectedStageType.Type" Placeholder="Type" FloatLabelType="FloatLabelType.Always" Width="60px" CssClass="e-ntstyle center-textbox" Enabled=@ActiveChecked/>
-            <SfNumericTextBox TValue="decimal" @bind-Value="SelectedStageType.Price" Placeholder="Prijs" Format="c2" FloatLabelType="FloatLabelType.Always" Width="140px" Step="5" CssClass="e-ntstyle"  Enabled=@ActiveChecked />
-            <SfMultiSelect TValue="List<string>"
-                            TItem="string"
-                            Placeholder="Compatibel met"
-                            FloatLabelType="FloatLabelType.Always"
-                            @bind-Value="CompatibelTypes"
-                            DataSource="@AvailableStageTypes"
-                            Mode="VisualMode.CheckBox"
-                            CssClass="e-ntstyle"
-                            Width="130px"  Enabled=@ActiveChecked>
-            </SfMultiSelect>
-            <BitToggleButton @bind-IsChecked="ActiveChecked" Text="@(ActiveChecked ? "Aktief" : "Niet aktief")" Styles="@(new() { Root = "--toggle-background: gray; background: var(--toggle-background); border: none",
-                Checked = "--toggle-background: green;",
-                Text = "color: white;" })"/>
-            <hr />
-            <h5>Instrumenten e.d</h5>
-            <div Width="50%">
-            <SfNumericTextBox TValue="int" Min="0" Max="2" @bind-Value="SelectedStageType.Piano" Placeholder="Piano" Width="10%" FloatLabelType="@FloatLabelType.Auto" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
-            <SfNumericTextBox TValue="int" Min="0" Max="10" @bind-Value="SelectedStageType.Lectern" Placeholder="Lessenaar" Width="10%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
-            <SfNumericTextBox TValue="int" Min="0" Max="10" @bind-Value="SelectedStageType.Microphones" Placeholder="Microfoons" Width="10%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
-            <SfNumericTextBox TValue="int" Min="0" Max="2" @bind-Value="SelectedStageType.Drums" Placeholder="Drums" Width="10%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
-            </div> 
-            <hr />
-            <h5>Techniek</h5>
-            <div width="75%">
-            <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="SelectedStageType.GuitarAmplifiers" Placeholder="Gitaar versterkers" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
-            <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="SelectedStageType.BassAmplifiers" Placeholder="Bas versterkers" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
-            <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="SelectedStageType.ChoirAmplifiers" Placeholder="Koor versterking" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
-            <SfNumericTextBox TValue="int" Min="0" Max="4" @bind-Value="SelectedStageType.Monitors" Placeholder="Monitoren" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
-            <SfNumericTextBox TValue="int" Min="0" Max="4" @bind-Value="SelectedStageType.Monitors" Placeholder="Speakers" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+    <div class="page-container">
+        <div class="fixed-header">
+            <SfDataForm Model="SelectedStageType" OnValidSubmit="SaveStageType" LabelPosition="FormLabelPosition.Top">
+            <div class="form-floating-switch">
+                <h5>Algemeen</h5>
+                <SfTextBox @bind-Value="SelectedStageType.Type" Placeholder="Type" FloatLabelType="FloatLabelType.Always" Width="60px" CssClass="e-ntstyle center-textbox" Enabled=@ActiveChecked/>
+                <SfNumericTextBox TValue="decimal" @bind-Value="SelectedStageType.Price" Placeholder="Prijs" Format="c2" FloatLabelType="FloatLabelType.Always" Width="140px" Step="5" CssClass="e-ntstyle"  Enabled=@ActiveChecked />
+                <SfMultiSelect TValue="List<string>"
+                                TItem="string"
+                                Placeholder="Compatibel met"
+                                FloatLabelType="FloatLabelType.Always"
+                                @bind-Value="CompatibelTypes"
+                                DataSource="@AvailableStageTypes"
+                                Mode="VisualMode.CheckBox"
+                                CssClass="e-ntstyle"
+                                Width="130px"  Enabled=@ActiveChecked>
+                </SfMultiSelect>
+                <BitToggleButton @bind-IsChecked="ActiveChecked" Text="@(ActiveChecked ? "Aktief" : "Niet aktief")" Styles="@(new() { Root = "--toggle-background: gray; background: var(--toggle-background); border: none",
+                    Checked = "--toggle-background: green;",
+                    Text = "color: white;" })"/>
+                <hr />
+                <h5>Instrumenten e.d</h5>
+                <div Width="50%">
+                <SfNumericTextBox TValue="int" Min="0" Max="2" @bind-Value="SelectedStageType.Piano" Placeholder="Piano" Width="10%" FloatLabelType="@FloatLabelType.Auto" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+                <SfNumericTextBox TValue="int" Min="0" Max="10" @bind-Value="SelectedStageType.Lectern" Placeholder="Lessenaar" Width="10%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+                <SfNumericTextBox TValue="int" Min="0" Max="10" @bind-Value="SelectedStageType.Microphones" Placeholder="Microfoons" Width="10%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+                <SfNumericTextBox TValue="int" Min="0" Max="2" @bind-Value="SelectedStageType.Drums" Placeholder="Drums" Width="10%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+                </div> 
+                <hr />
+                <h5>Techniek</h5>
+                <div width="75%">
+                <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="SelectedStageType.GuitarAmplifiers" Placeholder="Gitaar versterkers" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+                <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="SelectedStageType.BassAmplifiers" Placeholder="Bas versterkers" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+                <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="SelectedStageType.ChoirAmplifiers" Placeholder="Koor versterking" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+                <SfNumericTextBox TValue="int" Min="0" Max="4" @bind-Value="SelectedStageType.Monitors" Placeholder="Monitoren" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+                <SfNumericTextBox TValue="int" Min="0" Max="4" @bind-Value="SelectedStageType.Monitors" Placeholder="Speakers" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+                </div>
+                <div class="spacer-medium"></div>
+                <SfCheckBox @bind-Checked="ElectronicsChecked" Disabled="!ActiveChecked">Electra</SfCheckBox>
+                <SfCheckBox @bind-Checked="MixingConsoleChecked" Disabled="!ActiveChecked">Mengpaneel</SfCheckBox>
+                <SfCheckBox @bind-Checked="Mp3Checked" Disabled="!ActiveChecked">MD/MP3</SfCheckBox>
+                <hr />
             </div>
-            <div class="spacer-medium"></div>
-            <SfCheckBox @bind-Checked="ElectronicsChecked" Disabled="!ActiveChecked">Electra</SfCheckBox>
-            <SfCheckBox @bind-Checked="MixingConsoleChecked" Disabled="!ActiveChecked">Mengpaneel</SfCheckBox>
-            <SfCheckBox @bind-Checked="Mp3Checked" Disabled="!ActiveChecked">MD/MP3</SfCheckBox>
-            <hr />
+        </SfDataForm>
         </div>
-    </SfDataForm>
 
-    <div class="spacer-medium"></div>
-    <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
-        <SfGrid @ref="GridRef"
-                TValue="StageTypeModel"
-                DataSource="@StageTypes"
-                AllowResizing="true"
-                AllowMultiSorting="true"
-                AllowSelection="true"
-                AllowSorting="true" >
+        <div class="scrollable-content">
+            <div class="spacer-medium"></div>
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+                <SfGrid @ref="GridRef"
+                        TValue="StageTypeModel"
+                        DataSource="@StageTypes"
+                        AllowResizing="true"
+                        AllowMultiSorting="true"
+                        AllowSelection="true"
+                        AllowSorting="true" >
 
-            <GridTextWrapSettings WrapMode=" WrapMode.Header"></GridTextWrapSettings>
-            <GridSelectionSettings 
-                Mode="Syncfusion.Blazor.Grids.SelectionMode.Row" 
-                Type="Syncfusion.Blazor.Grids.SelectionType.Single">
-            </GridSelectionSettings>
+                    <GridTextWrapSettings WrapMode=" WrapMode.Header"></GridTextWrapSettings>
+                    <GridSelectionSettings 
+                        Mode="Syncfusion.Blazor.Grids.SelectionMode.Row" 
+                        Type="Syncfusion.Blazor.Grids.SelectionType.Single">
+                    </GridSelectionSettings>
 
-            <GridEvents TValue="StageTypeModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
+                    <GridEvents TValue="StageTypeModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
 
-            <SfToolbar>
-                <ToolbarItems>
-                    <ToolbarItem Type="ItemType.Button">
-                        <Template>
-                            <button class="custom-toolbar-btn" @onclick="SaveStageType" title="Sla het podiumtype als nieuwe, of ge-(in)activeerde versie">
-                                <img src="icons/button-save.svg" class="icon" alt="SAVE" />
-                            </button>
-                        </Template>
-                    </ToolbarItem>
-                    <ToolbarItem Type="ItemType.Button">
-                        <Template>
-                            <button class="custom-toolbar-btn" @onclick="AddNewStageType" title="Voeg een nieuw podium type toe">
-                                <img src="icons/button-add.svg" class="icon" alt="ADD" />
-                            </button>
-                        </Template>
-                    </ToolbarItem>
-                    <ToolbarItem Type="ItemType.Button">
-                        <Template>
-                            <button class="custom-toolbar-btn" @onclick="DeleteStageTypeClicked" title="Verwijder geselecteerde podium type (versie)">
-                                <img src="icons/button-del.svg" class="icon" alt="DEL" />
-                            </button>
-                        </Template>
-                    </ToolbarItem>
-                    <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
-                        <Template>
-                            <span class="toolbar-count">@FileName: @VisibleRowCount</span>
-                        </Template>
-                    </ToolbarItem>
+                    <SfToolbar>
+                        <ToolbarItems>
+                            <ToolbarItem Type="ItemType.Button">
+                                <Template>
+                                    <button class="custom-toolbar-btn" @onclick="SaveStageType" title="Sla het podiumtype als nieuwe, of ge-(in)activeerde versie">
+                                        <img src="icons/button-save.svg" class="icon" alt="SAVE" />
+                                    </button>
+                                </Template>
+                            </ToolbarItem>
+                            <ToolbarItem Type="ItemType.Button">
+                                <Template>
+                                    <button class="custom-toolbar-btn" @onclick="AddNewStageType" title="Voeg een nieuw podium type toe">
+                                        <img src="icons/button-add.svg" class="icon" alt="ADD" />
+                                    </button>
+                                </Template>
+                            </ToolbarItem>
+                            <ToolbarItem Type="ItemType.Button">
+                                <Template>
+                                    <button class="custom-toolbar-btn" @onclick="DeleteStageTypeClicked" title="Verwijder geselecteerde podium type (versie)">
+                                        <img src="icons/button-del.svg" class="icon" alt="DEL" />
+                                    </button>
+                                </Template>
+                            </ToolbarItem>
+                            <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                                <Template>
+                                    <span class="toolbar-count">@FileName: @VisibleRowCount</span>
+                                </Template>
+                            </ToolbarItem>
 
-                    <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
-                        <Template>
-                            <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
-                        </Template>
-                    </ToolbarItem>
-                </ToolbarItems>
-            </SfToolbar>
+                            <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                                <Template>
+                                    <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
+                                </Template>
+                            </ToolbarItem>
+                        </ToolbarItems>
+                    </SfToolbar>
 
-            <GridColumns>
-                <GridColumn Field="Type" HeaderText="Type" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="60px" />
-                <GridColumn Field="Description" HeaderText="Omvat" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" />
-                <GridColumn Field="Price" HeaderText="Prijs" Format="C2" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="90px" />
-                <GridColumn Field="Compatibel" HeaderText="Compatibel met" TextAlign="TextAlign.Left" AllowSorting=false AllowResizing="true" Width="135px" />
-                <GridColumn Field="Active" HeaderText="Aktief" TextAlign="TextAlign.Center" Width="120px">
-                    <Template>
-                        @{
-                            var stage = (context as StageTypeModel);
-                            var activeState = stage.Active == 1 ? "Aktief" : "Niet aktief";
-                            var activeStateColor = stage.Active == 1 ? "e-success" : "e-danger";
-                            <div class="template_checkbox">
-                                <SfChip id="chip">
-                                    <ChipItems>
-                                        <ChipItem Text="@activeState" CssClass="@($"{activeStateColor} custom-chip")" Width="120px"/>
-                                    </ChipItems>
-                                </SfChip>
-                            </div>
-                        }
-                    </Template>
-                </GridColumn>
-            </GridColumns>
-        </SfGrid>
-        <div class="spacer-large"></div>
-        <BitMessage Color="BitColor.Secondary" Visibility="@ShowDeletedMessage">
-            <div>Let op: wanneer je een podium type verwijdert, verwijder je alleen de laatste versie van dat type.</div>
-            <div>De regel kan dus gewoon zichtbaar blijven in de lijst, dit is dan de vorige versie.</div>
-            <div>Wil je een podium type niet meer gebruiken, zet hem dan op disabled en sla het type op.</div>
-        </BitMessage>    </div>
+                    <GridColumns>
+                        <GridColumn Field="Type" HeaderText="Type" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="60px" />
+                        <GridColumn Field="Description" HeaderText="Omvat" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" />
+                        <GridColumn Field="Price" HeaderText="Prijs" Format="C2" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="90px" />
+                        <GridColumn Field="Compatibel" HeaderText="Compatibel met" TextAlign="TextAlign.Left" AllowSorting=false AllowResizing="true" Width="135px" />
+                        <GridColumn Field="Active" HeaderText="Aktief" TextAlign="TextAlign.Center" Width="120px">
+                            <Template>
+                                @{
+                                    var stage = (context as StageTypeModel);
+                                    var activeState = stage.Active == 1 ? "Aktief" : "Niet aktief";
+                                    var activeStateColor = stage.Active == 1 ? "e-success" : "e-danger";
+                                    <div class="template_checkbox">
+                                        <SfChip id="chip">
+                                            <ChipItems>
+                                                <ChipItem Text="@activeState" CssClass="@($"{activeStateColor} custom-chip")" Width="120px"/>
+                                            </ChipItems>
+                                        </SfChip>
+                                    </div>
+                                }
+                            </Template>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
+                <div class="spacer-large" />
+                <BitMessage Color="BitColor.Secondary" Visibility="@ShowDeletedMessage">
+                    <div>Let op: wanneer je een podium type verwijdert, verwijder je alleen de laatste versie van dat type.</div>
+                    <div>De regel kan dus gewoon zichtbaar blijven in de lijst, dit is dan de vorige versie.</div>
+                    <div>Wil je een podium type niet meer gebruiken, zet hem dan op disabled en sla het type op.</div>
+                </BitMessage>    
+            </div>
+        </div>
+    </div>
+
 }
 @code {
     private bool IsLoading = false;

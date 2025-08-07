@@ -63,4 +63,26 @@ public class GenericDataService
 
         return await cmd.ExecuteNonQueryAsync();
     }
+
+    public async Task<T> ExecuteScalarAsync<T>( string query, Dictionary<string, object>? parameters = null )
+    {
+        await using MySqlConnection connection = new(_connection.ConnectionString);
+        await connection.OpenAsync();
+
+        await using MySqlCommand command = new(query, connection);
+
+        if ( parameters != null )
+        {
+            foreach ( KeyValuePair<string, object> param in parameters )
+            {
+                command.Parameters.AddWithValue( param.Key, param.Value );
+            }
+        }
+
+        object? result = await command.ExecuteScalarAsync();
+
+        return result != null && result != DBNull.Value
+            ? ( T ) Convert.ChangeType( result, typeof( T ) )
+            : default!;
+    }
 }
