@@ -358,6 +358,23 @@ public static class QueryDefinitions
         FROM ah_festivals
         ORDER BY YEAR(festivaldatum) DESC;";
 
+    public static readonly string GetAllStages =@"
+        SELECT  
+             podium_id AS `Podium-Id`, 
+             naam AS `Naam`, 
+             soort AS `Bi/Bu`, 
+             TYPE AS `Type`, 
+             kwaliteit AS `Kwaliteit`, 
+             max_zangers AS `Max. zangers`, 
+             aantal_vrijwilligers AS `Vrijwilligers`, 
+             opening AS `Optredens Start`, 
+             sluiting AS `Optredens Eind`, 
+             vrijwilligers_vanaf AS `Vrijwilligers Van`, 
+             vrijwilligers_tot AS `Vrijwilligers Tot`, 
+             kaart_nummer AS `Kaart-Id` 
+        FROM ah_podia
+        ORDER BY naam ASC;";
+
     public static readonly string GetActiveStages = @"
         SELECT  
 	        podium_id AS `Podium-Id`, 

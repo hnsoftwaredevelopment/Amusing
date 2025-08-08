@@ -45,29 +45,4 @@
     <PackageReference Include="Syncfusion.PdfExport.Net.Core" Version="30.1.39" />
     <PackageReference Include="Syncfusion.XlsIO.Net.Core" Version="30.1.39" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Resources\SfResources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>SfResources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Resources\SfResources.de.resx">
-      <Generator></Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\SfResources.en-US.resx">
-      <Generator></Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\SfResources.nl.resx">
-      <Generator></Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\SfResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>SfResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-
 </Project>

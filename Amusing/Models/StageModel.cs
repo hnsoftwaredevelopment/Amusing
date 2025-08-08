@@ -13,6 +13,7 @@ public class StageModel
     public TimeOnly Eind { get; set; }
     public TimeOnly Van { get; set; }
     public TimeOnly Tot { get; set; }
-    public int KaartId { get; set; }
+    public int KaartNummer { get; set; }
+    public int Aktief { get; set; } = 0;
 
 }

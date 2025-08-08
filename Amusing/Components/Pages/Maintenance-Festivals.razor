@@ -4,6 +4,7 @@
 @using Bit.BlazorUI
 @using Bit.BlazorUI.Extras
 @using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Calendars
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
@@ -27,9 +28,9 @@ else
                 <SfDataForm Model="SelectedFestival" OnValidSubmit="SaveFestival" OnInvalidSubmit="HandleValidationFailed" LabelPosition="FormLabelPosition.Top">
                 <div class="form-floating-switch">
                     <hr />
-                    <Syncfusion.Blazor.Calendars.SfDatePicker TValue="DateOnly" @bind-Value="SelectedFestival.Festivaldatum" Placeholder="Festival datum" Format="dd-MM-yyyy" FloatLabelType="FloatLabelType.Always" Width="150px" />
-                    <Syncfusion.Blazor.Calendars.SfDatePicker TValue="DateOnly" @bind-Value="SelectedFestival.StartInschrijving" Placeholder="Start inschrijving" Format="dd-MM-yyyy" FloatLabelType="FloatLabelType.Always" Width="150px" />
-                    <Syncfusion.Blazor.Calendars.SfDatePicker TValue="DateOnly" @bind-Value="SelectedFestival.EindeInschrijving" Placeholder="Einde inschrijving" Format="dd-MM-yyyy" FloatLabelType="FloatLabelType.Always" Width="150px" />
+                    <Syncfusion.Blazor.Calendars.SfDatePicker TValue="DateOnly" @bind-Value="SelectedFestival.Festivaldatum" Placeholder="Festival datum" Format="dd-MM-yyyy" FloatLabelType="FloatLabelType.Always" Width="150px" WeekNumber="true" />
+                    <Syncfusion.Blazor.Calendars.SfDatePicker TValue="DateOnly" @bind-Value="SelectedFestival.StartInschrijving" Placeholder="Start inschrijving" Format="dd-MM-yyyy" FloatLabelType="FloatLabelType.Always" Width="150px" WeekNumber="true" />
+                    <Syncfusion.Blazor.Calendars.SfDatePicker TValue="DateOnly" @bind-Value="SelectedFestival.EindeInschrijving" Placeholder="Einde inschrijving" Format="dd-MM-yyyy" FloatLabelType="FloatLabelType.Always" Width="150px" WeekNumber="true" />
                     <hr />
                     <SfCheckBox @bind-Checked="WaitlistChecked">Wachtlijst</SfCheckBox>
                     <SfCheckBox @bind-Checked="PublicateChecked">Publiceer planning</SfCheckBox>
@@ -238,7 +239,6 @@ else
             EindeVasteVrijwilligersTaken = args.Data.EindeVasteVrijwilligersTaken,
             Aktief = args.Data.Aktief
         };
-        FestivalIsDirty = false;
 
         StateHasChanged();
     }
@@ -290,8 +290,8 @@ else
 
         // What is the first Saterday of June for that year
         DateOnly firstSaterday = Enumerable.Range(1, 7)
-            .Select(newDate => new DateOnly(newFestival, 6, newDate))
-            .First(d => d.DayOfWeek == DayOfWeek.Saturday);
+        .Select(newDate => new DateOnly(newFestival, 6, newDate))
+        .First(d => d.DayOfWeek == DayOfWeek.Saturday);
 
         // Insert new record for this year in the table, and get the Festival-Id
         var festivalId = await FestivalService.InsertNewFestivalAsync( firstSaterday );
@@ -325,5 +325,22 @@ else
             .OrderByDescending( f => int.Parse( f.Festival ) ) // Festival is een string
             .FirstOrDefault();
         await GridRef.Refresh();
+    }
+
+    public void DisableSaterdays( RenderDayCellEventArgs args )
+    {
+        if ( ( int ) args.Date.DayOfWeek == 6 )
+        {
+            args.IsDisabled = true;
+        }
+    }
+
+    private void DisableDate( RenderDayCellEventArgs args )
+    {
+        var view = DatePickerObj.CurrentView();
+        if ( view == "Month" && ( ( int ) args.Date.DayOfWeek == 0 || ( int ) args.Date.DayOfWeek == 6 ) )
+        {
+            args.IsDisabled = true;
+        }
     }
 }
