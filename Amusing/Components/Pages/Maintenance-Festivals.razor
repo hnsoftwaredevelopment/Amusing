@@ -25,7 +25,7 @@ else
         <div class="fixed-header">
                 <h3>Onderhoud Amusing editie: @SelectedFestival.Festival</h3>
                 @* Detail Fields *@
-                <SfDataForm Model="SelectedFestival" OnValidSubmit="SaveFestival" OnInvalidSubmit="HandleValidationFailed" LabelPosition="FormLabelPosition.Top">
+                <SfDataForm Model="SelectedFestival" OnValidSubmit="SaveFestival" LabelPosition="FormLabelPosition.Top">
                 <div class="form-floating-switch">
                     <hr />
                     <Syncfusion.Blazor.Calendars.SfDatePicker TValue="DateOnly" @bind-Value="SelectedFestival.Festivaldatum" Placeholder="Festival datum" Format="dd-MM-yyyy" FloatLabelType="FloatLabelType.Always" Width="150px" WeekNumber="true" />
@@ -58,47 +58,47 @@ else
         @* DataGrid *@ 
         <div class="spacer-medium"></div>
         <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
-                <SfToolbar Width="550px">
-                    <ToolbarItems>
-                        <ToolbarItem Type="ItemType.Button">
-                            <Template>
-                                <button class="custom-toolbar-btn"
-                                        @onclick="SaveFestival"
-                                        title="Sla het podiumtype als nieuwe, of ge-(in)activeerde versie">
-                                    <img src="icons/button-save.svg" class="icon" alt="SAVE" />
-                                </button>
-                            </Template>
-                        </ToolbarItem>
-                        <ToolbarItem Type="ItemType.Button">
-                            <Template>
-                                <button class="custom-toolbar-btn" @onclick="AddNewFestival" title="Voeg een nieuw podium type toe">
-                                    <img src="icons/button-add.svg" class="icon" alt="ADD" />
-                                </button>
-                            </Template>
-                        </ToolbarItem>
-                        <ToolbarItem Type="ItemType.Button">
-                            <Template>
-                                <button class="custom-toolbar-btn @(SelectedFestival?.Aktief == 1 ? "disabled" : "")"
-                                        @onclick="DeleteFestival"
-                                        title="Verwijder geselecteerde podium type (versie)"
-                                        disabled="@(SelectedFestival?.Aktief == 1)">
-                                    <img src="icons/button-del.svg" class="icon" alt="DEL" />
-                                </button>
-                            </Template>
-                        </ToolbarItem>
-                        <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
-                            <Template>
-                                <span class="toolbar-count">@FileName: @VisibleRowCount</span>
-                            </Template>
-                        </ToolbarItem>
+            <SfToolbar Width="550px">
+                <ToolbarItems>
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn"
+                                    @onclick="SaveFestival"
+                                    title="Sla het podiumtype als nieuwe, of ge-(in)activeerde versie">
+                                <img src="icons/button-save.svg" class="icon" alt="SAVE" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn" @onclick="AddNewFestival" title="Voeg een nieuw podium type toe">
+                                <img src="icons/button-add.svg" class="icon" alt="ADD" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn @(SelectedFestival?.Aktief == 1 ? "disabled" : "")"
+                                    @onclick="DeleteFestival"
+                                    title="Verwijder geselecteerde podium type (versie)"
+                                    disabled="@(SelectedFestival?.Aktief == 1)">
+                                <img src="icons/button-del.svg" class="icon" alt="DEL" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+                    <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                        <Template>
+                            <span class="toolbar-count">@FileName: @VisibleRowCount</span>
+                        </Template>
+                    </ToolbarItem>
 
-                        <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
-                            <Template>
-                                <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
-                            </Template>
-                        </ToolbarItem>
-                    </ToolbarItems>
-                </SfToolbar>
+                    <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                        <Template>
+                            <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
+                        </Template>
+                    </ToolbarItem>
+                </ToolbarItems>
+            </SfToolbar>
     
                 <SfGrid @ref="GridRef"
                     TValue="FestivalModel"
@@ -179,7 +179,7 @@ else
 
         Festivals = await FestivalService.GetFestivalDataAsync();
         SelectedFestival = Festivals
-            .OrderByDescending( f => int.Parse( f.Festival ) ) // Festival is een string
+            .OrderByDescending( f => int.Parse( f.Festival ) ) 
             .FirstOrDefault();
         IsLoading = false;
     }
@@ -243,31 +243,6 @@ else
         StateHasChanged();
     }
 
-    private async Task UpdateIsDirty()
-    {
-        ChangedFields.Clear();
-
-
-        bool vuilelucht = SelectedFestival != SelectedFestivalOriginal;
-
-        FestivalIsDirty = SelectedFestival.FestivalId != SelectedFestivalOriginal.FestivalId ||
-                  SelectedFestival.Festival != SelectedFestivalOriginal.Festival ||
-                  SelectedFestival.Festivaldatum != SelectedFestivalOriginal.Festivaldatum ||
-                  SelectedFestival.StartInschrijving != SelectedFestivalOriginal.StartInschrijving ||
-                  SelectedFestival.EindeInschrijving != SelectedFestivalOriginal.EindeInschrijving ||
-                  SelectedFestival.Wachtlijst != SelectedFestivalOriginal.Wachtlijst ||
-                  SelectedFestival.PubliceerPlanning != SelectedFestivalOriginal.PubliceerPlanning ||
-                  SelectedFestival.StartVrijwilligersTaken != SelectedFestivalOriginal.StartVrijwilligersTaken ||
-                  SelectedFestival.EindeVrijwilligersTaken != SelectedFestivalOriginal.EindeVrijwilligersTaken ||
-                  SelectedFestival.StartVrijwilligersPauze != SelectedFestivalOriginal.StartVrijwilligersPauze ||
-                  SelectedFestival.EindeVrijwilligersPauze != SelectedFestivalOriginal.EindeVrijwilligersPauze ||
-                  SelectedFestival.EindeVasteVrijwilligersTaken != SelectedFestivalOriginal.EindeVasteVrijwilligersTaken ||
-                  SelectedFestival.MinutenTussenOptredens != SelectedFestivalOriginal.MinutenTussenOptredens ||
-                  SelectedFestival.MaximumMinutenTussenOptredens != SelectedFestivalOriginal.MaximumMinutenTussenOptredens ||
-                  SelectedFestival.MaximumUrenVrijwilligers != SelectedFestivalOriginal.MaximumUrenVrijwilligers ||
-                  SelectedFestival.BoeteOnderbrekingOptredens != SelectedFestivalOriginal.BoeteOnderbrekingOptredens;
-    }
-
     private async Task SaveFestival()
     {
         if ( SelectedFestival is null )
@@ -325,22 +300,5 @@ else
             .OrderByDescending( f => int.Parse( f.Festival ) ) // Festival is een string
             .FirstOrDefault();
         await GridRef.Refresh();
-    }
-
-    public void DisableSaterdays( RenderDayCellEventArgs args )
-    {
-        if ( ( int ) args.Date.DayOfWeek == 6 )
-        {
-            args.IsDisabled = true;
-        }
-    }
-
-    private void DisableDate( RenderDayCellEventArgs args )
-    {
-        var view = DatePickerObj.CurrentView();
-        if ( view == "Month" && ( ( int ) args.Date.DayOfWeek == 0 || ( int ) args.Date.DayOfWeek == 6 ) )
-        {
-            args.IsDisabled = true;
-        }
     }
 }

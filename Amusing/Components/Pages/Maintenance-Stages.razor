@@ -1,0 +1,228 @@
+﻿@page "/Maintenance-Stages"
+@using Amusing.Models
+@using Amusing.Services
+@using Bit.BlazorUI
+@using Bit.BlazorUI.Extras
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+@using System.ComponentModel.DataAnnotations
+
+@inject StageService StageService;
+@inject StageTypeService StageTypeService;
+
+if (IsLoading)
+{
+    <div class="text-center p-2">
+        <SfSpinner CssClass="e-spin-center" />
+        <p>@FileName worden geladen...</p>
+    </div>
+}
+else
+{
+    <div class="page-container">
+        <div class="fixed-header">
+            <h3>Onderhoud Podia</h3>
+            @* Detail Fields *@
+            <SfDataForm Model="SelectedStage" OnValidSubmit="SaveStage" LabelPosition="FormLabelPosition.Top">
+                <div class="form-floating-switch">
+                    <hr />
+                    <SfTextBox @bind-Value="SelectedStage.Naam" Placeholder="Podium naam" Width="250px" />
+                    <SfComboBox TValue="string"
+                                TItem="StageTypeModel"
+                                Placeholder="Kies een podium type"
+                                DataSource="@AvailableStageTypes"
+                                Width="250px">
+                        <ComboBoxFieldSettings Value="Type" Text="Text"></ComboBoxFieldSettings>
+                    </SfComboBox>
+                </div>
+            </SfDataForm>
+        </div>
+
+        <div class="scrollable-content">
+            @* DataGrid *@ 
+            <div class="spacer-medium"></div>
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+                <SfToolbar Width="550px">
+                    <ToolbarItems>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn"
+                                        @onclick="SaveStage"
+                                        title="Sla het podium op">
+                                    <img src="icons/button-save.svg" class="icon" alt="SAVE" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn" @onclick="AddNewStage" title="Voeg een nieuw podium toe">
+                                    <img src="icons/button-add.svg" class="icon" alt="ADD" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn @(SelectedStage?.Aktief == 1 ? "disabled" : "")"
+                                        @onclick="DeleteStage"
+                                        title="Verwijder geselecteerde podium"
+                                        disabled="@(SelectedStage?.Aktief == 1)">
+                                    <img src="icons/button-del.svg" class="icon" alt="DEL" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                            <Template>
+                                <span class="toolbar-count">@FileName: @VisibleRowCount</span>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                            <Template>
+                                <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
+                            </Template>
+                        </ToolbarItem>
+                    </ToolbarItems>
+                </SfToolbar>
+
+                <SfGrid @ref="GridRef"
+                    TValue="StageModel"
+                    DataSource="@Stages" EnableStickyHeader="true"
+                    AllowResizing="true" Width="550px"
+                    AllowSelection="true">
+                    <GridEvents TValue="StageModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
+
+                    <GridColumns>
+                        <GridColumn Field="Naam" HeaderText="Naam" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="180px" />
+                        <GridColumn Field="Type" HeaderText="Type" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="80px" />
+                        <GridColumn Field="Soort" HeaderText="Soort" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="100px" />
+                        <GridColumn Field="KaartNummer" HeaderText="Kaart nummer" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="100px" />
+                    </GridColumns>
+                </SfGrid>
+                <div class="spacer-large"></div>
+            </div>
+        </div>
+    </div>
+}
+
+@code 
+{
+    private bool IsLoading = false;
+    private bool _initialLoadDone = false;
+    private SfGrid<StageModel> GridRef;
+    private string FileName = "Podia";
+    private StageModel? SelectedStage;
+    private List<StageTypeModel> AvailableStageTypes = new();
+    private string? SelectedStageType;
+    private int VisibleRowCount = 0;
+    private List<StageModel> Stages = [];
+
+    private string SelectedStageTypeText => AvailableStageTypes.FirstOrDefault( e => e.Type == SelectedStageType )?.Type ?? "Onbekende podium type";
+
+    private bool ActiveChecked
+    {
+        get => SelectedStage?.Aktief == 1;
+        set => SelectedStage.Aktief = value ? 1 : 0;
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+
+        // Not sure if this is needed
+        //var stageModels = await StageService.GetAllStagesAsync();
+        //var stagetypeModel = await StageTypeService.GetActiveStageTypesListAsync();
+
+        Stages = await StageService.GetAllStagesAsync();
+        AvailableStageTypes = await StageTypeService.GetActiveStageTypesListAsync();
+        SelectedStage = Stages
+            .OrderByDescending( f => int.Parse( f.Naam ) )
+            .FirstOrDefault();
+        IsLoading = false;
+    }
+
+    private async Task OnGridDataBound()
+    {
+        if ( !_initialLoadDone )
+        {
+            _initialLoadDone = true;
+            await UpdateVisibleRowCountAsync();
+        }
+    }
+
+    private async Task UpdateVisibleRowCountAsync()
+    {
+        if ( GridRef is not null )
+        {
+            await GridRef.Refresh();
+            await Task.Delay( 50 );
+            var records = await GridRef.GetCurrentViewRecordsAsync();
+            await Task.Delay( 150 );
+            VisibleRowCount = records?.Count ?? 0;
+            StateHasChanged();
+        }
+    }
+
+    public async Task OnInput( InputEventArgs args )
+    {
+        await GridRef.SearchAsync( args.Value );
+
+        await Task.Delay( 50 );
+        await UpdateVisibleRowCountAsync();
+    }
+
+    private void OnRowSelected( RowSelectEventArgs<StageModel> args )
+    {
+        SelectedStage = args.Data;
+
+        StateHasChanged();
+    }
+
+    private async Task SaveStage()
+    {
+        if ( SelectedStage is null )
+            return;
+
+        //await StageService.ModifyStageAsync( SelectedStage );
+
+        Stages = await StageService.GetAllStagesAsync();
+        await GridRef.Refresh();
+        await GridRef.SelectRowAsync( Stages.IndexOf( SelectedStage ) );
+    }
+
+    private async Task AddNewStage()
+    {
+        if ( SelectedStage is null )
+            return;
+
+        // Insert new record for this year in the table, and get the Stage-Id
+        //var stageId = await StageService.InsertNewStageAsync(stageId);
+
+        var stageModels = await StageService.GetAllStagesAsync();
+
+        Stages = await StageService.GetAllStagesAsync();
+        SelectedStage = Stages
+            .OrderByDescending( f => int.Parse( f.Naam ) )
+            .FirstOrDefault();
+        await GridRef.Refresh();
+    }
+
+    private async Task DeleteStage()
+    {
+        if ( SelectedStage is null )
+            return;
+
+        //await StageService.DeleteStageAsync( SelectedStage.StageId );
+
+        // refresh the table
+        var stageModels = await StageService.GetAllStagesAsync();
+
+        Stages = await StageService.GetAllStagesAsync();
+        SelectedStage = Stages
+            .OrderByDescending( f => int.Parse( f.Naam ) )
+            .FirstOrDefault();
+        await GridRef.Refresh();
+    }
+}
