@@ -95,16 +95,16 @@ else
             </div>
         </div>
 
-        <div class="scrollable-content" style="height:250px">
+        <div class="scrollable-content">
             @* DataGrid *@ 
-            <div class="spacer-medium"></div>
+            <div class="spacer-small"></div>
             <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
                 <SfGrid @ref="GridRef"
                     TValue="StageModel"
                     DataSource="@Stages" 
                     EnableStickyHeader="true"
                     AllowResizing="true" 
-                    Height="100%"
+                    Height="@GridHeight"
                     Width="650px" 
                     AllowSorting="true" 
                     AllowMultiSorting="true"

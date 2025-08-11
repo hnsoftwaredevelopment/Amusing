@@ -20,20 +20,10 @@
                         };
                     }
 
-                    <div class="top-row px-4 auth d-flex">
+                    <div class="top-row px-2 auth d-flex">
                         <div class="greeting text-success">@greeting @context.User.Identity.Name</div>
-                        <div class="ms-auto">
-                            <a href="https://amusing-hengelo.nl/" target="_blank">Over Amusing</a>
-                        </div>
                     </div>
                 </Authorized>
-                <NotAuthorized>
-                    <div class="top-row px-4 auth d-flex">
-                        <div class="ms-auto">
-                            <a href="https://amusing-hengelo.nl/" target="_blank">Over Amusing</a>
-                        </div>
-                    </div>
-                </NotAuthorized>
             </AuthorizeView>
         </CascadingAuthenticationState>
 

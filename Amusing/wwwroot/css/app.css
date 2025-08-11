@@ -338,7 +338,7 @@ a, .btn-link {
 /* Make part of the screen static: Definition of the scrollable part of the screen*/
 .scrollable-content {
     flex: 1 1 auto; /* Fill remaining height */
-    overflow: hidden; /* important: let grid handle scrolling */
+    overflow-y: auto;
     padding: 5px;
     background-color: #f8f9fa;
 }
