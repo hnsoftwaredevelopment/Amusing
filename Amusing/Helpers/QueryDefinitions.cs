@@ -371,7 +371,7 @@ public static class QueryDefinitions
              sluiting AS `Optredens Eind`, 
              vrijwilligers_vanaf AS `Vrijwilligers Van`, 
              vrijwilligers_tot AS `Vrijwilligers Tot`, 
-             kaart_nummer AS `Kaart-Id` 
+             IFNULL(kaart_nummer, 0) AS `Kaart-Id` 
         FROM ah_podia
         ORDER BY naam ASC;";
 
@@ -388,7 +388,7 @@ public static class QueryDefinitions
 	        sluiting AS `Optredens Eind`, 
 	        vrijwilligers_vanaf AS `Vrijwilligers Van`, 
 	        vrijwilligers_tot AS `Vrijwilligers Tot`, 
-	        kaart_nummer AS `Kaart-Id` 
+	       IFNULL(kaart_nummer, 0) AS `Kaart-Id` 
         FROM ah_podia
         WHERE kaart_nummer IS NOT NULL AND kaart_nummer > 0
         ORDER BY kaart_nummer ASC;";
@@ -410,9 +410,137 @@ public static class QueryDefinitions
         WHERE kaart_nummer IS NULL OR kaart_nummer = 0
         ORDER BY kaart_nummer ASC;";
 
-    public static readonly string GetActiveStageTypesList = @"SELECT type FROM ah_podia_typen WHERE aktief = 1 ORDER BY type ASC;";
+    public static readonly string GetActiveStageTypesList = @"
+        SELECT 
+            t.TYPE, 
+            TRIM(TRAILING ', ' FROM 
+                CONCAT(
+                    CASE WHEN piano = 0 THEN ''
+                         WHEN piano = 1 THEN 'piano, '
+                         ELSE CONCAT(piano, ' piano\'s, ')
+                    END,
+                    CASE WHEN lessenaar = 0 THEN ''
+                         WHEN lessenaar = 1 THEN 'lessenaar, '
+                         ELSE CONCAT(lessenaar, ' lessenaar\'s, ')
+                    END,
+                    CASE WHEN microfoons = 0 THEN ''
+                         WHEN microfoons = 1 THEN 'microfoon, '
+                         ELSE CONCAT(microfoons, ' microfoons, ')
+                    END,
+                    CASE WHEN electra = 0 THEN ''
+                         WHEN electra = 1 THEN 'electra, '
+                         ELSE CONCAT(electra, ' electra, ')
+                    END,
+                    CASE WHEN drum = 0 THEN ''
+                         WHEN drum = 1 THEN 'drum, '
+                         ELSE CONCAT(drum, ' drums, ')
+                    END,
+                    CASE WHEN gitaarversterkers = 0 THEN ''
+                         WHEN gitaarversterkers = 1 THEN 'gitaarversterker, '
+                         ELSE CONCAT(gitaarversterkers, ' gitaarversterkers, ')
+                    END,
+                    CASE WHEN basversterkers = 0 THEN ''
+                         WHEN basversterkers = 1 THEN 'basversterker, '
+                         ELSE CONCAT(basversterkers, ' basversterkers, ')
+                    END,
+                    CASE WHEN koorversterking = 0 THEN ''
+                         WHEN koorversterking = 1 THEN 'koorversterking, '
+                         ELSE CONCAT(koorversterking, ' koorversterkers, ')
+                    END,
+                    CASE WHEN monitoren = 0 THEN ''
+                         WHEN monitoren = 1 THEN 'monitor, '
+                         ELSE CONCAT(monitoren, ' monitoren, ')                    
+                    END,
+                    CASE WHEN speakers = 0 THEN ''
+                         WHEN speakers = 1 THEN 'speaker, '
+                         ELSE CONCAT(speakers, ' speakers, ')                   
+                    END,
+                    CASE WHEN mengpaneel = 0 THEN ''
+                         WHEN mengpaneel = 1 THEN 'mengpaneel, '
+                         ELSE CONCAT(mengpaneel, ' mengpanelen, ')                    
+                    END,
+                    CASE WHEN md_mp3 = 0 THEN ''
+                         WHEN md_mp3 = 1 THEN 'md/mp3, '
+                         ELSE CONCAT(md_mp3, ' md/mp3, ')
+                    END
+                )
+            ) AS omschrijving,
+            t.versie, 
+            t.aktief 
+        FROM ah_podia_typen t
+        JOIN (
+            SELECT type, MAX(versie) AS max_versie
+            FROM ah_podia_typen
+            WHERE aktief = 1
+            GROUP BY type
+        ) x ON t.type = x.type AND t.versie = x.max_versie
+        WHERE t.aktief = 1
+        ORDER BY t.type ASC;";
 
-    public static readonly string GetAllStageTypesList = @"SELECT type FROM ah_podia_typen ORDER BY type ASC;";
+    public static readonly string GetAllStageTypesList = @"
+        SELECT 
+            t.TYPE, 
+            TRIM(TRAILING ', ' FROM 
+                CONCAT(
+                    CASE WHEN piano = 0 THEN ''
+                         WHEN piano = 1 THEN 'piano, '
+                         ELSE CONCAT(piano, ' piano\'s, ')
+                    END,
+                    CASE WHEN lessenaar = 0 THEN ''
+                         WHEN lessenaar = 1 THEN 'lessenaar, '
+                         ELSE CONCAT(lessenaar, ' lessenaar\'s, ')
+                    END,
+                    CASE WHEN microfoons = 0 THEN ''
+                         WHEN microfoons = 1 THEN 'microfoon, '
+                         ELSE CONCAT(microfoons, ' microfoons, ')
+                    END,
+                    CASE WHEN electra = 0 THEN ''
+                         WHEN electra = 1 THEN 'electra, '
+                         ELSE CONCAT(electra, ' electra, ')
+                    END,
+                    CASE WHEN drum = 0 THEN ''
+                         WHEN drum = 1 THEN 'drum, '
+                         ELSE CONCAT(drum, ' drums, ')
+                    END,
+                    CASE WHEN gitaarversterkers = 0 THEN ''
+                         WHEN gitaarversterkers = 1 THEN 'gitaarversterker, '
+                         ELSE CONCAT(gitaarversterkers, ' gitaarversterkers, ')
+                    END,
+                    CASE WHEN basversterkers = 0 THEN ''
+                         WHEN basversterkers = 1 THEN 'basversterker, '
+                         ELSE CONCAT(basversterkers, ' basversterkers, ')
+                    END,
+                    CASE WHEN koorversterking = 0 THEN ''
+                         WHEN koorversterking = 1 THEN 'koorversterking, '
+                         ELSE CONCAT(koorversterking, ' koorversterkers, ')
+                    END,
+                    CASE WHEN monitoren = 0 THEN ''
+                         WHEN monitoren = 1 THEN 'monitor, '
+                         ELSE CONCAT(monitoren, ' monitoren, ')                    
+                    END,
+                    CASE WHEN speakers = 0 THEN ''
+                         WHEN speakers = 1 THEN 'speaker, '
+                         ELSE CONCAT(speakers, ' speakers, ')                   
+                    END,
+                    CASE WHEN mengpaneel = 0 THEN ''
+                         WHEN mengpaneel = 1 THEN 'mengpaneel, '
+                         ELSE CONCAT(mengpaneel, ' mengpanelen, ')                    
+                    END,
+                    CASE WHEN md_mp3 = 0 THEN ''
+                         WHEN md_mp3 = 1 THEN 'md/mp3, '
+                         ELSE CONCAT(md_mp3, ' md/mp3, ')
+                    END
+                )
+            ) AS omschrijving,
+            t.versie, 
+            t.aktief 
+        FROM ah_podia_typen t
+        JOIN (
+            SELECT type, MAX(versie) AS max_versie
+            FROM ah_podia_typen
+            GROUP BY type
+        ) x ON t.type = x.type AND t.versie = x.max_versie
+        ORDER BY t.type ASC;";
 
     public static readonly string GetNewStageTypeVersion = @"SELECT COALESCE(MAX(versie), 0) + 1 AS versie FROM ah_podia_typen WHERE type = @type;";
 

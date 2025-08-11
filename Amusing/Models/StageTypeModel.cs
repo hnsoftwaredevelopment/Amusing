@@ -18,6 +18,8 @@ public class StageTypeModel
     public int Mp3 { get; set; } = 0;
     public string Beschrijving { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public string Omschrijving { get; set; } = string.Empty;
+    public string ComboBoxDisplayName => $"{Type} - {Omschrijving}";
     public string Compatible { get; set; } = string.Empty;
     public int Active { get; set; } = 0;
     public bool IsActive => Active == 1;

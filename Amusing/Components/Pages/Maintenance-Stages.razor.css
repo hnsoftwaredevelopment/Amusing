@@ -1,0 +1,32 @@
+/* fixed top bar */
+.fixed-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 80px; /* adjust to your header height */
+    z-index: 1100;
+    background: #e9f0f6;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+/* keep page content below fixed header */
+.page-content {
+    padding-top: 80px; /* same as fixed header height */
+}
+
+/* make Syncfusion Grid header sticky relative to viewport */
+.e-grid .e-gridheader {
+    position: sticky;
+    top: 80px; /* same as fixed header height */
+    z-index: 1050; /* above rows but below top bar if needed */
+}
+
+    /* ensure header has background so rows don't show through */
+    .e-grid .e-gridheader .e-headercell,
+    .e-grid .e-gridheader {
+        background: white;
+        /* optional: keep box-shadow for visual separation */
+        box-shadow: 0 1px 0 rgba(0,0,0,0.06);
+    }

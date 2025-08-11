@@ -12,7 +12,8 @@ public class StageTypeService( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetActiveStageTypesList,
            reader => new StageTypeModel
            {
-               Type = reader [ "type" ].ToString()
+               Type = reader [ "type" ].ToString(),
+               Omschrijving = reader [ "omschrijving" ].ToString()
            } );
     }
 
@@ -21,7 +22,8 @@ public class StageTypeService( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetAllStageTypesList,
            reader => new StageTypeModel
            {
-               Type = reader [ "type" ].ToString()
+               Type = reader [ "type" ].ToString(),
+               Omschrijving = reader [ "omschrijving" ].ToString()
            } );
     }
 

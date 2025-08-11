@@ -13,7 +13,7 @@
 @inject StageService StageService;
 @inject StageTypeService StageTypeService;
 
-if (IsLoading)
+@if (IsLoading)
 {
     <div class="text-center p-2">
         <SfSpinner CssClass="e-spin-center" />
@@ -34,16 +34,23 @@ else
                                 TItem="StageTypeModel"
                                 Placeholder="Kies een podium type"
                                 DataSource="@AvailableStageTypes"
+                                @bind-Value="@SelectedStage.Type"
                                 Width="250px">
-                        <ComboBoxFieldSettings Value="Type" Text="Text"></ComboBoxFieldSettings>
+                        <ComboBoxFieldSettings Value="Type" Text="ComboBoxDisplayName"></ComboBoxFieldSettings>
                     </SfComboBox>
+
+                    <SfComboBox 
+                        TValue=string 
+                        TItem=string 
+                        Placeholder="Binnen of buiten podium" 
+                        DataSource="@dataStageKind" 
+                        @bind-Value="@SelectedStage.Soort" 
+                        Width="300px" />
+
+                    <SfNumericTextBox @bind-Value="SelectedStage.KaartNummer" Placeholder="Kaartnummer" Width="100px" />
                 </div>
             </SfDataForm>
-        </div>
-
-        <div class="scrollable-content">
-            @* DataGrid *@ 
-            <div class="spacer-medium"></div>
+            <div class="spacer-large"/>
             <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
                 <SfToolbar Width="550px">
                     <ToolbarItems>
@@ -85,19 +92,30 @@ else
                         </ToolbarItem>
                     </ToolbarItems>
                 </SfToolbar>
+            </div>
+        </div>
 
+        <div class="scrollable-content" style="height:250px">
+            @* DataGrid *@ 
+            <div class="spacer-medium"></div>
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
                 <SfGrid @ref="GridRef"
                     TValue="StageModel"
-                    DataSource="@Stages" EnableStickyHeader="true"
-                    AllowResizing="true" Width="550px"
+                    DataSource="@Stages" 
+                    EnableStickyHeader="true"
+                    AllowResizing="true" 
+                    Height="100%"
+                    Width="650px" 
+                    AllowSorting="true" 
+                    AllowMultiSorting="true"
                     AllowSelection="true">
                     <GridEvents TValue="StageModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
 
                     <GridColumns>
-                        <GridColumn Field="Naam" HeaderText="Naam" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="180px" />
-                        <GridColumn Field="Type" HeaderText="Type" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="80px" />
-                        <GridColumn Field="Soort" HeaderText="Soort" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="100px" />
-                        <GridColumn Field="KaartNummer" HeaderText="Kaart nummer" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="100px" />
+                        <GridColumn Field="Naam" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" />
+                        <GridColumn Field="Type" HeaderText="Type" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="80px" />
+                        <GridColumn Field="Soort" HeaderText="Soort" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="80px" />
+                        <GridColumn Field="KaartNummer" HeaderText="Kaart nummer" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="150px" />
                     </GridColumns>
                 </SfGrid>
                 <div class="spacer-large"></div>
@@ -136,9 +154,9 @@ else
         //var stagetypeModel = await StageTypeService.GetActiveStageTypesListAsync();
 
         Stages = await StageService.GetAllStagesAsync();
-        AvailableStageTypes = await StageTypeService.GetActiveStageTypesListAsync();
+        AvailableStageTypes = await StageTypeService.GetAllStageTypesListAsync();
         SelectedStage = Stages
-            .OrderByDescending( f => int.Parse( f.Naam ) )
+            .OrderByDescending( f => f.Naam )
             .FirstOrDefault();
         IsLoading = false;
     }
@@ -225,4 +243,8 @@ else
             .FirstOrDefault();
         await GridRef.Refresh();
     }
+
+    // List for Kind of Stage (In or Out)
+    public string ComboBoxValue { get; set; } = "Buiten";
+    public string[] dataStageKind = { "Binnen", "Buiten" };
 }
