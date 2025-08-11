@@ -29,30 +29,37 @@ else
             <SfDataForm Model="SelectedStage" OnValidSubmit="SaveStage" LabelPosition="FormLabelPosition.Top">
                 <div class="form-floating-switch">
                     <hr />
-                    <SfTextBox @bind-Value="SelectedStage.Naam" Placeholder="Podium naam" Width="250px" />
-                    <SfComboBox TValue="string"
-                                TItem="StageTypeModel"
-                                Placeholder="Kies een podium type"
-                                DataSource="@AvailableStageTypes"
-                                @bind-Value="@SelectedStage.Type"
-                                Width="250px">
-                        <ComboBoxFieldSettings Value="Type" Text="ComboBoxDisplayName"></ComboBoxFieldSettings>
+                    <SfTextBox @bind-Value="SelectedStage.Naam" Placeholder="Podium naam" FloatLabelType="FloatLabelType.Always" Width="450px" />
+                    <SfNumericTextBox @bind-Value="SelectedStage.KaartNummer" Placeholder="Kaartnummer" FloatLabelType="FloatLabelType.Always" Width="160px" />
+                    <SfComboBox 
+                        TValue=string
+                            TItem=string 
+                            FloatLabelType="FloatLabelType.Always"
+                            Placeholder="Binnen of buiten podium"
+                            DataSource="@dataStageKind"
+                            @bind-Value="@SelectedStage.Soort"
+                            Width="180px" />
+                    <div />
+                    <SfComboBox 
+                        TValue="string"
+                        TItem="StageTypeModel"
+                        FloatLabelType="FloatLabelType.Always"
+                        Placeholder="Kies een podium type"
+                        DataSource="@AvailableStageTypes"
+                        @bind-Value="@SelectedStage.Type"
+                        Width="450px">
+                        <ItemTemplate Context="stageType">
+                            <div title="@stageType.ComboBoxDisplayName">
+                                @stageType.ComboBoxDisplayName
+                            </div>
+                        </ItemTemplate>
                     </SfComboBox>
 
-                    <SfComboBox 
-                        TValue=string 
-                        TItem=string 
-                        Placeholder="Binnen of buiten podium" 
-                        DataSource="@dataStageKind" 
-                        @bind-Value="@SelectedStage.Soort" 
-                        Width="300px" />
-
-                    <SfNumericTextBox @bind-Value="SelectedStage.KaartNummer" Placeholder="Kaartnummer" Width="100px" />
                 </div>
             </SfDataForm>
             <div class="spacer-large"/>
             <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
-                <SfToolbar Width="550px">
+                <SfToolbar Width="800px">
                     <ToolbarItems>
                         <ToolbarItem Type="ItemType.Button">
                             <Template>
@@ -104,18 +111,18 @@ else
                     DataSource="@Stages" 
                     EnableStickyHeader="true"
                     AllowResizing="true" 
-                    Height="@GridHeight"
-                    Width="650px" 
+                    Height="560px"
+                    Width="800px" 
                     AllowSorting="true" 
                     AllowMultiSorting="true"
                     AllowSelection="true">
                     <GridEvents TValue="StageModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
 
                     <GridColumns>
-                        <GridColumn Field="Naam" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" />
-                        <GridColumn Field="Type" HeaderText="Type" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="80px" />
+                        <GridColumn Field="Naam" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="500px" />
+                        <GridColumn Field="Type" HeaderText="Type" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="60px" />
                         <GridColumn Field="Soort" HeaderText="Soort" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="80px" />
-                        <GridColumn Field="KaartNummer" HeaderText="Kaart nummer" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="150px" />
+                        <GridColumn Field="KaartNummer" HeaderText="Kaart nummer" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="130px" />
                     </GridColumns>
                 </SfGrid>
                 <div class="spacer-large"></div>
@@ -148,10 +155,6 @@ else
     protected override async Task OnInitializedAsync()
     {
         IsLoading = true;
-
-        // Not sure if this is needed
-        //var stageModels = await StageService.GetAllStagesAsync();
-        //var stagetypeModel = await StageTypeService.GetActiveStageTypesListAsync();
 
         Stages = await StageService.GetAllStagesAsync();
         AvailableStageTypes = await StageTypeService.GetAllStageTypesListAsync();

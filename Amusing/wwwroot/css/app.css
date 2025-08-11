@@ -282,6 +282,11 @@ a, .btn-link {
     outline: none;
 }
 
+.e-input-group.e-ntstyle.e-control-wrapper:not(.e-success):not(.e-warning):not(.e-error):not(.e-float-icon-left),
+.e-float-input.e-control-wrapper:not(.e-success):not(.e-warning):not(.e-error):not(.e-disabled):not(.e-float-icon-left) {
+    margin-right: 30px !important; /* Override Syncfusion hover style */
+}
+
    /* SfNumericTextBox: To specify font size and background color of the Up and Down arrow */
 .e-numeric.e-control-wrapper.e-input-group .e-input-group-icon {
     font-size: 20px;
