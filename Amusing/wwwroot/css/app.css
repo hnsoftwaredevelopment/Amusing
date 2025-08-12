@@ -363,3 +363,9 @@ a, .btn-link {
     pointer-events: none;
     filter: grayscale(100%);
 }
+
+/* Place item where tooltip is used inline with other objects */
+#CardNumberTooltip {
+    display: inline-block;
+    vertical-align: middle; /* zorgt dat alles mooi op 1 lijn staat */
+}

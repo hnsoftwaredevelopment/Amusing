@@ -898,4 +898,25 @@ public static class QueryDefinitions
 
         return sb.ToString();
     }
+
+    public static readonly string ModifyStage = @"
+        UPDATE amusing.ah_podia 
+            SET naam = @Naam,
+                soort = @Soort,
+                type = @Type,
+                kwaliteit = @Kwaliteit,
+                max_zangers = @MaxZangers,
+                aantal_vrijwilligers = @AantalVrijwilligers,
+                opening = @Opening,
+                sluiting = @Sluiting,
+                vrijwilligers_vanaf = @VrijwilligersVanaf,
+                vrijwilligers_tot = @VrijwilligersTot,
+                kaart_nummer = @KaartNummer
+        WHERE podium_id = @PodiumId;";
+
+    public static readonly string InsertNewStage = @"
+        INSERT INTO amusing.ah_podia (type, aantal_vrijwilligers, kaart_nummer) VALUES ('A', 'geen', 0);
+        SELECT LAST_INSERT_ID();";
+
+    public static readonly string DeleteStage = @"DELETE FROM ah_podia WHERE podium_id = @StageId;";
 }
