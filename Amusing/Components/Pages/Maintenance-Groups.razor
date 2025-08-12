@@ -1,0 +1,210 @@
+﻿@page "/Maintenance-Groups"
+@using Amusing.Models
+@using Amusing.Services
+@using Bit.BlazorUI
+@using Bit.BlazorUI.Extras
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+@using System.ComponentModel.DataAnnotations
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.RichTextEditor
+@using Microsoft.AspNetCore.Components.Forms
+
+@inject NavigationManager NavManager
+@inject IJSRuntime JS
+
+@if (IsLoading)
+{
+    <div class="text-center p-2">
+        <SfSpinner CssClass="e-spin-center" />
+        <p>@FileName worden geladen...</p>
+    </div>
+}
+else
+{
+    <div class="page-container">
+        <div class="fixed-header">
+            <h3>Onderhoud @FileName</h3>
+            <SfTab>
+                <TabItems>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Groep"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="form-floating-switch">
+                                <SfTextBox Placeholder="Naam" FloatLabelType="FloatLabelType.Always" Width="500px" />
+
+                                <SfRichTextEditor Width="800px">
+                                    <RichTextEditorToolbarSettings Items="@Tools" />
+                                    <p>Rich Text Editor allows to insert images from online source as well as local computer where you want to insert the image in your content.</p>
+                                    <p><b>Get started Quick Toolbar to click on the image</b></p>
+                                    <p>It is possible to add custom style on the selected image inside the Rich Text Editor through quick toolbar.</p>
+                                </SfRichTextEditor>
+                                <div/>
+                                <SfTextBox Placeholder="Standplaats" FloatLabelType="FloatLabelType.Always" Width="250px" />
+                                <SfComboBox TValue=string
+                                            TItem=string
+                                            FloatLabelType="FloatLabelType.Always"
+                                            Placeholder="Land"
+                                            DataSource="@dataCountry"
+                                            Width="180px" />
+                                <SfComboBox TValue=string
+                                            TItem=string
+                                            FloatLabelType="FloatLabelType.Always"
+                                            Placeholder="Genre"
+                                            DataSource="@dataGenre"
+                                            Width="180px" />
+                                <div/>
+                                <SfTextBox Placeholder="Rekeningnummer" FloatLabelType="FloatLabelType.Always" Width="250px" />
+                                <div />
+                                <SfTextBox Placeholder="Website" FloatLabelType="FloatLabelType.Always" Width="400px" />
+                                <SfTextBox Placeholder="E-Mail" FloatLabelType="FloatLabelType.Always" Width="400px" />
+                                <div />
+                                <h3>Logo upload (max height: 80px)</h3>
+                                <div class="drop-zone">
+                                    <InputFile OnChange="@(e => OnImageSelected( e, true ))" accept=".png,.jpg,.jpeg" />
+                                    @if ( !string.IsNullOrEmpty( LogoPreview ) )
+                                    {
+                                        <img src="@LogoPreview" style="max-height:80px; border:1px solid #ccc; padding:2px;" />
+                                    }
+                                </div>
+
+                                <h3>Koorfoto upload (max height: 150px)</h3>
+                                <div class="drop-zone">
+                                    <InputFile OnChange="@(e => OnImageSelected( e, false ))" accept=".png,.jpg,.jpeg" />
+                                    @if ( !string.IsNullOrEmpty( PhotoPreview ) )
+                                    {
+                                        <img src="@PhotoPreview" style="max-height:150px; border:1px solid #ccc; padding:2px;" />
+                                    }
+                                </div>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Personen"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="login-form">
+                                <div class='wrap'>
+                                    <div id="input-container">
+                                        <div class="e-float-input e-input-group">
+                                            <input type="text" />
+                                            <span class="e-float-line"></span>
+                                            <label class="e-float-text">Username</label>
+                                        </div>
+                                        <div class="e-float-input e-input-group">
+                                            <input type="password" />
+                                            <span class="e-float-line"></span>
+                                            <label class="e-float-text">Password</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                </TabItems>
+            </SfTab>
+        </div>
+    </div>
+}
+
+@code 
+{
+    private string FileName = "Groepen";
+    private bool IsLoading = false;
+    private bool _initialLoadDone = false;
+    //private SfGrid<GroupModel> GridRef;
+    //private GroupModel? SelectedGroup;
+    private int VisibleRowCount = 0;
+    //private List<GroupModel> Groups = [];
+
+    private SfTooltip? TooltipObj;
+    private bool isOpen = false;
+
+    // List for Kind of Stage (In or Out)
+    public string ComboBoxCountryValue { get; set; } = "Nederland";
+    public string[] dataCountry = { "Nederland", "Duitsland" };
+
+    public string ComboBoxGenreValue { get; set; } = "Nederland";
+    public string[] dataGenre = { "Mannenkoor", "Pop", "Rock" };
+
+    private string LogoPreview;
+    private string PhotoPreview;
+
+    private byte[] LogoData;
+    private byte[] PhotoData;
+
+    // Called when a file is selected
+    private async Task OnImageSelected( InputFileChangeEventArgs e, bool isLogo )
+    {
+        // Get the first selected file
+        var file = e.File;
+
+        // Limit file size to 5MB
+        using var stream = file.OpenReadStream(5 * 1024 * 1024);
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync( ms );
+
+        var bytes = ms.ToArray();
+
+        // Create base64 string for preview
+        var base64 = Convert.ToBase64String(bytes);
+        var imageDataUrl = $"data:image/png;base64,{base64}";
+
+        // Assign to correct field
+        if ( isLogo )
+        {
+            LogoData = bytes;
+            LogoPreview = imageDataUrl;
+        }
+        else
+        {
+            PhotoData = bytes;
+            PhotoPreview = imageDataUrl;
+        }
+    }
+
+    // Save both images to the database
+    private async Task SaveImages()
+    {
+        if ( LogoData != null && PhotoData != null )
+        {
+            await SaveToDatabase( LogoData, PhotoData );
+        }
+    }
+
+    // Example database save method
+    private Task SaveToDatabase( byte [ ] logo, byte [ ] photo )
+    {
+        // TODO: Call your service/repository to save in DB
+        return Task.CompletedTask;
+    }
+
+    // Contents of the Rich Text Editor Toolbar
+    private List<ToolbarItemModel> Tools = new List<ToolbarItemModel>()
+    {
+        new ToolbarItemModel() { Command = ToolbarCommand.Undo },
+        new ToolbarItemModel() { Command = ToolbarCommand.Redo },
+        new ToolbarItemModel() { Command = ToolbarCommand.Separator },
+        new ToolbarItemModel() { Command = ToolbarCommand.Bold },
+        new ToolbarItemModel() { Command = ToolbarCommand.Italic },
+        new ToolbarItemModel() { Command = ToolbarCommand.Underline },
+        new ToolbarItemModel() { Command = ToolbarCommand.StrikeThrough },
+        new ToolbarItemModel() { Command = ToolbarCommand.SuperScript },
+        new ToolbarItemModel() { Command = ToolbarCommand.SubScript },
+        new ToolbarItemModel() { Command = ToolbarCommand.Separator },
+        new ToolbarItemModel() { Command = ToolbarCommand.FontSize },
+        new ToolbarItemModel() { Command = ToolbarCommand.FontColor },
+        new ToolbarItemModel() { Command = ToolbarCommand.BackgroundColor },
+        new ToolbarItemModel() { Command = ToolbarCommand.Separator },
+        new ToolbarItemModel() { Command = ToolbarCommand.Outdent },
+        new ToolbarItemModel() { Command = ToolbarCommand.Indent }
+    };
+
+}
