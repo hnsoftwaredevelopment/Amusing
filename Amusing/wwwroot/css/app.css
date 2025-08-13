@@ -278,13 +278,14 @@ a, .btn-link {
     border-left: none;
     border-top: none;
     border-right: none;
-    margin-right: 30px;
+    border-bottom:none;
+    margin-right: 10px;
     outline: none;
 }
 
 .e-input-group.e-ntstyle.e-control-wrapper:not(.e-success):not(.e-warning):not(.e-error):not(.e-float-icon-left),
 .e-float-input.e-control-wrapper:not(.e-success):not(.e-warning):not(.e-error):not(.e-disabled):not(.e-float-icon-left) {
-    margin-right: 30px !important; /* Override Syncfusion hover style */
+    margin-right: 10px !important; /* Override Syncfusion hover style */
 }
 
    /* SfNumericTextBox: To specify font size and background color of the Up and Down arrow */
@@ -365,7 +366,7 @@ a, .btn-link {
 }
 
 /* Place item where tooltip is used inline with other objects */
-#CardNumberTooltip {
+.CardNumberTooltip {
     display: inline-block;
     vertical-align: middle; /* zorgt dat alles mooi op 1 lijn staat */
 }

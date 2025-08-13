@@ -36,51 +36,74 @@ else
                             <TabHeader Text="Groep"></TabHeader>
                         </ChildContent>
                         <ContentTemplate>
-                            <div class="form-floating-switch">
-                                <SfTextBox Placeholder="Naam" FloatLabelType="FloatLabelType.Always" Width="500px" />
+                            <div class="koor-details-container">
+                                <!-- Left column: form fields -->
+                                <div class="koor-left">
+                                    <div class="form-row">
+                                        <SfTextBox Placeholder="Naam" FloatLabelType="FloatLabelType.Always" Width="45%" />
+                                        <SfTextBox Placeholder="Standplaats" FloatLabelType="FloatLabelType.Always" Width="25%" />
+                                        <SfComboBox TValue="string" TItem="string" FloatLabelType="FloatLabelType.Always"
+                                                    Placeholder="Land" DataSource="@dataCountry" Width="15%" />
+                                    </div>
 
-                                <SfRichTextEditor Width="800px">
-                                    <RichTextEditorToolbarSettings Items="@Tools" />
-                                    <p>Rich Text Editor allows to insert images from online source as well as local computer where you want to insert the image in your content.</p>
-                                    <p><b>Get started Quick Toolbar to click on the image</b></p>
-                                    <p>It is possible to add custom style on the selected image inside the Rich Text Editor through quick toolbar.</p>
-                                </SfRichTextEditor>
-                                <div/>
-                                <SfTextBox Placeholder="Standplaats" FloatLabelType="FloatLabelType.Always" Width="250px" />
-                                <SfComboBox TValue=string
-                                            TItem=string
-                                            FloatLabelType="FloatLabelType.Always"
-                                            Placeholder="Land"
-                                            DataSource="@dataCountry"
-                                            Width="180px" />
-                                <SfComboBox TValue=string
-                                            TItem=string
-                                            FloatLabelType="FloatLabelType.Always"
-                                            Placeholder="Genre"
-                                            DataSource="@dataGenre"
-                                            Width="180px" />
-                                <div/>
-                                <SfTextBox Placeholder="Rekeningnummer" FloatLabelType="FloatLabelType.Always" Width="250px" />
-                                <div />
-                                <SfTextBox Placeholder="Website" FloatLabelType="FloatLabelType.Always" Width="400px" />
-                                <SfTextBox Placeholder="E-Mail" FloatLabelType="FloatLabelType.Always" Width="400px" />
-                                <div />
-                                <h3>Logo upload (max height: 80px)</h3>
-                                <div class="drop-zone">
-                                    <InputFile OnChange="@(e => OnImageSelected( e, true ))" accept=".png,.jpg,.jpeg" />
-                                    @if ( !string.IsNullOrEmpty( LogoPreview ) )
-                                    {
-                                        <img src="@LogoPreview" style="max-height:80px; border:1px solid #ccc; padding:2px;" />
-                                    }
+                                    <SfRichTextEditor Width="100%">
+                                        <RichTextEditorToolbarSettings Items="@Tools" />
+                                        <p>Beschrijving koor...</p>
+                                    </SfRichTextEditor>
+
+                                    <div class="form-row">
+                                        <SfComboBox TValue="string" TItem="string" FloatLabelType="FloatLabelType.Always"
+                                                    Placeholder="Genre" DataSource="@dataGenre" Width="40%" />
+                                        <SfTextBox Placeholder="Rekeningnummer" FloatLabelType="FloatLabelType.Always" Width="40%" />
+                                    </div>
+
+                                    <div class="form-row">
+                                        <SfTextBox Placeholder="Website" FloatLabelType="FloatLabelType.Always" Width="45%" />
+                                        <SfTextBox Placeholder="E-Mail" FloatLabelType="FloatLabelType.Always" Width="45%" />
+                                    </div>
                                 </div>
 
-                                <h3>Koorfoto upload (max height: 150px)</h3>
-                                <div class="drop-zone">
-                                    <InputFile OnChange="@(e => OnImageSelected( e, false ))" accept=".png,.jpg,.jpeg" />
-                                    @if ( !string.IsNullOrEmpty( PhotoPreview ) )
-                                    {
-                                        <img src="@PhotoPreview" style="max-height:150px; border:1px solid #ccc; padding:2px;" />
-                                    }
+                                <!-- Right column: sticky images -->
+                                <div class="koor-right">
+                                    <div class="sticky-photo-panel">
+                                        <h4>Logo</h4>
+                                        <div class="drop-zone">
+                                            @if ( !string.IsNullOrEmpty( LogoPreview ) )
+                                            {
+                                                <img src="@LogoPreview" style="max-height:80px;" />
+                                            }
+
+                                            <label class="custom-upload-btn">📁 Kies koor logo
+                                                <InputFile class="custom-upload-btn.hidden-file-input"
+                                                           OnChange="@(e => OnImageSelected(e, true))"
+                                                           accept=".png,.jpg,.jpeg" />
+                                            </label>
+
+                                            <div class="file-name">
+                                                @(SelectedLogoFileName ?? "Nog geen logo beschikbaar")
+                                            </div>
+                                            <div class="drop-hint">Klik of sleep het logo hierheen</div>
+                                        </div>
+
+                                        <h4>Koorfoto</h4>
+                                        <div class="drop-zone">
+                                            @if ( !string.IsNullOrEmpty( PhotoPreview ) )
+                                            {
+                                                <img src="@PhotoPreview" alt="Preview" class="preview-img" />
+                                            }
+
+                                            <label class="custom-upload-btn">📁 Kies koor foto
+                                                <InputFile class="hidden-file-input"
+                                                           OnChange="@(e => OnImageSelected(e, false))"
+                                                           accept=".png,.jpg,.jpeg" />
+                                            </label>
+
+                                            <div class="file-name">
+                                                @(SelectedPhotoFileName ?? "Nog geen foto beschikbaar")
+                                            </div>
+                                            <div class="drop-hint">Klik of sleep de foto hierheen</div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </ContentTemplate>
@@ -119,6 +142,13 @@ else
     private string FileName = "Groepen";
     private bool IsLoading = false;
     private bool _initialLoadDone = false;
+    private bool isDragOverLogo = false;
+    private bool isDragOverPhoto = false;
+    private string? SelectedLogoFileName;
+    private string? SelectedPhotoFileName;
+    private ElementReference? logoFileInput;
+
+
     //private SfGrid<GroupModel> GridRef;
     //private GroupModel? SelectedGroup;
     private int VisibleRowCount = 0;
@@ -134,40 +164,39 @@ else
     public string ComboBoxGenreValue { get; set; } = "Nederland";
     public string[] dataGenre = { "Mannenkoor", "Pop", "Rock" };
 
-    private string LogoPreview;
-    private string PhotoPreview;
+    private string? LogoPreview;
+    private string? PhotoPreview;
 
-    private byte[] LogoData;
-    private byte[] PhotoData;
+    private byte[]? LogoData;
+    private byte[]? PhotoData;
 
     // Called when a file is selected
     private async Task OnImageSelected( InputFileChangeEventArgs e, bool isLogo )
     {
-        // Get the first selected file
         var file = e.File;
+        var preview = await GetImageDataUrl(file);
 
-        // Limit file size to 5MB
-        using var stream = file.OpenReadStream(5 * 1024 * 1024);
-        using var ms = new MemoryStream();
-        await stream.CopyToAsync( ms );
-
-        var bytes = ms.ToArray();
-
-        // Create base64 string for preview
-        var base64 = Convert.ToBase64String(bytes);
-        var imageDataUrl = $"data:image/png;base64,{base64}";
-
-        // Assign to correct field
         if ( isLogo )
         {
-            LogoData = bytes;
-            LogoPreview = imageDataUrl;
+            SelectedLogoFileName = file.Name;
+            LogoPreview = preview;
         }
         else
         {
-            PhotoData = bytes;
-            PhotoPreview = imageDataUrl;
+            SelectedPhotoFileName = file.Name;
+            PhotoPreview = preview;
         }
+    }
+
+    
+    // Helper to confert the file to Base64 data URL
+    private async Task<string> GetImageDataUrl( IBrowserFile file )
+    {
+        using var stream = file.OpenReadStream(5 * 1024 * 1024);
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync( ms );
+        var base64 = Convert.ToBase64String(ms.ToArray());
+        return $"data:{file.ContentType};base64,{base64}";
     }
 
     // Save both images to the database

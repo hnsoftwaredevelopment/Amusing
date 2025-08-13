@@ -1,0 +1,115 @@
+.koor-details-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr; /* left wide, right narrow */
+    gap: 1rem;
+    align-items: start;
+}
+
+/* Make sticky panel stick within the tab area */
+.sticky-photo-panel {
+    position: sticky;
+    top: 1rem; /* distance from top of the viewport */
+}
+
+/* On smaller screens, stack vertically */
+@media (max-width: 992px) {
+    .koor-details-container {
+        grid-template-columns: 1fr;
+    }
+
+    .sticky-photo-panel {
+        position: static; /* disable sticky on mobile */
+    }
+}
+
+.koor-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.koor-right {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Dropzone styling */
+.drop-zone {
+    position: relative;
+    border: 2px dashed #0077cc;
+    background-color: #f5faff;
+    padding: 1rem;
+    text-align: center;
+    border-radius: 10px;
+    /* layout */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    /* optional hover effect */
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+    .drop-zone.drag-over {
+        border-color: #0078d4;
+        background-color: #e8f4ff;
+    }
+
+    /* Invisible overlay that captures CLICK and DROP over the whole zone */
+    .drop-zone .drop-input {
+        position: absolute;
+        display: none;
+        inset: 0; /* top:0; right:0; bottom:0; left:0 */
+        opacity: 0; /* fully invisible */
+        cursor: crosshair; /* show clickable cursor */
+    }
+
+    /* Optional: simple visual feedback on hover */
+    .drop-zone:hover {
+        background-color: #e9f4ff;
+        border-color: #0055aa;
+    }
+
+.preview-img {
+    max-height: 150px;
+    max-width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.custom-upload-btn {
+    background-color: #003366; /* donkerblauw */
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+    .custom-upload-btn:hover {
+        background-color: #0055aa; /* lichtere blauw bij hover */
+    }
+
+.file-name {
+    font-size: 0.9rem;
+    color: #333;
+    font-style: italic;
+}
+
+.drop-hint {
+    font-size: 0.8rem;
+    color: #555;
+}
+
+.custom-upload-btn.hidden-file-input {
+    display: none;
+}
