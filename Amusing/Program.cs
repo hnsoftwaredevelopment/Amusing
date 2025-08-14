@@ -18,15 +18,18 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<GenericDataService>();
+builder.Services.AddScoped<CountryService>();
 builder.Services.AddScoped<EditionService>();
-builder.Services.AddScoped<RegistrationService>();
-builder.Services.AddScoped<VolunteerService>();
 builder.Services.AddScoped<EmailAddressesService>();
-builder.Services.AddScoped<PersonService>();
 builder.Services.AddScoped<FestivalService>();
+builder.Services.AddScoped<GenreService>();
+builder.Services.AddScoped<GroupService>();
+builder.Services.AddScoped<PersonService>();
+builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<StageService>();
 builder.Services.AddScoped<StageTypeService>();
 builder.Services.AddScoped<TaskService>();
+builder.Services.AddScoped<VolunteerService>();
 
 builder.Services.AddAuthentication( CookieAuthenticationDefaults.AuthenticationScheme )
     .AddCookie( options =>

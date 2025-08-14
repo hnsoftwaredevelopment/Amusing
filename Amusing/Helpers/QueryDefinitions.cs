@@ -919,4 +919,81 @@ public static class QueryDefinitions
         SELECT LAST_INSERT_ID();";
 
     public static readonly string DeleteStage = @"DELETE FROM ah_podia WHERE podium_id = @StageId;";
+
+    public static readonly string GetActiveCountries = @"
+        SELECT 
+	        country.code AS CountryId,
+	        country.naam AS Country,
+	        country.zichtbaar AS Active
+        FROM amusing.ah_landen country
+        WHERE country.zichtbaar = 1;";
+    public static readonly string GetAllCountries = @"
+        SELECT 
+	        country.code AS CountryId,
+	        country.naam AS Country,
+	        country.zichtbaar AS Active
+        FROM amusing.ah_landen country;";
+    public static readonly string GetGenres = @"
+        SELECT 
+	        gen.genre_id  AS GenreId,
+	        gen.nl AS Nl,
+	        gen.de AS De,
+	        gen.en AS En
+        FROM amusing.ah_genres gen;";
+    public static readonly string GetAllGroups = @"
+        SELECT 
+            grp.zanggroep_id	AS GroupId,
+            grp.naam  			AS Name,
+            grp.genre_id 		AS GenreId,
+            gen.nl 				AS Genre,
+            grp.standplaats 	AS City,
+            grp.land 			AS CountryId,
+            cou.naam 			AS Country,
+            grp.website 		AS Website,
+            det.email 			AS Email,
+            grp.foto 			AS Photo,
+            grp.logo 			AS Logo,
+            grp.beschrijving 	AS Description,
+            grp.rekeningnr 		AS BankAccount,
+            grp.actief 			AS Active
+        FROM amusing.ah_zanggroepen grp 
+        JOIN amusing.ah_zanggroep_details det ON grp.zanggroep_id = det.id 
+        JOIN amusing.ah_genres gen ON grp.genre_id = gen.genre_id 
+        JOIN amusing.ah_landen cou ON grp.land COLLATE utf8mb3_unicode_ci = cou.code;";
+    public static readonly string GetAllActivePersonsByGroupId = @"
+        SELECT 
+	        rol.persoon_id AS PersoonId,
+            CONCAT_WS(' ', per.voornaam, per.tussenvoegsel, per.achternaam) AS Name,
+	        per.email AS Email,
+	        per.actief  AS Active,
+	        rol.zanggroep_id AS GroupId,
+	        rol.rol AS Role
+        FROM amusing.ah_personen_rollen rol
+        JOIN amusing.ah_personen per ON rol.persoon_id = per.persoon_id 
+        WHERE rol.zanggroep_id = @GroupId AND per.actief = 1
+        ORDER BY rol.rol;";
+    public static readonly string GetAllInactivePersonsByGroupId = @"
+        SELECT 
+	        rol.persoon_id AS PersoonId,
+            CONCAT_WS(' ', per.voornaam, per.tussenvoegsel, per.achternaam) AS Name,
+	        per.email AS Email,
+	        per.actief  AS Active,
+	        rol.zanggroep_id AS GroupId,
+	        rol.rol AS Role
+        FROM amusing.ah_personen_rollen rol
+        JOIN amusing.ah_personen per ON rol.persoon_id = per.persoon_id 
+        WHERE rol.zanggroep_id = @GroupId AND per.actief = 0
+        ORDER BY rol.rol;";
+    public static readonly string GetAllUnrelatedPersonsByGroupId = @"
+        SELECT 
+	        rol.persoon_id AS PersoonId,
+            CONCAT_WS(' ', per.voornaam, per.tussenvoegsel, per.achternaam) AS Name,
+	        per.email AS Email,
+	        per.actief  AS Active,
+	        rol.zanggroep_id AS GroupId,
+	        rol.rol AS Role
+        FROM amusing.ah_personen_rollen rol
+        JOIN amusing.ah_personen per ON rol.persoon_id = per.persoon_id 
+        WHERE rol.zanggroep_id != @GroupId
+        ORDER BY rol.rol;";
 }

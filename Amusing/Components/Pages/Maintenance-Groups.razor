@@ -14,6 +14,11 @@
 @using Syncfusion.Blazor.RichTextEditor
 @using Microsoft.AspNetCore.Components.Forms
 
+@inject CountryService CountryService;
+@inject GenreService GenreService;
+@inject GroupService GroupService;
+@inject PersonService PersonService;
+
 @inject NavigationManager NavManager
 @inject IJSRuntime JS
 
@@ -29,7 +34,7 @@ else
     <div class="page-container">
         <div class="fixed-header">
             <h3>Onderhoud @FileName</h3>
-            <SfTab>
+            <SfTab @ref="GroupTab" OnSelected="OnTabSelected">
                 <TabItems>
                     <TabItem>
                         <ChildContent>
@@ -38,72 +43,75 @@ else
                         <ContentTemplate>
                             <div class="koor-details-container">
                                 <!-- Left column: form fields -->
-                                <div class="koor-left">
-                                    <div class="form-row">
-                                        <SfTextBox Placeholder="Naam" FloatLabelType="FloatLabelType.Always" Width="45%" />
-                                        <SfTextBox Placeholder="Standplaats" FloatLabelType="FloatLabelType.Always" Width="25%" />
-                                        <SfComboBox TValue="string" TItem="string" FloatLabelType="FloatLabelType.Always"
-                                                    Placeholder="Land" DataSource="@dataCountry" Width="15%" />
-                                    </div>
+                                <div class="form-row">
+                                    <SfTextBox Placeholder="Naam" FloatLabelType="FloatLabelType.Always" Width="45%" @bind-Value="SelectedGroup.Name"/>
+                                    <SfTextBox Placeholder="Standplaats" FloatLabelType="FloatLabelType.Always" Width="25%" @bind-Value="SelectedGroup.City"/>
+                                    <SfComboBox TValue="string" TItem="CountryModel" FloatLabelType="FloatLabelType.Always"
+                                                Placeholder="Land" DataSource="@Countries" Width="20%" @bind-Value="SelectedGroup.Country" >
+                                        <ComboBoxFieldSettings Value="CountryId" Text="Country"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                </div>
 
-                                    <SfRichTextEditor Width="100%">
-                                        <RichTextEditorToolbarSettings Items="@Tools" />
-                                        <p>Beschrijving koor...</p>
-                                    </SfRichTextEditor>
-
-                                    <div class="form-row">
-                                        <SfComboBox TValue="string" TItem="string" FloatLabelType="FloatLabelType.Always"
-                                                    Placeholder="Genre" DataSource="@dataGenre" Width="40%" />
-                                        <SfTextBox Placeholder="Rekeningnummer" FloatLabelType="FloatLabelType.Always" Width="40%" />
-                                    </div>
-
-                                    <div class="form-row">
-                                        <SfTextBox Placeholder="Website" FloatLabelType="FloatLabelType.Always" Width="45%" />
-                                        <SfTextBox Placeholder="E-Mail" FloatLabelType="FloatLabelType.Always" Width="45%" />
+                                <div class="form-row">
+                                    <div class="sf-float-group">
+                                        <label class="sf-float-label" for="rteBeschrijving">Beschrijving</label>
+                                        <SfRichTextEditor ID="rteBeschrijving" Width="100%" Placeholder="Beschrijving" Height="200px" @bind-Value="SelectedGroup.Description">
+                                            <RichTextEditorToolbarSettings Items="@Tools" />
+                                        </SfRichTextEditor>
                                     </div>
                                 </div>
 
-                                <!-- Right column: sticky images -->
-                                <div class="koor-right">
-                                    <div class="sticky-photo-panel">
-                                        <h4>Logo</h4>
-                                        <div class="drop-zone">
-                                            @if ( !string.IsNullOrEmpty( LogoPreview ) )
-                                            {
-                                                <img src="@LogoPreview" style="max-height:80px;" />
-                                            }
+                                <div class="form-row">
+                                    <SfComboBox TValue="uint" TItem="GenreModel" FloatLabelType="FloatLabelType.Always"
+                                                Placeholder="Genre" DataSource="@Genres" Width="45%" @bind-Value="SelectedGroup.GenreId" >
+                                        <ComboBoxFieldSettings Value="GenreId" Text="Nl"></ComboBoxFieldSettings>
+                                    </SfComboBox>
+                                    <SfTextBox Placeholder="Rekeningnummer" FloatLabelType="FloatLabelType.Always" Width="25%" @bind-Value="SelectedGroup.BankAccount" />
+                                </div>
 
-                                            <label class="custom-upload-btn">📁 Kies koor logo
-                                                <InputFile class="custom-upload-btn.hidden-file-input"
-                                                           OnChange="@(e => OnImageSelected(e, true))"
-                                                           accept=".png,.jpg,.jpeg" />
-                                            </label>
+                                <div class="form-row">
+                                    <SfTextBox Placeholder="Website" FloatLabelType="FloatLabelType.Always" Width="45%" @bind-Value="SelectedGroup.Website" />
+                                    <SfTextBox Placeholder="E-Mail" FloatLabelType="FloatLabelType.Always" Width="45%" @bind-Value="SelectedGroup.Email" />
+                                </div>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Logo/foto"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="dropzone-grid">
+                                <div class="drop-zone" Width="150px">
+                                    <h4>Logo</h4>
+                                    @if ( !string.IsNullOrEmpty( LogoPreview ) )
+                                    {
+                                        <img src="@LogoPreview" style="max-height:80px;" />
+                                    }
 
-                                            <div class="file-name">
-                                                @(SelectedLogoFileName ?? "Nog geen logo beschikbaar")
-                                            </div>
-                                            <div class="drop-hint">Klik of sleep het logo hierheen</div>
-                                        </div>
+                                    <InputFile class="drop-input"
+                                               OnChange="@(e => OnImageSelected(e, true))"
+                                               accept=".png,.jpg,.jpeg" />
 
-                                        <h4>Koorfoto</h4>
-                                        <div class="drop-zone">
-                                            @if ( !string.IsNullOrEmpty( PhotoPreview ) )
-                                            {
-                                                <img src="@PhotoPreview" alt="Preview" class="preview-img" />
-                                            }
+                                    <div class="custom-upload-btn">📁 Selecteer afbeelding</div>
 
-                                            <label class="custom-upload-btn">📁 Kies koor foto
-                                                <InputFile class="hidden-file-input"
-                                                           OnChange="@(e => OnImageSelected(e, false))"
-                                                           accept=".png,.jpg,.jpeg" />
-                                            </label>
+                                    <div class="drop-hint">Klik of sleep het logo hierheen</div>
+                                </div>
 
-                                            <div class="file-name">
-                                                @(SelectedPhotoFileName ?? "Nog geen foto beschikbaar")
-                                            </div>
-                                            <div class="drop-hint">Klik of sleep de foto hierheen</div>
-                                        </div>
-                                    </div>
+                                <div class="drop-zone" Width="200px">
+                                    <h4>Koorfoto</h4>
+                                    @if ( !string.IsNullOrEmpty( PhotoPreview ) )
+                                    {
+                                        <img src="@PhotoPreview" alt="Preview" class="preview-img" />
+                                    }
+
+                                    <InputFile class="drop-input"
+                                               OnChange="@(e => OnImageSelected(e, false))"
+                                               accept=".png,.jpg,.jpeg" />
+
+                                    <div class="custom-upload-btn">📁 Selecteer afbeelding</div>
+
+                                    <div class="drop-hint">Klik of sleep de foto hierheen</div>
                                 </div>
                             </div>
                         </ContentTemplate>
@@ -113,49 +121,106 @@ else
                             <TabHeader Text="Personen"></TabHeader>
                         </ChildContent>
                         <ContentTemplate>
-                            <div class="login-form">
-                                <div class='wrap'>
-                                    <div id="input-container">
-                                        <div class="e-float-input e-input-group">
-                                            <input type="text" />
-                                            <span class="e-float-line"></span>
-                                            <label class="e-float-text">Username</label>
-                                        </div>
-                                        <div class="e-float-input e-input-group">
-                                            <input type="password" />
-                                            <span class="e-float-line"></span>
-                                            <label class="e-float-text">Password</label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <SfDataGrid DataSource="@ActivePersonsList"></SfDataGrid>
+                            <SfDataGrid DataSource="@InactivePersonsList"></SfDataGrid>
+                            <SfDataGrid DataSource="@UnrelatedPersonsList"></SfDataGrid>
                         </ContentTemplate>
                     </TabItem>
                 </TabItems>
             </SfTab>
+
+            <div class="spacer-large" />
+
+            @* Toolbar *@
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+                <SfToolbar Width="800px">
+                    <ToolbarItems>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn"
+                                        @onclick="SaveGroup"
+                                        title="Sla het podium op">
+                                    <img src="icons/button-save.svg" class="icon" alt="SAVE" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn" @onclick="AddNewGroup" title="Voeg een nieuw podium toe">
+                                    <img src="icons/button-add.svg" class="icon" alt="ADD" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn @(SelectedGroup?.Active == 1 ? "disabled" : "")"
+                                        @onclick="DeleteGroup"
+                                        title="Verwijder geselecteerde podium"
+                                        disabled="@(SelectedGroup?.Active == 1)">
+                                    <img src="icons/button-del.svg" class="icon" alt="DEL" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                            <Template>
+                                <span class="toolbar-count">@FileName: @VisibleRowCount</span>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                            <Template>
+                                <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
+                            </Template>
+                        </ToolbarItem>
+                    </ToolbarItems>
+                </SfToolbar>
+            </div>
+        </div>
+
+        <div class="scrollable-content">
+            <div class="spacer-small"></div>
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
+                <SfGrid @ref="GridRef"
+                    TValue="GroupModel"
+                    DataSource="@Groups" 
+                    EnableStickyHeader="true"
+                    AllowResizing="true" 
+                    Height="560px"
+                    Width="800px" 
+                    AllowSorting="true" 
+                    AllowMultiSorting="true"
+                    AllowSelection="true">
+                    <GridEvents TValue="GroupModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
+                    <GridColumns>
+                        <GridColumn Field="Name" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="350px" />
+                        <GridColumn Field="City" HeaderText="Standplaats" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="100px" />
+                        <GridColumn Field="Country" HeaderText="Land" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="90px" />
+                        <GridColumn Field="Genre" HeaderText="Genre" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="100px" />
+                    </GridColumns>
+                </SfGrid>
+            </div>
         </div>
     </div>
 }
 
 @code 
 {
-    private string FileName = "Groepen";
+    private string FileName = "Koren";
     private bool IsLoading = false;
     private bool _initialLoadDone = false;
-    private bool isDragOverLogo = false;
-    private bool isDragOverPhoto = false;
     private string? SelectedLogoFileName;
     private string? SelectedPhotoFileName;
-    private ElementReference? logoFileInput;
+    private List<PersonModel> ActivePersonsList = new();
+    private List<PersonModel> InactivePersonsList = new();
+    private List<PersonModel> UnrelatedPersonsList = new();
+    private SfTab GroupTab;
+    private int currentTabIndex = 0;
 
-
-    //private SfGrid<GroupModel> GridRef;
-    //private GroupModel? SelectedGroup;
+    private SfGrid<GroupModel> GridRef;
+    private GroupModel? SelectedGroup;
     private int VisibleRowCount = 0;
-    //private List<GroupModel> Groups = [];
-
-    private SfTooltip? TooltipObj;
-    private bool isOpen = false;
+    private List<CountryModel> Countries = [];
+    private List<GenreModel> Genres = [];
+    private List<GroupModel> Groups = [];
 
     // List for Kind of Stage (In or Out)
     public string ComboBoxCountryValue { get; set; } = "Nederland";
@@ -164,8 +229,12 @@ else
     public string ComboBoxGenreValue { get; set; } = "Nederland";
     public string[] dataGenre = { "Mannenkoor", "Pop", "Rock" };
 
-    private string? LogoPreview;
-    private string? PhotoPreview;
+    private string LogoPreview => SelectedGroup?.Logo != null
+    ? $"data:{GetImageMimeType( SelectedGroup.Logo )};base64,{Convert.ToBase64String( SelectedGroup.Logo )}"
+    : null;
+    private string PhotoPreview => SelectedGroup?.Photo != null
+        ? $"data:{GetImageMimeType( SelectedGroup.Photo )};base64,{Convert.ToBase64String( SelectedGroup.Photo )}"
+        : null;
 
     private byte[]? LogoData;
     private byte[]? PhotoData;
@@ -174,21 +243,24 @@ else
     private async Task OnImageSelected( InputFileChangeEventArgs e, bool isLogo )
     {
         var file = e.File;
-        var preview = await GetImageDataUrl(file);
+
+        // Read the file into a byte array
+        var buffer = new byte[file.Size];
+        await file.OpenReadStream( 5 * 1024 * 1024 ).ReadAsync( buffer ); // max 5 MB
+
+        // Convert to Base64 with correct MIME type
+        var preview = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
 
         if ( isLogo )
         {
-            SelectedLogoFileName = file.Name;
-            LogoPreview = preview;
+            SelectedGroup.Logo  = buffer;
         }
         else
         {
-            SelectedPhotoFileName = file.Name;
-            PhotoPreview = preview;
+            SelectedGroup.Photo = buffer;
         }
     }
 
-    
     // Helper to confert the file to Base64 data URL
     private async Task<string> GetImageDataUrl( IBrowserFile file )
     {
@@ -197,6 +269,22 @@ else
         await stream.CopyToAsync( ms );
         var base64 = Convert.ToBase64String(ms.ToArray());
         return $"data:{file.ContentType};base64,{base64}";
+    }
+
+    private string GetImageMimeType( byte [ ] imageBytes )
+    {
+        if ( imageBytes == null || imageBytes.Length < 4 )
+            return "application/octet-stream"; // fallback
+
+        // PNG: first 8 bytes: 89 50 4E 47 0D 0A 1A 0A
+        if ( imageBytes [ 0 ] == 0x89 && imageBytes [ 1 ] == 0x50 && imageBytes [ 2 ] == 0x4E && imageBytes [ 3 ] == 0x47 )
+            return "image/png";
+
+        // JPEG: first 2 bytes: FF D8
+        if ( imageBytes [ 0 ] == 0xFF && imageBytes [ 1 ] == 0xD8 )
+            return "image/jpeg";
+
+        return "application/octet-stream"; // fallback
     }
 
     // Save both images to the database
@@ -236,4 +324,155 @@ else
         new ToolbarItemModel() { Command = ToolbarCommand.Indent }
     };
 
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+
+        Groups = await GroupService.GetAllGroupsAsync();
+        Genres = await GenreService.GetGenresAsync();
+        Countries = await CountryService.GetActiveCountriesAsync();
+
+        SelectedGroup = Groups
+            .OrderByDescending( f => f.Name )
+            .FirstOrDefault();
+
+        IsLoading = false;
+    }
+
+    private async Task OnGridDataBound()
+    {
+        if ( !_initialLoadDone )
+        {
+            _initialLoadDone = true;
+            await UpdateVisibleRowCountAsync();
+        }
+    }
+
+    private async Task UpdateVisibleRowCountAsync()
+    {
+        if ( GridRef is not null )
+        {
+            await GridRef.Refresh();
+            await Task.Delay( 50 );
+            var records = await GridRef.GetCurrentViewRecordsAsync();
+            await Task.Delay( 150 );
+            VisibleRowCount = records?.Count ?? 0;
+            StateHasChanged();
+        }
+    }
+
+    public async Task OnInput( InputEventArgs args )
+    {
+        await GridRef.SearchAsync( args.Value );
+
+        await Task.Delay( 50 );
+        await UpdateVisibleRowCountAsync();
+    }
+
+    private async void OnRowSelected( RowSelectEventArgs<GroupModel> args )
+    {
+        SelectedGroup = args.Data;
+
+        if ( currentTabIndex == 2 )
+        {
+            await LoadPersonsAsync();
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task SaveGroup()
+    {
+        if ( SelectedGroup is null )
+            return;
+
+        // Save te current Index of the record in the grid
+        var savedId = SelectedGroup.GroupId;
+
+        //await GroupService.ModifyGroupAsync( SelectedGroup );
+
+        // Refresh the list
+        Groups = await GroupService.GetAllGroupsAsync();
+        await GridRef.Refresh();
+
+        // Search the modified record
+        var index = Groups.FindIndex(s => s.GroupId == savedId);
+        if ( index >= 0 )
+        {
+            SelectedGroup = Groups [ index ];
+            await GridRef.SelectRowAsync( index );
+        }
+    }
+
+    private async Task AddNewGroup()
+    {
+        if ( SelectedGroup is null )
+            return;
+
+        // Insert new record for this year in the table, and get the Group-Id
+        //var groupId = await GroupService.InsertNewGroupAsync();
+
+        // Refresh the list
+        Groups = await GroupService.GetAllGroupsAsync();
+        await GridRef.Refresh();
+
+        // Search the new record
+        //var index = Groups.FindIndex(s => s.GroupId == groupId);
+        // if ( index >= 0 )
+        // {
+        //     SelectedGroup = Groups [ index ];
+        //     await GridRef.SelectRowAsync( index );
+        // }
+    }
+
+    private async Task DeleteGroup()
+    {
+        if ( SelectedGroup is null )
+            return;
+
+        //await GroupService.DeleteGroupAsync( SelectedGroup.GroupId );
+
+        // refresh the table
+        var groupModels = await GroupService.GetAllGroupsAsync();
+
+        Groups = await GroupService.GetAllGroupsAsync();
+        SelectedGroup = Groups
+            .OrderByDescending( f => f.Name )
+            .FirstOrDefault();
+        await GridRef.Refresh();
+
+        // Select the first record in the grid
+        if ( Groups.Any() )
+        {
+            SelectedGroup = Groups [ 0 ];
+            await GridRef.SelectRowAsync( 0 );
+        }
+        else
+        {
+            SelectedGroup = null;
+        }
+    }
+
+    private async Task OnTabSelected( SelectEventArgs args )
+    {
+        currentTabIndex = args.SelectedIndex;
+
+        if ( currentTabIndex == 2 && SelectedGroup is not null ) // 2 = Personstab'
+        {
+            await LoadPersonsAsync();
+        }
+    }
+
+    private async Task LoadPersonsAsync()
+    {
+        if ( SelectedGroup is null )
+            return;
+
+        // Haal categorieën op vanuit service
+        ActivePersonsList = await PersonService.GetAllActivePersonsByGroupId(SelectedGroup.GroupId);
+        InactivePersonsList = await PersonService.GetAllInactivePersonsByGroupId( SelectedGroup.GroupId );
+        UnrelatedPersonsList = await PersonService.GetAllUnrelatedPersonsByGroupId( SelectedGroup.GroupId );
+
+        StateHasChanged(); // Force UI update
+    }
 }
