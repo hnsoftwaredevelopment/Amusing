@@ -34,7 +34,8 @@ else
     <div class="page-container">
         <div class="fixed-header">
             <h3>Onderhoud @FileName</h3>
-            <SfTab @ref="GroupTab" OnSelected="OnTabSelected">
+            <SfTab @ref="GroupTab" @bind-SelectedItem="currentTabIndex">
+                <TabEvents Selected="OnTabSelected"/>
                 <TabItems>
                     <TabItem>
                         <ChildContent>
@@ -121,9 +122,48 @@ else
                             <TabHeader Text="Personen"></TabHeader>
                         </ChildContent>
                         <ContentTemplate>
-                            <SfDataGrid DataSource="@ActivePersonsList"></SfDataGrid>
-                            <SfDataGrid DataSource="@InactivePersonsList"></SfDataGrid>
-                            <SfDataGrid DataSource="@UnrelatedPersonsList"></SfDataGrid>
+                            <div class="persons-layout">
+                                <!-- Active persons for the selected choir -->
+                                <div class="persons-col">
+                                    <label class="persons-grid-label">Actieve personen</label>
+                                    <SfGrid TItem="PersonModel" @ref="ActivePersonGridRef" DataSource="@ActivePersonsList" AllowSelection="true" ContextMenuItems="@ActivePersonsContextMenuItems" AllowSorting="true" Height="105px">
+                                        <GridEvents ContextMenuItemClicked="OnContextMenuClick" TValue="PersonModel"/>
+                                        
+                                        
+                                        <GridColumns>
+                                            <GridColumn Field="Name" HeaderText="Naam" Width="60px" />
+                                            <GridColumn Field="Email" HeaderText="E-Mail" Width="80px" />
+                                            <GridColumn Field="Role" HeaderText="Rol" Width="60px" />
+                                        </GridColumns>
+                                    </SfGrid>
+                                </div>
+
+                                <!-- Available persons to perform a role for the selected choir -->
+                                <div class="persons-col">
+                                    <label class="persons-grid-label">Beschikbare personen</label>
+                                    <SfGrid ID="UnrelatedPersonsGrid" @ref="PersonGridRef" DataSource="@UnrelatedPersonsList" AllowSorting="true" Height="250px">
+                                        <GridColumns>
+                                            <GridColumn Field="Name" HeaderText="Naam" Width="150px" />
+                                            <GridColumn Field="Email" HeaderText="E-Mail" Width="150px" />
+                                            <GridColumn Field="GroupName" HeaderText="Koor" Width="250px" />
+                                        </GridColumns>
+                                        <SfContextMenu TValue="MenuItem" Items="@UnrelatedPersonsContextMenuItems" Target="#UnrelatedPersonsGrid" Select="OnUnrelatedMenuSelect" />
+                                    </SfGrid>
+                                </div>
+
+                                <div class="persons-col">
+                                    <label class="persons-grid-label">Zoek persoon</label>
+                                    <SfToolbar Width="175px">
+                                        <ToolbarItems>
+                                            <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                                                <Template>
+                                                    <SfTextBox Placeholder="Zoek persoon" Input="OnPersonInput"></SfTextBox>
+                                                </Template>
+                                            </ToolbarItem>
+                                        </ToolbarItems>
+                                    </SfToolbar>
+                                </div>
+                            </div>
                         </ContentTemplate>
                     </TabItem>
                 </TabItems>
@@ -210,24 +250,39 @@ else
     private string? SelectedLogoFileName;
     private string? SelectedPhotoFileName;
     private List<PersonModel> ActivePersonsList = new();
-    private List<PersonModel> InactivePersonsList = new();
     private List<PersonModel> UnrelatedPersonsList = new();
     private SfTab GroupTab;
     private int currentTabIndex = 0;
+    public int TabIndex { get; set; }
 
     private SfGrid<GroupModel> GridRef;
+    private SfGrid<PersonModel> ActivePersonGridRef;
+    private SfGrid<PersonModel> PersonGridRef;
     private GroupModel? SelectedGroup;
     private int VisibleRowCount = 0;
     private List<CountryModel> Countries = [];
     private List<GenreModel> Genres = [];
     private List<GroupModel> Groups = [];
 
-    // List for Kind of Stage (In or Out)
-    public string ComboBoxCountryValue { get; set; } = "Nederland";
-    public string[] dataCountry = { "Nederland", "Duitsland" };
+    public string ComboBoxRoleValue { get; set; } = "Contactpersoon1";
+    public string[] dataRole = { "Contactpersoon1", "Contactpersoon2", "Dirigent", "Muzikant", "Penningmeester", "Zanger" };
 
-    public string ComboBoxGenreValue { get; set; } = "Nederland";
-    public string[] dataGenre = { "Mannenkoor", "Pop", "Rock" };
+    public class ContextMenuItem
+    {
+        public string Text { get; set; }
+        public string Id { get; set; }
+        public List<MenuItem> Items { get; set; } = new();
+    }
+
+    public List<ContextMenuItemModel> ActivePersonsContextMenuItems;
+    public List<MenuItem> UnrelatedPersonsContextMenuItems;
+    //public MenuItem SelectedItem;
+    //private void Active_RowDataBound( RowDataBoundEventArgs<PersonModel> args ) => args.Row.AddAttribute( "data-key", args.Data.PersonId.ToString() );
+
+    public async Task OnContextMenuClick( ContextMenuClickEventArgs<PersonModel> args )
+    {
+        var SelectedItem = args.RowInfo.RowData ;
+    }
 
     private string LogoPreview => SelectedGroup?.Logo != null
     ? $"data:{GetImageMimeType( SelectedGroup.Logo )};base64,{Convert.ToBase64String( SelectedGroup.Logo )}"
@@ -336,8 +391,36 @@ else
             .OrderByDescending( f => f.Name )
             .FirstOrDefault();
 
+        // Set the ContextMenu's for the Persons tab
+        // Active persons menu
+        ActivePersonsContextMenuItems = new List<ContextMenuItemModel>
+        {
+            new ContextMenuItemModel { Text = $"Maak niet langer actief", Target="e.content", Id = "make-inactive" },
+            new ContextMenuItemModel { Text = $"Verander de rol in >", Target="e.content", Id = "add-to-group" }
+        };
+
+
+
+        // Unrelated persons menu
+        UnrelatedPersonsContextMenuItems = new List<MenuItem>
+        {
+            new MenuItem
+            {
+                Text = $"Voeg toe voor {SelectedGroup.Name} in de rol van",
+                Id = "add-to-group",
+                Items = CreateRoleMenuItems()
+            }
+        };
         IsLoading = false;
     }
+
+    // Helper to create ContextSubmenu based on roles
+    private List<MenuItem> CreateRoleMenuItems()
+    {
+        var roles = new[] { "Contactpersoon1", "Contactpersoon2", "Dirigent", "Muzikant", "Penningmeester", "Zanger" };
+        return roles.Select( r => new MenuItem { Text = r, Id = $"role-{r}" } ).ToList();
+    }
+
 
     private async Task OnGridDataBound()
     {
@@ -367,6 +450,11 @@ else
 
         await Task.Delay( 50 );
         await UpdateVisibleRowCountAsync();
+    }
+
+    public async Task OnPersonInput( InputEventArgs args )
+    {
+        await PersonGridRef.SearchAsync( args.Value );
     }
 
     private async void OnRowSelected( RowSelectEventArgs<GroupModel> args )
@@ -457,7 +545,7 @@ else
     {
         currentTabIndex = args.SelectedIndex;
 
-        if ( currentTabIndex == 2 && SelectedGroup is not null ) // 2 = Personstab'
+        if ( currentTabIndex == 2 ) // 2 = Personstab'
         {
             await LoadPersonsAsync();
         }
@@ -470,9 +558,38 @@ else
 
         // Haal categorieën op vanuit service
         ActivePersonsList = await PersonService.GetAllActivePersonsByGroupId(SelectedGroup.GroupId);
-        InactivePersonsList = await PersonService.GetAllInactivePersonsByGroupId( SelectedGroup.GroupId );
         UnrelatedPersonsList = await PersonService.GetAllUnrelatedPersonsByGroupId( SelectedGroup.GroupId );
 
         StateHasChanged(); // Force UI update
+    }
+
+    private async void OnActiveMenuSelect( MenuEventArgs<MenuItem> args )
+    {
+        if ( args.Item.Id == "make-inactive" )
+        {
+            //SelectedItem = args.Item;
+            //await PersonService.RemoveActivePersonForGroupAsync( SelectedGroup.GroupId, 0u );
+
+            // refresh the table
+            await LoadPersonsAsync();
+        }
+    }
+
+    private void OnInactiveMenuSelect( MenuEventArgs<MenuItem> args )
+    {
+        if ( args.Item.Id.StartsWith( "role-" ) )
+        {
+            var role = args.Item.Text;
+            // Handle logic to make person active with given role
+        }
+    }
+
+    private void OnUnrelatedMenuSelect( MenuEventArgs<MenuItem> args )
+    {
+        if ( args.Item.Id.StartsWith( "role-" ) )
+        {
+            var role = args.Item.Text;
+            // Handle logic to add person to group with given role
+        }
     }
 }

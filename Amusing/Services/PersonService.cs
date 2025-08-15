@@ -33,25 +33,7 @@ public class PersonService( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetAllActivePersonsByGroupId,
             reader => new PersonModel
             {
-                PersoonId = Convert.ToUInt16( reader [ "PersonId" ] ),
-                Name = reader [ "Name" ].ToString(),
-                Email = reader [ "Email" ].ToString(),
-                GroupId = Convert.ToUInt16( reader [ "GroupId" ] ),
-                Active = Convert.ToInt16( reader [ "Active" ] ),
-                Role = reader [ "Role" ].ToString(),
-            }, parameters );
-    }
-
-    public Task<List<PersonModel>> GetAllInactivePersonsByGroupId( uint groupId )
-    {
-        Dictionary<string, object> parameters = new()
-    {
-        { "@GroupId", groupId }
-    };
-        return _dataService.ExecuteQueryAsync( QueryDefinitions.GetAllInactivePersonsByGroupId,
-            reader => new PersonModel
-            {
-                PersoonId = Convert.ToUInt16( reader [ "PersonId" ] ),
+                PersonId = Convert.ToUInt16( reader [ "PersonId" ] ),
                 Name = reader [ "Name" ].ToString(),
                 Email = reader [ "Email" ].ToString(),
                 GroupId = Convert.ToUInt16( reader [ "GroupId" ] ),
@@ -69,12 +51,27 @@ public class PersonService( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetAllUnrelatedPersonsByGroupId,
             reader => new PersonModel
             {
-                PersoonId = Convert.ToUInt16( reader [ "PersonId" ] ),
+                PersonId = Convert.ToUInt16( reader [ "PersonId" ] ),
                 Name = reader [ "Name" ].ToString(),
-                Email = reader [ "Email" ].ToString(),
-                GroupId = Convert.ToUInt16( reader [ "GroupId" ] ),
-                Active = Convert.ToInt16( reader [ "Active" ] ),
-                Role = reader [ "Role" ].ToString(),
+                Email = reader.IsDBNull( reader.GetOrdinal( "Email" ) )
+                    ? string.Empty
+                    : reader [ "Email" ]?.ToString(),
+                GroupName = reader.IsDBNull( reader.GetOrdinal( "GroupNames" ) )
+                    ? string.Empty
+                    : reader [ "GroupNames" ]?.ToString()
             }, parameters );
+    }
+
+    public async Task<bool> RemoveActivePersonForGroupAsync( uint groupId, uint personId )
+    {
+        Dictionary<string, object> parameters = new()
+    {
+        { "@GroupId", groupId },
+        { "@PersonId", personId }
+    };
+
+        int affectedRows = await _dataService.ExecuteNonQueryAsync(QueryDefinitions.RemoveActivePersonForGroup, parameters);
+
+        return affectedRows > 0;
     }
 }

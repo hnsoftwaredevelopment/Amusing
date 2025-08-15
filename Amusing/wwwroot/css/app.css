@@ -524,3 +524,37 @@ label.sf-float-label {
 .sf-float-group .e-richtexteditor .e-placeholder {
     opacity: 0.75;
 }
+
+.persons-layout {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: auto;
+    gap: 15px 30px; /* 15px between rows, 30px between columns */
+    width: 100%;
+}
+
+.persons-col {
+    min-width: 0; /* voorkomt overflow van de grid */
+}
+
+.persons-full {
+    grid-column: 1 / span 2;
+}
+
+.persons-grid-label {
+    display: block;
+    font-weight: bold;
+    margin-top: 5px;
+    margin-bottom: 4px;
+}
+
+/* Responsive: onder elkaar bij smalle schermen */
+@media (max-width: 768px) {
+    .persons-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .persons-full {
+        grid-column: auto;
+    }
+}

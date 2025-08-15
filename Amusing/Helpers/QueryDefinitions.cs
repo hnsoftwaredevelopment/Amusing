@@ -5,7 +5,6 @@ namespace Amusing.Helpers;
 public static class QueryDefinitions
 {
     public static readonly string GetEditions = @"SELECT festival_id, festivaldatum FROM ah_festivals ORDER BY festivaldatum DESC";
-
     public static readonly string GetNewsletterEmailAddresses = @"
         SELECT DISTINCT  
             grp.naam AS Groep,
@@ -17,7 +16,6 @@ public static class QueryDefinitions
         JOIN amusing.ah_zanggroepen grp ON prol.zanggroep_id = grp.zanggroep_id
         WHERE pers.infomailing = 1 AND pers.email <> '';
     ";
-
     public static readonly string GetAllKnownEmailAddresses = @"
         SELECT DISTINCT  
             grp.naam AS Groep,
@@ -28,7 +26,6 @@ public static class QueryDefinitions
         JOIN amusing.ah_personen_rollen prol ON pers.persoon_id = prol.persoon_id 
         JOIN amusing.ah_zanggroepen grp ON prol.zanggroep_id = grp.zanggroep_id
         WHERE prol.rol = 'contactpersoon1' AND pers.email <> '';";
-
     public static readonly string GetNewlyAddedEmailAddresses = @"
     SELECT 
         ANY_VALUE(ah_zanggroepen.naam) AS `Groep`,
@@ -64,7 +61,6 @@ public static class QueryDefinitions
         ah_personen.email
     ORDER BY 
         `Naam` ASC;";
-
     public static readonly string GetOldEmailAddresses = @"
     SELECT
         any_value(`ah_zanggroepen`.`naam`) AS `Groep`,
@@ -104,7 +100,6 @@ public static class QueryDefinitions
         `ah_personen`.`email`
     ORDER BY
         `Groep`;";
-
     public static readonly string GetPreviousEmailAddresses = @"
     SELECT 
         ANY_VALUE(zg.naam) AS `Groep`,
@@ -135,7 +130,6 @@ public static class QueryDefinitions
         p.email
     ORDER BY 
         ANY_VALUE(zg.naam) ASC;";
-
     public static readonly string GetUpcommingEmailAddresses = @"
     SELECT 
         ANY_VALUE(zg.naam) AS `Groep`,
@@ -165,7 +159,6 @@ public static class QueryDefinitions
         p.email
     ORDER BY 
         ANY_VALUE(zg.naam) ASC;";
-
     public static readonly string GetQueueUpcommingEmailAddresses = @"
     SELECT 
         ANY_VALUE(ah_zanggroepen.naam) AS `Groep`,
@@ -189,7 +182,6 @@ public static class QueryDefinitions
       AND ah_personen.email <> ''
     GROUP BY ah_personen.email
     ORDER BY `Groep` ASC;";
-
     public static readonly string GetIncompleteEmailAddresses = @"
     SELECT 
         ANY_VALUE(ah_zanggroepen.naam) AS `Groep`,
@@ -226,7 +218,6 @@ public static class QueryDefinitions
         )
     GROUP BY ah_personen.email
     ORDER BY `Groep` ASC;";
-
     public static readonly string GetRegistrationsByFestifalId = @"
         SELECT
             i.festival_id AS festival_id,
@@ -262,7 +253,6 @@ public static class QueryDefinitions
         ORDER BY
             grp.naam;
         ";
-
     public static readonly string GetVolunteersByFestivalId = @"
         SELECT 
             vw.festival_id, DATE(vw.datum) AS Datum, 
@@ -288,7 +278,6 @@ public static class QueryDefinitions
         JOIN amusing.ah_festivals fest ON vw.festival_id = fest.festival_id
         WHERE vw.festival_id = @festivalId;
     ";
-
     public static readonly string GetPersonsOverview = @"
         SELECT 
             p.persoon_id AS PersonId,
@@ -337,15 +326,12 @@ public static class QueryDefinitions
             p.persoon_id, p.email
         ORDER BY 
             p.persoon_id ASC;";
-
     public const string GetFestivalYearRange = @"
         SELECT MIN(YEAR(festivaldatum)) AS Oudste, 
                MAX(YEAR(festivaldatum)) AS Nieuwste 
         FROM ah_festivals;
     ";
-
     public static string GetCurrentFestival = @"SELECT MAX(YEAR(festivaldatum)) AS Huidige FROM ah_festivals";
-
     public static readonly string GetFestivals = @"
         SELECT
             festival_Id, 
@@ -357,7 +343,6 @@ public static class QueryDefinitions
             END AS `Gepubliceerd`
         FROM ah_festivals
         ORDER BY YEAR(festivaldatum) DESC;";
-
     public static readonly string GetAllStages =@"
         SELECT  
              podium_id AS `Podium-Id`, 
@@ -374,7 +359,6 @@ public static class QueryDefinitions
              IFNULL(kaart_nummer, 0) AS `Kaart-Id` 
         FROM ah_podia
         ORDER BY naam ASC;";
-
     public static readonly string GetActiveStages = @"
         SELECT  
 	        podium_id AS `Podium-Id`, 
@@ -392,7 +376,6 @@ public static class QueryDefinitions
         FROM ah_podia
         WHERE kaart_nummer IS NOT NULL AND kaart_nummer > 0
         ORDER BY kaart_nummer ASC;";
-
     public static readonly string GetInActiveStages = @"
         SELECT  
          podium_id AS `Podium-Id`, 
@@ -409,7 +392,6 @@ public static class QueryDefinitions
         FROM ah_podia
         WHERE kaart_nummer IS NULL OR kaart_nummer = 0
         ORDER BY kaart_nummer ASC;";
-
     public static readonly string GetActiveStageTypesList = @"
         SELECT 
             t.TYPE, 
@@ -476,7 +458,6 @@ public static class QueryDefinitions
         ) x ON t.type = x.type AND t.versie = x.max_versie
         WHERE t.aktief = 1
         ORDER BY t.type ASC;";
-
     public static readonly string GetAllStageTypesList = @"
         SELECT 
             t.TYPE, 
@@ -541,9 +522,7 @@ public static class QueryDefinitions
             GROUP BY type
         ) x ON t.type = x.type AND t.versie = x.max_versie
         ORDER BY t.type ASC;";
-
     public static readonly string GetNewStageTypeVersion = @"SELECT COALESCE(MAX(versie), 0) + 1 AS versie FROM ah_podia_typen WHERE type = @type;";
-
     public static readonly string GetAllStageTypes = @"
         SELECT 
             type,
@@ -633,7 +612,6 @@ public static class QueryDefinitions
             FROM ah_podia_typen
         ) pt
         WHERE pt.rn = 1;";
-
     public static readonly string GetStageTypes = @"
         SELECT 
             pt.type,
@@ -715,7 +693,6 @@ public static class QueryDefinitions
             WHERE kaart_nummer > 0 AND kaart_nummer IS NOT NULL
         ) p ON pt.type = p.type
         WHERE pt.rn = 1;";
-
     public static readonly string InsertStageType = @"
     INSERT INTO ah_podia_typen (
         type, versie, prijs, piano, lessenaar, electra, drum, gitaarversterkers, 
@@ -725,9 +702,7 @@ public static class QueryDefinitions
         @type, @versie, @prijs, @piano, @lessenaar, @electra, @drum, @gitaarversterkers,
         @basversterkers, @koorversterking, @microfoons, @monitoren, @speakers, @mengpaneel, 
         @md_mp3, @compatibel, @aktief, @beschrijving, @description);";
-
     public static readonly string DeleteStageType = @"DELETE FROM ah_podia_typen WHERE type = @type AND versie = @version;";
-
     public static readonly string GetActiveTasks = @"
         SELECT 
             t.taak_id AS 'TaakId',
@@ -748,7 +723,6 @@ public static class QueryDefinitions
         ) AS bezetting_data
         WHERE t.actief = 'ja'
         ORDER BY t.taak_id, bezetting_data.Van;";
-
     public static readonly string GetInActiveTasks = @"
         SELECT 
             t.taak_id AS 'TaakId',
@@ -773,7 +747,6 @@ public static class QueryDefinitions
         ) AS bezetting_data ON TRUE
         WHERE t.actief = 'Nee'
         ORDER BY t.taak_id, COALESCE(bezetting_data.Van, '');";
-
     public static readonly string GetFestivalData = @"
         SELECT 
 	        f.festival_id AS FestivalId,
@@ -811,7 +784,6 @@ public static class QueryDefinitions
         FROM amusing.ah_festivals f 
         LEFT JOIN amusing.planner_voorwaarden pv ON f.festival_id = pv.festival_id
         ORDER BY YEAR(f.festivaldatum) DESC;";
-
     public static readonly string ModifyFestival = @"
         UPDATE amusing.ah_festivals 
         SET festivaldatum = @Festivaldatum,
@@ -825,7 +797,6 @@ public static class QueryDefinitions
             einde_pauze = @EindeVrijwilligersPauze,
             einde_ervaren_reserve = @EindeVasteVrijwilligersTaken
         WHERE festival_id = @festivalId;";
-
     public static readonly string ModifyCondition = @"
         UPDATE amusing.planner_voorwaarden
         SET WensTijdTussenOptredens = @MinutenTussenOptredens, 
@@ -833,20 +804,15 @@ public static class QueryDefinitions
             MaxLengteVrijwilligerDienst = @MaximumUrenVrijwilligers, 
             BoeteOnderbrekingOptredens = @BoeteOnderbrekingOptredens
         WHERE festival_id = @festivalid";
-
     public static readonly string InsertNewFestival = @"
         INSERT INTO ah_festivals (festivaldatum) VALUES (@festivaldatum);
         SELECT LAST_INSERT_ID();";
-
     public static readonly string InsertNewCondition = @"
         INSERT INTO amusing.planner_voorwaarden 
             (festival_id, WensTijdTussenOptredens, MaxTijdTussenOptredens, MaxLengteVrijwilligerDienst, BoeteOnderbrekingOptredens) 
         VALUES ( @festivalid, 4, 6, 10,  0);";
-
     public static readonly string DeleteFestival = @"DELETE FROM ah_festivals WHERE festival_id = @festivalid;";
-
     public static readonly string DeleteCondition = @"DELETE FROM planner_voorwaarden WHERE festival_id = @festivalid;";
-
     public static string GetFestivalOverviewQuery( int oldestYear, int newestYear, bool filterOutOldGroups )
     {
         int NumberOfYearsForExclusion = 3;
@@ -898,7 +864,6 @@ public static class QueryDefinitions
 
         return sb.ToString();
     }
-
     public static readonly string ModifyStage = @"
         UPDATE amusing.ah_podia 
             SET naam = @Naam,
@@ -913,13 +878,10 @@ public static class QueryDefinitions
                 vrijwilligers_tot = @VrijwilligersTot,
                 kaart_nummer = @KaartNummer
         WHERE podium_id = @PodiumId;";
-
     public static readonly string InsertNewStage = @"
         INSERT INTO amusing.ah_podia (type, aantal_vrijwilligers, kaart_nummer) VALUES ('A', 'geen', 0);
         SELECT LAST_INSERT_ID();";
-
     public static readonly string DeleteStage = @"DELETE FROM ah_podia WHERE podium_id = @StageId;";
-
     public static readonly string GetActiveCountries = @"
         SELECT 
 	        country.code AS CountryId,
@@ -957,12 +919,12 @@ public static class QueryDefinitions
             grp.rekeningnr 		AS BankAccount,
             grp.actief 			AS Active
         FROM amusing.ah_zanggroepen grp 
-        JOIN amusing.ah_zanggroep_details det ON grp.zanggroep_id = det.id 
+        LEFT JOIN amusing.ah_zanggroep_details det ON grp.zanggroep_id = det.id 
         JOIN amusing.ah_genres gen ON grp.genre_id = gen.genre_id 
         JOIN amusing.ah_landen cou ON grp.land COLLATE utf8mb3_unicode_ci = cou.code;";
     public static readonly string GetAllActivePersonsByGroupId = @"
         SELECT 
-	        rol.persoon_id AS PersoonId,
+	        rol.persoon_id AS PersonId,
             CONCAT_WS(' ', per.voornaam, per.tussenvoegsel, per.achternaam) AS Name,
 	        per.email AS Email,
 	        per.actief  AS Active,
@@ -972,28 +934,21 @@ public static class QueryDefinitions
         JOIN amusing.ah_personen per ON rol.persoon_id = per.persoon_id 
         WHERE rol.zanggroep_id = @GroupId AND per.actief = 1
         ORDER BY rol.rol;";
-    public static readonly string GetAllInactivePersonsByGroupId = @"
-        SELECT 
-	        rol.persoon_id AS PersoonId,
-            CONCAT_WS(' ', per.voornaam, per.tussenvoegsel, per.achternaam) AS Name,
-	        per.email AS Email,
-	        per.actief  AS Active,
-	        rol.zanggroep_id AS GroupId,
-	        rol.rol AS Role
-        FROM amusing.ah_personen_rollen rol
-        JOIN amusing.ah_personen per ON rol.persoon_id = per.persoon_id 
-        WHERE rol.zanggroep_id = @GroupId AND per.actief = 0
-        ORDER BY rol.rol;";
     public static readonly string GetAllUnrelatedPersonsByGroupId = @"
         SELECT 
-	        rol.persoon_id AS PersoonId,
+            per.persoon_id AS PersonId,
             CONCAT_WS(' ', per.voornaam, per.tussenvoegsel, per.achternaam) AS Name,
-	        per.email AS Email,
-	        per.actief  AS Active,
-	        rol.zanggroep_id AS GroupId,
-	        rol.rol AS Role
-        FROM amusing.ah_personen_rollen rol
-        JOIN amusing.ah_personen per ON rol.persoon_id = per.persoon_id 
-        WHERE rol.zanggroep_id != @GroupId
-        ORDER BY rol.rol;";
+            COALESCE(per.email, '') AS Email,
+            COALESCE(GROUP_CONCAT(DISTINCT rol.zanggroep_id), '') AS GroupIds,
+            COALESCE(GROUP_CONCAT(DISTINCT grp.naam), '') AS GroupNames
+        FROM amusing.ah_personen per
+        LEFT JOIN amusing.ah_personen_rollen rol 
+            ON per.persoon_id = rol.persoon_id
+            AND rol.zanggroep_id != 251
+        LEFT JOIN amusing.ah_zanggroepen grp 
+            ON rol.zanggroep_id = grp.zanggroep_id
+        GROUP BY per.persoon_id, Name, Email
+        ORDER BY Name;";
+    public static readonly string RemoveActivePersonForGroup = @"
+        DELETE FROM amusing.ah_personen_rollen WHERE zanggroep_id = @GroupId AND rol.persoon_id = @PersonId";
 }
