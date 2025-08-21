@@ -4,7 +4,8 @@ namespace Amusing.Helpers;
 
 public static class QueryDefinitions
 {
-    public static readonly string GetEditions = @"SELECT festival_id, festivaldatum FROM ah_festivals ORDER BY festivaldatum DESC";
+    public static readonly string GetEditions = @"
+        SELECT festival_id, festivaldatum FROM ah_festivals ORDER BY festivaldatum DESC";
     public static readonly string GetNewsletterEmailAddresses = @"
         SELECT DISTINCT  
             grp.naam AS Groep,
@@ -331,7 +332,8 @@ public static class QueryDefinitions
                MAX(YEAR(festivaldatum)) AS Nieuwste 
         FROM ah_festivals;
     ";
-    public static string GetCurrentFestival = @"SELECT MAX(YEAR(festivaldatum)) AS Huidige FROM ah_festivals";
+    public static string GetCurrentFestival = @"
+        SELECT MAX(YEAR(festivaldatum)) AS Huidige FROM ah_festivals";
     public static readonly string GetFestivals = @"
         SELECT
             festival_Id, 
@@ -522,7 +524,8 @@ public static class QueryDefinitions
             GROUP BY type
         ) x ON t.type = x.type AND t.versie = x.max_versie
         ORDER BY t.type ASC;";
-    public static readonly string GetNewStageTypeVersion = @"SELECT COALESCE(MAX(versie), 0) + 1 AS versie FROM ah_podia_typen WHERE type = @type;";
+    public static readonly string GetNewStageTypeVersion = @"
+        SELECT COALESCE(MAX(versie), 0) + 1 AS versie FROM ah_podia_typen WHERE type = @type;";
     public static readonly string GetAllStageTypes = @"
         SELECT 
             type,
@@ -702,7 +705,8 @@ public static class QueryDefinitions
         @type, @versie, @prijs, @piano, @lessenaar, @electra, @drum, @gitaarversterkers,
         @basversterkers, @koorversterking, @microfoons, @monitoren, @speakers, @mengpaneel, 
         @md_mp3, @compatibel, @aktief, @beschrijving, @description);";
-    public static readonly string DeleteStageType = @"DELETE FROM ah_podia_typen WHERE type = @type AND versie = @version;";
+    public static readonly string DeleteStageType = @"
+        DELETE FROM ah_podia_typen WHERE type = @type AND versie = @version;";
     public static readonly string GetActiveTasks = @"
         SELECT 
             t.taak_id AS 'TaakId',
@@ -811,8 +815,10 @@ public static class QueryDefinitions
         INSERT INTO amusing.planner_voorwaarden 
             (festival_id, WensTijdTussenOptredens, MaxTijdTussenOptredens, MaxLengteVrijwilligerDienst, BoeteOnderbrekingOptredens) 
         VALUES ( @festivalid, 4, 6, 10,  0);";
-    public static readonly string DeleteFestival = @"DELETE FROM ah_festivals WHERE festival_id = @festivalid;";
-    public static readonly string DeleteCondition = @"DELETE FROM planner_voorwaarden WHERE festival_id = @festivalid;";
+    public static readonly string DeleteFestival = @"
+        DELETE FROM ah_festivals WHERE festival_id = @festivalid;";
+    public static readonly string DeleteCondition = @"
+        DELETE FROM planner_voorwaarden WHERE festival_id = @festivalid;";
     public static string GetFestivalOverviewQuery( int oldestYear, int newestYear, bool filterOutOldGroups )
     {
         int NumberOfYearsForExclusion = 3;
@@ -881,7 +887,8 @@ public static class QueryDefinitions
     public static readonly string InsertNewStage = @"
         INSERT INTO amusing.ah_podia (type, aantal_vrijwilligers, kaart_nummer) VALUES ('A', 'geen', 0);
         SELECT LAST_INSERT_ID();";
-    public static readonly string DeleteStage = @"DELETE FROM ah_podia WHERE podium_id = @StageId;";
+    public static readonly string DeleteStage = @"
+        DELETE FROM ah_podia WHERE podium_id = @StageId;";
     public static readonly string GetActiveCountries = @"
         SELECT 
 	        country.code AS CountryId,
@@ -921,7 +928,9 @@ public static class QueryDefinitions
         FROM amusing.ah_zanggroepen grp 
         LEFT JOIN amusing.ah_zanggroep_details det ON grp.zanggroep_id = det.id 
         JOIN amusing.ah_genres gen ON grp.genre_id = gen.genre_id 
-        JOIN amusing.ah_landen cou ON grp.land COLLATE utf8mb3_unicode_ci = cou.code;";
+        JOIN amusing.ah_landen cou ON grp.land COLLATE utf8mb3_unicode_ci = cou.code
+        WHERE grp.actief = '1'
+        ORDER BY grp.naam;";
     public static readonly string GetAllActivePersonsByGroupId = @"
         SELECT 
 	        rol.persoon_id AS PersonId,
@@ -949,6 +958,13 @@ public static class QueryDefinitions
             ON rol.zanggroep_id = grp.zanggroep_id
         GROUP BY per.persoon_id, Name, Email
         ORDER BY Name;";
-    public static readonly string RemoveActivePersonForGroup = @"
-        DELETE FROM amusing.ah_personen_rollen WHERE zanggroep_id = @GroupId AND rol.persoon_id = @PersonId";
+    public static readonly string ModifyPersonRole = @"
+        UPDATE amusing.ah_personen_rollen 
+        SET rol = @Role
+        WHERE persoon_id = @PersonId AND zanggroep_id = @GroupId;";
+    public static readonly string InsertNewPersonRole = @"
+        INSERT INTO amusing.ah_personen_rollen  (zanggroep_id, persoon_id, rol) VALUES (@GroupId, @PersonId, @Role);";
+    public static readonly string DeletePersonRole = @"
+        DELETE FROM ah_personen_rollen 
+        WHERE persoon_id = @PersonId AND zanggroep_id = @GroupId;";
 }

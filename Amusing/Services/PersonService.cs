@@ -23,7 +23,6 @@ public class PersonService( GenericDataService dataService )
                          .ToList() ?? [ ]
             } );
     }
-
     public Task<List<PersonModel>> GetAllActivePersonsByGroupId( uint groupId )
     {
         Dictionary<string, object> parameters = new()
@@ -41,7 +40,6 @@ public class PersonService( GenericDataService dataService )
                 Role = reader [ "Role" ].ToString(),
             }, parameters );
     }
-
     public Task<List<PersonModel>> GetAllUnrelatedPersonsByGroupId( uint groupId )
     {
         Dictionary<string, object> parameters = new()
@@ -61,17 +59,36 @@ public class PersonService( GenericDataService dataService )
                     : reader [ "GroupNames" ]?.ToString()
             }, parameters );
     }
+    public async Task ModifyPersonRoleAsync( uint groupId, uint personId, string role )
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { "@GroupId", groupId },
+            { "@PersonId", personId },
+            { "@Role", role }
+        };
 
-    public async Task<bool> RemoveActivePersonForGroupAsync( uint groupId, uint personId )
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyPersonRole, parameters );
+    }
+    public async Task InsertNewPersonRoleAsync( uint groupId, uint personId, string role )
     {
         Dictionary<string, object> parameters = new()
     {
         { "@GroupId", groupId },
-        { "@PersonId", personId }
+        { "@PersonId", personId },
+        { "@Role", role }
     };
 
-        int affectedRows = await _dataService.ExecuteNonQueryAsync(QueryDefinitions.RemoveActivePersonForGroup, parameters);
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.InsertNewPersonRole, parameters );
+    }
+    public async Task DeletePersonRoleAsync( uint groupId, uint personId )
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { "@GroupId", groupId },
+            { "@PersonId", personId }
+        };
 
-        return affectedRows > 0;
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.DeletePersonRole, parameters );
     }
 }
