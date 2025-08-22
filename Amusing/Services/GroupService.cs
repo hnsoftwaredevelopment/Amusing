@@ -32,7 +32,25 @@ public class GroupService( GenericDataService dataService )
             };
         } );
     }
-
+    public Task<List<GroupModel>> GetInactiveGroupsAsync()
+    {
+        return _dataService.ExecuteQueryAsync( QueryDefinitions.GetInactiveGroups, reader =>
+        {
+            return new GroupModel
+            {
+                GroupId = Convert.ToUInt16( reader [ "GroupId" ] ),
+                Name = reader [ "Name" ]?.ToString(),
+                GenreId = Convert.ToUInt16( reader [ "GenreId" ] ),
+                Genre = reader [ "Genre" ].ToString(),
+                City = reader [ "City" ].ToString(),
+                CountryId = reader [ "CountryId" ].ToString()?.ToLower(),
+                Country = CultureInfo.CurrentCulture.TextInfo.ToTitleCase( reader [ "Country" ].ToString()?.ToLower() ?? "" ),
+                Website = reader [ "Website" ].ToString(),
+                BankAccount = reader [ "BankAccount" ].ToString(),
+                Active = Convert.ToInt16( reader [ "Active" ] ),
+            };
+        } );
+    }
     public async Task<uint> AddGroupAsync( GroupModel model )
     {
         string _description = (model.Description == string.Empty || model.Description == null) ? "" : model.Description;
@@ -53,7 +71,6 @@ public class GroupService( GenericDataService dataService )
 
         return await _dataService.ExecuteScalarAsync<uint>( QueryDefinitions.AddNewGroup, parameters );
     }
-
     public async Task<uint> AddGroupDetailsAsync( GroupModel model, uint groupId )
     {
         string _description = (model.Description == string.Empty || model.Description == null) ? "" : model.Description;
@@ -66,7 +83,6 @@ public class GroupService( GenericDataService dataService )
 
         return await _dataService.ExecuteScalarAsync<uint>( QueryDefinitions.AddNewGroupDetail, parameters );
     }
-
     public async Task UpdateGroupAsync( GroupModel model )
     {
         string _description = (model.Description == string.Empty || model.Description == null) ? "" : model.Description;
@@ -88,7 +104,6 @@ public class GroupService( GenericDataService dataService )
 
         await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyGroupByGroupId, parameters );
     }
-
     public async Task UpdateGroupDetailsAsync( GroupModel model )
     {
         Dictionary<string, object> parameters = new()
@@ -99,7 +114,6 @@ public class GroupService( GenericDataService dataService )
 
         await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyGroupDetailsByGroupId, parameters );
     }
-
     public async Task DeleteGroupAsync( uint groupId )
     {
         Dictionary<string, object> parameters = new()
@@ -110,5 +124,33 @@ public class GroupService( GenericDataService dataService )
 
         await _dataService.ExecuteNonQueryAsync( QueryDefinitions.DeleteGroupByGroupId, parameters );
     }
+    public async Task DestroyGroupAsync( uint groupId )
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { "@GroupId", groupId },
+            { "@Name", "Groep verwijderd" },
+            { "@GenreId", 0 },
+            { "@City", string.Empty },
+            { "@CountryId", string.Empty },
+            { "@Website", string.Empty },
+            { "@Description", string.Empty },
+            { "@BankAccount", string.Empty },
+            { "@Active", 0 },
+            { "@Photo", string.Empty },
+            { "@Logo", string.Empty }
+        };
 
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyGroupByGroupId, parameters );
+    }
+    public async Task ReactivateGroupAsync( uint groupId )
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { "@GroupId", groupId },
+            { "@Active", 1 }
+        };
+
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ReactivateGroupByGroupId, parameters );
+    }
 }

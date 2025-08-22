@@ -1,0 +1,192 @@
+﻿@page "/Maintenance-DeactivatedGroups"
+@using Amusing.Models
+@using Amusing.Services
+@using Bit.BlazorUI
+@using Bit.BlazorUI.Extras
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+@using System.ComponentModel.DataAnnotations
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.RichTextEditor
+@using Microsoft.AspNetCore.Components.Forms
+@using Syncfusion.Blazor.SplitButtons
+
+@inject GroupService GroupService;
+
+@inject NavigationManager NavManager
+@inject IJSRuntime JS
+
+@if (IsLoading)
+{
+    <div class="text-center p-2">
+        <SfSpinner CssClass="e-spin-center" />
+        <p>@FileName worden geladen...</p>
+    </div>
+}
+else
+{
+    <div class="page-container">
+        <div class="fixed-header">
+            <h3>Onderhoud @FileName</h3>
+            <div>Koren kunnen niet uit de database worden verwijderd, want een deel van de koorinformatie is nodig voor historische data.</div>
+            <div>In dit scherm kan, met behulp van de rechtermuisknop:</div>
+            <div>- Koor data worden opgeschoond: Alle niet relevante data wordt dan onherroepelijk verwijderd.</div>
+            <div>- Koor heractiveren: Het koor wordt hiermee terug geplaatst naar de active koren.</div>
+
+            <div class="spacer-large" />
+
+            <!-- Toolbar -->
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+                <SfToolbar Width="800px">
+                    <ToolbarItems>
+                        <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                            <Template>
+                                <span class="toolbar-count">@FileName: @VisibleRowCount</span>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                            <Template>
+                                <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
+                            </Template>
+                        </ToolbarItem>
+                    </ToolbarItems>
+                </SfToolbar>
+            </div>
+        </div>
+
+        <div class="scrollable-content">
+            <div class="spacer-small"></div>
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
+                <SfGrid @ref="GridRef"
+                        TValue="GroupModel"
+                        DataSource="@Groups"
+                        EnableStickyHeader="true"
+                        AllowResizing="true"
+                        Height="630px"
+                        Width="800px"
+                        ContextMenuItems="@ContextMenuItems"
+                        AllowSorting="true"
+                        AllowMultiSorting="true"
+                        AllowSelection="true">
+                    <GridEvents TValue="GroupModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" ContextMenuItemClicked="OnContextMenuClick" />
+                    <GridSelectionSettings Type="Syncfusion.Blazor.Grids.SelectionType.Single"
+                                           Mode="Syncfusion.Blazor.Grids.SelectionMode.Row" />
+                    <GridColumns>
+                        <GridColumn Field="GroupId" IsPrimaryKey="true" Visible="false" />
+                        <GridColumn Field="Name" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="350px" />
+                        <GridColumn Field="City" HeaderText="Standplaats" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="100px" />
+                        <GridColumn Field="Country" HeaderText="Land" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="90px" />
+                        <GridColumn Field="Genre" HeaderText="Genre" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="100px" />
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+    </div>
+}
+
+@code 
+{
+    private bool _initialLoadDone = false;
+    private bool IsLoading = false;
+    private GroupModel? SelectedGroup;
+    private int VisibleRowCount = 0;
+    private List<GroupModel> Groups = [];
+    private SfGrid<GroupModel>? GridRef;
+    private string FileName = "Gedeactiveerde (vewijderde) koren";
+    public List<Syncfusion.Blazor.Grids.ContextMenuItemModel>? ContextMenuItems = new()
+        {
+            new ContextMenuItemModel { Text = "Verwijder alle relevante koor data", Id = "destroy" },
+            new ContextMenuItemModel { Text = "Maak koor weer actief", Id = "reactivate" }
+        };
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+
+        Groups = await GroupService.GetInactiveGroupsAsync();
+
+        SelectedGroup = Groups.FirstOrDefault();
+
+        IsLoading = false;
+    }
+
+    public async Task OnInput( InputEventArgs args )
+    {
+        await GridRef.SearchAsync( args.Value );
+
+        await Task.Delay( 50 );
+        await UpdateVisibleRowCountAsync();
+    }
+    
+    private async Task OnGridDataBound()
+    {
+        if ( !_initialLoadDone && Groups?.Any() == true )
+        {
+            _initialLoadDone = true;
+            await UpdateVisibleRowCountAsync();
+            await GridRef.SelectRowAsync( 0 );
+        }
+    }
+
+    private void OnRowSelected( RowSelectEventArgs<GroupModel> args )
+    {
+        SelectedGroup = args.Data;
+
+        StateHasChanged();
+    }
+
+    private async Task UpdateVisibleRowCountAsync()
+    {
+        if ( GridRef is not null )
+        {
+            var records = await GridRef.GetCurrentViewRecordsAsync();
+            await Task.Delay( 150 );
+            VisibleRowCount = records?.Count ?? 0;
+            StateHasChanged();
+        }
+    }
+
+    private async Task ReactivateGroup()
+    {
+        if ( SelectedGroup is null )
+            return;
+        await GroupService.ReactivateGroupAsync( SelectedGroup.GroupId );
+
+        Groups = await GroupService.GetInactiveGroupsAsync();
+        SelectedGroup = Groups
+            .OrderByDescending( f => f.Name )
+            .FirstOrDefault();
+        await GridRef.Refresh();
+
+        // Select the first record in the grid
+        if ( Groups.Any() )
+        {
+            SelectedGroup = Groups [ 0 ];
+            await GridRef.SelectRowAsync( 0 );
+        }
+        else
+        {
+            SelectedGroup = null;
+        }
+    }
+
+    public async Task OnContextMenuClick( ContextMenuClickEventArgs<GroupModel> args )
+    {
+        if ( args.Item.Items?.Count > 0 )
+            return;
+
+        var selected = args.RowInfo.RowData;
+        if ( args.Item.Id.StartsWith( "destroy" ) )
+        {
+            await GroupService.DestroyGroupAsync( selected.GroupId );
+        }
+        else if ( args.Item.Id.StartsWith( "reactivate" ) )
+        {
+            await GroupService.ReactivateGroupAsync( selected.GroupId );
+        }
+    }
+}

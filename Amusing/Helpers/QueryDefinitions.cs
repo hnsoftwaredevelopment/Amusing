@@ -931,6 +931,23 @@ public static class QueryDefinitions
         JOIN amusing.ah_landen cou ON grp.land COLLATE utf8mb3_unicode_ci = cou.code
         WHERE grp.actief = 1
         ORDER BY grp.naam;";
+    public static readonly string GetInactiveGroups = @"
+        SELECT 
+            grp.zanggroep_id	AS GroupId,
+            grp.naam  			AS Name,
+            grp.genre_id 		AS GenreId,
+            gen.nl 				AS Genre,
+            grp.standplaats 	AS City,
+            grp.land 			AS CountryId,
+            cou.naam 			AS Country,
+            grp.website 		AS Website,
+            grp.rekeningnr 		AS BankAccount,
+            grp.actief 			AS Active
+        FROM amusing.ah_zanggroepen grp 
+        JOIN amusing.ah_genres gen ON grp.genre_id = gen.genre_id 
+        JOIN amusing.ah_landen cou ON grp.land COLLATE utf8mb3_unicode_ci = cou.code
+        WHERE grp.actief = 0
+        ORDER BY grp.naam;";
     public static readonly string AddNewGroup = @"
         INSERT INTO ah_zanggroepen
             (Naam, genre_id, standplaats, land, website, beschrijving, rekeningnr, actief, foto, logo)
@@ -942,7 +959,6 @@ public static class QueryDefinitions
             (id, email)
         VALUES (@GroupId, @Email);
         ";
-
     public static readonly string ModifyGroupByGroupId = @"
         UPDATE ah_zanggroepen 
         SET
@@ -967,6 +983,7 @@ public static class QueryDefinitions
         UPDATE ah_zanggroepen 
         SET actief=@Active
         WHERE zanggroep_id=@GroupId";
+    public static readonly string ReactivateGroupByGroupId = DeleteGroupByGroupId;
     public static readonly string GetAllActivePersonsByGroupId = @"
         SELECT 
 	        rol.persoon_id AS PersonId,
