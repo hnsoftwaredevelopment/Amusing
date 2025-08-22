@@ -32,4 +32,83 @@ public class GroupService( GenericDataService dataService )
             };
         } );
     }
+
+    public async Task<uint> AddGroupAsync( GroupModel model )
+    {
+        string _description = (model.Description == string.Empty || model.Description == null) ? "" : model.Description;
+
+        Dictionary<string, object> parameters = new()
+        {
+            { "@Name", model.Name },
+            { "@GenreId", model.GenreId },
+            { "@City", model.City },
+            { "@CountryId", model.CountryId },
+            { "@Website", model.Website },
+            { "@Description", _description },
+            { "@BankAccount", model.BankAccount },
+            { "@Active", model.Active },
+            { "@Photo", model.Photo },
+            { "@Logo", model.Logo }
+        };
+
+        return await _dataService.ExecuteScalarAsync<uint>( QueryDefinitions.AddNewGroup, parameters );
+    }
+
+    public async Task<uint> AddGroupDetailsAsync( GroupModel model, uint groupId )
+    {
+        string _description = (model.Description == string.Empty || model.Description == null) ? "" : model.Description;
+
+        Dictionary<string, object> parameters = new()
+        {
+            { "@GroupId", groupId },
+            { "@Email", model.Email }
+        };
+
+        return await _dataService.ExecuteScalarAsync<uint>( QueryDefinitions.AddNewGroupDetail, parameters );
+    }
+
+    public async Task UpdateGroupAsync( GroupModel model )
+    {
+        string _description = (model.Description == string.Empty || model.Description == null) ? "" : model.Description;
+
+        Dictionary<string, object> parameters = new()
+        {
+            { "@GroupId", model.GroupId },
+            { "@Name", model.Name },
+            { "@GenreId", model.GenreId },
+            { "@City", model.City },
+            { "@CountryId", model.CountryId },
+            { "@Website", model.Website },
+            { "@Description", _description },
+            { "@BankAccount", model.BankAccount },
+            { "@Active", model.Active },
+            { "@Photo", model.Photo },
+            { "@Logo", model.Logo }
+        };
+
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyGroupByGroupId, parameters );
+    }
+
+    public async Task UpdateGroupDetailsAsync( GroupModel model )
+    {
+        Dictionary<string, object> parameters = new()
+    {
+        { "@GroupId", model.GroupId },
+        { "@Email", model.Email }
+    };
+
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyGroupDetailsByGroupId, parameters );
+    }
+
+    public async Task DeleteGroupAsync( uint groupId )
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { "@GroupId", groupId },
+            { "@Active", 0 }
+        };
+
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.DeleteGroupByGroupId, parameters );
+    }
+
 }

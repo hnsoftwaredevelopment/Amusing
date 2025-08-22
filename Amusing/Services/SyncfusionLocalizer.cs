@@ -4,10 +4,7 @@ namespace Amusing.Services;
 
 public class SyncfusionLocalizer : ISyncfusionStringLocalizer
 {
-    public string GetText( string key )
-    {
-        return this.ResourceManager.GetString( key );
-    }
+    public string? GetText( string key ) => this.ResourceManager.GetString( key );
 
     public System.Resources.ResourceManager ResourceManager
     {

@@ -89,6 +89,11 @@ else
                             <div class="dropzone-grid">
                                 <div class="drop-zone" Width="150px">
                                     <h4>Logo</h4>
+                                    @if ( !string.IsNullOrEmpty( LogoUploadErrorMessage ) )
+                                    {
+                                        <div class="text-danger">@LogoUploadErrorMessage</div>
+                                    }
+
                                     @if ( !string.IsNullOrEmpty( LogoPreview ) )
                                     {
                                         <img src="@LogoPreview" style="max-height:80px;" />
@@ -105,6 +110,11 @@ else
 
                                 <div class="drop-zone" Width="200px">
                                     <h4>Koorfoto</h4>
+                                    @if (!string.IsNullOrEmpty(PhotoUploadErrorMessage))
+                                    {
+                                        <div class="text-danger">@PhotoUploadErrorMessage</div>
+                                    }
+
                                     @if ( !string.IsNullOrEmpty( PhotoPreview ) )
                                     {
                                         <img src="@PhotoPreview" alt="Preview" class="preview-img" />
@@ -123,7 +133,7 @@ else
                     </TabItem>
 
                     <!-- People -->
-                    <TabItem>
+                    <TabItem Disabled="@(!IsPersonsTabEnabled)">
                         <ChildContent>
                             <TabHeader Text="Personen"></TabHeader>
                         </ChildContent>
@@ -216,10 +226,10 @@ else
                         </ToolbarItem>
                         <ToolbarItem Type="ItemType.Button">
                             <Template>
-                                <button class="custom-toolbar-btn @(SelectedGroup?.Active == 1 ? "disabled" : "")"
+                                <button class="custom-toolbar-btn @(!IsPersonsTabEnabled ? "disabled" : "")"
                                         @onclick="DeleteGroup"
                                         title="Verwijder geselecteerde podium"
-                                        disabled="@(SelectedGroup?.Active == 1)">
+                                        disabled="@(!IsPersonsTabEnabled)">
                                     <img src="icons/button-del.svg" class="icon" alt="DEL" />
                                 </button>
                             </Template>
@@ -253,7 +263,9 @@ else
                     AllowMultiSorting="true"
                     AllowSelection="true">
                     <GridEvents TValue="GroupModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
+                    <GridEditSettings AllowAdding="true" NewRowPosition="NewRowPosition.Top"></GridEditSettings>
                     <GridColumns>
+                        <GridColumn Field="GroupId" IsPrimaryKey="true" Visible="false"/>
                         <GridColumn Field="Name" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="350px" />
                         <GridColumn Field="City" HeaderText="Standplaats" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="100px" />
                         <GridColumn Field="Country" HeaderText="Land" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="90px" />
@@ -267,30 +279,37 @@ else
 
 @code 
 {
-    private string FileName = "Koren";
-    private bool IsLoading = false;
     private bool _initialLoadDone = false;
     private bool _selectFirstRowActivePending;
     private bool _selectFirstRowUnrelatedPending;
-    private string? SelectedLogoFileName;
-    private string? SelectedPhotoFileName;
+    private bool IsDeleteEnabled => SelectedGroup?.GroupId != 0;
+    private bool IsLoading = false;
+    private bool IsPersonsTabEnabled => SelectedGroup?.GroupId != 0;
+
+    private const long LogoMaxImageSize = 8 * 1024 * 1024; // 8 MB
+    private const long PhotoMaxImageSize = 16 * 1024 * 1024; // 16 MB
+
+    private GroupModel? SelectedGroup;
+
+    private int currentTabIndex = 0;
+    private int VisibleRowCount = 0;
+
+    private List<CountryModel> Countries = [];
+    private List<GenreModel> Genres = [];
+    private List<GroupModel> Groups = [];
     private List<PersonModel> ActivePersonsList = new();
     private List<PersonModel> UnrelatedPersonsList = new();
-    private SfTab? GroupTab;
-    private int currentTabIndex = 0;
-    public int TabIndex { get; set; }
 
     private SfGrid<GroupModel>? GridRef;
     private SfGrid<PersonModel>? ActivePersonGridRef;
     private SfGrid<PersonModel>? UnrelatedPersonGridRef;
-    private GroupModel? SelectedGroup;
-    private int VisibleRowCount = 0;
-    private List<CountryModel> Countries = [];
-    private List<GenreModel> Genres = [];
-    private List<GroupModel> Groups = [];
+    private SfTab? GroupTab;
 
-    public string ComboBoxRoleValue { get; set; } = "Contactpersoon1";
-    public string[] dataRole = { "Contactpersoon1", "Contactpersoon2", "Dirigent", "Muzikant", "Penningmeester", "Zanger" };
+    private string FileName = "Koren";
+    private string? SelectedLogoFileName;
+    private string? SelectedPhotoFileName;
+    private string? LogoUploadErrorMessage;
+    private string? PhotoUploadErrorMessage;
 
     public List<Syncfusion.Blazor.Grids.ContextMenuItemModel>? ActivePersonsContextMenuItems;
     public List<Syncfusion.Blazor.Grids.ContextMenuItemModel>? UnrelatedPersonsContextMenuItems;
@@ -324,12 +343,12 @@ else
         await SetupPersonTabAsync();
     }
 
-    private string LogoPreview => SelectedGroup?.Logo != null
-    ? $"data:{GetImageMimeType( SelectedGroup.Logo )};base64,{Convert.ToBase64String( SelectedGroup.Logo )}"
-    : null;
-    private string PhotoPreview => SelectedGroup?.Photo != null
+    private string? LogoPreview => SelectedGroup?.Logo != null
+        ? $"data:{GetImageMimeType( SelectedGroup.Logo )};base64,{Convert.ToBase64String( SelectedGroup.Logo )}"
+        : string.Empty;
+    private string? PhotoPreview => SelectedGroup?.Photo != null
         ? $"data:{GetImageMimeType( SelectedGroup.Photo )};base64,{Convert.ToBase64String( SelectedGroup.Photo )}"
-        : null;
+        : string.Empty;
 
     private byte[]? LogoData;
     private byte[]? PhotoData;
@@ -338,31 +357,43 @@ else
     {
         var file = e.File;
 
-        // Read the file into a byte array
-        var buffer = new byte[file.Size];
-        await file.OpenReadStream( 5 * 1024 * 1024 ).ReadAsync( buffer ); // max 5 MB
+        if (isLogo)
+        {
+            if ( file.Size > LogoMaxImageSize)
+            {
+                LogoUploadErrorMessage = $"Bestand is te groot ({file.Size / 1024 / 1024} MB). " +
+                                         $"Maximaal toegestaan: {LogoMaxImageSize / 1024 / 1024} MB.";
+                return;
+            }
+        }
+        else
+        {
+            if ( file.Size > PhotoMaxImageSize )
+            {
+                PhotoUploadErrorMessage = $"Bestand is te groot ({file.Size / 1024 / 1024} MB). " +
+                                          $"Maximaal toegestaan: {PhotoMaxImageSize / 1024 / 1024} MB.";
+                return;
+            }
 
-        // Convert to Base64 with correct MIME type
-        var preview = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+        }
+
+        LogoUploadErrorMessage = null;
+        PhotoUploadErrorMessage = null;
+
+        await using var stream = file.OpenReadStream(PhotoMaxImageSize);
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync( ms );
+
+        var buffer = ms.ToArray();
 
         if ( isLogo )
         {
-            SelectedGroup.Logo  = buffer;
+            SelectedGroup.Logo = buffer;
         }
         else
         {
             SelectedGroup.Photo = buffer;
         }
-    }
-
-    // Helper to confert the file to Base64 data URL
-    private async Task<string> GetImageDataUrl( IBrowserFile file )
-    {
-        using var stream = file.OpenReadStream(5 * 1024 * 1024);
-        using var ms = new MemoryStream();
-        await stream.CopyToAsync( ms );
-        var base64 = Convert.ToBase64String(ms.ToArray());
-        return $"data:{file.ContentType};base64,{base64}";
     }
 
     private string GetImageMimeType( byte [ ] imageBytes )
@@ -379,22 +410,6 @@ else
             return "image/jpeg";
 
         return "application/octet-stream"; // fallback
-    }
-
-    // Save both images to the database
-    private async Task SaveImages()
-    {
-        if ( LogoData != null && PhotoData != null )
-        {
-            await SaveToDatabase( LogoData, PhotoData );
-        }
-    }
-
-    // Example database save method
-    private Task SaveToDatabase( byte [ ] logo, byte [ ] photo )
-    {
-        // TODO: Call your service/repository to save in DB
-        return Task.CompletedTask;
     }
 
     private List<ToolbarItemModel> Tools = new List<ToolbarItemModel>()
@@ -536,37 +551,69 @@ else
         if ( SelectedGroup is null )
             return;
 
-        // Save te current Index of the record in the grid
-        var savedId = SelectedGroup.GroupId;
-
-        //await GroupService.ModifyGroupAsync( SelectedGroup );
-
-        // Refresh the list
-        Groups = await GroupService.GetAllGroupsAsync();
-        await GridRef.Refresh();
-
-        // Search the modified record
-        var index = Groups.FindIndex(s => s.GroupId == savedId);
-        if ( index >= 0 )
+        if ( SelectedGroup.GroupId != 0 )
         {
-            SelectedGroup = Groups [ index ];
-            await GridRef.SelectRowAsync( index );
+            var savedId = SelectedGroup.GroupId;
+
+            await GroupService.UpdateGroupAsync( SelectedGroup );
+            await GroupService.UpdateGroupDetailsAsync( SelectedGroup );
+        }
+        else
+        {
+            // Save the new group and get the new group Id
+            var savedId = await GroupService.AddGroupAsync(SelectedGroup);
+
+            // Save the groepdetails using the GroupId
+            var record = await GroupService.AddGroupDetailsAsync(SelectedGroup, savedId);
+
+            // Refresh the list
+            Groups = await GroupService.GetAllGroupsAsync();
+            await GridRef.Refresh();
+
+            // Search the modified record
+            var index = Groups.FindIndex(s => s.GroupId == savedId);
+            if ( index >= 0 )
+            {
+                SelectedGroup = Groups [ index ];
+                await GridRef.SelectRowAsync( index );
+            }
         }
     }
 
     private async Task AddNewGroup()
     {
-        if ( SelectedGroup is null )
-            return;
+        var newGroup = new GroupModel
+        {
+            GroupId = 0,
+            Name = string.Empty,
+            Genre = string.Empty,
+            City = string.Empty,
+            CountryId = string.Empty,
+            Country = string.Empty,
+            Website = string.Empty,
+            Email = string.Empty,
+            Photo = Array.Empty<byte>(),
+            Logo = Array.Empty<byte>(),
+            Description = string.Empty,
+            BankAccount = string.Empty,
+            Active = 1,
+            IsActive = true
+        };
 
-        Groups = await GroupService.GetAllGroupsAsync();
-        await GridRef.Refresh();
+        await GridRef.AddRecordAsync(newGroup, 0);
+        await GridRef.SelectRowAsync( 0 );
+
+        SelectedGroup = newGroup;
+
+        StateHasChanged();
     }
 
     private async Task DeleteGroup()
     {
         if ( SelectedGroup is null )
             return;
+        await GroupService.DeleteGroupAsync( SelectedGroup.GroupId );
+
         var groupModels = await GroupService.GetAllGroupsAsync();
 
         Groups = await GroupService.GetAllGroupsAsync();

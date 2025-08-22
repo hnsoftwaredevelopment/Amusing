@@ -929,8 +929,44 @@ public static class QueryDefinitions
         LEFT JOIN amusing.ah_zanggroep_details det ON grp.zanggroep_id = det.id 
         JOIN amusing.ah_genres gen ON grp.genre_id = gen.genre_id 
         JOIN amusing.ah_landen cou ON grp.land COLLATE utf8mb3_unicode_ci = cou.code
-        WHERE grp.actief = '1'
+        WHERE grp.actief = 1
         ORDER BY grp.naam;";
+    public static readonly string AddNewGroup = @"
+        INSERT INTO ah_zanggroepen
+            (Naam, genre_id, standplaats, land, website, beschrijving, rekeningnr, actief, foto, logo)
+        VALUES (@Name, @GenreId, @City, @CountryId, @Website, @Description, @BankAccount, @Active, @Photo, @Logo);
+        SELECT LAST_INSERT_ID();
+        ";
+    public static readonly string AddNewGroupDetail = @"
+        INSERT INTO ah_zanggroep_details
+            (id, email)
+        VALUES (@GroupId, @Email);
+        ";
+
+    public static readonly string ModifyGroupByGroupId = @"
+        UPDATE ah_zanggroepen 
+        SET
+            Naam=@Name,
+            genre_id=@GenreId,
+            standplaats=@City,
+            land=@CountryId,
+            website=@Website,
+            beschrijving=@Description,
+            rekeningnr=@BankAccount,
+            actief=@Active,
+            foto=@Photo,
+            logo=@Logo
+        WHERE zanggroep_id=@GroupId
+        ";
+    public static readonly string ModifyGroupDetailsByGroupId = @"
+        UPDATE ah_zanggroep_details 
+        SET email=@Email
+        WHERE id=@GroupId
+        ";
+    public static readonly string DeleteGroupByGroupId = @"
+        UPDATE ah_zanggroepen 
+        SET actief=@Active
+        WHERE zanggroep_id=@GroupId";
     public static readonly string GetAllActivePersonsByGroupId = @"
         SELECT 
 	        rol.persoon_id AS PersonId,

@@ -5,8 +5,16 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-Amusing-d4b4dda8-27a3-4a96-94e4-f605690b8606</UserSecretsId>
-    <AssemblyVersion>25.8.21.20</AssemblyVersion>
-    <FileVersion>25.8.21.20</FileVersion>
+    <AssemblyVersion>25.8.22.24</AssemblyVersion>
+    <FileVersion>25.8.22.24</FileVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;BL0005;8618</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;BL0005;8618</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

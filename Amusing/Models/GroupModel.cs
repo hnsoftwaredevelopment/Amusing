@@ -16,4 +16,5 @@ public class GroupModel
     public string Description { get; set; } = null!;
     public string BankAccount { get; set; }
     public int Active { get; set; } = 0;
+    public bool IsActive { get; set; }
 }

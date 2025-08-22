@@ -3,9 +3,9 @@
 public class StageModel
 {
     public uint PodiumId { get; set; }
-    public string? Naam { get; set; } = string.Empty;
-    public string? Soort { get; set; } = string.Empty;
-    public string? Type { get; set; } = string.Empty;
+    public string Naam { get; set; } = string.Empty;
+    public string Soort { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
     public int Kwaliteit { get; set; }
     public int MaxZangers { get; set; }
     public int Vrijwilligers { get; set; } = 0;

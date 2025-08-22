@@ -12,6 +12,4 @@ public class LoginModel
 
     public int UserId { get; set; }
     public string Role { get; set; } = string.Empty;
-    //public bool RememberMe { get; set; }
-    //public bool IsAuthenticated { get; set; }
 }

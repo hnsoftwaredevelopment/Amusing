@@ -206,7 +206,18 @@ a, .btn-link {
     background-color: #062666;
 }
 
-.e-grid .e-gridheader .e-headercell {
+/* Alternate rowcolor */
+.e-grid .e-altrow {
+    background-color: #E8EEFF;
+}
+
+/* Selected rowcolor */
+.e-selectionbackground {
+    background-color: yellow;
+}
+
+.e-grid .e-gridheader .e-headercell
+{
     background-color: #062666 !important;
     color: #ebebf1 !important;
     accent-color: red;
@@ -214,23 +225,23 @@ a, .btn-link {
     font-size: 12px;
 }
 
-    .e-grid .e-gridheader .e-headercell .e-headertext {
+.e-grid .e-gridheader .e-headercell .e-headertext {
+    color: #ebebf1 !important;
+}
+
+/* Eventueel: ook bij hover/focus of sortering actief */
+.e-grid .e-gridheader .e-headercell.e-active,
+.e-grid .e-gridheader .e-headercell:focus,
+.e-grid .e-gridheader .e-headercell:hover {
+    background-color: #062666 !important;
+    color: #ebebf1 !important;
+}
+
+    .e-grid .e-gridheader .e-headercell.e-active .e-headertext,
+    .e-grid .e-gridheader .e-headercell:hover .e-headertext,
+    .e-grid .e-gridheader .e-headercell:focus .e-headertext {
         color: #ebebf1 !important;
     }
-
-    /* Eventueel: ook bij hover/focus of sortering actief */
-    .e-grid .e-gridheader .e-headercell.e-active,
-    .e-grid .e-gridheader .e-headercell:focus,
-    .e-grid .e-gridheader .e-headercell:hover {
-        background-color: #062666 !important;
-        color: #ebebf1 !important;
-    }
-
-        .e-grid .e-gridheader .e-headercell.e-active .e-headertext,
-        .e-grid .e-gridheader .e-headercell:hover .e-headertext,
-        .e-grid .e-gridheader .e-headercell:focus .e-headertext {
-            color: #ebebf1 !important;
-        }
 
 /* Sorteericoon (pijltje omhoog/omlaag) in geel */
 .e-grid .e-gridheader .e-sortfilterdiv::before {
