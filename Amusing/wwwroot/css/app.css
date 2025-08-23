@@ -569,3 +569,34 @@ label.sf-float-label {
         grid-column: auto;
     }
 }
+
+/* Coloroed toggle switch buttons */
+.active-green .e-switch-inner {
+    background-color: green !important;
+}
+
+.inactive-red .e-switch-inner {
+    background-color: red !important;
+}
+
+/* Basis: switch container */
+.e-switch-wrapper.active-green .e-switch-inner::before {
+    background-color: green !important;
+    border-color: green !important;
+}
+
+/* De ronde knop */
+.e-switch-wrapper.active-green .e-switch-handle {
+    background-color: white !important;
+}
+
+/* Uit (niet actief, rood) */
+.e-switch-wrapper.inactive-red .e-switch-inner::before {
+    background-color: red !important;
+    border-color: red !important;
+}
+
+/* Inactive circle */
+.e-switch-wrapper.inactive-red .e-switch-handle {
+    background-color: silver !important;
+}

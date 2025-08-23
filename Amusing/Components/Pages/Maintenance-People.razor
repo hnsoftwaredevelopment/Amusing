@@ -1,0 +1,247 @@
+﻿@page "/Maintenance-Persons"
+@using Amusing.Models
+@using Amusing.Services
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+@using System.ComponentModel.DataAnnotations
+@using Syncfusion.Blazor.Popups
+@using Microsoft.AspNetCore.Components.Forms
+@using Syncfusion.Blazor.SplitButtons
+
+@inject PersonService PersonService;
+
+@inject NavigationManager NavManager
+@inject IJSRuntime JS
+
+@if (IsLoading)
+{
+    <div class="text-center p-2">
+        <SfSpinner CssClass="e-spin-center" />
+        <p>@FileName worden geladen...</p>
+    </div>
+}
+else
+{
+    <div class="page-container">
+        <!-- Static detail fields-->
+        <div class="fixed-header">
+            <h3>Onderhoud @FileName</h3>
+            <EditForm Model="SelectedPerson">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="form-row">
+                    <SfTextBox Placeholder="Voornaam" FloatLabelType="FloatLabelType.Always" Width="200px" @bind-Value="SelectedPerson.FirstName" />
+                    <SfTextBox Placeholder="Tussenvoegsel" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedPerson.NameInfix" />
+                    <SfTextBox Placeholder="Achternaam" FloatLabelType="FloatLabelType.Always" Width="250px" @bind-Value="SelectedPerson.LastName" />
+                </div>
+
+                <div class="form-row">
+                    <SfTextBox Placeholder="Straat" FloatLabelType="FloatLabelType.Always" Width="350px" @bind-Value="SelectedPerson.Street" />
+                    <SfTextBox Placeholder="Huisnummer" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedPerson.HomeNr" />
+                    <SfTextBox Placeholder="Toevoeging" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedPerson.HomeNrAddition" />
+                </div>
+
+                <div class="form-row">
+                    <SfTextBox Placeholder="Postcode" FloatLabelType="FloatLabelType.Always" Width="80px" @bind-Value="SelectedPerson.Zip" />
+                    <SfTextBox Placeholder="Woonplaats" FloatLabelType="FloatLabelType.Always" Width="230px" @bind-Value="SelectedPerson.City" />
+                </div>
+
+                <div class="form-row">
+                    <SfTextBox Placeholder="E-mail" FloatLabelType="FloatLabelType.Always" Width="250px" @bind-Value="SelectedPerson.PersonsEmail" />
+                    <SfTextBox Placeholder="Mobiel" FloatLabelType="FloatLabelType.Always" Width="130px" @bind-Value="SelectedPerson.Mobile" />
+                    <SfTextBox Placeholder="Telefoon" FloatLabelType="FloatLabelType.Always" Width="130px" @bind-Value="SelectedPerson.Phone" />
+                </div>
+            </EditForm>
+
+            <!-- Toolbar -->
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+                <SfToolbar Width="800px">
+                    <ToolbarItems>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn"
+                                        @onclick="Save"
+                                        title="Sla de persoonsgegevens">
+                                    <img src="icons/button-save.svg" class="icon" alt="SAVE" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn" @onclick="AddNew" title="Voeg een nieuw persoon toe">
+                                    <img src="icons/button-add.svg" class="icon" alt="ADD" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn" @onclick="Delete" title="Verwijder (deactiveer) geselecteerde persoon"
+                                        disabled="@(!IsDeleteEnabled)">
+                                    <img src="icons/button-del.svg" class="icon" alt="DEL" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Input">
+                            <Template>
+                                <SfSwitch @bind-Checked="IsActive"
+                                          OnLabel="Actief"
+                                          OffLabel="Inactief"
+                                          CssClass="@GetActiveCss()" />
+                            </Template>
+
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                            <Template>
+                                <span class="toolbar-count">@FileName: @VisibleRowCount</span>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                            <Template>
+                                <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
+                            </Template>
+                        </ToolbarItem>
+                    </ToolbarItems>
+                </SfToolbar>
+            </div>
+        </div>
+
+        <div class="spacer-small"></div>
+
+        <!-- Scrollable area for main datagrid -->
+        <div class="scrollable-content">    
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
+                <SfGrid @ref="GridRef"
+                        TValue="PersonModel"
+                        DataSource="@Persons"
+                        EnableStickyHeader="true"
+                        AllowResizing="true"
+                        Height="260px"
+                        Width="800px"
+                        AllowSorting="true"
+                        AllowMultiSorting="true"
+                        AllowSelection="true">
+                    <GridEvents TValue="PersonModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
+                    <GridEditSettings AllowAdding="true" NewRowPosition="NewRowPosition.Top"></GridEditSettings>
+                    <GridColumns>
+                        <GridColumn Field="PersonId" IsPrimaryKey="true" Visible="false" />
+                        <GridColumn Field="Name" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="350px" />
+                        <GridColumn Field="City" HeaderText="Standplaats" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="100px" />
+                        <GridColumn Field="Email" HeaderText="Land" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="90px" />
+                        <GridColumn Field="Mobile" HeaderText="Genre" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="100px" />
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool _initialLoadDone = false;
+    private bool IsDeleteEnabled => SelectedPerson?.PersonId != 0;
+    private bool IsLoading = false;
+    private PersonModel? SelectedPerson;
+    private int VisibleRowCount = 0;
+    private List<PersonModel> Persons = [];
+    private SfGrid<PersonModel>? GridRef;
+    private string FileName = "Personen";
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+
+        Persons = await PersonService.GetAllPersonsAsync();
+
+        SelectedPerson = Persons.FirstOrDefault();
+
+        IsLoading = false;
+    }
+
+    private async Task OnGridDataBound()
+    {
+        if (!_initialLoadDone && Persons?.Any() == true)
+        {
+            _initialLoadDone = true;
+            await UpdateVisibleRowCountAsync();
+            await GridRef.SelectRowAsync(0);
+        }
+    }
+
+    private async void OnRowSelected(RowSelectEventArgs<PersonModel> args)
+    {
+        SelectedPerson = args.Data;
+
+        StateHasChanged();
+    }
+
+    private async Task UpdateVisibleRowCountAsync()
+    {
+        if (GridRef is not null)
+        {
+            var records = await GridRef.GetCurrentViewRecordsAsync();
+            await Task.Delay(150);
+            VisibleRowCount = records?.Count ?? 0;
+            StateHasChanged();
+        }
+    }
+
+    public async Task OnInput(InputEventArgs args)
+    {
+        await GridRef.SearchAsync(args.Value);
+
+        await Task.Delay(50);
+        await UpdateVisibleRowCountAsync();
+    }
+
+    public class RequiredIfActiveAttribute : ValidationAttribute
+    {
+        private readonly string _dependentProperty;
+
+        public RequiredIfActiveAttribute(string dependentProperty)
+        {
+            _dependentProperty = dependentProperty;
+        }
+
+        protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
+        {
+            var activeProp = validationContext.ObjectType.GetProperty(_dependentProperty);
+            if (activeProp == null)
+                return new ValidationResult($"Property {_dependentProperty} not found");
+
+            var activeValue = (int)(activeProp.GetValue(validationContext.ObjectInstance) ?? 0);
+
+            // Alleen valideren als Active = 1
+            if (activeValue == 1 && string.IsNullOrWhiteSpace(value?.ToString()))
+            {
+                return new ValidationResult(ErrorMessage ?? "Dit veld is verplicht");
+            }
+
+            return ValidationResult.Success!;
+        }
+    }
+
+    private bool IsActive
+    {
+        get => SelectedPerson.Active == 1;
+        set => SelectedPerson.Active = value ? 1 : 0;
+    }
+
+    private string GetActiveCss()
+    {
+        return IsActive ? "active-green" : "inactive-red";
+    }
+
+    private async Task Save()
+    {
+    }
+
+    private async Task AddNew()
+    {
+    }
+    private async Task Delete()
+    {
+    }
+
+}

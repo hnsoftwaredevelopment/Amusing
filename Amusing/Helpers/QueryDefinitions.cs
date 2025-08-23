@@ -1020,4 +1020,64 @@ public static class QueryDefinitions
     public static readonly string DeletePersonRole = @"
         DELETE FROM ah_personen_rollen 
         WHERE persoon_id = @PersonId AND zanggroep_id = @GroupId;";
+    public static readonly string GetAllPersons = @"
+        SELECT 
+            p.persoon_id AS PersonId,
+            CONCAT_WS(' ', p.voornaam, p.tussenvoegsel, p.achternaam) AS Name,
+            p.voornaam AS FirstName, 
+            p.tussenvoegsel AS NameInfix, 
+            p.achternaam AS LastName,
+            p.email AS Email,
+            CONCAT_WS(' ', adr.straatnaam, CONCAT(adr.huisnummer, adr.huisnummer_toevoeging ) ) AS Address,
+            adr.straatnaam AS Street,
+            adr.huisnummer AS HomeNr,
+            adr.huisnummer_toevoeging AS HomeNrAddition,
+            adr.postcode AS Zip,
+            adr.woonplaats AS City,
+            adr.telefoon_mobiel AS Mobile,
+            adr.telefoon_vast AS Phone,
+            rollen.rollen AS Roles,
+            vrijwilligers.vrijwilligers AS Volunteer,
+            p.actief  AS Active
+        FROM 
+            amusing.ah_personen p
+        LEFT JOIN amusing.ah_contactgegevens adr ON p.persoon_id = adr.persoon_id  
+        LEFT JOIN (
+            SELECT 
+                pr.persoon_id,
+                GROUP_CONCAT(DISTINCT
+                    CASE
+                        WHEN pr.rol IS NOT NULL AND zg.naam IS NOT NULL THEN 
+                            CONCAT(pr.rol, ' ', zg.naam)
+                        WHEN pr.rol IS NOT NULL THEN
+                            pr.rol
+                        ELSE NULL
+                    END
+                    ORDER BY pr.rol SEPARATOR ', '
+                ) AS rollen
+            FROM 
+                amusing.ah_personen_rollen pr
+            LEFT JOIN 
+                amusing.ah_zanggroepen zg ON zg.zanggroep_id = pr.zanggroep_id
+            GROUP BY 
+                pr.persoon_id
+        ) rollen ON rollen.persoon_id = p.persoon_id
+        LEFT JOIN (
+            SELECT 
+                v.persoon_id,
+                GROUP_CONCAT(DISTINCT
+                    CONCAT('Vrijwilliger ', YEAR(f.festivaldatum))
+                    ORDER BY f.festivaldatum SEPARATOR ', '
+                ) AS vrijwilligers
+            FROM 
+                amusing.ah_vrijwilligers v
+            LEFT JOIN 
+                amusing.ah_festivals f ON f.festival_id = v.festival_id
+            GROUP BY 
+                v.persoon_id
+        ) vrijwilligers ON vrijwilligers.persoon_id = p.persoon_id
+        GROUP BY 
+            CONCAT_WS(' ', p.voornaam, p.tussenvoegsel, p.achternaam), p.email
+        ORDER BY 
+            CONCAT_WS(' ', p.voornaam, p.tussenvoegsel, p.achternaam) ASC;";
 }

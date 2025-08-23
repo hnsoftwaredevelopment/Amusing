@@ -91,4 +91,28 @@ public class PersonService( GenericDataService dataService )
 
         await _dataService.ExecuteNonQueryAsync( QueryDefinitions.DeletePersonRole, parameters );
     }
+    public Task<List<PersonModel>> GetAllPersonsAsync()
+    {
+        return _dataService.ExecuteQueryAsync(QueryDefinitions.GetAllPersons,
+            reader => new PersonModel
+            {
+                PersonId = Convert.ToUInt32(reader["PersonId"]),
+                Name = reader["Name"].ToString(),
+                PersonsEmail = reader["Email"]?.ToString(),
+                Roles = reader["Roles"]?.ToString(),
+                Volunteer = reader["Volunteer"]?.ToString(),
+                FirstName = reader["FirstName"].ToString(),
+                NameInfix = reader["NameInfix"].ToString(),
+                LastName = reader["LastName"].ToString(),
+                Address = reader["Address"].ToString(),
+                Street = reader["Street"].ToString(),
+                HomeNr = reader["HomeNr"].ToString(),
+                HomeNrAddition = reader["HomeNrAddition"].ToString(),
+                Zip = reader["Zip"].ToString(),
+                City = reader["City"].ToString(),
+                Mobile = reader["Mobile"].ToString(),
+                Phone = reader["Phone"].ToString(),
+                Active = Convert.ToInt32(reader["Active"])
+            });
+    }
 }
