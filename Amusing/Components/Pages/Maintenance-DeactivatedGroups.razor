@@ -96,7 +96,7 @@ else
     private int VisibleRowCount = 0;
     private List<GroupModel> Groups = [];
     private SfGrid<GroupModel>? GridRef;
-    private string FileName = "Gedeactiveerde (vewijderde) koren";
+    private string FileName = "Gedeactiveerde (verwijderde) koren";
     public List<Syncfusion.Blazor.Grids.ContextMenuItemModel>? ContextMenuItems = new()
         {
             new ContextMenuItemModel { Text = "Verwijder alle relevante koor data", Id = "destroy" },
@@ -182,11 +182,19 @@ else
         var selected = args.RowInfo.RowData;
         if ( args.Item.Id.StartsWith( "destroy" ) )
         {
+            var index = GridRef.SelectedRowIndex;
             await GroupService.DestroyGroupAsync( selected.GroupId );
+            await Task.Delay(150);
+            Groups = await GroupService.GetInactiveGroupsAsync();
+            await Task.Delay(50);
+            await GridRef.Refresh();
+            SelectedGroup = Groups[index];
+            await GridRef.SelectRowAsync(index);
         }
         else if ( args.Item.Id.StartsWith( "reactivate" ) )
         {
             await GroupService.ReactivateGroupAsync( selected.GroupId );
+            await ReactivateGroup();
         }
     }
 }

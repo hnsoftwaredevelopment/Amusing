@@ -944,8 +944,8 @@ public static class QueryDefinitions
             grp.rekeningnr 		AS BankAccount,
             grp.actief 			AS Active
         FROM amusing.ah_zanggroepen grp 
-        JOIN amusing.ah_genres gen ON grp.genre_id = gen.genre_id 
-        JOIN amusing.ah_landen cou ON grp.land COLLATE utf8mb3_unicode_ci = cou.code
+        LEFT JOIN amusing.ah_genres gen ON grp.genre_id = gen.genre_id 
+        LEFT JOIN amusing.ah_landen cou ON grp.land COLLATE utf8mb3_unicode_ci = cou.code
         WHERE grp.actief = 0
         ORDER BY grp.naam;";
     public static readonly string AddNewGroup = @"
