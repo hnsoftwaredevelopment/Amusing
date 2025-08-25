@@ -32,10 +32,16 @@ else
             <EditForm Model="SelectedPerson">
                 <DataAnnotationsValidator />
                 <ValidationSummary />
-                <div class="form-row">
+                <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
                     <SfTextBox Placeholder="Voornaam" FloatLabelType="FloatLabelType.Always" Width="200px" @bind-Value="SelectedPerson.FirstName" />
                     <SfTextBox Placeholder="Tussenvoegsel" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedPerson.NameInfix" />
                     <SfTextBox Placeholder="Achternaam" FloatLabelType="FloatLabelType.Always" Width="250px" @bind-Value="SelectedPerson.LastName" />
+                    <BitTooltip Text="@(IsActive ? "Deze persoon is actief, klik om te deactiveren" : "Deze persoon is niet actief, klik om te activeren")" HideDelay="200" ShowOnHover="true">
+                        <BitToggleButton 
+                            @bind-IsChecked="IsActive"
+                            Text="@(IsActive ? "Aktief" : "Niet aktief")"
+                                         Styles="@(new() { Root = "height: 32px;  min-height: 32px; width: 100px; border-radius: 16px; vertical-align: bottom; --toggle-background: red; background: var(--toggle-background); border: none", Checked = "--toggle-background: green;", Text = "color: white;" })" />
+                    </BitTooltip>
                 </div>
 
                 <div class="form-row">
@@ -51,6 +57,10 @@ else
 
                 <div class="form-row">
                     <SfTextBox Placeholder="E-mail" FloatLabelType="FloatLabelType.Always" Width="250px" @bind-Value="SelectedPerson.PersonsEmail" />
+                    <div class="ceckbox-container">
+                        <label class="checkbox-label">Info mailing</label>
+                        <SfCheckBox CssClass="big-checkbox" @bind-Checked="SelectedPerson.InfoMailingBool" />
+                    </div>
                     <SfTextBox Placeholder="Mobiel" FloatLabelType="FloatLabelType.Always" Width="130px" @bind-Value="SelectedPerson.Mobile" />
                     <SfTextBox Placeholder="Telefoon" FloatLabelType="FloatLabelType.Always" Width="130px" @bind-Value="SelectedPerson.Phone" />
                 </div>
@@ -58,7 +68,7 @@ else
 
             <!-- Toolbar -->
             <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
-                <SfToolbar Width="800px">
+                <SfToolbar>
                     <ToolbarItems>
                         <ToolbarItem Type="ItemType.Button">
                             <Template>
@@ -84,18 +94,19 @@ else
                                 </button>
                             </Template>
                         </ToolbarItem>
-                        <ToolbarItem Type="ItemType.Input">
-                            <Template>
-                                <SfSwitch @bind-Checked="IsActive"
-                                          OnLabel="Actief"
-                                          OffLabel="Inactief"
-                                          CssClass="@GetActiveCss()" />
-                            </Template>
-
-                        </ToolbarItem>
                         <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
                             <Template>
                                 <span class="toolbar-count">@FileName: @VisibleRowCount</span>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Text="Toon: ">
+                            <Template>
+                                <div class="status-filter" style="display:flex; align-items:center; gap:10px;">
+                                    <span style="font-weight:bold; margin-left:50px;">Toon: </span>    
+                                    <SfRadioButton Label="Alle" Name="status" Value="All" @bind-Checked="ActiveFilter" />
+                                    <SfRadioButton Label="Actief" Name="status" Value="Active" @bind-Checked="ActiveFilter" />
+                                    <SfRadioButton Label="Niet actief" Name="status" Value="Inactive" @bind-Checked="ActiveFilter" />
+                                </div>
                             </Template>
                         </ToolbarItem>
                         <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
@@ -115,11 +126,10 @@ else
             <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
                 <SfGrid @ref="GridRef"
                         TValue="PersonModel"
-                        DataSource="@Persons"
+                        DataSource="@FilteredPersons"
                         EnableStickyHeader="true"
                         AllowResizing="true"
                         Height="260px"
-                        Width="800px"
                         AllowSorting="true"
                         AllowMultiSorting="true"
                         AllowSelection="true">
@@ -127,10 +137,27 @@ else
                     <GridEditSettings AllowAdding="true" NewRowPosition="NewRowPosition.Top"></GridEditSettings>
                     <GridColumns>
                         <GridColumn Field="PersonId" IsPrimaryKey="true" Visible="false" />
-                        <GridColumn Field="Name" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="350px" />
-                        <GridColumn Field="City" HeaderText="Standplaats" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="100px" />
-                        <GridColumn Field="Email" HeaderText="Land" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="90px" />
-                        <GridColumn Field="Mobile" HeaderText="Genre" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="100px" />
+                        <GridColumn Field="Name" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="250px" />
+                        <GridColumn Field="PersonsEmail" HeaderText="E-Mail" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="100px" />
+                        <GridColumn Field="Mobile" HeaderText="Mobiel" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="100px" />
+                        <GridColumn Field="Roles" HeaderText="Rollen" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="120px" />
+                        <GridColumn Field="Volunteer" HeaderText="Vrijwilliger" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="120px" />
+                        <GridColumn Field="Active" HeaderText="Status" Width="60px">
+                            <Template>
+                                @{
+                                    var person = (PersonModel)context;
+                                }
+                                <BitToggleButton IsChecked="@person.IsActive"
+                                                 Disabled="true"
+                                                 Styles="@(new()
+                                                 {
+                                                     Root = "display:inline-block; vertical-align:bottom; height:32px; min-height:32px; width:100px; border-radius:16px; --toggle-background:red; background:var(--toggle-background); border:none;",
+                                                     Checked = "--toggle-background:green;",
+                                                     Text = "color:white;"
+                                                 })"
+                                             Text="@(person.IsActive ? "Actief" : "Niet actief")" />
+                        </Template>
+                        </GridColumn>
                     </GridColumns>
                 </SfGrid>
             </div>
@@ -140,13 +167,28 @@ else
 
 @code {
     private bool _initialLoadDone = false;
-    private bool IsDeleteEnabled => SelectedPerson?.PersonId != 0;
+    private bool IsDeleteEnabled => SelectedPerson?.PersonId != 0 || SelectedPerson?.IsActive == true;
     private bool IsLoading = false;
     private PersonModel? SelectedPerson;
     private int VisibleRowCount = 0;
     private List<PersonModel> Persons = [];
+    private List<PersonModel> FilteredPersons = new();
     private SfGrid<PersonModel>? GridRef;
+    private string _activeFilter = "All";
+    private string ActiveFilter
+    {
+        get => _activeFilter;
+        set
+        {
+            if ( _activeFilter != value )
+            {
+                _activeFilter = value;
+                ApplyFilter();
+            }
+        }
+    }
     private string FileName = "Personen";
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -155,8 +197,14 @@ else
         Persons = await PersonService.GetAllPersonsAsync();
 
         SelectedPerson = Persons.FirstOrDefault();
+        ApplyFilter();
 
         IsLoading = false;
+    }
+
+    protected override void OnInitialized()
+    {
+        ApplyFilter();
     }
 
     private async Task OnGridDataBound()
@@ -169,7 +217,7 @@ else
         }
     }
 
-    private async void OnRowSelected(RowSelectEventArgs<PersonModel> args)
+    private void OnRowSelected(RowSelectEventArgs<PersonModel> args)
     {
         SelectedPerson = args.Data;
 
@@ -192,6 +240,19 @@ else
         await GridRef.SearchAsync(args.Value);
 
         await Task.Delay(50);
+        await UpdateVisibleRowCountAsync();
+    }
+
+    private async void ApplyFilter()
+    {
+        FilteredPersons = ActiveFilter switch
+        {
+            "Active" => Persons.Where( p => p.Active == 1 ).ToList(),
+            "Inactive" => Persons.Where( p => p.Active == 0 ).ToList(),
+            _ => Persons.ToList()
+        };
+
+        await Task.Delay( 50 );
         await UpdateVisibleRowCountAsync();
     }
 
@@ -235,13 +296,90 @@ else
 
     private async Task Save()
     {
+        // Save data to ah_personen, af_contactgegevens
+        if ( SelectedPerson is null )
+            return;
+
+        if ( SelectedPerson.PersonId != 0 )
+        {
+            var savedId = SelectedPerson.PersonId;
+
+            await PersonService.UpdatePersonAsync( SelectedPerson );
+            await PersonService.UpdateContactDataAsync( SelectedPerson );
+        }
+        else
+        {
+            // Save the new Person and get the new Person Id
+            var savedId = await PersonService.AddPersonAsync(SelectedPerson);
+
+            // Save the groepdetails using the PersonId
+            var record = await PersonService.AddContactDataAsync(SelectedPerson, savedId);
+
+            // Refresh the list
+            Persons = await PersonService.GetAllPersonsAsync();
+            await Task.Delay( 50 );
+            await GridRef.Refresh();
+
+            // Search the modified record
+            var index = Persons.FindIndex(s => s.PersonId == savedId);
+            if ( index >= 0 )
+            {
+                SelectedPerson = Persons [ index ];
+                await GridRef.SelectRowAsync( index );
+            }
+        }
     }
 
     private async Task AddNew()
     {
+        var newPerson = new PersonModel
+        {
+            PersonId = 0,
+            FirstName = string.Empty,
+            NameInfix = string.Empty,
+            LastName = string.Empty,
+            PersonsEmail = string.Empty,
+            InfoMailing = 0,
+            Zip = string.Empty,
+            Street = string.Empty,
+            HomeNr = string.Empty,
+            HomeNrAddition = string.Empty,
+            City = string.Empty,
+            Phone = string.Empty,
+            Mobile = string.Empty,
+            Active = 1
+        };
+
+        await GridRef.AddRecordAsync( newPerson, 0 );
+        await GridRef.SelectRowAsync( 0 );
+
+        SelectedPerson = newPerson;
+
+        StateHasChanged();
     }
+
     private async Task Delete()
     {
+        if ( SelectedPerson is null ) return;
+
+        if (!IsActive) await PersonService.DeletePersonAsync( SelectedPerson.PersonId );
+
+        Persons = await PersonService.GetAllPersonsAsync();
+        SelectedPerson = Persons
+            .OrderByDescending( f => f.Name )
+            .FirstOrDefault();
+        await GridRef.Refresh();
+
+        // Select the first record in the grid
+        if ( Persons.Any() )
+        {
+            SelectedPerson = Persons [ 0 ];
+            await GridRef.SelectRowAsync( 0 );
+        }
+        else
+        {
+            SelectedPerson = null;
+        }
     }
 
 }

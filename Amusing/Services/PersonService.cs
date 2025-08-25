@@ -93,26 +93,98 @@ public class PersonService( GenericDataService dataService )
     }
     public Task<List<PersonModel>> GetAllPersonsAsync()
     {
-        return _dataService.ExecuteQueryAsync(QueryDefinitions.GetAllPersons,
+        return _dataService.ExecuteQueryAsync( QueryDefinitions.GetAllPersons,
             reader => new PersonModel
             {
-                PersonId = Convert.ToUInt32(reader["PersonId"]),
-                Name = reader["Name"].ToString(),
-                PersonsEmail = reader["Email"]?.ToString(),
-                Roles = reader["Roles"]?.ToString(),
-                Volunteer = reader["Volunteer"]?.ToString(),
-                FirstName = reader["FirstName"].ToString(),
-                NameInfix = reader["NameInfix"].ToString(),
-                LastName = reader["LastName"].ToString(),
-                Address = reader["Address"].ToString(),
-                Street = reader["Street"].ToString(),
-                HomeNr = reader["HomeNr"].ToString(),
-                HomeNrAddition = reader["HomeNrAddition"].ToString(),
-                Zip = reader["Zip"].ToString(),
-                City = reader["City"].ToString(),
-                Mobile = reader["Mobile"].ToString(),
-                Phone = reader["Phone"].ToString(),
-                Active = Convert.ToInt32(reader["Active"])
-            });
+                PersonId = Convert.ToUInt32( reader [ "PersonId" ] ),
+                Name = reader [ "Name" ].ToString(),
+                PersonsEmail = reader [ "Email" ]?.ToString(),
+                Roles = reader [ "Roles" ]?.ToString(),
+                Volunteer = reader [ "Volunteer" ]?.ToString(),
+                FirstName = reader [ "FirstName" ].ToString(),
+                NameInfix = reader [ "NameInfix" ].ToString(),
+                LastName = reader [ "LastName" ].ToString(),
+                Address = reader [ "Address" ].ToString(),
+                Street = reader [ "Street" ].ToString(),
+                HomeNr = reader [ "HomeNr" ].ToString(),
+                HomeNrAddition = reader [ "HomeNrAddition" ].ToString(),
+                Zip = reader [ "Zip" ].ToString(),
+                City = reader [ "City" ].ToString(),
+                Mobile = reader [ "Mobile" ].ToString(),
+                Phone = reader [ "Phone" ].ToString(),
+                Active = Convert.ToInt32( reader [ "Active" ] )
+            } );
+    }
+    public async Task UpdateContactDataAsync( PersonModel model )
+    {
+        Dictionary<string, object> parameters = new()
+    {
+        { "@PersonId", model.PersonId },
+        { "@Zip",  model.Zip },
+        { "@Street",  model.Street },
+        { "@HomeNr",  model.HomeNr },
+        { "@HomeNrAddition",  model.HomeNrAddition },
+        { "@City",  model.City },
+        { "@Phone",  model.Phone },
+        { "@Mobile",  model.Mobile }
+    };
+
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyContactDataByPersonId, parameters );
+    }
+    public async Task UpdatePersonAsync( PersonModel model )
+    {
+        Dictionary<string, object> parameters = new()
+{
+        { "@PersonId", model.PersonId },
+        { "@FirstName",  model.FirstName },
+        { "@NameInfix",  model.NameInfix },
+        { "@LastName",  model.LastName },
+        { "@Email",  model.PersonsEmail },
+        { "@Active",  model.Active },
+        { "@InfoMailing",  model.InfoMailing }
+    };
+
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyPersonByPersonId, parameters );
+    }
+    public async Task DeletePersonAsync( uint personId )
+    {
+        Dictionary<string, object> parameters = new()
+    {
+        { "@PersonId", personId },
+        { "@Active", 0 }
+    };
+
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.DeletePersonByPersonId, parameters );
+    }
+    public async Task<uint> AddPersonAsync( PersonModel model )
+    {
+        Dictionary<string, object> parameters = new()
+    {
+        { "@PersonId", model.PersonId },
+        { "@FirstName",  model.FirstName },
+        { "@NameInfix",  model.NameInfix },
+        { "@LastName",  model.LastName },
+        { "@Email",  model.Email },
+        { "@Active",  model.Active },
+        { "@InfoMailing",  model.InfoMailing }
+    };
+
+        return await _dataService.ExecuteScalarAsync<uint>( QueryDefinitions.AddNewPerson, parameters );
+    }
+    public async Task<uint> AddContactDataAsync( PersonModel model, uint personId )
+    {
+        Dictionary<string, object> parameters = new()
+    {
+        { "@PersonId", model.PersonId },
+        { "@Zip",  model.Zip },
+        { "@Street",  model.Street },
+        { "@HomeNr",  model.HomeNr },
+        { "@HomeNrAddition",  model.HomeNrAddition },
+        { "@City",  model.City },
+        { "@Phone",  model.Phone },
+        { "@Mobile",  model.Mobile }
+    };
+
+        return await _dataService.ExecuteScalarAsync<uint>( QueryDefinitions.AddNewContactData, parameters );
     }
 }

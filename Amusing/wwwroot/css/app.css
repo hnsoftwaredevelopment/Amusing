@@ -216,8 +216,7 @@ a, .btn-link {
     background-color: yellow;
 }
 
-.e-grid .e-gridheader .e-headercell
-{
+.e-grid .e-gridheader .e-headercell {
     background-color: #062666 !important;
     color: #ebebf1 !important;
     accent-color: red;
@@ -225,23 +224,23 @@ a, .btn-link {
     font-size: 12px;
 }
 
-.e-grid .e-gridheader .e-headercell .e-headertext {
-    color: #ebebf1 !important;
-}
-
-/* Eventueel: ook bij hover/focus of sortering actief */
-.e-grid .e-gridheader .e-headercell.e-active,
-.e-grid .e-gridheader .e-headercell:focus,
-.e-grid .e-gridheader .e-headercell:hover {
-    background-color: #062666 !important;
-    color: #ebebf1 !important;
-}
-
-    .e-grid .e-gridheader .e-headercell.e-active .e-headertext,
-    .e-grid .e-gridheader .e-headercell:hover .e-headertext,
-    .e-grid .e-gridheader .e-headercell:focus .e-headertext {
+    .e-grid .e-gridheader .e-headercell .e-headertext {
         color: #ebebf1 !important;
     }
+
+    /* Eventueel: ook bij hover/focus of sortering actief */
+    .e-grid .e-gridheader .e-headercell.e-active,
+    .e-grid .e-gridheader .e-headercell:focus,
+    .e-grid .e-gridheader .e-headercell:hover {
+        background-color: #062666 !important;
+        color: #ebebf1 !important;
+    }
+
+        .e-grid .e-gridheader .e-headercell.e-active .e-headertext,
+        .e-grid .e-gridheader .e-headercell:hover .e-headertext,
+        .e-grid .e-gridheader .e-headercell:focus .e-headertext {
+            color: #ebebf1 !important;
+        }
 
 /* Sorteericoon (pijltje omhoog/omlaag) in geel */
 .e-grid .e-gridheader .e-sortfilterdiv::before {
@@ -570,33 +569,19 @@ label.sf-float-label {
     }
 }
 
-/* Coloroed toggle switch buttons */
-.active-green .e-switch-inner {
-    background-color: green !important;
+.checkbox-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* zorgt dat hij mooi in de rij staat */
+    margin: 0 10px;
 }
 
-.inactive-red .e-switch-inner {
-    background-color: red !important;
+.checkbox-label {
+    font-weight: bold;
+    margin-bottom: 5px;
 }
 
-/* Basis: switch container */
-.e-switch-wrapper.active-green .e-switch-inner::before {
-    background-color: green !important;
-    border-color: green !important;
-}
-
-/* De ronde knop */
-.e-switch-wrapper.active-green .e-switch-handle {
-    background-color: white !important;
-}
-
-/* Uit (niet actief, rood) */
-.e-switch-wrapper.inactive-red .e-switch-inner::before {
-    background-color: red !important;
-    border-color: red !important;
-}
-
-/* Inactive circle */
-.e-switch-wrapper.inactive-red .e-switch-handle {
-    background-color: silver !important;
+.big-checkbox .e-frame,
+.big-checkbox .e-icons {
+    transform: scale(1.5); /* ongeveer 30px */
 }

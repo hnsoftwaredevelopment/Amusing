@@ -1028,7 +1028,7 @@ public static class QueryDefinitions
             p.tussenvoegsel AS NameInfix, 
             p.achternaam AS LastName,
             p.email AS Email,
-            CONCAT_WS(' ', adr.straatnaam, CONCAT(adr.huisnummer, adr.huisnummer_toevoeging ) ) AS Address,
+            CONCAT_WS(' ', adr.straatnaam, CONCAT(adr.huisnummer, adr.huisnummer_toevoeging)) AS Address,
             adr.straatnaam AS Street,
             adr.huisnummer AS HomeNr,
             adr.huisnummer_toevoeging AS HomeNrAddition,
@@ -1036,12 +1036,14 @@ public static class QueryDefinitions
             adr.woonplaats AS City,
             adr.telefoon_mobiel AS Mobile,
             adr.telefoon_vast AS Phone,
+            p.infomailing AS InfoMailing,
             rollen.rollen AS Roles,
             vrijwilligers.vrijwilligers AS Volunteer,
-            p.actief  AS Active
+            p.actief AS Active
         FROM 
             amusing.ah_personen p
-        LEFT JOIN amusing.ah_contactgegevens adr ON p.persoon_id = adr.persoon_id  
+        LEFT JOIN amusing.ah_contactgegevens adr 
+            ON p.persoon_id = adr.persoon_id  
         LEFT JOIN (
             SELECT 
                 pr.persoon_id,
@@ -1061,7 +1063,8 @@ public static class QueryDefinitions
                 amusing.ah_zanggroepen zg ON zg.zanggroep_id = pr.zanggroep_id
             GROUP BY 
                 pr.persoon_id
-        ) rollen ON rollen.persoon_id = p.persoon_id
+        ) rollen 
+            ON rollen.persoon_id = p.persoon_id
         LEFT JOIN (
             SELECT 
                 v.persoon_id,
@@ -1075,9 +1078,47 @@ public static class QueryDefinitions
                 amusing.ah_festivals f ON f.festival_id = v.festival_id
             GROUP BY 
                 v.persoon_id
-        ) vrijwilligers ON vrijwilligers.persoon_id = p.persoon_id
+        ) vrijwilligers 
+            ON vrijwilligers.persoon_id = p.persoon_id
         GROUP BY 
-            CONCAT_WS(' ', p.voornaam, p.tussenvoegsel, p.achternaam), p.email
+            p.persoon_id
         ORDER BY 
-            CONCAT_WS(' ', p.voornaam, p.tussenvoegsel, p.achternaam) ASC;";
+            Name ASC;";
+    public static readonly string AddNewPerson = @"
+        INSERT INTO amusing.ah_personen
+            (voornaam, tussenvoegsel, achternaam, email, actief, infomailing)
+        VALUES (@FirstName, @NameInfix, @LastName, @Email, @Active, @InfoMailing);
+        SELECT LAST_INSERT_ID();
+        ";
+    public static readonly string AddNewContactData = @"
+        INSERT INTO amusing.ah_contactgegevens
+            (persoon_id, postcode, straatnaam, huisnummer, huisnummer_toevoeging, woonplaats, telefoon_vast, telefoon_mobiel)
+        VALUES (@PersonId, @Zip, @Street, @HomeNr, @HomeNrAddition, @City, @Phone, @Mobile);
+        ";
+    public static readonly string ModifyPersonByPersonId = @"
+        UPDATE amusing.ah_personen
+        SET 
+            voornaam = @FirstName,
+            tussenvoegsel = @NameInfix,
+            achternaam = @LastName,
+            email = @Email,
+            actief = @Active,
+            infomailing = @InfoMailing
+        WHERE persoon_id = @PersonId;";
+    public static readonly string ModifyContactDataByPersonId = @"
+        UPDATE amusing.ah_contactgegevens
+        SET 
+            postcode = @Zip,
+            straatnaam = @Street,
+            huisnummer = @HomeNr,
+            huisnummer_toevoeging = @HomeNrAddition,
+            woonplaats = @City,
+            telefoon_vast = @Phone,
+            telefoon_mobiel = @Mobile
+        WHERE persoon_id = @PersonId;";
+    public static readonly string DeletePersonByPersonId = @"
+        UPDATE amusing.ah_personen
+        SET 
+            actief = @Active
+        WHERE persoon_id = @PersonId;";
 }
