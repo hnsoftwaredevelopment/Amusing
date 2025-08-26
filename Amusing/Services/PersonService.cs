@@ -104,6 +104,7 @@ public class PersonService( GenericDataService dataService )
                 FirstName = reader [ "FirstName" ].ToString(),
                 NameInfix = reader [ "NameInfix" ].ToString(),
                 LastName = reader [ "LastName" ].ToString(),
+                InfoMailing = Convert.ToInt16( reader [ "InfoMailing" ] ),
                 Address = reader [ "Address" ].ToString(),
                 Street = reader [ "Street" ].ToString(),
                 HomeNr = reader [ "HomeNr" ].ToString(),
@@ -146,15 +147,16 @@ public class PersonService( GenericDataService dataService )
 
         await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyPersonByPersonId, parameters );
     }
-    public async Task DeletePersonAsync( uint personId )
+    public async Task PersonActivationAsync( PersonModel model )
     {
+        int _active = model.Active == 0  ? 1 : 0;
         Dictionary<string, object> parameters = new()
     {
-        { "@PersonId", personId },
-        { "@Active", 0 }
+        { "@PersonId", model.PersonId },
+        { "@Active", _active }
     };
 
-        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.DeletePersonByPersonId, parameters );
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.PersonActivationByPersonId, parameters );
     }
     public async Task<uint> AddPersonAsync( PersonModel model )
     {

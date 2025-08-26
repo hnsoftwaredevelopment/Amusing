@@ -36,7 +36,7 @@ public partial class PersonModel
     public string? City { get; set; } = "";
     public string? Mobile { get; set; } = "";
     public string? Phone { get; set; } = "";
-    public int InfoMailing { get; set; } = 0;
+    public int InfoMailing { get; set; }
     public bool InfoMailingBool
     {
         get => InfoMailing == 1;

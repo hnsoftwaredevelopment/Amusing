@@ -38,7 +38,7 @@ else
                     <SfTextBox Placeholder="Achternaam" FloatLabelType="FloatLabelType.Always" Width="250px" @bind-Value="SelectedPerson.LastName" />
                     <BitTooltip Text="@(IsActive ? "Deze persoon is actief, klik om te deactiveren" : "Deze persoon is niet actief, klik om te activeren")" HideDelay="200" ShowOnHover="true">
                         <BitToggleButton 
-                            @bind-IsChecked="IsActive"
+                            @bind-IsChecked="IsActive" OnClick="PersonActivation"
                             Text="@(IsActive ? "Aktief" : "Niet aktief")"
                                          Styles="@(new() { Root = "height: 32px;  min-height: 32px; width: 100px; border-radius: 16px; vertical-align: bottom; --toggle-background: red; background: var(--toggle-background); border: none", Checked = "--toggle-background: green;", Text = "color: white;" })" />
                     </BitTooltip>
@@ -57,10 +57,12 @@ else
 
                 <div class="form-row">
                     <SfTextBox Placeholder="E-mail" FloatLabelType="FloatLabelType.Always" Width="250px" @bind-Value="SelectedPerson.PersonsEmail" />
-                    <div class="ceckbox-container">
-                        <label class="checkbox-label">Info mailing</label>
+                    
+                    <div class="form-group col-md-2">
+                        <label class="custom-checkbox-label">Info mailing</label>
                         <SfCheckBox CssClass="big-checkbox" @bind-Checked="SelectedPerson.InfoMailingBool" />
                     </div>
+                    
                     <SfTextBox Placeholder="Mobiel" FloatLabelType="FloatLabelType.Always" Width="130px" @bind-Value="SelectedPerson.Mobile" />
                     <SfTextBox Placeholder="Telefoon" FloatLabelType="FloatLabelType.Always" Width="130px" @bind-Value="SelectedPerson.Phone" />
                 </div>
@@ -83,14 +85,6 @@ else
                             <Template>
                                 <button class="custom-toolbar-btn" @onclick="AddNew" title="Voeg een nieuw persoon toe">
                                     <img src="icons/button-add.svg" class="icon" alt="ADD" />
-                                </button>
-                            </Template>
-                        </ToolbarItem>
-                        <ToolbarItem Type="ItemType.Button">
-                            <Template>
-                                <button class="custom-toolbar-btn" @onclick="Delete" title="Verwijder (deactiveer) geselecteerde persoon"
-                                        disabled="@(!IsDeleteEnabled)">
-                                    <img src="icons/button-del.svg" class="icon" alt="DEL" />
                                 </button>
                             </Template>
                         </ToolbarItem>
@@ -137,7 +131,7 @@ else
                     <GridEditSettings AllowAdding="true" NewRowPosition="NewRowPosition.Top"></GridEditSettings>
                     <GridColumns>
                         <GridColumn Field="PersonId" IsPrimaryKey="true" Visible="false" />
-                        <GridColumn Field="Name" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="250px" />
+                        <GridColumn Field="Name" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="150px" />
                         <GridColumn Field="PersonsEmail" HeaderText="E-Mail" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="100px" />
                         <GridColumn Field="Mobile" HeaderText="Mobiel" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="100px" />
                         <GridColumn Field="Roles" HeaderText="Rollen" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="120px" />
@@ -358,28 +352,11 @@ else
         StateHasChanged();
     }
 
-    private async Task Delete()
+    private async Task PersonActivation()
     {
         if ( SelectedPerson is null ) return;
 
-        if (!IsActive) await PersonService.DeletePersonAsync( SelectedPerson.PersonId );
-
-        Persons = await PersonService.GetAllPersonsAsync();
-        SelectedPerson = Persons
-            .OrderByDescending( f => f.Name )
-            .FirstOrDefault();
-        await GridRef.Refresh();
-
-        // Select the first record in the grid
-        if ( Persons.Any() )
-        {
-            SelectedPerson = Persons [ 0 ];
-            await GridRef.SelectRowAsync( 0 );
-        }
-        else
-        {
-            SelectedPerson = null;
-        }
+        await PersonService.PersonActivationAsync( SelectedPerson );
     }
 
 }

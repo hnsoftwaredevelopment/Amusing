@@ -1116,7 +1116,7 @@ public static class QueryDefinitions
             telefoon_vast = @Phone,
             telefoon_mobiel = @Mobile
         WHERE persoon_id = @PersonId;";
-    public static readonly string DeletePersonByPersonId = @"
+    public static readonly string PersonActivationByPersonId = @"
         UPDATE amusing.ah_personen
         SET 
             actief = @Active
