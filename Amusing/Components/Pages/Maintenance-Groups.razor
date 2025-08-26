@@ -350,9 +350,6 @@ else
         ? $"data:{GetImageMimeType( SelectedGroup.Photo )};base64,{Convert.ToBase64String( SelectedGroup.Photo )}"
         : string.Empty;
 
-    private byte[]? LogoData;
-    private byte[]? PhotoData;
-
     private async Task OnImageSelected( InputFileChangeEventArgs e, bool isLogo )
     {
         var file = e.File;
