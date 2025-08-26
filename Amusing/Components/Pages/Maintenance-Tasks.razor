@@ -1,0 +1,324 @@
+﻿@page "/Maintenance-Tasks"
+@using Amusing.Models
+@using Amusing.Services
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+@using System.ComponentModel.DataAnnotations
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.RichTextEditor
+@using Microsoft.AspNetCore.Components.Forms
+@using Syncfusion.Blazor.SplitButtons
+
+@inject TaskService TaskService;
+
+@inject NavigationManager NavManager
+@inject IJSRuntime JS
+
+@if (IsLoading)
+{
+    <div class="text-center p-2">
+        <SfSpinner CssClass="e-spin-center" />
+        <p>@FileName worden geladen...</p>
+    </div>
+}
+else
+{
+    <div class="page-container">
+        <!-- Static detail fields-->
+        <div class="fixed-header">
+            <h3>Onderhoud @FileName</h3>
+            <EditForm Model="SelectedTask">
+                <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
+                    <SfTextBox Placeholder="Korte naam" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.ShortName" />
+                    <SfTextBox Placeholder="Naam" FloatLabelType="FloatLabelType.Always" Width="200px" @bind-Value="SelectedTask.Name" />
+                    <BitTooltip Text="@(IsActive ? "Deze persoon is actief, klik om te deactiveren" : "Deze persoon is niet actief, klik om te activeren")" HideDelay="200" ShowOnHover="true">
+                        <BitToggleButton @bind-IsChecked="IsActive" OnClick="TaskActivation"
+                                         Text="@(IsActive ? "Aktief" : "Niet aktief")"
+                                         Styles="@(new() { Root = "height: 32px;  min-height: 32px; width: 100px; border-radius: 16px; vertical-align: bottom; --toggle-background: red; background: var(--toggle-background); border: none", Checked = "--toggle-background: green;", Text = "color: white;" })" />
+                    </BitTooltip>
+
+                </div>
+                
+                <hr/>
+
+                <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
+                    <SfTextBox Placeholder="Minimumduur" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.MinimumDuur" />
+                    <SfTextBox Placeholder="Maximumduur" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.MaximumDuur" />
+                </div>
+
+                <hr />
+                
+                <div style="border:1px solid #ccc; border-radius:8px; padding:12px;">
+                    <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
+                        <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Van" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock1From" />
+                        <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Tot" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock1Until" />
+                        <SfNumericTextBox Placeholder="Aantal" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock1Volunteers" />
+                    </div>
+                </div>
+
+                <div style="border:1px solid #ccc; border-radius:8px; padding:12px;">
+                    <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
+                        <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Van" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock2From" />
+                        <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Tot" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock2Until" />
+                        <SfNumericTextBox Placeholder="Aantal" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock2Volunteers" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="sf-float-group">
+                        <label class="sf-float-label" for="rteBeschrijving">Beschrijving</label>
+                        <SfRichTextEditor ID="rteBeschrijving" Width="100%" Placeholder="Beschrijving" Height="180px" @bind-Value="SelectedTask.Description">
+                            <RichTextEditorToolbarSettings Items="@Tools" />
+                        </SfRichTextEditor>
+                    </div>
+                </div>
+            </EditForm>
+
+            <!-- Toolbar -->
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+                <SfToolbar>
+                    <ToolbarItems>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn"
+                                        @onclick="Save"
+                                        title="Bewaar de taak">
+                                    <img src="icons/button-save.svg" class="icon" alt="SAVE" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn" @onclick="AddNew" title="Voeg een nieuw taak toe">
+                                    <img src="icons/button-add.svg" class="icon" alt="ADD" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                            <Template>
+                                <span class="toolbar-count">@FileName: @VisibleRowCount</span>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                            <Template>
+                                <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
+                            </Template>
+                        </ToolbarItem>
+                    </ToolbarItems>
+                </SfToolbar>
+            </div>
+        </div>
+
+        <div class="spacer-small"></div>
+
+        <!-- Scrollable area for main datagrid -->
+        <div class="scrollable-content">
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
+                <SfGrid @ref="GridRef"
+                        TValue="TaskModel"
+                        DataSource="@Tasks"
+                        EnableStickyHeader="true"
+                        AllowResizing="true"
+                        Height="260px"
+                        AllowSorting="true"
+                        AllowMultiSorting="true"
+                        AllowSelection="true">
+                    <GridEvents TValue="TaskModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
+                    <GridEditSettings AllowAdding="true" NewRowPosition="NewRowPosition.Top"></GridEditSettings>
+                    <GridColumns>
+                        <GridColumn Field="TaskId" IsPrimaryKey="true" Visible="false" />
+                        <GridColumn Field="ShortName" HeaderText="Korte naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="70px" />
+                        <GridColumn Field="Name" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="100px" />
+                        <GridColumn Field="MinTimeSpan" HeaderText="Minimumduur" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="80px" />
+                        <GridColumn Field="MaxTimeSpan" HeaderText="Maximumduur" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="80px" />
+
+                        <GridColumn Field="Active" HeaderText="Status" Width="60px">
+                            <Template>
+                                @{
+                                    var task = (TaskModel)context;
+                                }
+                                <BitToggleButton IsChecked="@task.IsActive"
+                                                 Disabled="true"
+                                                 Styles="@(new()
+                                                 {
+                                                     Root = "display:inline-block; vertical-align:bottom; height:32px; min-height:32px; width:100px; border-radius:16px; --toggle-background:red; background:var(--toggle-background); border:none;",
+                                                     Checked = "--toggle-background:green;",
+                                                     Text = "color:white;"
+                                                 })"
+                                             Text="@(task.IsActive ? "Actief" : "Niet actief")" />
+                        </Template>
+                    </GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </div>
+    </div>
+    </div>
+}
+
+@code {
+    private bool _initialLoadDone = false;
+    private bool IsDeleteEnabled => SelectedTask?.TaskId != 0 || SelectedTask?.IsActive == true;
+    private bool IsLoading = false;
+    private TaskModel? SelectedTask;
+    private int VisibleRowCount = 0;
+    private List<TaskModel> Tasks = [];
+    private SfGrid<TaskModel>? GridRef;
+    private string FileName = "Taken";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+
+        Tasks = await TaskService.GetAllTasksAsync();
+
+        SelectedTask = Tasks.FirstOrDefault();
+
+        IsLoading = false;
+    }
+
+    private async Task OnGridDataBound()
+    {
+        if ( !_initialLoadDone && Tasks?.Any() == true )
+        {
+            _initialLoadDone = true;
+            await UpdateVisibleRowCountAsync();
+            await GridRef.SelectRowAsync( 0 );
+        }
+    }
+
+    private void OnRowSelected( RowSelectEventArgs<TaskModel> args )
+    {
+        SelectedTask = args.Data;
+
+        StateHasChanged();
+    }
+
+    private async Task UpdateVisibleRowCountAsync()
+    {
+        if ( GridRef is not null )
+        {
+            var records = await GridRef.GetCurrentViewRecordsAsync();
+            await Task.Delay( 150 );
+            VisibleRowCount = records?.Count ?? 0;
+            StateHasChanged();
+        }
+    }
+
+    public async Task OnInput( InputEventArgs args )
+    {
+        await GridRef.SearchAsync( args.Value );
+
+        await Task.Delay( 50 );
+        await UpdateVisibleRowCountAsync();
+    }
+
+    public class RequiredIfActiveAttribute : ValidationAttribute
+    {
+        private readonly string _dependentProperty;
+
+        public RequiredIfActiveAttribute( string dependentProperty )
+        {
+            _dependentProperty = dependentProperty;
+        }
+
+        protected override ValidationResult IsValid( object? value, ValidationContext validationContext )
+        {
+            var activeProp = validationContext.ObjectType.GetProperty(_dependentProperty);
+            if ( activeProp == null )
+                return new ValidationResult( $"Property {_dependentProperty} not found" );
+
+            var activeValue = (int)(activeProp.GetValue(validationContext.ObjectInstance) ?? 0);
+
+            // Alleen valideren als Active = 1
+            if ( activeValue == 1 && string.IsNullOrWhiteSpace( value?.ToString() ) )
+            {
+                return new ValidationResult( ErrorMessage ?? "Dit veld is verplicht" );
+            }
+
+            return ValidationResult.Success!;
+        }
+    }
+
+    private bool IsActive
+    {
+        get => SelectedTask.Active == "ja";
+        set => SelectedTask.Active = value ? "ja" : "nee";
+    }
+
+    private string GetActiveCss()
+    {
+        return IsActive ? "active-green" : "inactive-red";
+    }
+
+    private async Task Save()
+    {
+        // Save data to ah_personen, af_contactgegevens
+        if ( SelectedTask is null )
+            return;
+
+        if ( SelectedTask.TaskId != 0 )
+        {
+            var savedId = SelectedTask.TaskId;
+
+            //await TaskService.UpdateTaskAsync( SelectedTask );
+        }
+        else
+        {
+            // Save the new Person and get the new Person Id
+            //var savedId = await TaskService.AddTaskAsync(SelectedTask);
+
+            // Refresh the list
+            Tasks = await TaskService.GetAllTasksAsync();
+            await Task.Delay( 50 );
+            await GridRef.Refresh();
+
+            // Search the modified record
+            //var index = Tasks.FindIndex(s => s.TaskId == savedId);
+            // if ( index >= 0 )
+            // {
+            //     SelectedTask = Tasks [ index ];
+            //     await GridRef.SelectRowAsync( index );
+            // }
+        }
+    }
+
+    private async Task AddNew()
+    {
+        var newTask = new TaskModel
+        {
+            TaskId = 0,
+            ShortName = string.Empty,
+            Name = string.Empty,
+            MinTimeSpan = 0,
+            MaxTimeSpan = 0,
+            TimeBlock1From = null,
+            TimeBlock1Until = null,
+            TimeBlock1Volunteers = 0,
+            TimeBlock2From = null,
+            TimeBlock2Until = null,
+            TimeBlock2Volunteers = 0,
+            Description =  string.Empty,
+            Active = "ja",
+        };
+
+        await GridRef.AddRecordAsync( newTask, 0 );
+        await GridRef.SelectRowAsync( 0 );
+
+        SelectedTask = newTask;
+
+        StateHasChanged();
+    }
+
+    private async Task TaskActivation()
+    {
+        if ( SelectedTask is null )
+            return;
+
+        //await TaskService.TaskActivationAsync( SelectedTask );
+    }
+
+}

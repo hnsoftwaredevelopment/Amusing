@@ -1121,4 +1121,20 @@ public static class QueryDefinitions
         SET 
             actief = @Active
         WHERE persoon_id = @PersonId;";
+    public static readonly string GetAllTasks = @"
+        SELECT 
+	        taak_Id AS TaskId,
+	        korte_naam AS ShortName,
+	        naam AS Name,
+	        minimumduur AS MinTimeSpan,
+	        maximumduur AS MaxTimeSpan,
+	        bezetting_tijdvak1_van AS TimeBlock1From,
+	        bezetting_tijdvak1_tot AS TimeBlock1Until,
+	        aantal_vrijwilligers_tijdvak1 AS TimeBlock1Volunteers,
+	        bezetting_tijdvak2_van AS TimeBlock2From,
+	        bezetting_tijdvak2_tot AS TimeBlock2Until,
+	        aantal_vrijwilligers_tijdvak2 AS TimeBlock2Volunteers,
+	        omschrijving AS Description,
+	        actief AS Active
+        FROM amusing.ah_taken;";
 }
