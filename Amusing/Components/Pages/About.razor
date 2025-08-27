@@ -1,0 +1,42 @@
+﻿@page "/About"
+@using Amusing.Models
+@using Amusing.Services
+
+@inject GitHubService GitHubService
+
+<h3>Over Amusing - Beheer</h3>
+<div style="width: 650px; border:2px solid #ccc; border-radius:15px; padding:12px;">
+    <div class="text-center">
+        <div class="spacer-medium" />
+        <img src="@imageSource" alt="Logo" style="height: 80px;" />
+        <p class="mt-2">Versie: @assemblyVersion</p>
+        <div class="spacer-medium" />
+    </div>
+    <b>Amusing Beheer</b> kan worden gebruikt voor het beheer van de Amusing faciliteiten, ook kan het worden gebruikt om gebruikers te ondersteunen wanneer zij problemen ondervinden bij het aanmaken, of wijzigen van hun groep of contactpersonen.
+</div>
+
+<div class="spacer-medium" />
+
+<SfGrid DataSource="@commits" AllowPaging="true" Width="650">
+    <GridPageSettings PageSizes="true" PageSize="10" />
+    <GridColumns>
+        <GridColumn Field="Message" HeaderText="Omschrijving" Width="400" TextAlign="TextAlign.Left" ClipMode="ClipMode.EllipsisWithTooltip"></GridColumn>
+        <GridColumn Field="Author" HeaderText="Auteur" Width="150"></GridColumn>
+        <GridColumn Field="Date" HeaderText="Datum" Format="d" Type="ColumnType.Date"></GridColumn>
+    </GridColumns>
+</SfGrid>
+
+@code
+{
+    private List<CommitModel> commits = new();
+    private string? assemblyVersion = string.Empty;
+    private string? imageSource;
+
+    protected override async Task OnInitializedAsync()
+    {
+        imageSource = $"images/logo.svg";
+        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+        assemblyVersion = assembly.GetName().Version?.ToString() ?? "Onbekend";
+        commits = await GitHubService.GetCommitsAsync( "hnsoftwaredevelopment", "amusing" );
+    }
+}
