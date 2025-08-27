@@ -16,12 +16,13 @@ public class TaskModel
     public string? Name { get; set; } = string.Empty;
     public int MinTimeSpan { get; set; }
     public int MaxTimeSpan { get; set; }
+    public string? Occupation { get; set; } = string.Empty;
     public TimeOnly? TimeBlock1From { get; set; }
     public TimeOnly? TimeBlock1Until { get; set; }
-    public uint TimeBlock1Volunteers { get; set; }
+    public int TimeBlock1Volunteers { get; set; }
     public TimeOnly? TimeBlock2From { get; set; }
     public TimeOnly? TimeBlock2Until { get; set; }
-    public uint TimeBlock2Volunteers { get; set; }
+    public int TimeBlock2Volunteers { get; set; }
     public string? Description { get; set; } = string.Empty;
     public string? Active { get; set; } = string.Empty;
     public bool ActiveBool

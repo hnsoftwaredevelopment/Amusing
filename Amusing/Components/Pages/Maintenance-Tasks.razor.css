@@ -1,0 +1,26 @@
+﻿.tijdvak {
+    width:320px;
+    flex: 1 1 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 0 12px 12px 12px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+.tijdvak-header {
+    font-size: 0.75rem;
+    font-weight: bold;
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    color: #666;
+    background-color: #e9f0f6;
+    padding: 0 4px;
+}
+
+.tijdvak-content {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+}

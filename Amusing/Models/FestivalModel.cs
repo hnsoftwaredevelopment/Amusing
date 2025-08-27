@@ -18,7 +18,7 @@ public class FestivalModel
     public TimeOnly EindeVasteVrijwilligersTaken { get; set; }
 
 
-    // additional data from planner_voorwaarden
+    // additional data From planner_voorwaarden
     public int MinutenTussenOptredens { get; set; }
     public int MaximumMinutenTussenOptredens { get; set; }
     public int MaximumUrenVrijwilligers { get; set; }

@@ -1123,7 +1123,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Build table of contents from.
+        ///   Looks up a localized string similar to Build table of contents From.
         /// </summary>
         internal static string DocumentEditor_BuildTableOfContentsFrom {
             get {
@@ -1582,7 +1582,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Default number.
+        ///   Looks up a localized string similar to Default Number.
         /// </summary>
         internal static string DocumentEditor_DefaultNumber {
             get {
@@ -1852,7 +1852,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enter formatting for number.
+        ///   Looks up a localized string similar to Enter formatting for Number.
         /// </summary>
         internal static string DocumentEditor_EnterFormattingForNumber {
             get {
@@ -2059,7 +2059,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Follow number with.
+        ///   Looks up a localized string similar to Follow Number with.
         /// </summary>
         internal static string DocumentEditor_FollowNumberWith {
             get {
@@ -2374,7 +2374,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Indent from left.
+        ///   Looks up a localized string similar to Indent From left.
         /// </summary>
         internal static string DocumentEditor_IndentFromLeft {
             get {
@@ -2383,7 +2383,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Indent from right.
+        ///   Looks up a localized string similar to Indent From right.
         /// </summary>
         internal static string DocumentEditor_IndentFromRight {
             get {
@@ -3409,7 +3409,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Due to browser’s security policy, paste from system clipboard is restricted. Alternatively use the keyboard shortcut.
+        ///   Looks up a localized string similar to Due to browser’s security policy, paste From system clipboard is restricted. Alternatively use the keyboard shortcut.
         /// </summary>
         internal static string DocumentEditor_PasteContentDialog {
             get {
@@ -3517,7 +3517,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This document is protected from unintentional editing..
+        ///   Looks up a localized string similar to This document is protected From unintentional editing..
         /// </summary>
         internal static string DocumentEditor_ProtectedDocument {
             get {
@@ -4300,7 +4300,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The number must be between 1 and 9.
+        ///   Looks up a localized string similar to The Number must be between 1 and 9.
         /// </summary>
         internal static string DocumentEditor_The_Number_Must_Be_Between {
             get {
@@ -4408,7 +4408,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This is not a valid number.
+        ///   Looks up a localized string similar to This is not a valid Number.
         /// </summary>
         internal static string DocumentEditor_This_is_not_valid {
             get {
@@ -5191,7 +5191,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The current page number in the document. Click or tap to navigate specific page..
+        ///   Looks up a localized string similar to The current page Number in the document. Click or tap to navigate specific page..
         /// </summary>
         internal static string DocumentEditorContainer_CurrentPageNumber {
             get {
@@ -5272,7 +5272,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Distance from bottom of the page to bottom of the footer..
+        ///   Looks up a localized string similar to Distance From bottom of the page to bottom of the footer..
         /// </summary>
         internal static string DocumentEditorContainer_DistanceFromBottomOfThePageToBottomOfTheFooter {
             get {
@@ -5281,7 +5281,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Distance from top of the page to top of the header..
+        ///   Looks up a localized string similar to Distance From top of the page to top of the header..
         /// </summary>
         internal static string DocumentEditorContainer_DistanceFromTopOfThePageToTopOfTheHeader {
             get {
@@ -5425,7 +5425,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Footer from Bottom.
+        ///   Looks up a localized string similar to Footer From Bottom.
         /// </summary>
         internal static string DocumentEditorContainer_FooterFromBottom {
             get {
@@ -5479,7 +5479,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Header from Top.
+        ///   Looks up a localized string similar to Header From Top.
         /// </summary>
         internal static string DocumentEditorContainer_HeaderFromTop {
             get {
@@ -5632,7 +5632,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Insert inline picture from a file..
+        ///   Looks up a localized string similar to Insert inline picture From a file..
         /// </summary>
         internal static string DocumentEditorContainer_InsertInlinePictureFromAFile {
             get {
@@ -6463,7 +6463,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Upload from computer.
+        ///   Looks up a localized string similar to Upload From computer.
         /// </summary>
         internal static string DocumentEditorContainer_UploadFromComputer {
             get {
@@ -7174,7 +7174,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ServerError: Invalid response from.
+        ///   Looks up a localized string similar to ServerError: Invalid response From.
         /// </summary>
         internal static string FileManager_ServerError {
             get {
@@ -8128,7 +8128,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You moved &apos;{0}&apos; away from &apos;{1}&apos; and the two tasks are linked. As the result, the links cannot be honored. Select one action below to perform.
+        ///   Looks up a localized string similar to You moved &apos;{0}&apos; away From &apos;{1}&apos; and the two tasks are linked. As the result, the links cannot be honored. Select one action below to perform.
         /// </summary>
         internal static string Gantt_TaskAfterPredecessor_FS {
             get {
@@ -8173,7 +8173,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You moved &apos;{0}&apos; away from &apos;{1}&apos; to starts and the two tasks are linked. As the result, the links cannot be honored. Select one action below to perform.
+        ///   Looks up a localized string similar to You moved &apos;{0}&apos; away From &apos;{1}&apos; to starts and the two tasks are linked. As the result, the links cannot be honored. Select one action below to perform.
         /// </summary>
         internal static string Gantt_TaskBeforePredecessor_SF {
             get {
@@ -8821,7 +8821,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DataSource must not be empty at initial load since columns are generated from dataSource in AutoGenerate Column Grid.
+        ///   Looks up a localized string similar to DataSource must not be empty at initial load since columns are generated From dataSource in AutoGenerate Column Grid.
         /// </summary>
         internal static string Grid_EmptyDataSourceError {
             get {
@@ -12682,7 +12682,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Import annotations from JSON file.
+        ///   Looks up a localized string similar to Import annotations From JSON file.
         /// </summary>
         internal static string PdfViewer_ImportAnnotations {
             get {
@@ -12700,7 +12700,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Import annotations from XFDF file.
+        ///   Looks up a localized string similar to Import annotations From XFDF file.
         /// </summary>
         internal static string PdfViewer_ImportXFDF {
             get {
@@ -13474,7 +13474,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to All content marked for redaction will be permanently removed from the document. This action cannot be undone..
+        ///   Looks up a localized string similar to All content marked for redaction will be permanently removed From the document. This action cannot be undone..
         /// </summary>
         internal static string PdfViewer_RedactionConfirmation {
             get {
@@ -17560,7 +17560,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to until.
+        ///   Looks up a localized string similar to Until.
         /// </summary>
         internal static string RecurrenceEditor_SummaryUntil {
             get {
@@ -18379,7 +18379,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You can also provide a link from the web.
+        ///   Looks up a localized string similar to You can also provide a link From the web.
         /// </summary>
         internal static string RichTextEditor_ImageLinkHeader {
             get {
@@ -20125,7 +20125,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Showing events until.
+        ///   Looks up a localized string similar to Showing events Until.
         /// </summary>
         internal static string Schedule_ShowingEventsUntil {
             get {
@@ -20458,7 +20458,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the absolute value of a number.
+        ///   Looks up a localized string similar to Returns the absolute value of a Number.
         /// </summary>
         internal static string Spreadsheet_ABS {
             get {
@@ -20476,7 +20476,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the arccosine of a number.
+        ///   Looks up a localized string similar to Returns the arccosine of a Number.
         /// </summary>
         internal static string Spreadsheet_ACOS {
             get {
@@ -20485,7 +20485,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the inverse hyperbolic cosine of a number.
+        ///   Looks up a localized string similar to Returns the inverse hyperbolic cosine of a Number.
         /// </summary>
         internal static string Spreadsheet_ACOSH {
             get {
@@ -20611,7 +20611,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the number of areas in a reference.
+        ///   Looks up a localized string similar to Returns the Number of areas in a reference.
         /// </summary>
         internal static string Spreadsheet_AREAS {
             get {
@@ -20656,7 +20656,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the arcsine of a number.
+        ///   Looks up a localized string similar to Returns the arcsine of a Number.
         /// </summary>
         internal static string Spreadsheet_ASIN {
             get {
@@ -20665,7 +20665,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the inverse hyperbolic sine of a number.
+        ///   Looks up a localized string similar to Returns the inverse hyperbolic sine of a Number.
         /// </summary>
         internal static string Spreadsheet_ASINH {
             get {
@@ -20674,7 +20674,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the arctangent of a number.
+        ///   Looks up a localized string similar to Returns the arctangent of a Number.
         /// </summary>
         internal static string Spreadsheet_ATAN {
             get {
@@ -20683,7 +20683,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the arctangent from x- and y-coordinates.
+        ///   Looks up a localized string similar to Returns the arctangent From x- and y-coordinates.
         /// </summary>
         internal static string Spreadsheet_ATAN2 {
             get {
@@ -20692,7 +20692,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the inverse hyperbolic tangent of a number.
+        ///   Looks up a localized string similar to Returns the inverse hyperbolic tangent of a Number.
         /// </summary>
         internal static string Spreadsheet_ATANH {
             get {
@@ -20710,7 +20710,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the average of absolute deviations from mean.
+        ///   Looks up a localized string similar to Returns the average of absolute deviations From mean.
         /// </summary>
         internal static string Spreadsheet_AVEDEV {
             get {
@@ -20809,7 +20809,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a binary number to decimal.
+        ///   Looks up a localized string similar to Converts a binary Number to decimal.
         /// </summary>
         internal static string Spreadsheet_BIN2DEC {
             get {
@@ -20818,7 +20818,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a binary number to hexadecimal.
+        ///   Looks up a localized string similar to Converts a binary Number to hexadecimal.
         /// </summary>
         internal static string Spreadsheet_BIN2HEX {
             get {
@@ -20827,7 +20827,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a binary number to octal.
+        ///   Looks up a localized string similar to Converts a binary Number to octal.
         /// </summary>
         internal static string Spreadsheet_BIN2OCT {
             get {
@@ -20962,7 +20962,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Rounds a number to nearest integer or multiple.
+        ///   Looks up a localized string similar to Rounds a Number to nearest integer or multiple.
         /// </summary>
         internal static string Spreadsheet_CEILING {
             get {
@@ -20998,7 +20998,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the character specified by the code number.
+        ///   Looks up a localized string similar to Returns the character specified by the code Number.
         /// </summary>
         internal static string Spreadsheet_CHAR {
             get {
@@ -21034,7 +21034,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Chooses a value from a list of values.
+        ///   Looks up a localized string similar to Chooses a value From a list of values.
         /// </summary>
         internal static string Spreadsheet_CHOOSE {
             get {
@@ -21043,7 +21043,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns specified columns from an array.
+        ///   Looks up a localized string similar to Returns specified columns From an array.
         /// </summary>
         internal static string Spreadsheet_CHOOSECOLS {
             get {
@@ -21052,7 +21052,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns specified rows from an array.
+        ///   Looks up a localized string similar to Returns specified rows From an array.
         /// </summary>
         internal static string Spreadsheet_CHOOSEROWS {
             get {
@@ -21061,7 +21061,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Removes all non-printable characters from text.
+        ///   Looks up a localized string similar to Removes all non-printable characters From text.
         /// </summary>
         internal static string Spreadsheet_CLEAN {
             get {
@@ -21169,7 +21169,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the column number of a reference.
+        ///   Looks up a localized string similar to Returns the column Number of a reference.
         /// </summary>
         internal static string Spreadsheet_COLUMN {
             get {
@@ -21178,7 +21178,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the number of columns in a reference.
+        ///   Looks up a localized string similar to Returns the Number of columns in a reference.
         /// </summary>
         internal static string Spreadsheet_COLUMNS {
             get {
@@ -21187,7 +21187,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the number of combinations for a given number of objects.
+        ///   Looks up a localized string similar to Returns the Number of combinations for a given Number of objects.
         /// </summary>
         internal static string Spreadsheet_COMBIN {
             get {
@@ -21196,7 +21196,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts real and imaginary coefficients into a complex number.
+        ///   Looks up a localized string similar to Converts real and imaginary coefficients into a complex Number.
         /// </summary>
         internal static string Spreadsheet_COMPLEX {
             get {
@@ -21205,7 +21205,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Combines the text from multiple ranges and/or strings.
+        ///   Looks up a localized string similar to Combines the text From multiple ranges and/or strings.
         /// </summary>
         internal static string Spreadsheet_CONCAT {
             get {
@@ -21250,7 +21250,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a number from one measurement system to another.
+        ///   Looks up a localized string similar to Converts a Number From one measurement system to another.
         /// </summary>
         internal static string Spreadsheet_CONVERT {
             get {
@@ -21286,7 +21286,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the cosine of a number.
+        ///   Looks up a localized string similar to Returns the cosine of a Number.
         /// </summary>
         internal static string Spreadsheet_COS {
             get {
@@ -21295,7 +21295,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the hyperbolic cosine of a number.
+        ///   Looks up a localized string similar to Returns the hyperbolic cosine of a Number.
         /// </summary>
         internal static string Spreadsheet_COSH {
             get {
@@ -21322,7 +21322,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Counts the number of blank cells within a range.
+        ///   Looks up a localized string similar to Counts the Number of blank cells within a range.
         /// </summary>
         internal static string Spreadsheet_COUNTBLANK {
             get {
@@ -21448,7 +21448,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the serial number of a particular date.
+        ///   Looks up a localized string similar to Returns the serial Number of a particular date.
         /// </summary>
         internal static string Spreadsheet_DATE {
             get {
@@ -21475,7 +21475,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a date in the form of text to a serial number.
+        ///   Looks up a localized string similar to Converts a date in the form of text to a serial Number.
         /// </summary>
         internal static string Spreadsheet_DATEVALUE {
             get {
@@ -21484,7 +21484,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a serial number to a day of the month.
+        ///   Looks up a localized string similar to Converts a serial Number to a day of the month.
         /// </summary>
         internal static string Spreadsheet_DAY {
             get {
@@ -21493,7 +21493,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Calculates the number of days between two dates based on a 360-day year.
+        ///   Looks up a localized string similar to Calculates the Number of days between two dates based on a 360-day year.
         /// </summary>
         internal static string Spreadsheet_DAYS360 {
             get {
@@ -21520,7 +21520,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a decimal number to binary.
+        ///   Looks up a localized string similar to Converts a decimal Number to binary.
         /// </summary>
         internal static string Spreadsheet_DEC2BIN {
             get {
@@ -21529,7 +21529,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a decimal number to octal.
+        ///   Looks up a localized string similar to Converts a decimal Number to octal.
         /// </summary>
         internal static string Spreadsheet_DEC2OCT {
             get {
@@ -21538,7 +21538,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a decimal number to hexadecimal.
+        ///   Looks up a localized string similar to Converts a decimal Number to hexadecimal.
         /// </summary>
         internal static string Spreadsheet_DECHEX {
             get {
@@ -21655,7 +21655,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a number to text, using the $ (dollar) currency format.
+        ///   Looks up a localized string similar to Converts a Number to text, using the $ (dollar) currency format.
         /// </summary>
         internal static string Spreadsheet_DOLLAR {
             get {
@@ -21826,7 +21826,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns a number corresponding to an error type.
+        ///   Looks up a localized string similar to Returns a Number corresponding to an error type.
         /// </summary>
         internal static string Spreadsheet_ERRORTYPE {
             get {
@@ -21835,7 +21835,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Rounds a number up to the nearest even integer.
+        ///   Looks up a localized string similar to Rounds a Number up to the nearest even integer.
         /// </summary>
         internal static string Spreadsheet_EVEN {
             get {
@@ -21862,7 +21862,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns e raised to the power of a given number.
+        ///   Looks up a localized string similar to Returns e raised to the power of a given Number.
         /// </summary>
         internal static string Spreadsheet_EXP {
             get {
@@ -21898,7 +21898,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the factorial of a number.
+        ///   Looks up a localized string similar to Returns the factorial of a Number.
         /// </summary>
         internal static string Spreadsheet_FACT {
             get {
@@ -21907,7 +21907,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the double factorial of a number.
+        ///   Looks up a localized string similar to Returns the double factorial of a Number.
         /// </summary>
         internal static string Spreadsheet_FACTDOUBLE {
             get {
@@ -22033,7 +22033,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Formats a number as text with a fixed number of decimals.
+        ///   Looks up a localized string similar to Formats a Number as text with a fixed Number of decimals.
         /// </summary>
         internal static string Spreadsheet_FIXED {
             get {
@@ -22042,7 +22042,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Rounds a number down, toward zero.
+        ///   Looks up a localized string similar to Rounds a Number down, toward zero.
         /// </summary>
         internal static string Spreadsheet_FLOOR {
             get {
@@ -22231,7 +22231,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tests whether a number is greater than a threshold value.
+        ///   Looks up a localized string similar to Tests whether a Number is greater than a threshold value.
         /// </summary>
         internal static string Spreadsheet_GESTEP {
             get {
@@ -22276,7 +22276,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a hexadecimal number to binary.
+        ///   Looks up a localized string similar to Converts a hexadecimal Number to binary.
         /// </summary>
         internal static string Spreadsheet_HEX2BIN {
             get {
@@ -22285,7 +22285,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a hexadecimal number to decimal.
+        ///   Looks up a localized string similar to Converts a hexadecimal Number to decimal.
         /// </summary>
         internal static string Spreadsheet_HEX2DEC {
             get {
@@ -22294,7 +22294,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a hexadecimal number to octal.
+        ///   Looks up a localized string similar to Converts a hexadecimal Number to octal.
         /// </summary>
         internal static string Spreadsheet_HEX2OCT {
             get {
@@ -22339,7 +22339,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a serial number to an hour.
+        ///   Looks up a localized string similar to Converts a serial Number to an hour.
         /// </summary>
         internal static string Spreadsheet_HOUR {
             get {
@@ -22402,7 +22402,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the absolute value (modulus) of a complex number.
+        ///   Looks up a localized string similar to Returns the absolute value (modulus) of a complex Number.
         /// </summary>
         internal static string Spreadsheet_IMABS {
             get {
@@ -22420,7 +22420,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the imaginary coefficient of a complex number.
+        ///   Looks up a localized string similar to Returns the imaginary coefficient of a complex Number.
         /// </summary>
         internal static string Spreadsheet_IMAGINARY {
             get {
@@ -22438,7 +22438,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the complex conjugate of a complex number.
+        ///   Looks up a localized string similar to Returns the complex conjugate of a complex Number.
         /// </summary>
         internal static string Spreadsheet_IMCONJUGATE {
             get {
@@ -22447,7 +22447,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the cosine of a complex number.
+        ///   Looks up a localized string similar to Returns the cosine of a complex Number.
         /// </summary>
         internal static string Spreadsheet_IMCOS {
             get {
@@ -22465,7 +22465,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the exponential of a complex number.
+        ///   Looks up a localized string similar to Returns the exponential of a complex Number.
         /// </summary>
         internal static string Spreadsheet_IMEXP {
             get {
@@ -22474,7 +22474,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the natural logarithm of a complex number.
+        ///   Looks up a localized string similar to Returns the natural logarithm of a complex Number.
         /// </summary>
         internal static string Spreadsheet_IMLN {
             get {
@@ -22483,7 +22483,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the base-10 logarithm of a complex number.
+        ///   Looks up a localized string similar to Returns the base-10 logarithm of a complex Number.
         /// </summary>
         internal static string Spreadsheet_IMLOG10 {
             get {
@@ -22492,7 +22492,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the base-2 logarithm of a complex number.
+        ///   Looks up a localized string similar to Returns the base-2 logarithm of a complex Number.
         /// </summary>
         internal static string Spreadsheet_IMLOG2 {
             get {
@@ -22510,7 +22510,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns a complex number raised to an integer power.
+        ///   Looks up a localized string similar to Returns a complex Number raised to an integer power.
         /// </summary>
         internal static string Spreadsheet_IMPOWER {
             get {
@@ -22519,7 +22519,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the product of from 2 to 29 complex numbers.
+        ///   Looks up a localized string similar to Returns the product of From 2 to 29 complex numbers.
         /// </summary>
         internal static string Spreadsheet_IMPRODUCT {
             get {
@@ -22528,7 +22528,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the real coefficient of a complex number.
+        ///   Looks up a localized string similar to Returns the real coefficient of a complex Number.
         /// </summary>
         internal static string Spreadsheet_IMREAL {
             get {
@@ -22537,7 +22537,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the sine of a complex number.
+        ///   Looks up a localized string similar to Returns the sine of a complex Number.
         /// </summary>
         internal static string Spreadsheet_IMSIN {
             get {
@@ -22546,7 +22546,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the square root of a complex number.
+        ///   Looks up a localized string similar to Returns the square root of a complex Number.
         /// </summary>
         internal static string Spreadsheet_IMSQRT {
             get {
@@ -22582,7 +22582,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Uses an index to choose a value from a reference or array.
+        ///   Looks up a localized string similar to Uses an index to choose a value From a reference or array.
         /// </summary>
         internal static string Spreadsheet_INDEX {
             get {
@@ -22699,7 +22699,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Rounds a number down to the nearest integer.
+        ///   Looks up a localized string similar to Rounds a Number down to the nearest integer.
         /// </summary>
         internal static string Spreadsheet_INT {
             get {
@@ -22834,7 +22834,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns TRUE if the number is even.
+        ///   Looks up a localized string similar to Returns TRUE if the Number is even.
         /// </summary>
         internal static string Spreadsheet_ISEVEN {
             get {
@@ -22870,7 +22870,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns TRUE if the value is a number.
+        ///   Looks up a localized string similar to Returns TRUE if the value is a Number.
         /// </summary>
         internal static string Spreadsheet_ISNUMBER {
             get {
@@ -22879,7 +22879,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns TRUE if the number is odd.
+        ///   Looks up a localized string similar to Returns TRUE if the Number is odd.
         /// </summary>
         internal static string Spreadsheet_ISODD {
             get {
@@ -23023,7 +23023,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the leftmost characters from a text value.
+        ///   Looks up a localized string similar to Returns the leftmost characters From a text value.
         /// </summary>
         internal static string Spreadsheet_LEFT {
             get {
@@ -23032,7 +23032,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the leftmost characters from a text value.
+        ///   Looks up a localized string similar to Returns the leftmost characters From a text value.
         /// </summary>
         internal static string Spreadsheet_LEFTB {
             get {
@@ -23041,7 +23041,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the number of characters in a text string.
+        ///   Looks up a localized string similar to Returns the Number of characters in a text string.
         /// </summary>
         internal static string Spreadsheet_LEN {
             get {
@@ -23050,7 +23050,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the number of characters in a text string.
+        ///   Looks up a localized string similar to Returns the Number of characters in a text string.
         /// </summary>
         internal static string Spreadsheet_LENB {
             get {
@@ -23113,7 +23113,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the natural logarithm of a number.
+        ///   Looks up a localized string similar to Returns the natural logarithm of a Number.
         /// </summary>
         internal static string Spreadsheet_LN {
             get {
@@ -23122,7 +23122,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the logarithm of a number to a specified base.
+        ///   Looks up a localized string similar to Returns the logarithm of a Number to a specified base.
         /// </summary>
         internal static string Spreadsheet_LOG {
             get {
@@ -23131,7 +23131,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the base-10 logarithm of a number.
+        ///   Looks up a localized string similar to Returns the base-10 logarithm of a Number.
         /// </summary>
         internal static string Spreadsheet_LOG10 {
             get {
@@ -23311,7 +23311,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns characters from text starting at position.
+        ///   Looks up a localized string similar to Returns characters From text starting at position.
         /// </summary>
         internal static string Spreadsheet_MID {
             get {
@@ -23320,7 +23320,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns a specific number of characters from a text string starting at the position you specify.
+        ///   Looks up a localized string similar to Returns a specific Number of characters From a text string starting at the position you specify.
         /// </summary>
         internal static string Spreadsheet_MIDB {
             get {
@@ -23356,7 +23356,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a serial number to a minute.
+        ///   Looks up a localized string similar to Converts a serial Number to a minute.
         /// </summary>
         internal static string Spreadsheet_MINUTE {
             get {
@@ -23392,7 +23392,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the remainder from division.
+        ///   Looks up a localized string similar to Returns the remainder From division.
         /// </summary>
         internal static string Spreadsheet_MOD {
             get {
@@ -23410,7 +23410,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a serial number to a month.
+        ///   Looks up a localized string similar to Converts a serial Number to a month.
         /// </summary>
         internal static string Spreadsheet_MONTH {
             get {
@@ -23437,7 +23437,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns a number rounded to the desired multiple.
+        ///   Looks up a localized string similar to Returns a Number rounded to the desired multiple.
         /// </summary>
         internal static string Spreadsheet_MROUND {
             get {
@@ -23464,7 +23464,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns a value converted to a number.
+        ///   Looks up a localized string similar to Returns a value converted to a Number.
         /// </summary>
         internal static string Spreadsheet_N {
             get {
@@ -23527,7 +23527,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the number of whole workdays between two dates.
+        ///   Looks up a localized string similar to Returns the Number of whole workdays between two dates.
         /// </summary>
         internal static string Spreadsheet_NETWORKDAYS {
             get {
@@ -23662,7 +23662,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the serial number of the current date and time.
+        ///   Looks up a localized string similar to Returns the serial Number of the current date and time.
         /// </summary>
         internal static string Spreadsheet_NOW {
             get {
@@ -23671,7 +23671,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the number of periods for an investment.
+        ///   Looks up a localized string similar to Returns the Number of periods for an investment.
         /// </summary>
         internal static string Spreadsheet_NPER {
             get {
@@ -23707,7 +23707,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts an octal number to binary.
+        ///   Looks up a localized string similar to Converts an octal Number to binary.
         /// </summary>
         internal static string Spreadsheet_OCT2BIN {
             get {
@@ -23716,7 +23716,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts an octal number to decimal.
+        ///   Looks up a localized string similar to Converts an octal Number to decimal.
         /// </summary>
         internal static string Spreadsheet_OCT2DEC {
             get {
@@ -23725,7 +23725,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts an octal number to hexadecimal.
+        ///   Looks up a localized string similar to Converts an octal Number to hexadecimal.
         /// </summary>
         internal static string Spreadsheet_OCT2HEX {
             get {
@@ -23734,7 +23734,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Rounds a number up to the nearest odd integer.
+        ///   Looks up a localized string similar to Rounds a Number up to the nearest odd integer.
         /// </summary>
         internal static string Spreadsheet_ODD {
             get {
@@ -23743,7 +23743,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns a reference offset from a given reference.
+        ///   Looks up a localized string similar to Returns a reference offset From a given reference.
         /// </summary>
         internal static string Spreadsheet_OFFSET {
             get {
@@ -23878,7 +23878,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the number of permutations for a given number of objects.
+        ///   Looks up a localized string similar to Returns the Number of permutations for a given Number of objects.
         /// </summary>
         internal static string Spreadsheet_PERMUT {
             get {
@@ -23923,7 +23923,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the result of a number raised to a power.
+        ///   Looks up a localized string similar to Returns the result of a Number raised to a power.
         /// </summary>
         internal static string Spreadsheet_POWER {
             get {
@@ -24049,7 +24049,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns a random number between 0 and 1.
+        ///   Looks up a localized string similar to Returns a random Number between 0 and 1.
         /// </summary>
         internal static string Spreadsheet_RAND {
             get {
@@ -24058,7 +24058,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns a random number between the numbers you specify.
+        ///   Looks up a localized string similar to Returns a random Number between the numbers you specify.
         /// </summary>
         internal static string Spreadsheet_RANDBETWEEN {
             get {
@@ -24103,7 +24103,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the rank of a number in a list of numbers.
+        ///   Looks up a localized string similar to Returns the rank of a Number in a list of numbers.
         /// </summary>
         internal static string Spreadsheet_RANK {
             get {
@@ -24202,7 +24202,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Repeats text a given number of times.
+        ///   Looks up a localized string similar to Repeats text a given Number of times.
         /// </summary>
         internal static string Spreadsheet_REPT {
             get {
@@ -24229,7 +24229,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the rightmost characters from a text value.
+        ///   Looks up a localized string similar to Returns the rightmost characters From a text value.
         /// </summary>
         internal static string Spreadsheet_RIGHT {
             get {
@@ -24238,7 +24238,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the rightmost characters from a text value.
+        ///   Looks up a localized string similar to Returns the rightmost characters From a text value.
         /// </summary>
         internal static string Spreadsheet_RIGHTB {
             get {
@@ -24256,7 +24256,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Rounds a number to a specified number of digits.
+        ///   Looks up a localized string similar to Rounds a Number to a specified Number of digits.
         /// </summary>
         internal static string Spreadsheet_ROUND {
             get {
@@ -24265,7 +24265,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Rounds a number down, toward zero.
+        ///   Looks up a localized string similar to Rounds a Number down, toward zero.
         /// </summary>
         internal static string Spreadsheet_ROUNDDOWN {
             get {
@@ -24274,7 +24274,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Rounds a number up, away from zero.
+        ///   Looks up a localized string similar to Rounds a Number up, away From zero.
         /// </summary>
         internal static string Spreadsheet_ROUNDUP {
             get {
@@ -24283,7 +24283,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the row number of a reference.
+        ///   Looks up a localized string similar to Returns the row Number of a reference.
         /// </summary>
         internal static string Spreadsheet_ROW {
             get {
@@ -24292,7 +24292,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the number of rows in a reference.
+        ///   Looks up a localized string similar to Returns the Number of rows in a reference.
         /// </summary>
         internal static string Spreadsheet_ROWS {
             get {
@@ -24373,7 +24373,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a serial number to a second.
+        ///   Looks up a localized string similar to Converts a serial Number to a second.
         /// </summary>
         internal static string Spreadsheet_SECOND {
             get {
@@ -24472,7 +24472,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the sign of a number.
+        ///   Looks up a localized string similar to Returns the sign of a Number.
         /// </summary>
         internal static string Spreadsheet_SIGN {
             get {
@@ -24508,7 +24508,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the hyperbolic sine of a number.
+        ///   Looks up a localized string similar to Returns the hyperbolic sine of a Number.
         /// </summary>
         internal static string Spreadsheet_SINH {
             get {
@@ -24616,7 +24616,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the square root of (number * pi).
+        ///   Looks up a localized string similar to Returns the square root of (Number * pi).
         /// </summary>
         internal static string Spreadsheet_SQRTPI {
             get {
@@ -24814,7 +24814,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the tangent of a number.
+        ///   Looks up a localized string similar to Returns the tangent of a Number.
         /// </summary>
         internal static string Spreadsheet_TAN {
             get {
@@ -24823,7 +24823,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the hyperbolic tangent of a number.
+        ///   Looks up a localized string similar to Returns the hyperbolic tangent of a Number.
         /// </summary>
         internal static string Spreadsheet_TANH {
             get {
@@ -24859,7 +24859,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Formats a number and converts it to text.
+        ///   Looks up a localized string similar to Formats a Number and converts it to text.
         /// </summary>
         internal static string Spreadsheet_TEXTFormula {
             get {
@@ -24940,7 +24940,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the serial number of a particular time.
+        ///   Looks up a localized string similar to Returns the serial Number of a particular time.
         /// </summary>
         internal static string Spreadsheet_TIMEFormula {
             get {
@@ -24958,7 +24958,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a time in the form of text to a serial number.
+        ///   Looks up a localized string similar to Converts a time in the form of text to a serial Number.
         /// </summary>
         internal static string Spreadsheet_TIMEVALUE {
             get {
@@ -24985,7 +24985,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the serial number of today&apos;s date.
+        ///   Looks up a localized string similar to Returns the serial Number of today&apos;s date.
         /// </summary>
         internal static string Spreadsheet_TODAYFormula {
             get {
@@ -25021,7 +25021,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Removes spaces from text.
+        ///   Looks up a localized string similar to Removes spaces From text.
         /// </summary>
         internal static string Spreadsheet_TRIM {
             get {
@@ -25048,7 +25048,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Truncates a number to an integer.
+        ///   Looks up a localized string similar to Truncates a Number to an integer.
         /// </summary>
         internal static string Spreadsheet_TRUNC {
             get {
@@ -25057,7 +25057,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns a number indicating the data type of a value.
+        ///   Looks up a localized string similar to Returns a Number indicating the data type of a value.
         /// </summary>
         internal static string Spreadsheet_TYPE {
             get {
@@ -25165,7 +25165,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a text argument to a number.
+        ///   Looks up a localized string similar to Converts a text argument to a Number.
         /// </summary>
         internal static string Spreadsheet_VALUEFormula {
             get {
@@ -25174,7 +25174,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the text from any specified value..
+        ///   Looks up a localized string similar to Returns the text From any specified value..
         /// </summary>
         internal static string Spreadsheet_VALUETOTEXT {
             get {
@@ -25255,7 +25255,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a serial number to a day of the week.
+        ///   Looks up a localized string similar to Converts a serial Number to a day of the week.
         /// </summary>
         internal static string Spreadsheet_WEEKDAY {
             get {
@@ -25264,7 +25264,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns week number within year.
+        ///   Looks up a localized string similar to Returns week Number within year.
         /// </summary>
         internal static string Spreadsheet_WEEKNUM {
             get {
@@ -25345,7 +25345,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a serial number to a year.
+        ///   Looks up a localized string similar to Converts a serial Number to a year.
         /// </summary>
         internal static string Spreadsheet_YEAR {
             get {

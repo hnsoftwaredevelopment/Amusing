@@ -60,7 +60,7 @@
             var setPhoneResult = await UserManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
             if (!setPhoneResult.Succeeded)
             {
-                RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone number.", HttpContext);
+                RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone Number.", HttpContext);
             }
         }
 
@@ -71,7 +71,7 @@
     private sealed class InputModel
     {
         [Phone]
-        [Display(Name = "Phone number")]
+        [Display(Name = "Phone Number")]
         public string? PhoneNumber { get; set; }
     }
 }

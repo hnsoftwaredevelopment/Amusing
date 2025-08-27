@@ -720,9 +720,9 @@ public static class QueryDefinitions
         CROSS JOIN JSON_TABLE(
             t.bezetting,
             '$[*]' COLUMNS(
-                Van VARCHAR(10) PATH '$.from',
-                Tot VARCHAR(10) PATH '$.until', 
-                Aantal VARCHAR(10) PATH '$.number'
+                Van VARCHAR(10) PATH '$.From',
+                Tot VARCHAR(10) PATH '$.Until', 
+                Aantal VARCHAR(10) PATH '$.Number'
             )
         ) AS bezetting_data
         WHERE t.actief = 'ja'
@@ -744,9 +744,9 @@ public static class QueryDefinitions
                 ELSE t.bezetting 
             END,
             '$[*]' COLUMNS(
-                Van VARCHAR(10) PATH '$.from',
-                Tot VARCHAR(10) PATH '$.until', 
-                Aantal VARCHAR(10) PATH '$.number'
+                Van VARCHAR(10) PATH '$.From',
+                Tot VARCHAR(10) PATH '$.Until', 
+                Aantal VARCHAR(10) PATH '$.Number'
             )
         ) AS bezetting_data ON TRUE
         WHERE t.actief = 'Nee'
@@ -1137,4 +1137,32 @@ public static class QueryDefinitions
 	        omschrijving AS Description,
 	        actief AS Active
         FROM amusing.ah_taken;";
+    public static readonly string AddNewTask = @"
+        INSERT INTO amusing.ah_taken
+            (korte_naam, naam, minimumduur, maximumduur, bezetting, bezetting_tijdvak1_van, bezetting_tijdvak1_tot, aantal_vrijwilligers_tijdvak1, bezetting_tijdvak2_van, bezetting_tijdvak2_tot, aantal_vrijwilligers_tijdvak2, actief, omschrijving)
+        VALUES (@ShortName, @Name, @MinTimeSpan, @MaxTimeSpan, @Occupation, @TimeBlock1From, @TimeBlock1Until, @TimeBlock1Volunteers, @TimeBlock2From, @TimeBlock2Until, @TimeBlock2Volunteers, @Active, @Description);
+        SELECT LAST_INSERT_ID();
+        ";
+    public static readonly string ModifyTaskByTaskId = @"
+    UPDATE amusing.ah_taken
+    SET 
+        korte_naam = @ShortName,
+        naam = @Name,
+        minimumduur = @MinTimeSpan,
+        maximumduur = @MaxTimeSpan,
+        bezetting = @Occupation,
+        bezetting_tijdvak1_van = @TimeBlock1From,
+        bezetting_tijdvak1_tot = @TimeBlock1Until,
+        aantal_vrijwilligers_tijdvak1 = @TimeBlock1Volunteers,
+        bezetting_tijdvak2_van = @TimeBlock2From,
+        bezetting_tijdvak2_tot = @TimeBlock2Until,
+        aantal_vrijwilligers_tijdvak2 = @TimeBlock2Volunteers,
+        actief = @Active, 
+        omschrijving = @Description
+    WHERE taak_id = @TaskId;";
+    public static readonly string TaskActivationByTaskId = @"
+        UPDATE amusing.ah_taken
+        SET 
+            actief = @Active
+        WHERE taak_id = @TaskId;";
 }

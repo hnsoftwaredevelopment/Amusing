@@ -11,6 +11,7 @@
 @using Syncfusion.Blazor.RichTextEditor
 @using Microsoft.AspNetCore.Components.Forms
 @using Syncfusion.Blazor.SplitButtons
+@using System.Text.Json
 
 @inject TaskService TaskService;
 
@@ -34,52 +35,66 @@ else
                 <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
                     <SfTextBox Placeholder="Korte naam" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.ShortName" />
                     <SfTextBox Placeholder="Naam" FloatLabelType="FloatLabelType.Always" Width="200px" @bind-Value="SelectedTask.Name" />
-                    <BitTooltip Text="@(IsActive ? "Deze persoon is actief, klik om te deactiveren" : "Deze persoon is niet actief, klik om te activeren")" HideDelay="200" ShowOnHover="true">
+                    <SfNumericTextBox Placeholder="Minimumduur" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedTask.MinTimeSpan" Min=0 Max=600 ShowSpinButton=false />
+                    <SfNumericTextBox Placeholder="Maximumduur" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedTask.MaxTimeSpan" Min=0 Max=600 ShowSpinButton=false />
+                    <BitTooltip Text="@(IsActive ? "Deze taak is actief, klik om te deactiveren" : "Deze taak is niet actief, klik om te activeren")" HideDelay="200" ShowOnHover="true">
                         <BitToggleButton @bind-IsChecked="IsActive" OnClick="TaskActivation"
                                          Text="@(IsActive ? "Aktief" : "Niet aktief")"
                                          Styles="@(new() { Root = "height: 32px;  min-height: 32px; width: 100px; border-radius: 16px; vertical-align: bottom; --toggle-background: red; background: var(--toggle-background); border: none", Checked = "--toggle-background: green;", Text = "color: white;" })" />
                     </BitTooltip>
-
                 </div>
                 
                 <hr/>
-
-                <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
-                    <SfTextBox Placeholder="Minimumduur" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.MinimumDuur" />
-                    <SfTextBox Placeholder="Maximumduur" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.MaximumDuur" />
-                </div>
-
-                <hr />
                 
-                <div style="border:1px solid #ccc; border-radius:8px; padding:12px;">
-                    <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
-                        <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Van" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock1From" />
-                        <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Tot" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock1Until" />
-                        <SfNumericTextBox Placeholder="Aantal" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock1Volunteers" />
+                <div class="container-fluid">
+                    <div class="row justify-content-start">
+                        <div class="col-auto">
+                            <div class="tijdvak">
+                                <div class="tijdvak-header">Tijdvak 1</div>
+                                <div class="tijdvak-content">
+                                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Van" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock1From" />
+                                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Tot" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock1Until" />
+                                    <SfNumericTextBox Placeholder="Aantal" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock1Volunteers" ShowSpinButton=false />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-auto">
+                            <div class="tijdvak">
+                                <div class="tijdvak-header">Tijdvak 2</div>
+                                <div class="tijdvak-content">
+                                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Van" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock2From" />
+                                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Tot" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock2Until" />
+                                    <SfNumericTextBox Placeholder="Aantal" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock2Volunteers" ShowSpinButton=false />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div style="border:1px solid #ccc; border-radius:8px; padding:12px;">
-                    <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
-                        <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Van" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock2From" />
-                        <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Tot" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock2Until" />
-                        <SfNumericTextBox Placeholder="Aantal" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock2Volunteers" />
-                    </div>
-                </div>
+                <hr/>
 
                 <div class="form-row">
                     <div class="sf-float-group">
                         <label class="sf-float-label" for="rteBeschrijving">Beschrijving</label>
-                        <SfRichTextEditor ID="rteBeschrijving" Width="100%" Placeholder="Beschrijving" Height="180px" @bind-Value="SelectedTask.Description">
+                        <SfRichTextEditor 
+                            ID="rteBeschrijving" 
+                            Width="680px" 
+                            Placeholder="Beschrijving" 
+                            Height="150px" 
+                            Value="@SelectedTask.Description"
                             <RichTextEditorToolbarSettings Items="@Tools" />
+                            <RichTextEditorEvents ValueChange="OnRteValueChange" />
                         </SfRichTextEditor>
                     </div>
                 </div>
+
+                <div class="spacer-medium"/>
             </EditForm>
 
             <!-- Toolbar -->
             <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
-                <SfToolbar>
+                <SfToolbar Width="870px">
                     <ToolbarItems>
                         <ToolbarItem Type="ItemType.Button">
                             <Template>
@@ -118,7 +133,8 @@ else
         <div class="scrollable-content">
             <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
                 <SfGrid @ref="GridRef"
-                        TValue="TaskModel"
+                        TValue="TaskModel" 
+                        Width="870"
                         DataSource="@Tasks"
                         EnableStickyHeader="true"
                         AllowResizing="true"
@@ -130,12 +146,12 @@ else
                     <GridEditSettings AllowAdding="true" NewRowPosition="NewRowPosition.Top"></GridEditSettings>
                     <GridColumns>
                         <GridColumn Field="TaskId" IsPrimaryKey="true" Visible="false" />
-                        <GridColumn Field="ShortName" HeaderText="Korte naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="70px" />
-                        <GridColumn Field="Name" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="100px" />
-                        <GridColumn Field="MinTimeSpan" HeaderText="Minimumduur" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="80px" />
-                        <GridColumn Field="MaxTimeSpan" HeaderText="Maximumduur" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="80px" />
+                        <GridColumn Field="ShortName" HeaderText="Korte naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="160px" />
+                        <GridColumn Field="Name" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="300px" />
+                        <GridColumn Field="MinTimeSpan" HeaderText="Minimumduur" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="130px" />
+                        <GridColumn Field="MaxTimeSpan" HeaderText="Maximumduur" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="130px" />
 
-                        <GridColumn Field="Active" HeaderText="Status" Width="60px">
+                        <GridColumn Field="Active" HeaderText="Status" Width="115px">
                             <Template>
                                 @{
                                     var task = (TaskModel)context;
@@ -167,6 +183,7 @@ else
     private List<TaskModel> Tasks = [];
     private SfGrid<TaskModel>? GridRef;
     private string FileName = "Taken";
+    private SfRichTextEditor? Rte;
 
 
     protected override async Task OnInitializedAsync()
@@ -264,12 +281,12 @@ else
         {
             var savedId = SelectedTask.TaskId;
 
-            //await TaskService.UpdateTaskAsync( SelectedTask );
+            await TaskService.UpdateTaskAsync( SelectedTask );
         }
         else
         {
             // Save the new Person and get the new Person Id
-            //var savedId = await TaskService.AddTaskAsync(SelectedTask);
+            var savedId = await TaskService.AddTaskAsync(SelectedTask);
 
             // Refresh the list
             Tasks = await TaskService.GetAllTasksAsync();
@@ -277,12 +294,12 @@ else
             await GridRef.Refresh();
 
             // Search the modified record
-            //var index = Tasks.FindIndex(s => s.TaskId == savedId);
-            // if ( index >= 0 )
-            // {
-            //     SelectedTask = Tasks [ index ];
-            //     await GridRef.SelectRowAsync( index );
-            // }
+            var index = Tasks.FindIndex(s => s.TaskId == savedId);
+            if ( index >= 0 )
+            {
+                SelectedTask = Tasks [ index ];
+                await GridRef.SelectRowAsync( index );
+            }
         }
     }
 
@@ -295,6 +312,7 @@ else
             Name = string.Empty,
             MinTimeSpan = 0,
             MaxTimeSpan = 0,
+            Occupation = "[]",
             TimeBlock1From = null,
             TimeBlock1Until = null,
             TimeBlock1Volunteers = 0,
@@ -318,9 +336,12 @@ else
         if ( SelectedTask is null )
             return;
 
-        //await TaskService.TaskActivationAsync( SelectedTask );
+        await TaskService.TaskActivationAsync( SelectedTask );
     }
     
+    private void OnRteValueChange( Syncfusion.Blazor.RichTextEditor.ChangeEventArgs args )
+        => SelectedTask!.Description = args.Value;
+
     private List<ToolbarItemModel> Tools = new List<ToolbarItemModel>()
     {
         new ToolbarItemModel() { Command = ToolbarCommand.Undo },
