@@ -1,6 +1,6 @@
 ﻿namespace Amusing.Models;
 
-public partial class AhBeheer
+public partial class UserModel
 {
     public uint UserId { get; set; }
     public string Username { get; set; } = null!;

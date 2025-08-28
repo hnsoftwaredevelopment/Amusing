@@ -14,7 +14,7 @@ public partial class amusingContext : DbContext
     {
     }
 
-    public virtual DbSet<AhBeheer> AhBeheers { get; set; } = null!;
+    public virtual DbSet<UserModel> AhBeheers { get; set; } = null!;
     public virtual DbSet<AhBeheerLog> AhBeheerLogs { get; set; } = null!;
     public virtual DbSet<AhContactgegeven> AhContactgegevens { get; set; } = null!;
     public virtual DbSet<AhFestival> AhFestivals { get; set; } = null!;
@@ -54,7 +54,7 @@ public partial class amusingContext : DbContext
         modelBuilder.UseCollation( "utf8mb3_general_ci" )
             .HasCharSet( "utf8mb3" );
 
-        modelBuilder.Entity<AhBeheer>( entity =>
+        modelBuilder.Entity<UserModel>( entity =>
         {
             entity.HasKey( e => e.UserId )
                 .HasName( "PRIMARY" );

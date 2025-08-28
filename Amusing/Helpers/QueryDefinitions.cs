@@ -1165,4 +1165,31 @@ public static class QueryDefinitions
         SET 
             actief = @Active
         WHERE taak_id = @TaskId;";
+    public static readonly string GetAllUsers = @"
+        SELECT 
+	        user_id AS UserId,
+	        username AS UserName,
+	        password AS Password,
+	        role AS ROLE
+        FROM amusing.ah_beheer;";
+    public static readonly string AddNewUser = @"
+        INSERT INTO amusing.ah_beheer
+            (username, password, role)
+        VALUES (@UserName, @Password, @Role);
+        SELECT LAST_INSERT_ID();
+        ";
+    public static readonly string ModifyUserByUserId = @"
+        UPDATE amusing.ah_beheer
+        SET 
+            username = @UserName,
+            role = @Role
+        WHERE user_id = @UserId;";
+    public static readonly string ModifyPasswordByUserId = @"
+        UPDATE amusing.ah_beheer
+        SET 
+            password = @Password
+        WHERE user_id = @UserId;";
+    public static readonly string DeleteUserByUserId = @"
+        DELETE FROM ah_beheer 
+        WHERE user_id = @UserId;";
 }

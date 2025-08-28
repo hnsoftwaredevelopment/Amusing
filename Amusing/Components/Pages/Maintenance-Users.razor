@@ -1,0 +1,32 @@
+﻿@page "/Maintenance-Users"
+@using Amusing.Models
+@using Amusing.Services
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+@using System.ComponentModel.DataAnnotations
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.RichTextEditor
+@using Microsoft.AspNetCore.Components.Forms
+@using Syncfusion.Blazor.SplitButtons
+@using System.Text.Json
+
+@inject UserService UserService;
+
+@inject NavigationManager NavManager
+@inject IJSRuntime JS
+
+
+@code {
+	private bool _initialLoadDone = false;
+	private bool IsLoading = false;
+	private AhBeheer? SelectedUser;
+	private int VisibleRowCount = 0;
+	private List<AhBeheer> Users = [];
+	private SfGrid<AhBeheer>? GridRef;
+	private string FileName = "Gebruikers";
+	private List<string> UserRoles = new List<string> {"admin","penningmeester","contactpersoon","vrijwilligers","pr","algemeen"};
+
+}
