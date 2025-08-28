@@ -30,6 +30,7 @@ builder.Services.AddScoped<StageService>();
 builder.Services.AddScoped<StageTypeService>();
 builder.Services.AddScoped<TaskService>();
 builder.Services.AddScoped<VolunteerService>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<GitHubService>();
 
 builder.Services.AddAuthentication( CookieAuthenticationDefaults.AuthenticationScheme )

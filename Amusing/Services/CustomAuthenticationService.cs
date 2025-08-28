@@ -52,7 +52,7 @@ public class CustomAuthenticationService
         return null;
     }
 
-    private string ComputeMd5Hash( string input )
+    public string ComputeMd5Hash( string input )
     {
         using System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create();
         byte[] inputBytes = System.Text.Encoding.UTF8.GetBytes(input);

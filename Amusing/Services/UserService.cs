@@ -6,6 +6,7 @@ namespace Amusing.Services;
 public class UserService( GenericDataService dataService )
 {
     private readonly GenericDataService _dataService = dataService;
+
     public Task<List<UserModel>> GetAllUsersAsync()
     {
         return _dataService.ExecuteQueryAsync(
@@ -14,8 +15,11 @@ public class UserService( GenericDataService dataService )
             {
                 UserId = Convert.ToUInt32( reader [ "UserId" ] ),
                 Username = reader [ "UserName" ].ToString() ?? string.Empty,
-                Password = reader [ "Password" ].ToString() ?? string.Empty,
-                Role = reader [ "Role" ].ToString() ?? string.Empty
+                Password = "",
+                Role = reader [ "Role" ].ToString() ?? string.Empty,
+                LastLoginDate = reader [ "LastLoginDate" ] == DBNull.Value
+                    ? "nooit"
+                    : Convert.ToDateTime( reader [ "LastLoginDate" ] ).ToString( "dd/MM/yyyy" )
             } );
     }
 
@@ -40,6 +44,18 @@ public class UserService( GenericDataService dataService )
             };
 
         await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyPasswordByUserId, parameters );
+    }
+
+    public async Task<uint> AddUserAsync( UserModel model )
+    {
+        Dictionary<string, object> parameters = new()
+    {
+        { "@UserName", model.Username },
+        { "@Password", model.Password },
+        { "@Role", model.Role }
+    };
+
+        return await _dataService.ExecuteScalarAsync<uint>( QueryDefinitions.AddNewUser, parameters );
     }
 
     public async Task DeleteUserAsync( UserModel model )

@@ -7,6 +7,7 @@
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
 @using System.ComponentModel.DataAnnotations
+@using Syncfusion.Blazor.Notifications
 @using Syncfusion.Blazor.Popups
 @using Syncfusion.Blazor.RichTextEditor
 @using Microsoft.AspNetCore.Components.Forms
@@ -14,19 +15,246 @@
 @using System.Text.Json
 
 @inject UserService UserService;
+@inject CustomAuthenticationService CustomAuthenticationService;
 
 @inject NavigationManager NavManager
 @inject IJSRuntime JS
 
+@if (IsLoading)
+{
+    <div class="text-center p-2">
+        <SfSpinner CssClass="e-spin-center" />
+        <p>@FileName worden geladen...</p>
+    </div>
+}
+else
+{
+    <div class="page-container">
+        <!-- Static detail fields-->
+        <div class="fixed-header">
+            <h3>Onderhoud @FileName</h3>
+            <EditForm Model="SelectedUser">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
+                    <SfTextBox Placeholder="Gebruikersnaam" FloatLabelType="FloatLabelType.Always" Width="120px" @bind-Value="SelectedUser.Username" />
+                    <SfComboBox TValue="string" TItem="UserRoles" FloatLabelType="FloatLabelType.Always"
+                                Placeholder="Rol" DataSource="@Roles" Width="170px" @bind-Value="SelectedUser.Role" >
+                        <ComboBoxFieldSettings Value="Role" Text="Role"></ComboBoxFieldSettings>
+                    </SfComboBox>
+                </div>
+
+                <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
+                    <SfToast @ref="ToastObj" Title="Wachtwoord gewijzigd" Content="Gewijzigde wachtwoord opgeslagen" Timeout="3000" ShowProgressBar="true" >
+                        <ToastPosition X="300" Y="150"></ToastPosition>
+                    </SfToast>
+                    <SfTextBox Placeholder="Wachtwoord" FloatLabelType="FloatLabelType.Always" Width="200px" @bind-Value="SelectedUser.Password"/>
+                    @if (SelectedUser.UserId != 0)
+                    {
+                        <SfButton Content="Bewaar" OnClick="SavePassword" /> <!--KooF3oox9ainga-->
+                    }
+                </div>
+            </EditForm>
+
+            <div class="spacer-small"></div>
+
+            <!-- Toolbar -->
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+                <SfToolbar Width="870px">
+                    <ToolbarItems>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn"
+                                        @onclick="Save"
+                                        title="Bewaar de gebruiker">
+                                    <img src="icons/button-save.svg" class="icon" alt="SAVE" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn" @onclick="AddNew" title="Voeg een nieuw gebruiker toe">
+                                    <img src="icons/button-add.svg" class="icon" alt="ADD" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                            <Template>
+                                <span class="toolbar-count">@FileName: @VisibleRowCount</span>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                            <Template>
+                                <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
+                            </Template>
+                        </ToolbarItem>
+                    </ToolbarItems>
+                </SfToolbar>
+            </div>
+        </div>
+
+        <div class="spacer-small"></div>
+
+        <!-- Scrollable area for main datagrid -->
+        <div class="scrollable-content">
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
+                <SfGrid @ref="GridRef"
+                        TValue="UserModel"
+                        Width="870"
+                        DataSource="@Users"
+                        EnableStickyHeader="true"
+                        AllowResizing="true"
+                        Height="260px"
+                        AllowSorting="true"
+                        AllowMultiSorting="true"
+                        AllowSelection="true">
+                    <GridEvents TValue="UserModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
+                    <GridEditSettings AllowAdding="true" NewRowPosition="NewRowPosition.Top"></GridEditSettings>
+                    <GridColumns>
+                        <GridColumn Field="UserId" IsPrimaryKey="true" Visible="false" />
+                        <GridColumn Field="Username" HeaderText="Gebruikersnaam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="120px" />
+                        <GridColumn Field="Role" HeaderText="Rol" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="120px" />
+                        <GridColumn Field="LastLoginDate" HeaderText="Laatste inlog" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="120px" />
+                    </GridColumns>
+                </SfGrid>
+            </div> 
+        </div>
+    </div>
+}
 
 @code {
-	private bool _initialLoadDone = false;
-	private bool IsLoading = false;
-	private AhBeheer? SelectedUser;
-	private int VisibleRowCount = 0;
-	private List<AhBeheer> Users = [];
-	private SfGrid<AhBeheer>? GridRef;
-	private string FileName = "Gebruikers";
-	private List<string> UserRoles = new List<string> {"admin","penningmeester","contactpersoon","vrijwilligers","pr","algemeen"};
+    private bool _initialLoadDone = false;
+    private bool IsLoading = false;
+    private UserModel? SelectedUser;
+    private int VisibleRowCount = 0;
+    private List<UserModel> Users = [];
+    private SfGrid<UserModel>? GridRef;
+    private SfToast ToastObj;
+    private string FileName = "Gebruikers";
+    public string HashedPassword { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+
+        Users = await UserService.GetAllUsersAsync();
+
+        SelectedUser = Users.FirstOrDefault();
+
+        IsLoading = false;
+    }
+
+    private async Task OnGridDataBound()
+    {
+        if ( !_initialLoadDone && Users?.Any() == true )
+        {
+            _initialLoadDone = true;
+            await UpdateVisibleRowCountAsync();
+            await GridRef.SelectRowAsync( 0 );
+        }
+    }
+
+    private void OnRowSelected( RowSelectEventArgs<UserModel> args )
+    {
+        SelectedUser = args.Data;
+
+        StateHasChanged();
+    }
+
+    private async Task UpdateVisibleRowCountAsync()
+    {
+        if ( GridRef is not null )
+        {
+            var records = await GridRef.GetCurrentViewRecordsAsync();
+            await Task.Delay( 150 );
+            VisibleRowCount = records?.Count ?? 0;
+            StateHasChanged();
+        }
+    }
+
+    public async Task OnInput( InputEventArgs args )
+    {
+        await GridRef.SearchAsync( args.Value );
+
+        await Task.Delay( 50 );
+        await UpdateVisibleRowCountAsync();
+    }
+
+    private async Task Save()
+    {
+        if ( SelectedUser is null )
+            return;
+
+        if ( SelectedUser.UserId != 0 )
+        {
+            await UserService.UpdateUserAsync( SelectedUser );
+        }
+        else
+        {
+            // Save the new Person and get the new Person Id
+            var savedId = await UserService.AddUserAsync(SelectedUser);
+
+            // Refresh the list
+            Users = await UserService.GetAllUsersAsync();
+            await Task.Delay( 50 );
+            await GridRef.Refresh();
+
+            // Search the modified record
+            var index = Users.FindIndex(s => s.UserId == savedId);
+            if ( index >= 0 )
+            {
+                SelectedUser = Users [ index ];
+                await GridRef.SelectRowAsync( index );
+            }
+        }
+    }
+
+    private async Task AddNew()
+    {
+        var newUser = new UserModel
+        {
+            UserId = 0,
+            Username = string.Empty,
+            Password = string.Empty,
+            Role =  string.Empty
+        };
+
+        await GridRef.AddRecordAsync( newUser, 0 );
+        await GridRef.SelectRowAsync( 0 );
+
+        SelectedUser = newUser;
+
+        StateHasChanged();
+    }
+
+    private async Task SavePassword(MouseEventArgs args)
+    {
+        if (!string.IsNullOrWhiteSpace(SelectedUser.Password))
+        {
+            SelectedUser.Password = CustomAuthenticationService.ComputeMd5Hash( SelectedUser.Password );
+
+            await UserService.UpdatePasswordAsync( SelectedUser );
+
+            SelectedUser.Password = string.Empty;
+
+            await ToastObj.ShowAsync();
+            }
+    }
+
+    public async Task HashUserPassword()
+    {
+        HashedPassword = CustomAuthenticationService.ComputeMd5Hash( SelectedUser.Password );
+    }
+
+    private List<UserRoles> Roles = 
+    [
+        new UserRoles() { Role= "admin" },
+        new UserRoles() { Role= "algemeen" },
+        new UserRoles() { Role= "penningmeester" },
+        new UserRoles() { Role= "contactpersoon" },
+        new UserRoles() { Role= "vrijwilligers" },
+        new UserRoles() { Role= "pr" }
+    ];
 
 }

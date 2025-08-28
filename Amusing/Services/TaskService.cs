@@ -158,7 +158,6 @@ public class TaskService( GenericDataService dataService )
 
         return JsonSerializer.Serialize( timeBlocks );
     }
-
     public class TimeBlock
     {
         public string From { get; set; }

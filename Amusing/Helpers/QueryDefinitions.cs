@@ -1167,11 +1167,14 @@ public static class QueryDefinitions
         WHERE taak_id = @TaskId;";
     public static readonly string GetAllUsers = @"
         SELECT 
-	        user_id AS UserId,
-	        username AS UserName,
-	        password AS Password,
-	        role AS ROLE
-        FROM amusing.ah_beheer;";
+            usr.user_id AS UserId,
+            usr.username AS UserName,
+            usr.role AS ROLE,
+            DATE(MAX(log.date)) AS LastLoginDate
+        FROM amusing.ah_beheer usr
+        LEFT JOIN amusing.ah_beheer_log log 
+            ON usr.user_id = log.user_id
+        GROUP BY usr.user_id, usr.username, usr.password, usr.role;";
     public static readonly string AddNewUser = @"
         INSERT INTO amusing.ah_beheer
             (username, password, role)
