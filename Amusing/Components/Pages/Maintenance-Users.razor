@@ -33,27 +33,55 @@ else
         <!-- Static detail fields-->
         <div class="fixed-header">
             <h3>Onderhoud @FileName</h3>
-            <EditForm Model="SelectedUser">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
+            <EditForm EditContext="@editContext">
 
-                <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
-                    <SfTextBox Placeholder="Gebruikersnaam" FloatLabelType="FloatLabelType.Always" Width="120px" @bind-Value="SelectedUser.Username" />
-                    <SfComboBox TValue="string" TItem="UserRoles" FloatLabelType="FloatLabelType.Always"
-                                Placeholder="Rol" DataSource="@Roles" Width="170px" @bind-Value="SelectedUser.Role" >
-                        <ComboBoxFieldSettings Value="Role" Text="Role"></ComboBoxFieldSettings>
-                    </SfComboBox>
-                </div>
+                <div class="form-grid"> 
+                    <div class="form-left"> 
+                        <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
+                            <SfTextBox Placeholder="Gebruikersnaam" FloatLabelType="FloatLabelType.Always" Width="120px" @bind-Value="SelectedUser.Username" />
+                            <SfComboBox TValue="string" TItem="UserRoles" FloatLabelType="FloatLabelType.Always"
+                                        Placeholder="Rol" DataSource="@Roles" Width="170px" @bind-Value="SelectedUser.Role" >
+                                <ComboBoxFieldSettings Value="Role" Text="Role"></ComboBoxFieldSettings>
+                            </SfComboBox>
+                            <div> 
+                            </div>
+                        </div>
 
-                <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
-                    <SfToast @ref="ToastObj" Title="Wachtwoord gewijzigd" Content="Gewijzigde wachtwoord opgeslagen" Timeout="3000" ShowProgressBar="true" >
-                        <ToastPosition X="300" Y="150"></ToastPosition>
-                    </SfToast>
-                    <SfTextBox Placeholder="Wachtwoord" FloatLabelType="FloatLabelType.Always" Width="200px" @bind-Value="SelectedUser.Password"/>
-                    @if (SelectedUser.UserId != 0)
+                        <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
+                            <SfToast @ref="ToastObj" Title="Wachtwoord gewijzigd" Content="Gewijzigde wachtwoord opgeslagen" Timeout="3000" ShowProgressBar="true" >
+                                <ToastPosition X="300" Y="150"></ToastPosition>
+                            </SfToast>
+                            <SfTextBox Placeholder="Wachtwoord" FloatLabelType="FloatLabelType.Always" Width="200px" @bind-Value="SelectedUser.Password"/>
+                            @if (SelectedUser.UserId != 0)
+                            {
+                                <button class="custom-toolbar-btn" @onclick="SavePassword" title="Sla het wachtwoord op">
+                                    <img src="icons/button-savepassword.svg" class="icon" alt="PW" />
+                                </button>
+                            }
+                        </div>
+                    </div>
+                    @if ( SelectedUser.Username == "" || SelectedUser.Role == "" || ( SelectedUser.Password == "" && SelectedUser.UserId == 0 ) )
                     {
-                        <SfButton Content="Bewaar" OnClick="SavePassword" /> <!--KooF3oox9ainga-->
+                        <div class="form-middle">
+                                <ul>
+                                    @if ( SelectedUser.Username == "" )
+                                    {
+                                        <li class="text-danger">Gebruikersnaam mag niet leeg zijn</li>
+                                    }
+                                    @if ( SelectedUser.Role == "" )
+                                    {
+                                        <li class="text-danger">Rol mag niet leeg zijn</li>
+                                    }
+                                    @if ( SelectedUser.Password == "" && SelectedUser.UserId == 0 )
+                                    {
+                                        <li class="text-danger">Wachtwoord mag niet leeg zijn voor een nieuwe gebruiker</li>
+                                    }
+                                </ul>
+                        </div>
                     }
+                    <div class="form-right">
+                        <div></div>
+                    </div>
                 </div>
             </EditForm>
 
@@ -76,6 +104,13 @@ else
                             <Template>
                                 <button class="custom-toolbar-btn" @onclick="AddNew" title="Voeg een nieuw gebruiker toe">
                                     <img src="icons/button-add.svg" class="icon" alt="ADD" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn" @onclick="Delete" title="verwijder de geselecteerde gebruiker">
+                                    <img src="icons/button-del.svg" class="icon" alt="DELETE" />
                                 </button>
                             </Template>
                         </ToolbarItem>
@@ -128,6 +163,7 @@ else
     private bool IsLoading = false;
     private UserModel? SelectedUser;
     private int VisibleRowCount = 0;
+    private EditContext? editContext;
     private List<UserModel> Users = [];
     private SfGrid<UserModel>? GridRef;
     private SfToast ToastObj;
@@ -141,6 +177,7 @@ else
         Users = await UserService.GetAllUsersAsync();
 
         SelectedUser = Users.FirstOrDefault();
+        editContext = new EditContext( SelectedUser );
 
         IsLoading = false;
     }
@@ -158,7 +195,7 @@ else
     private void OnRowSelected( RowSelectEventArgs<UserModel> args )
     {
         SelectedUser = args.Data;
-
+        editContext = new EditContext(SelectedUser);
         StateHasChanged();
     }
 
@@ -193,6 +230,8 @@ else
         else
         {
             // Save the new Person and get the new Person Id
+            SelectedUser.Password = CustomAuthenticationService.ComputeMd5Hash( SelectedUser.Password ); 
+
             var savedId = await UserService.AddUserAsync(SelectedUser);
 
             // Refresh the list
@@ -207,6 +246,11 @@ else
                 SelectedUser = Users [ index ];
                 await GridRef.SelectRowAsync( index );
             }
+
+            if (SelectedUser.Password != "")
+            {
+
+            }
         }
     }
 
@@ -215,20 +259,20 @@ else
         var newUser = new UserModel
         {
             UserId = 0,
-            Username = string.Empty,
-            Password = string.Empty,
-            Role =  string.Empty
+            Username = "",
+            Password = "",
+            Role =  ""
         };
 
         await GridRef.AddRecordAsync( newUser, 0 );
         await GridRef.SelectRowAsync( 0 );
 
         SelectedUser = newUser;
-
+        editContext = new EditContext(SelectedUser);
         StateHasChanged();
     }
 
-    private async Task SavePassword(MouseEventArgs args)
+    private async Task SavePassword()
     {
         if (!string.IsNullOrWhiteSpace(SelectedUser.Password))
         {
@@ -239,14 +283,21 @@ else
             SelectedUser.Password = string.Empty;
 
             await ToastObj.ShowAsync();
-            }
+        }
     }
 
-    public async Task HashUserPassword()
+    private async Task Delete()
     {
-        HashedPassword = CustomAuthenticationService.ComputeMd5Hash( SelectedUser.Password );
-    }
+        if ( SelectedUser.UserId == 0 )
+            return;
 
+        await UserService.DeleteUserAsync( SelectedUser );
+
+        // Refresh the list
+        Users = await UserService.GetAllUsersAsync();
+        await Task.Delay( 50 );
+        await GridRef.Refresh();
+    }
     private List<UserRoles> Roles = 
     [
         new UserRoles() { Role= "admin" },

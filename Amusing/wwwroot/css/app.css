@@ -608,3 +608,9 @@ label.sf-float-label {
     margin: 0;
     padding: 0;
 }
+
+* Rode rand voor Syncfusion TextBox / ComboBox bij invalid */
+.e-input-group.e-control-wrapper.invalid input,
+.e-input-group.e-control-wrapper.invalid .e-control {
+    border: 1px solid red !important;
+}

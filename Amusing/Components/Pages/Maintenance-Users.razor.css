@@ -1,0 +1,38 @@
+﻿.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 3fr;
+    gap: 15px;
+    align-items: start;
+}
+
+.form-left {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.form-middle {
+    background-color: #fdffb6;
+    border-bottom: 2px solid #d00000;
+    border-left: 2px solid #d00000;
+    border-top: 2px solid #d00000;
+    border-right: 2px solid #d00000;
+    border-radius: 8px;
+    padding: 3px;
+    margin: 10px 0px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #d00000;
+    gap: 0px;
+}
+
+.form-right {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+    /* An empty list may never display an emtry row */
+    .form-right ul:empty {
+        display: none;
+    }
