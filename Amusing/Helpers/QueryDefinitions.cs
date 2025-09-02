@@ -9,7 +9,7 @@ public static class QueryDefinitions
     public static readonly string GetNewsletterEmailAddresses = @"
         SELECT DISTINCT  
             grp.naam AS Groep,
-            CONCAT_WS(' ', pers.voornaam, pers.tussenvoegsel, pers.achternaam) AS Naam,
+            CONCAT_WS(' ', pers.voornaam, NULLIF(pers.tussenvoegsel, ''), pers.achternaam) AS Naam,
             pers.email AS 'E-Mail',
             grp.land AS Land
         FROM amusing.ah_personen pers
@@ -20,7 +20,7 @@ public static class QueryDefinitions
     public static readonly string GetAllKnownEmailAddresses = @"
         SELECT DISTINCT  
             grp.naam AS Groep,
-            CONCAT_WS(' ', pers.voornaam, pers.tussenvoegsel, pers.achternaam) AS Naam,
+            CONCAT_WS(' ', pers.voornaam, NULLIF(pers.tussenvoegsel, ''), pers.achternaam) AS Naam,
             pers.email AS 'E-Mail',
             grp.land AS Land
         FROM amusing.ah_personen pers
@@ -30,7 +30,7 @@ public static class QueryDefinitions
     public static readonly string GetNewlyAddedEmailAddresses = @"
     SELECT 
         ANY_VALUE(ah_zanggroepen.naam) AS `Groep`,
-        ANY_VALUE(CONCAT_WS(' ', ah_personen.voornaam, ah_personen.tussenvoegsel, ah_personen.achternaam)) AS `Naam`,
+        ANY_VALUE(CONCAT_WS(' ', ah_personen.voornaam, NULLIF(ah_personen.tussenvoegsel, ''), ah_personen.achternaam)) AS `Naam`,
         ANY_VALUE(ah_personen.email) AS `E-Mail`,
         ANY_VALUE(ah_zanggroepen.land ) AS `Land`
     FROM amusing.ah_profielbeheer_log
@@ -65,7 +65,7 @@ public static class QueryDefinitions
     public static readonly string GetOldEmailAddresses = @"
     SELECT
         any_value(`ah_zanggroepen`.`naam`) AS `Groep`,
-        any_value(concat_ws(' ', `ah_personen`.`voornaam`, `ah_personen`.`tussenvoegsel`, `ah_personen`.`achternaam`)) AS `Naam`,
+        any_value(concat_ws(' ', `ah_personen`.`voornaam`, NULLIF(`ah_personen`.`tussenvoegsel`, ''), `ah_personen`.`achternaam`)) AS `Naam`,
         any_value(`ah_personen`.`email`) AS `E-Mail`,
         any_value(`ah_zanggroepen`.`land`) AS `Land`
     FROM
@@ -104,7 +104,7 @@ public static class QueryDefinitions
     public static readonly string GetPreviousEmailAddresses = @"
     SELECT 
         ANY_VALUE(zg.naam) AS `Groep`,
-        ANY_VALUE(CONCAT_WS(' ', p.voornaam, p.tussenvoegsel, p.achternaam)) AS `Naam`,
+        ANY_VALUE(CONCAT_WS(' ', p.voornaam, NULLIF(p.tussenvoegsel, ''), p.achternaam)) AS `Naam`,
         p.email AS `E-Mail`,
         ANY_VALUE(zg.land) AS `Land`
     FROM 
@@ -134,7 +134,7 @@ public static class QueryDefinitions
     public static readonly string GetUpcommingEmailAddresses = @"
     SELECT 
         ANY_VALUE(zg.naam) AS `Groep`,
-        ANY_VALUE(CONCAT_WS(' ', p.voornaam, p.tussenvoegsel, p.achternaam)) AS `Naam`,
+        ANY_VALUE(CONCAT_WS(' ', p.voornaam, NULLIF(p.tussenvoegsel, ''), p.achternaam)) AS `Naam`,
         p.email AS `E-Mail`,
         ANY_VALUE(zg.land) AS `Land`
     FROM 
@@ -163,7 +163,7 @@ public static class QueryDefinitions
     public static readonly string GetQueueUpcommingEmailAddresses = @"
     SELECT 
         ANY_VALUE(ah_zanggroepen.naam) AS `Groep`,
-        ANY_VALUE(CONCAT_WS(' ', ah_personen.voornaam, ah_personen.tussenvoegsel, ah_personen.achternaam)) AS `Naam`,
+        ANY_VALUE(CONCAT_WS(' ', ah_personen.voornaam, NULLIF(ah_personen.tussenvoegsel, ''), ah_personen.achternaam)) AS `Naam`,
         ANY_VALUE(ah_personen.email) AS `E-Mail`,
         ANY_VALUE(ah_zanggroepen.land ) as `Land`
     FROM ah_inschrijvingen
@@ -186,7 +186,7 @@ public static class QueryDefinitions
     public static readonly string GetIncompleteEmailAddresses = @"
     SELECT 
         ANY_VALUE(ah_zanggroepen.naam) AS `Groep`,
-        ANY_VALUE(CONCAT_WS(' ', ah_personen.voornaam, ah_personen.tussenvoegsel, ah_personen.achternaam)) AS `Naam`,
+        ANY_VALUE(CONCAT_WS(' ', ah_personen.voornaam, NULLIF(ah_personen.tussenvoegsel, ''), ah_personen.achternaam)) AS `Naam`,
         ANY_VALUE(ah_personen.email) AS `E-Mail`,
         CONCAT_WS(', ',
             IF(ah_contactgegevens.straatnaam IS NULL OR ah_contactgegevens.straatnaam = '', 'Straatnaam', NULL),
@@ -257,7 +257,7 @@ public static class QueryDefinitions
     public static readonly string GetVolunteersByFestivalId = @"
         SELECT 
             vw.festival_id, DATE(vw.datum) AS Datum, 
-            CONCAT_WS(' ', pers.voornaam, pers.tussenvoegsel, pers.achternaam) AS Naam,
+            CONCAT_WS(' ', pers.voornaam, NULLIF(pers.tussenvoegsel,''), pers.achternaam) AS Naam,
             TIME_FORMAT(vw.beschikbaar_van, '%H:%i') AS Van,
             TIME_FORMAT(vw.beschikbaar_tot, '%H:%i') AS Tot,
             vw.uren_achtereen AS Uren,
@@ -282,7 +282,7 @@ public static class QueryDefinitions
     public static readonly string GetPersonsOverview = @"
         SELECT 
             p.persoon_id AS PersonId,
-            CONCAT_WS(' ', p.voornaam, p.tussenvoegsel, p.achternaam) AS Name,
+            CONCAT_WS(' ', p.voornaam, NULLIF(p.tussenvoegsel, ''), p.achternaam) AS Name,
             p.email AS Email,
             rollen.rollen AS Role,
             vrijwilligers.vrijwilligers AS Volunteer
@@ -987,7 +987,7 @@ public static class QueryDefinitions
     public static readonly string GetAllActivePersonsByGroupId = @"
         SELECT 
 	        rol.persoon_id AS PersonId,
-            CONCAT_WS(' ', per.voornaam, per.tussenvoegsel, per.achternaam) AS Name,
+            CONCAT_WS(' ', per.voornaam, per.NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Name,
 	        per.email AS Email,
 	        per.actief  AS Active,
 	        rol.zanggroep_id AS GroupId,
@@ -999,7 +999,7 @@ public static class QueryDefinitions
     public static readonly string GetAllUnrelatedPersonsByGroupId = @"
         SELECT 
             per.persoon_id AS PersonId,
-            CONCAT_WS(' ', per.voornaam, per.tussenvoegsel, per.achternaam) AS Name,
+            CONCAT_WS(' ', per.voornaam, NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Name,
             COALESCE(per.email, '') AS Email,
             COALESCE(GROUP_CONCAT(DISTINCT rol.zanggroep_id), '') AS GroupIds,
             COALESCE(GROUP_CONCAT(DISTINCT grp.naam), '') AS GroupNames
@@ -1011,6 +1011,8 @@ public static class QueryDefinitions
             ON rol.zanggroep_id = grp.zanggroep_id
         GROUP BY per.persoon_id, Name, Email
         ORDER BY Name;";
+    public static readonly string GetPeronRoles = @"
+        SELECT DISTINCT rol.rol  FROM amusing.ah_personen_rollen rol ORDER BY rol.rol;";
     public static readonly string ModifyPersonRole = @"
         UPDATE amusing.ah_personen_rollen 
         SET rol = @Role
@@ -1023,7 +1025,7 @@ public static class QueryDefinitions
     public static readonly string GetAllPersons = @"
         SELECT 
             p.persoon_id AS PersonId,
-            CONCAT_WS(' ', p.voornaam, p.tussenvoegsel, p.achternaam) AS Name,
+            CONCAT_WS(' ', p.voornaam, NULLIF(p.tussenvoegsel, ''), p.achternaam) AS Name,
             p.voornaam AS FirstName, 
             p.tussenvoegsel AS NameInfix, 
             p.achternaam AS LastName,
@@ -1195,4 +1197,41 @@ public static class QueryDefinitions
     public static readonly string DeleteUserByUserId = @"
         DELETE FROM ah_beheer 
         WHERE user_id = @UserId;";
+    public static readonly string GetRecipentsList = @"
+        SELECT DISTINCT 
+             per.persoon_id AS PersonId, 
+             per.voornaam AS Firstname,
+             per.tussenvoegsel AS Infix,
+             per.achternaam AS Lastname,
+             CONCAT_WS(' ', per.voornaam, NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Name,
+             per.email AS Email,
+             per.infomailing AS Infomailing,
+             per.actief AS Active,
+             rol.rol AS Role,
+             rol.zanggroep_id AS GroupId,
+             grp.naam AS GroupName,
+             fes.festival_id AS FestivalId,
+             YEAR(fes.festivaldatum) AS Festival,
+             sub.podiumsoort AS StageType,
+             IF(sub.ingeschreven IS NOT NULL, 1, 0) AS Subscribed,
+             IF(sub.afgehaakt IS NOT NULL, 1, 0) AS Canceled,
+             IF(sub.betaald IS NOT NULL, 1, 0) AS Payed,
+             IF(sub.bevestigd IS NOT NULL, 1, 0) AS Confirmed,
+             sub.aantal_deelnemers AS Singers
+        FROM amusing.ah_personen per
+        JOIN amusing.ah_personen_rollen rol ON per.persoon_id = rol.persoon_id
+        JOIN amusing.ah_zanggroepen grp ON rol.zanggroep_id = grp.zanggroep_id 
+        JOIN amusing.ah_inschrijvingen sub ON grp.zanggroep_id = sub.zanggroep_id 
+        JOIN amusing.ah_festivals fes ON sub.festival_id  = fes.festival_id  
+        WHERE per.email IS NOT NULL;";
+    public static readonly string GetAllRecipientLists = @"
+        SELECT 
+	        id 		AS ListId,
+	        name 	AS ListName,
+	        created AS ListCreated,
+	        changed AS ListChanged,
+	        source 	AS ListSource,
+	        filter	AS ListFilter
+        FROM amusing.ah_recipient_lists
+        ORDER BY name;";
 }

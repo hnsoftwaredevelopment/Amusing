@@ -1,0 +1,300 @@
+﻿@page "/Recipients"
+@using Amusing.Models
+@using Amusing.Services
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+@using System.ComponentModel.DataAnnotations
+@using Syncfusion.Blazor.Notifications
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.QueryBuilder;
+@using Microsoft.AspNetCore.Components.Forms
+@using Syncfusion.Blazor.SplitButtons
+@using System.Text.Json
+
+@inject MailingService MailingService;
+
+@inject NavigationManager NavManager
+@inject IJSRuntime JS
+
+@if ( IsLoading )
+{
+    <div class="text-center p-2">
+        <SfSpinner CssClass="e-spin-center" />
+        <p>@FileName worden geladen...</p>
+    </div>
+}
+else
+{
+    <div class="page-container">
+        <!-- Static detail fields-->
+        <div class="fixed-header">
+            <SfRadioButton Label="Groepen" Name="source" Value="groups" TChecked="string" @onchange="onSourceChange" @bind-Checked="SourceChecked"></SfRadioButton>
+            <SfRadioButton Label="Personen" Name="source" Value="persons" TChecked="string" @onchange="onSourceChange" @bind-Checked="SourceChecked"></SfRadioButton>
+
+            <div class="spacer-small"></div>
+            <SfTextBox Placeholder="Lijstnaam" FloatLabelType="FloatLabelType.Always" Width="300px" @bind-Value="SelectedRecipientsList.ListName" />
+
+            @if (SourceChecked == "groups")
+            {
+                <h5>Groepen</h5>
+                <SfQueryBuilder DataSource="@RecipientsFilterList"/>
+            }
+            else
+            {
+                <h5>Personen</h5>
+                <SfQueryBuilder DataSource="@RecipientsFilterList" />
+            }
+
+            <!-- Toolbar -->
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+                <SfToolbar Width="870px">
+                    <ToolbarItems>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn"
+                                        @onclick="Save"
+                                        title="Bewaar de gebruiker">
+                                    <img src="icons/button-save.svg" class="icon" alt="SAVE" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn" @onclick="AddNew" title="Voeg een nieuw gebruiker toe">
+                                    <img src="icons/button-add.svg" class="icon" alt="ADD" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn" @onclick="Delete" title="verwijder de geselecteerde gebruiker">
+                                    <img src="icons/button-del.svg" class="icon" alt="DELETE" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                            <Template>
+                                <span class="toolbar-count">@FileName: @VisibleRowCount</span>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                            <Template>
+                                <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
+                            </Template>
+                        </ToolbarItem>
+                    </ToolbarItems>
+                </SfToolbar>
+            </div>
+        </div>
+
+        <div class="spacer-small"></div>
+
+        <!-- Scrollable area for main datagrid -->
+        <div class="scrollable-content">
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
+                <SfGrid @ref="GridRef"
+                        TValue="RecipientListModel"
+                        Width="870"
+                        DataSource="@RecipientsList"
+                        EnableStickyHeader="true"
+                        AllowResizing="true"
+                        Height="260px"
+                        AllowSorting="true"
+                        AllowMultiSorting="true"
+                        AllowSelection="true">
+                    <GridEvents TValue="RecipientListModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
+                    <GridEditSettings AllowAdding="true" NewRowPosition="NewRowPosition.Top"></GridEditSettings>
+                    <GridColumns>
+                        <GridColumn Field="@nameof(RecipientListModel.ListId)" IsPrimaryKey="true" Visible="false" />
+                        <GridColumn Field="@nameof(RecipientListModel.ListName)" HeaderText="Lijst" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="350px" />
+                        <GridColumn Field="@nameof(RecipientListModel.ListSourceUI)" HeaderText="Bron" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="100px" />
+                        <GridColumn Field="@nameof(RecipientListModel.ListCreated)" HeaderText="Gemaakt" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="120px" />
+                        <GridColumn Field="@nameof(RecipientListModel.ListChanged)" HeaderText="Gewijzigd" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="120px" />
+                    </GridColumns>
+                </SfGrid>
+            </div>
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
+                <SfGrid @ref="GridRefReceipts" TValue="RecipientListFilterModel" DataSource="RecipientsFilterList">
+                    <GridColumns>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.PersonId)" HeaderText="PersonId"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.Firstname)" HeaderText="Firstname"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.Infix)" HeaderText="Infix"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.Lastname)" HeaderText="Lastname"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.Name)" HeaderText="Name"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.Email)" HeaderText="Email"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.Infomailing)" HeaderText="Infomailing"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.Active)" HeaderText="Active"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.Role)" HeaderText="Role"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.GroupId)" HeaderText="Group ID"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.GroupName)" HeaderText="Group Name"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.FestivalId)" HeaderText="Festival ID"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.Festival)" HeaderText="Festival Year"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.StageType)" HeaderText="Stage Type"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.Subscribed)" HeaderText="Subscribed"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.Canceled)" HeaderText="Canceled"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.Payed)" HeaderText="Payed"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.Confirmed)" HeaderText="Confirmed"/>
+                        <GridColumn Field="@nameof(RecipientListFilterModel.Singers)" HeaderText="Singers"/>
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+    </div>
+}
+
+@code 
+{
+    private bool _initialLoadDone = false;
+    private bool IsLoading = false;
+    private RecipientListModel? SelectedRecipientsList;
+    private int VisibleRowCount = 0;
+    private EditContext? editContext;
+    private List<RecipientListModel> RecipientsList = [];
+    private List<RecipientListFilterModel> RecipientsFilterList = [];
+    private SfGrid<RecipientListModel>? GridRef;
+    private SfGrid<RecipientListFilterModel>? GridRefReceipts;
+    private SfToast ToastObj;
+    private string FileName = "Mailing lijsten";
+    private string SourceChecked = "groups";
+    private SfQueryBuilder<RecipientListFilterModel> PersonQueryBuilder;
+    private string GeneratedSql = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+
+        RecipientsList = await MailingService.GetRecipientListsAsync();
+        RecipientsFilterList = await MailingService.GetAllRecipientsAsync();
+
+        SelectedRecipientsList = RecipientsList.FirstOrDefault();
+        editContext = new EditContext( SelectedRecipientsList );
+
+        IsLoading = false;
+    }
+
+    private async Task OnGridDataBound()
+    {
+        if ( !_initialLoadDone && RecipientsList?.Any() == true )
+        {
+            _initialLoadDone = true;
+            await UpdateVisibleRowCountAsync();
+            await GridRef.SelectRowAsync( 0 );
+        }
+    }
+
+    private void OnRowSelected( RowSelectEventArgs<RecipientListModel> args )
+    {
+        SelectedRecipientsList = args.Data;
+        editContext = new EditContext( SelectedRecipientsList );
+        SourceChecked = SelectedRecipientsList.ListSource switch
+        {
+            MailingService.RecipientListSource.Groups  => "groups",
+            MailingService.RecipientListSource.Persons => "persons",
+            _                                          => string.Empty
+        };
+        StateHasChanged();
+    }
+
+    private async Task UpdateVisibleRowCountAsync()
+    {
+        if ( GridRef is not null )
+        {
+            var records = await GridRef.GetCurrentViewRecordsAsync();
+            await Task.Delay( 150 );
+            VisibleRowCount = records?.Count ?? 0;
+            StateHasChanged();
+        }
+    }
+
+    public async Task OnInput( InputEventArgs args )
+    {
+        await GridRef.SearchAsync( args.Value );
+
+        await Task.Delay( 50 );
+        await UpdateVisibleRowCountAsync();
+    }
+
+    private async Task Save()
+    {
+        if ( SelectedRecipientsList is null )
+            return;
+
+        if ( SelectedRecipientsList.ListId != 0 )
+        {
+            //await MailingService.UpdateRecipientsListAsync( SelectedRecipientsList );
+        }
+        else
+        {
+            // Save the new List and get the new List Id
+            //var savedId = await MailingService.AddListAsync(SelectedRecipientsList);
+
+            // Refresh the list
+            RecipientsList = await MailingService.GetRecipientListsAsync();
+            await Task.Delay( 50 );
+            await GridRef.Refresh();
+
+            // Search the modified record
+            //var index = RecipientsList.FindIndex(s => s.ListId == savedId);
+            // if ( index >= 0 )
+            // {
+            //     SelectedRecipientsList = RecipientsList [ index ];
+            //     await GridRef.SelectRowAsync( index );
+            // }
+        }
+    }
+
+    private async Task AddNew()
+    {
+        var newRecipientsList = new RecipientListModel
+        {
+            ListId = 0,
+            ListName = ""
+        };
+
+        await GridRef.AddRecordAsync( newRecipientsList, 0 );
+        await GridRef.SelectRowAsync( 0 );
+
+        SelectedRecipientsList = newRecipientsList;
+        editContext = new EditContext( SelectedRecipientsList );
+        StateHasChanged();
+    }
+
+    private async Task Delete()
+    {
+        if ( SelectedRecipientsList.ListId == 0 )
+            return;
+
+        //await MailingService.DeleteRecipientsListAsync( SelectedRecipientsList );
+
+        // Refresh the list
+        RecipientsList = await MailingService.GetRecipientListsAsync();
+        await Task.Delay( 50 );
+        await GridRef.Refresh();
+    }
+
+    private void onSourceChange( Microsoft.AspNetCore.Components.ChangeEventArgs args )
+    {
+        var value = args.Value?.ToString() ?? string.Empty;
+
+        SelectedRecipientsList.ListSource = value switch
+        {
+            "groups" => MailingService.RecipientListSource.Groups,
+            "persons" => MailingService.RecipientListSource.Persons,
+            _ => MailingService.RecipientListSource.Unknown
+        };
+    }
+
+    private List<PersonRole> PersonRoles = new()
+    {
+        new PersonRole { Id = "contactpersoon1", Name = "Contactpersoon 1" },
+        new PersonRole { Id = "contactpersoon2", Name = "Contactpersoon 2" },
+        new PersonRole { Id = "dirigent",        Name = "Dirigent" },
+        new PersonRole { Id = "muzikant",        Name = "Muzikant" },
+        new PersonRole { Id = "penningmeester",  Name = "Penningmeester" },
+        new PersonRole { Id = "zanger",          Name = "Zanger" }
+    };
+
+}
