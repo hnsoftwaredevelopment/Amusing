@@ -40,12 +40,19 @@ else
             @if (SourceChecked == "groups")
             {
                 <h5>Groepen</h5>
-                <SfQueryBuilder DataSource="@RecipientsFilterList"/>
             }
             else
             {
                 <h5>Personen</h5>
-                <SfQueryBuilder DataSource="@RecipientsFilterList" />
+                <SfQueryBuilder TValue="RecipientListFilterModel" DataSource="@RecipientsFilterList" MaxGroupCount="0" SummaryView=true>
+                    <QueryBuilderRule Condition="and" Rules="Rules"/>
+                    <QueryBuilderColumns>
+                        <QueryBuilderColumn Field="Festival" Label="Editie" Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Number" Operators="@FestivalOperators" Values="@FestivalValues" />
+                        <QueryBuilderColumn Field="Role" Label="Persoon met de role van..." Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String" Operators="@InOnlyOperator" Values="@RoleValues" />
+                        <QueryBuilderColumn Field="Infomailing" Label="Infomailing" Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" Values="@YesNoValues" />
+                    </QueryBuilderColumns>
+                </SfQueryBuilder>
+
             }
 
             <!-- Toolbar -->
@@ -159,6 +166,7 @@ else
     private SfToast ToastObj;
     private string FileName = "Mailing lijsten";
     private string SourceChecked = "groups";
+    private string[] YesNoValues = new string[] { "Ja", "Nee" };
     private SfQueryBuilder<RecipientListFilterModel> PersonQueryBuilder;
     private string GeneratedSql = string.Empty;
 
@@ -297,4 +305,23 @@ else
         new PersonRole { Id = "zanger",          Name = "Zanger" }
     };
 
+    List<RuleModel> Rules = new List<RuleModel>()
+    {
+        new RuleModel { Field="Festival", Operator="in" },
+        new RuleModel { Field="Role", Operator="in"},
+        new RuleModel { Field="Infomailing", Operator="equal"}
+    };
+
+    List<OperatorsModel> FestivalOperators = new List<OperatorsModel>
+    {
+        new OperatorsModel { Value = "in", Text = "In" }
+    };
+
+    List<OperatorsModel> InOnlyOperator  = new List<OperatorsModel>
+    {
+        new OperatorsModel { Value = "in", Text = "In" }
+    };
+
+    List<object> FestivalValues = new List<object> { 2019, 2020, 2021, 2022, 2023 }.OrderBy(x => x).ToList();
+    List<object> RoleValues = new List<object> { "Vrijwilliger", "Bezoeker", "Sponsor", "Organisatie" }.OrderBy(x => x).ToList();
 }

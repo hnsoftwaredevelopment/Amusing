@@ -987,7 +987,7 @@ public static class QueryDefinitions
     public static readonly string GetAllActivePersonsByGroupId = @"
         SELECT 
 	        rol.persoon_id AS PersonId,
-            CONCAT_WS(' ', per.voornaam, per.NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Name,
+            CONCAT_WS(' ', per.voornaam, NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Name,
 	        per.email AS Email,
 	        per.actief  AS Active,
 	        rol.zanggroep_id AS GroupId,

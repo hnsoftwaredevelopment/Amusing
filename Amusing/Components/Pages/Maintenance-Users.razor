@@ -238,6 +238,8 @@ else
             Users = await UserService.GetAllUsersAsync();
             await Task.Delay( 50 );
             await GridRef.Refresh();
+            await UpdateVisibleRowCountAsync();
+
 
             // Search the modified record
             var index = Users.FindIndex(s => s.UserId == savedId);
@@ -297,6 +299,7 @@ else
         Users = await UserService.GetAllUsersAsync();
         await Task.Delay( 50 );
         await GridRef.Refresh();
+        await UpdateVisibleRowCountAsync();
     }
     private List<UserRoles> Roles = 
     [
