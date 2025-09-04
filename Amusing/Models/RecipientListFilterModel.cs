@@ -14,7 +14,7 @@ public class RecipientListFilterModel
     public int GroupId { get; set; }
     public string GroupName { get; set; } = string.Empty;
     public int FestivalId { get; set; }
-    public int Festival { get; set; }
+    public string Festival { get; set; }
     public string StageType { get; set; } = string.Empty;
     public bool Subscribed { get; set; }
     public bool Canceled { get; set; }

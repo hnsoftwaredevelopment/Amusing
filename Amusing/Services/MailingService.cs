@@ -14,6 +14,18 @@ public class MailingService( GenericDataService dataService )
         Persons
     }
 
+    public async Task<List<string>> GetFestivalListAsync()
+    {
+        List<EditionModel> _editions = await _dataService.ExecuteQueryAsync( QueryDefinitions.GetEditionsList,
+    reader => new EditionModel
+    {
+        Festival = reader [ "Festival" ].ToString(),
+    } );
+
+        return [ .. _editions.Select( e => e.Festival ) ];
+    }
+
+
     public Task<List<RecipientListModel>> GetRecipientListsAsync()
     {
         return _dataService.ExecuteQueryAsync(
@@ -46,22 +58,18 @@ public class MailingService( GenericDataService dataService )
     public Task<List<RecipientListFilterModel>> GetAllRecipientsAsync()
     {
         return _dataService.ExecuteQueryAsync(
-            QueryDefinitions.GetRecipentsList, // Zorg dat je hier je MySQL query in QueryDefinitions hebt staan
+            QueryDefinitions.GetFullPersonsList, // Zorg dat je hier je MySQL query in QueryDefinitions hebt staan
             reader => new RecipientListFilterModel
             {
-                PersonId = Convert.ToInt32( reader [ "PersonId" ] ),
                 Firstname = reader [ "Firstname" ].ToString() ?? string.Empty,
-                Infix = reader [ "Infix" ].ToString() ?? string.Empty,
                 Lastname = reader [ "Lastname" ].ToString() ?? string.Empty,
                 Name = reader [ "Name" ].ToString() ?? string.Empty,
                 Email = reader [ "Email" ].ToString() ?? string.Empty,
                 Infomailing = Convert.ToBoolean( reader [ "Infomailing" ] ),
                 Active = Convert.ToBoolean( reader [ "Active" ] ),
                 Role = reader [ "Role" ].ToString() ?? string.Empty,
-                GroupId = Convert.ToInt32( reader [ "GroupId" ] ),
                 GroupName = reader [ "GroupName" ].ToString() ?? string.Empty,
-                FestivalId = Convert.ToInt32( reader [ "FestivalId" ] ),
-                Festival = Convert.ToInt32( reader [ "Festival" ] ),
+                Festival = reader [ "Festival" ].ToString(),
                 StageType = reader [ "StageType" ].ToString() ?? string.Empty,
                 Subscribed = Convert.ToBoolean( reader [ "Subscribed" ] ),
                 Canceled = Convert.ToBoolean( reader [ "Canceled" ] ),

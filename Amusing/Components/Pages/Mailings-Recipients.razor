@@ -44,67 +44,21 @@ else
             else
             {
                 <h5>Personen</h5>
-                <SfQueryBuilder TValue="RecipientListFilterModel" DataSource="@RecipientsFilterList" MaxGroupCount="0">
-                    <QueryBuilderRule Condition="and" Rules="@Rules"/>
+                <SfQueryBuilder TValue="RuleModel" @ref="queryBuilder" Width="100%">
                     <QueryBuilderColumns>
-                        <QueryBuilderColumn 
-                            Field="Festival" 
-                            Label="Editie" 
-                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Number"
-                            Operators="@InOnlyOperator">
-                            <QueryBuilderTemplates>
-                                <ValueTemplate Context="rule">
-                                    @{
-                                        var selected = rule.Value as double?[] ?? Array.Empty<double?>();
-                                    }
-                                    <SfMultiSelect TItem="double?" TValue="double?[]"
-                                                   DataSource="@FestivalValues" @* ← gesorteerde lijst *@
-                                                   Placeholder="Kies editie(s)"
-                                                   AllowFiltering="true"
-                                                   Mode="VisualMode.CheckBox"
-                                                   ShowSelectAll="true"
-                                                   @bind-Value="selected">
-                                        <MultiSelectEvents TItem="double" TValue="double[]"
-                                                           Created="e => EnsureIn(rule, Syncfusion.Blazor.QueryBuilder.ColumnType.Number)"
-                                                           ValueChange="args => rule.Value = args.Value" />
-                                    </SfMultiSelect>
-                                </ValueTemplate>
-                            </QueryBuilderTemplates>
-                            </QueryBuilderColumn>
-
-                        <QueryBuilderColumn 
-                            Field="Role" 
-                            Label="Persoon met de role van..." 
-                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String"
-                            Operators="@InOnlyOperator">
-                            <QueryBuilderTemplates>
-                                <ValueTemplate Context="rule">
-                                    @{
-                                        var selected = rule.Value as string[] ?? Array.Empty<string>();
-                                    }
-                                    <SfMultiSelect TItem="string" TValue="string[]"
-                                                   DataSource="@RoleValues" @* ← gesorteerde lijst *@
-                                                   Placeholder="Kies rol(len)"
-                                                   AllowFiltering="true"
-                                                   Mode="VisualMode.CheckBox"
-                                                   ShowSelectAll="true"
-                                                   @bind-Value="selected">
-                                        <MultiSelectEvents TItem="string" TValue="string[]"
-                                                           Created="e => EnsureIn(rule, Syncfusion.Blazor.QueryBuilder.ColumnType.String)"
-                                                           ValueChange="args => rule.Value = args.Value" />
-                                    </SfMultiSelect>
-                                </ValueTemplate>
-                            </QueryBuilderTemplates>
-                        </QueryBuilderColumn>
-
-                        <QueryBuilderColumn 
-                            Field="Infomailing" 
-                            Label="Infomailing" 
-                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
-                            Values="@YesNoValues" />
+                        <QueryBuilderColumn Field="Festival" Label="Groep is ingeschreven voor ..." Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String" Operators="@InOnlyOperator" Values="@FestivalValues" />
+                        <QueryBuilderColumn Field="IsPaid" Label="Groep heeft betaald" Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" Operators="EqualOnlyOperator" />
+                        <QueryBuilderColumn Field="IsCanceled" Label="Groep is afgehaakt" Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" Operators="EqualOnlyOperator" />
+                        <QueryBuilderColumn Field="Dressingroom" Label="Groep wil kleedkamer" Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" Operators="EqualOnlyOperator" />
+                        <QueryBuilderColumn Field="Jury" Label="Groep wil beoordeling" Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" Operators="EqualOnlyOperator" />
+                        <QueryBuilderColumn Field="Singers" Label="Aantal zangers" Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Number"/>
+                        <QueryBuilderColumn Field="Role" Label="Personen met de rol..." Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String" Operators="@InOnlyOperator" Values="@PersonRoles" />
+                        <QueryBuilderColumn Field="Volunteer" Label="Persoon is vrijwilliger" Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" Operators="@EqualOnlyOperator" />
+                        <QueryBuilderColumn Field="Infomailing" Label="Persoon wil Infomailing" Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" Operators="@EqualOnlyOperator" />
                     </QueryBuilderColumns>
                 </SfQueryBuilder>
 
+                <button class="btn btn-primary" @onclick="GenerateMailList">Genereer maillijst</button>
             }
 
             <!-- Toolbar -->
@@ -175,31 +129,6 @@ else
                     </GridColumns>
                 </SfGrid>
             </div>
-            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
-                <SfGrid @ref="GridRefReceipts" TValue="RecipientListFilterModel" DataSource="RecipientsFilterList">
-                    <GridColumns>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.PersonId)" HeaderText="PersonId"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.Firstname)" HeaderText="Firstname"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.Infix)" HeaderText="Infix"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.Lastname)" HeaderText="Lastname"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.Name)" HeaderText="Name"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.Email)" HeaderText="Email"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.Infomailing)" HeaderText="Infomailing"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.Active)" HeaderText="Active"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.Role)" HeaderText="Role"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.GroupId)" HeaderText="Group ID"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.GroupName)" HeaderText="Group Name"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.FestivalId)" HeaderText="Festival ID"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.Festival)" HeaderText="Festival Year"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.StageType)" HeaderText="Stage Type"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.Subscribed)" HeaderText="Subscribed"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.Canceled)" HeaderText="Canceled"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.Payed)" HeaderText="Payed"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.Confirmed)" HeaderText="Confirmed"/>
-                        <GridColumn Field="@nameof(RecipientListFilterModel.Singers)" HeaderText="Singers"/>
-                    </GridColumns>
-                </SfGrid>
-            </div>
         </div>
     </div>
 }
@@ -219,9 +148,13 @@ else
     private string FileName = "Mailing lijsten";
     private string SourceChecked = "groups";
     private string[] YesNoValues = new string[] { "Ja", "Nee" };
+    //private SfQueryBuilder<RecipientListFilterModel> PersonQueryBuilder;
     private SfQueryBuilder<RecipientListFilterModel> PersonQueryBuilder;
     private string GeneratedSql = string.Empty;
-    private SfQueryBuilder<RecipientListFilterModel> QB { get; set; }
+    //private SfQueryBuilder<RecipientListFilterModel> QB { get; set; }
+    private List<string> FestivalValues { get; set; } = new();
+    private List<string> RoleValues { get; set; } = new();
+    private SfQueryBuilder<RuleModel> queryBuilder;
 
 
     protected override async Task OnInitializedAsync()
@@ -229,10 +162,11 @@ else
         IsLoading = true;
 
         RecipientsList = await MailingService.GetRecipientListsAsync();
-        RecipientsFilterList = await MailingService.GetAllRecipientsAsync();
 
         SelectedRecipientsList = RecipientsList.FirstOrDefault();
         editContext = new EditContext( SelectedRecipientsList );
+
+        FestivalValues = await MailingService.GetFestivalListAsync();
 
         IsLoading = false;
     }
@@ -349,37 +283,26 @@ else
         };
     }
 
-    private List<PersonRole> PersonRoles = new()
-    {
-        new PersonRole { Id = "contactpersoon1", Name = "Contactpersoon 1" },
-        new PersonRole { Id = "contactpersoon2", Name = "Contactpersoon 2" },
-        new PersonRole { Id = "dirigent",        Name = "Dirigent" },
-        new PersonRole { Id = "muzikant",        Name = "Muzikant" },
-        new PersonRole { Id = "penningmeester",  Name = "Penningmeester" },
-        new PersonRole { Id = "zanger",          Name = "Zanger" }
-    };
+    private List<string> PersonRoles = new() { "contactpersoon1", "contactpersoon2", "dirigent", "muzikant", "penningmeester", "zanger" };
 
-    List<RuleModel> Rules = new List<RuleModel>()
-    {
-        new RuleModel { Field = "Festival",    Operator = "in", Type = "Number",  Value = Array.Empty<double?>() },
-        new RuleModel { Field = "Role",        Operator = "in", Type = "String",  Value = Array.Empty<string>() },
-        new RuleModel { Field = "Infomailing", Operator = "equal", Type = "Boolean", Value = null }
 
-    };
+    // private List<PersonRole> PersonRoles = new()
+    // {
+    //     new PersonRole { Id = "contactpersoon1", Name = "Contactpersoon 1" },
+    //     new PersonRole { Id = "contactpersoon2", Name = "Contactpersoon 2" },
+    //     new PersonRole { Id = "dirigent",        Name = "Dirigent" },
+    //     new PersonRole { Id = "muzikant",        Name = "Muzikant" },
+    //     new PersonRole { Id = "penningmeester",  Name = "Penningmeester" },
+    //     new PersonRole { Id = "zanger",          Name = "Zanger" }
+    // };
 
-    private IEnumerable<double?> FestivalValues =>
-        RecipientsFilterList
-            .Select( r => (double?)r.Festival )
-            .Where( y => y != 0 )
-            .Distinct()
-            .OrderBy( y => y );
+    // List<RuleModel> Rules = new List<RuleModel>()
+    // {
+    //     new RuleModel { Field = "Festival",    Operator = "in", Type = "String",  Value = Array.Empty<string>() },
+    //     new RuleModel { Field = "Role",        Operator = "in", Type = "String",  Value = Array.Empty<string>() },
+    //     new RuleModel { Field = "Infomailing", Operator = "equal", Type = "Boolean", Value = null }
 
-    private IEnumerable<string> RoleValues =>
-        RecipientsFilterList
-            .Select( r => r.Role )
-            .Where( s => !string.IsNullOrWhiteSpace( s ) )
-            .Distinct( StringComparer.OrdinalIgnoreCase )
-            .OrderBy( s => s, StringComparer.OrdinalIgnoreCase );
+    // };
 
     private void EnsureIn( RuleModel rule, Syncfusion.Blazor.QueryBuilder.ColumnType type )
     {
@@ -387,13 +310,28 @@ else
         rule.Type = type.ToString(); // "Number" of "String"
     }
 
-    List<OperatorsModel> FestivalOperators = new List<OperatorsModel>
-    {
-        new OperatorsModel { Value = "in", Text = "In" }
-    };
-
     List<OperatorsModel> InOnlyOperator  = new List<OperatorsModel>
     {
         new OperatorsModel { Value = "in", Text = "In" }
     };
+
+    List<OperatorsModel> EqualOnlyOperator  = new List<OperatorsModel>
+    {
+        new OperatorsModel { Value = "equal", Text = "Equal" }
+    };
+
+    private async Task GenerateMailList()
+    {
+        var rules = queryBuilder.GetRules();
+
+        string queryType = "GetFullPersonsList";
+
+        // Bepaal welke query te gebruiken
+        if ( rules.Rules.Any( r => r.Field == "Role" ) )
+            queryType = "GetPersonsWithRoleList";
+        if ( rules.Rules.Any( r => r.Field == "Festival" ) )
+            queryType = "GetPersonsWithRoleList";
+
+        
+    }
 }

@@ -6,6 +6,8 @@ public static class QueryDefinitions
 {
     public static readonly string GetEditions = @"
         SELECT festival_id, festivaldatum FROM ah_festivals ORDER BY festivaldatum DESC";
+    public static readonly string GetEditionsList = @"
+    SELECT YEAR(festivaldatum) AS Festival FROM ah_festivals ORDER BY YEAR(festivaldatum) DESC";
     public static readonly string GetNewsletterEmailAddresses = @"
         SELECT DISTINCT  
             grp.naam AS Groep,
@@ -1197,33 +1199,91 @@ public static class QueryDefinitions
     public static readonly string DeleteUserByUserId = @"
         DELETE FROM ah_beheer 
         WHERE user_id = @UserId;";
-    public static readonly string GetRecipentsList = @"
-        SELECT DISTINCT 
-             per.persoon_id AS PersonId, 
-             per.voornaam AS Firstname,
-             per.tussenvoegsel AS Infix,
-             per.achternaam AS Lastname,
-             CONCAT_WS(' ', per.voornaam, NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Name,
-             per.email AS Email,
-             per.infomailing AS Infomailing,
-             per.actief AS Active,
-             rol.rol AS Role,
-             rol.zanggroep_id AS GroupId,
-             grp.naam AS GroupName,
-             fes.festival_id AS FestivalId,
-             YEAR(fes.festivaldatum) AS Festival,
-             sub.podiumsoort AS StageType,
-             IF(sub.ingeschreven IS NOT NULL, 1, 0) AS Subscribed,
-             IF(sub.afgehaakt IS NOT NULL, 1, 0) AS Canceled,
-             IF(sub.betaald IS NOT NULL, 1, 0) AS Payed,
-             IF(sub.bevestigd IS NOT NULL, 1, 0) AS Confirmed,
-             sub.aantal_deelnemers AS Singers
+    public static readonly string GetPersonsList = @"
+    SELECT  
+     per.voornaam AS Firstname,
+     CONCAT_WS(' ', NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Lastname,
+     CONCAT_WS(' ', per.voornaam, NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Name,
+     per.email AS Email,
+     per.infomailing AS Infomailing,
+     per.actief AS Active
+    FROM amusing.ah_personen per
+    WHERE per.email IS NOT NULL;
+    ";
+    public static readonly string GetPersonsWithRoleList = @"
+        SELECT  
+	        per.voornaam AS Firstname,
+	        CONCAT_WS(' ', NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Lastname,
+	        CONCAT_WS(' ', per.voornaam, NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Name,
+	        per.email AS Email,
+	        per.infomailing AS Infomailing,
+	        per.actief AS Active,
+	        rol.rol AS ROLE
         FROM amusing.ah_personen per
-        JOIN amusing.ah_personen_rollen rol ON per.persoon_id = rol.persoon_id
-        JOIN amusing.ah_zanggroepen grp ON rol.zanggroep_id = grp.zanggroep_id 
-        JOIN amusing.ah_inschrijvingen sub ON grp.zanggroep_id = sub.zanggroep_id 
-        JOIN amusing.ah_festivals fes ON sub.festival_id  = fes.festival_id  
-        WHERE per.email IS NOT NULL;";
+        LEFT JOIN amusing.ah_personen_rollen rol ON per.persoon_id = rol.persoon_id
+        WHERE per.email IS NOT NULL;
+        ";
+    public static readonly string GetPersonsWithRoleAndGroupList = @"
+        SELECT  
+	        per.voornaam AS Firstname,
+	        CONCAT_WS(' ', NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Lastname,
+	        CONCAT_WS(' ', per.voornaam, NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Name,
+	        per.email AS Email,
+	        per.infomailing AS Infomailing,
+	        per.actief AS Active,
+	        rol.rol AS ROLE,
+	        grp.naam AS GroupName
+        FROM amusing.ah_personen per
+        LEFT JOIN amusing.ah_personen_rollen rol ON per.persoon_id = rol.persoon_id
+        LEFT JOIN amusing.ah_zanggroepen grp ON rol.zanggroep_id = grp.zanggroep_id
+        WHERE per.email IS NOT NULL;
+        ";
+    public static readonly string GetPersonsWithRoleAndGroupAndSubscriptionList = @"
+        SELECT  
+	        per.voornaam AS Firstname,
+	        CONCAT_WS(' ', NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Lastname,
+	        CONCAT_WS(' ', per.voornaam, NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Name,
+	        per.email AS Email,
+	        per.infomailing AS Infomailing,
+	        per.actief AS Active,
+	        rol.rol AS ROLE,
+	        grp.naam AS GroupName,
+	        sub.podiumsoort AS StageType,
+	        IF(sub.ingeschreven IS NOT NULL, 1, 0) AS Subscribed,
+	        IF(sub.afgehaakt IS NOT NULL, 1, 0) AS Canceled,
+	        IF(sub.betaald IS NOT NULL, 1, 0) AS Payed,
+	        IF(sub.bevestigd IS NOT NULL, 1, 0) AS Confirmed,
+	        sub.aantal_deelnemers AS Singers
+        FROM amusing.ah_personen per
+        LEFT JOIN amusing.ah_personen_rollen rol ON per.persoon_id = rol.persoon_id
+        LEFT JOIN amusing.ah_zanggroepen grp ON rol.zanggroep_id = grp.zanggroep_id
+        LEFT JOIN amusing.ah_inschrijvingen sub ON grp.zanggroep_id = sub.zanggroep_id
+        WHERE per.email IS NOT NULL;
+        ";
+    public static readonly string GetFullPersonsList = @"
+        SELECT  
+	        per.voornaam AS Firstname,
+	        CONCAT_WS(' ', NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Lastname,
+	        CONCAT_WS(' ', per.voornaam, NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Name,
+	        per.email AS Email,
+	        per.infomailing AS Infomailing,
+	        per.actief AS Active,
+	        rol.rol AS ROLE,
+	        grp.naam AS GroupName,
+	        YEAR(fes.festivaldatum) AS Festival,
+	        sub.podiumsoort AS StageType,
+	        IF(sub.ingeschreven IS NOT NULL, 1, 0) AS Subscribed,
+	        IF(sub.afgehaakt IS NOT NULL, 1, 0) AS Canceled,
+	        IF(sub.betaald IS NOT NULL, 1, 0) AS Payed,
+	        IF(sub.bevestigd IS NOT NULL, 1, 0) AS Confirmed,
+	        sub.aantal_deelnemers AS Singers
+        FROM amusing.ah_personen per
+        LEFT JOIN amusing.ah_personen_rollen rol ON per.persoon_id = rol.persoon_id
+        LEFT JOIN amusing.ah_zanggroepen grp ON rol.zanggroep_id = grp.zanggroep_id
+        LEFT JOIN amusing.ah_inschrijvingen sub ON grp.zanggroep_id = sub.zanggroep_id
+        LEFT JOIN amusing.ah_festivals fes ON sub.festival_id  = fes.festival_id 
+        WHERE per.email IS NOT NULL;
+        ";
     public static readonly string GetAllRecipientLists = @"
         SELECT 
 	        id 		AS ListId,
