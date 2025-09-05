@@ -16,13 +16,10 @@ public class MailingService( GenericDataService dataService )
 
     public async Task<List<string>> GetFestivalListAsync()
     {
-        List<EditionModel> _editions = await _dataService.ExecuteQueryAsync( QueryDefinitions.GetEditionsList,
-    reader => new EditionModel
-    {
-        Festival = reader [ "Festival" ].ToString(),
-    } );
-
-        return [ .. _editions.Select( e => e.Festival ) ];
+        return await _dataService.ExecuteQueryAsync(
+        QueryDefinitions.GetEditionsList,
+        reader => reader [ "Festival" ].ToString()!
+    );
     }
 
 
