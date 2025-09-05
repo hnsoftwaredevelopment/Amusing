@@ -1276,12 +1276,20 @@ public static class QueryDefinitions
 	        IF(sub.afgehaakt IS NOT NULL, 1, 0) AS Canceled,
 	        IF(sub.betaald IS NOT NULL, 1, 0) AS Payed,
 	        IF(sub.bevestigd IS NOT NULL, 1, 0) AS Confirmed,
-	        sub.aantal_deelnemers AS Singers
+	        sub.aantal_deelnemers AS Singers,
+	        IF(vol.persoon_id IS NOT NULL, 1, 0) AS Volunteer
         FROM amusing.ah_personen per
-        LEFT JOIN amusing.ah_personen_rollen rol ON per.persoon_id = rol.persoon_id
-        LEFT JOIN amusing.ah_zanggroepen grp ON rol.zanggroep_id = grp.zanggroep_id
-        LEFT JOIN amusing.ah_inschrijvingen sub ON grp.zanggroep_id = sub.zanggroep_id
-        LEFT JOIN amusing.ah_festivals fes ON sub.festival_id  = fes.festival_id 
+        LEFT JOIN amusing.ah_personen_rollen rol 
+	        ON per.persoon_id = rol.persoon_id
+        LEFT JOIN amusing.ah_zanggroepen grp 
+	        ON rol.zanggroep_id = grp.zanggroep_id
+        LEFT JOIN amusing.ah_inschrijvingen sub 
+	        ON grp.zanggroep_id = sub.zanggroep_id
+        LEFT JOIN amusing.ah_festivals fes 
+	        ON sub.festival_id  = fes.festival_id
+        LEFT JOIN amusing.ah_vrijwilligers vol
+            ON per.persoon_id = vol.persoon_id 
+	        AND fes.festival_id = vol.festival_id	
         WHERE per.email IS NOT NULL;
         ";
     public static readonly string GetAllRecipientLists = @"
