@@ -44,25 +44,64 @@ else
             else
             {
                 <h5>Personen</h5>
-                <SfQueryBuilder TValue="RuleModel" @ref="queryBuilder" Width="1000%">
-                    <QueryBuilderEvents TValue="RuleModel" Changed="OnRuleChanged" />
+                <SfQueryBuilder TValue="RuleModel" @ref="queryBuilder" Width="80%" MaxGroupCount="0">
+                    <QueryBuilderEvents TValue="RuleModel" Changed="OnQueryChanged" />
                     <QueryBuilderColumns>
-                        <QueryBuilderColumn Field="Festival" Label="Groep is ingeschreven voor ..." Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String" Values="@FestivalValues" Operators="@InOnlyOperator" />
-                        <QueryBuilderColumn Field="IsPaid" Label="Groep heeft betaald" Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" Operators="EqualOnlyOperator" />
-                        <QueryBuilderColumn Field="IsCanceled" Label="Groep is afgehaakt" Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" Operators="EqualOnlyOperator" />
-                        <QueryBuilderColumn Field="Dressingroom" Label="Groep wil kleedkamer" Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" Operators="EqualOnlyOperator" />
-                        <QueryBuilderColumn Field="Jury" Label="Groep wil beoordeling" Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" Operators="EqualOnlyOperator" />
-                        <QueryBuilderColumn Field="Singers" Label="Aantal zangers" Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Number" Operators="NumberOperator" />
-                        <QueryBuilderColumn Field="Role" Label="Personen met de rol..." Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String" Values="@PersonRoles" />
-                        <QueryBuilderColumn Field="Infomailing" Label="Persoon wil Infomailing" Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" Operators="EqualOnlyOperator" />
+                        <QueryBuilderColumn 
+                            Field="Festival" 
+                            Label="Groep is ingeschreven voor ..." 
+                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String" 
+                            Values="@FestivalValues"
+                            Operators="@(new List<OperatorsModel> {new OperatorsModel { Value="in", Text="Bevat" } } )" />
+                        <QueryBuilderColumn 
+                            Field="IsPaid" 
+                            Label="Groep heeft betaald" 
+                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
+                            Operators="EqualOnlyOperator" />
+                        <QueryBuilderColumn 
+                            Field="IsCanceled" 
+                            Label="Groep is afgehaakt" 
+                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
+                            Operators="EqualOnlyOperator" />
+                        <QueryBuilderColumn 
+                            Field="Dressingroom" 
+                            Label="Groep wil kleedkamer" 
+                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
+                            Operators="EqualOnlyOperator" />
+                        <QueryBuilderColumn 
+                            Field="Jury" 
+                            Label="Groep wil beoordeling" 
+                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
+                            Operators="EqualOnlyOperator" />
+                        <QueryBuilderColumn 
+                            Field="Singers" 
+                            Label="Aantal zangers" 
+                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Number" 
+                            Operators="NumberOperator" />
+                        <QueryBuilderColumn 
+                            Field="Role" 
+                            Label="Personen met de rol..." 
+                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String" 
+                            Values="@PersonRoles"
+                            Operators="@(new List<OperatorsModel> {new OperatorsModel { Value="in", Text="Bevat" } } )" />
+                        <QueryBuilderColumn 
+                            Field="Infomailing" 
+                            Label="Persoon wil Infomailing" 
+                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
+                            Operators="EqualOnlyOperator" />
                         @if ( FestivalSelected )
                         {
-                            <QueryBuilderColumn Field="Volunteer" Label="Persoon is vrijwilliger" Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" Operators="EqualOnlyOperator" />
+                            <QueryBuilderColumn 
+                                Field="Volunteer" 
+                                Label="Persoon is vrijwilliger voor festival..." 
+                                Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String"
+                                Values="@FestivalValues"
+                                Operators="@(new List<OperatorsModel> {new OperatorsModel { Value="in", Text="Bevat" } } )" />
                         }
                     </QueryBuilderColumns>
                 </SfQueryBuilder>
 
-                <button class="btn btn-primary" @onclick="GenerateMailList">Genereer maillijst</button>
+                <button class="btn btn-primary" @onclick="GenerateJson">Genereer maillijst</button>
             }
 
             <!-- Toolbar -->
@@ -143,6 +182,8 @@ else
     private bool FestivalSelected = false;
     private bool IsLoading = false;
     private bool RoleSelected = false;
+    private bool rulesPending;
+    private string? pendingRulesJson;
     private EditContext? editContext;
     private int VisibleRowCount = 0;
     private List<RecipientListFilterModel> RecipientsFilterList = [];
@@ -155,11 +196,14 @@ else
     private SfQueryBuilder<RuleModel> queryBuilder;
     private SfToast ToastObj;
     private List<string> PersonRoles = new() { "contactpersoon1", "contactpersoon2", "dirigent", "muzikant", "penningmeester", "zanger" };
-
+    private static readonly string[] InFields = { "Festival", "Role", "Volunteer" };
     private string FileName = "Mailing lijsten";
     private string GeneratedSql = string.Empty;
     private string SourceChecked = "groups";
     private string[] YesNoValues = new string[] { "Ja", "Nee" };
+    private string GeneratedJson = string.Empty;
+    private string OldJson = string.Empty;
+    private string[] LastSelectedFestivals = Array.Empty<string>(); // For autoselect the Festivals for Volunteers
 
     protected override async Task OnInitializedAsync()
     {
@@ -171,6 +215,17 @@ else
         editContext = new EditContext( SelectedRecipientsList );
 
         FestivalValues = await MailingService.GetFestivalListAsync();
+
+        // Safety: fix all "in" fields so Value is always a string[]
+        var rules = queryBuilder?.GetRules()?.Rules;
+        if (rules != null)
+        {
+            foreach (var rule in rules.Where(r =>
+                InFields.Contains(r.Field) && r.Operator == "in"))
+            {
+                rule.Value ??= Array.Empty<string>();
+            }
+        }
 
         IsLoading = false;
     }
@@ -185,7 +240,7 @@ else
         }
     }
 
-    private void OnRowSelected( RowSelectEventArgs<RecipientListModel> args )
+    private async Task OnRowSelected( RowSelectEventArgs<RecipientListModel> args )
     {
         SelectedRecipientsList = args.Data;
         editContext = new EditContext( SelectedRecipientsList );
@@ -195,7 +250,25 @@ else
             MailingService.RecipientListSource.Persons => "persons",
             _                                          => string.Empty
         };
+        
+        // Convert to new JSON and keep it in memory
+        pendingRulesJson = QueryBuilderJsonConverter.OldToNew(SelectedRecipientsList.ListFilter);
+        rulesPending = true;
+
         StateHasChanged();
+    }
+
+    // Set  the rules of the selected recipientlist
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (rulesPending && queryBuilder is not null && pendingRulesJson is not null)
+        {
+            var rule = JsonSerializer.Deserialize<RuleModel>(pendingRulesJson);
+            queryBuilder.SetRules(new List<RuleModel> { rule });
+
+            rulesPending = false;
+            pendingRulesJson = null;
+        }
     }
 
     private async Task UpdateVisibleRowCountAsync()
@@ -275,6 +348,32 @@ else
         await GridRef.Refresh();
     }
 
+    private void GenerateJson()
+    {
+        var rules = queryBuilder.GetRules();
+        // Force condition to "and", ignore OR
+        ForceAndCondition(rules);
+
+        // Serialize to JSON
+        GeneratedJson = JsonSerializer.Serialize(rules, new JsonSerializerOptions { WriteIndented = true });
+
+        // Generate Old JSON string for backwards compatibility
+        OldJson = QueryBuilderJsonConverter.NewToOld(GeneratedJson);
+    }
+
+    // Recursieve helper to set all nested RuleSets to "and"
+    private void ForceAndCondition(RuleModel rule)
+    {
+        if (rule.Rules != null)
+        {
+            rule.Condition = "and";
+            foreach (var r in rule.Rules)
+            {
+                ForceAndCondition(r);
+            }
+        }
+    }
+
     private void onSourceChange( Microsoft.AspNetCore.Components.ChangeEventArgs args )
     {
         var value = args.Value?.ToString() ?? string.Empty;
@@ -299,7 +398,7 @@ else
     // };
 
     List<string> InOnlyOperator = new List<string> { "in" };
-    
+
     List<OperatorsModel> EqualOnlyOperator  = new List<OperatorsModel>
     {
         new OperatorsModel { Value = "equal", Text = "Is gelijk aan" }
@@ -329,25 +428,51 @@ else
     //     FestivalSelected = rules?.Any( r => r.Field == "Festival" ) ?? false;
     // }
 
-    private void OnRuleChanged( Syncfusion.Blazor.QueryBuilder.ChangeEventArgs args )
+    private void OnQueryChanged(Syncfusion.Blazor.QueryBuilder.ChangeEventArgs args)
     {
-        if ( args.Value == "Festival")
+        var rootRules = queryBuilder.GetRules();
+
+        if (rootRules == null || rootRules.Rules == null || !rootRules.Rules.Any())
         {
-            UpdateContent();}
+            // Query nog niet compleet, niks doen
+            GeneratedJson = "Nog geen complete query...";
+            return;
+        }
+
+        foreach (var rule in rootRules.Rules)
+        {
+            if ((rule.Field == "Festival" || rule.Field == "Role" || rule.Field == "Volunteer")
+                && rule.Operator == "in")
+            {
+                switch (rule.Value)
+                {
+                    case string s:
+                        // convert single string into an array
+                        rule.Value = new string[] { s };
+                        break;
+
+                    case null:
+                        // ensure we have an empty array instead of null
+                        rule.Value = Array.Empty<string>();
+                        break;
+                }
+            }
+        }
+
+        try
+        {
+            // Serialize to JSON
+            GeneratedJson = JsonSerializer.Serialize(rootRules, new JsonSerializerOptions { WriteIndented = true });
+            OldJson = QueryBuilderJsonConverter.NewToOld(GeneratedJson);
+        }
+        catch (Exception ex)
+        {
+            GeneratedJson = $"Error: {ex.Message}";
+        }
+
+        // Alleen boolean gebruiken om te bepalen of festival geselecteerd is
+        FestivalSelected = rootRules.Rules.Any(r => r.Field == "Festival" && r.Value is string[] arr && arr.Length > 0);
     }
-
-    private void UpdateContent()
-    {
-        var rules = queryBuilder?.GetRules()?.Rules;
-        FestivalSelected = rules?.Any( r => r.Field == "Festival" ) ?? false;
-    }
-
-    // private void OnRuleChanged( Syncfusion.Blazor.QueryBuilder.ChangeEventArgs args )
-    // {
-    //     var rules = queryBuilder?.GetRules()?.Rules;
-
-    //     FestivalSelected = rules?.Any( r => r.Field == "Festival" ) ?? false;
-    // }
 
     private async Task GenerateMailList()
     {

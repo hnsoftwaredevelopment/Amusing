@@ -1,0 +1,4 @@
+﻿/* Hide the AND/OR selection of Querybuilder */
+.sfquerybuilder .e-lib.e-btn-group {
+    display: none !important;
+}
