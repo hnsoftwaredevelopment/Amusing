@@ -241,22 +241,25 @@ else
         }
     }
 
-    private async Task OnRowSelected( RowSelectEventArgs<RecipientListModel> args )
+    private async Task OnRowSelected(RowSelectEventArgs<RecipientListModel> args)
     {
         SelectedRecipientsList = args.Data;
-        editContext = new EditContext( SelectedRecipientsList );
+        editContext = new EditContext(SelectedRecipientsList);
+
         SourceChecked = SelectedRecipientsList.ListSource switch
         {
-            MailingService.RecipientListSource.Groups  => "groups",
+            MailingService.RecipientListSource.Groups => "groups",
             MailingService.RecipientListSource.Persons => "persons",
-            _                                          => string.Empty
+            _ => string.Empty
         };
 
-        // Convert to new JSON and keep it in memory
-        pendingRulesJson = QueryBuilderJsonConverter.OldToNew(SelectedRecipientsList.ListFilter);
+        // Convert old JSON naar nieuwe QueryBuilder regels
+        string convertedJson = QueryBuilderJsonConverter.OldToNew(SelectedRecipientsList.ListFilter);
+
+        // Laad regels in de QueryBuilder
+        QueryBuilderJsonConverter.LoadRulesFromJson(queryBuilder, convertedJson);
 
         rulesPending = true;
-
         await InvokeAsync(StateHasChanged);
     }
 
@@ -265,47 +268,30 @@ else
     {
         if (rulesPending && queryBuilder is not null && !string.IsNullOrEmpty(pendingRulesJson))
         {
-            LoadRulesFromJson(pendingRulesJson);
+            QueryBuilderJsonConverter.LoadRulesFromJson(queryBuilder, pendingRulesJson);
             rulesPending = false;
             pendingRulesJson = null;
             await InvokeAsync(StateHasChanged);
         }
     }
-    private void LoadRulesFromJson(string json)
+    
+    public static void LoadRulesFromJson(SfQueryBuilder<RuleModel> queryBuilder, string json)
     {
         try
         {
-            var root = JsonSerializer.Deserialize<Syncfusion.Blazor.QueryBuilder.RuleModel>(json);
-            if (root != null)
+            var rulesList = JsonSerializer.Deserialize<List<RuleModel>>(json);
+            if (rulesList != null)
             {
-                // Pass the entire structure as a single root element
-                queryBuilder.SetRules(root.Rules ?? new List<Syncfusion.Blazor.QueryBuilder.RuleModel>());
+                queryBuilder.SetRules(rulesList);
                 return;
             }
         }
         catch
         {
-            // Do nothing, just load empty rules
+            // fallback: lege lijst
         }
 
-        try
-        {
-
-            // Fallback: try JSON as a list of RuleModel
-            var list = JsonSerializer.Deserialize<List<Syncfusion.Blazor.QueryBuilder.RuleModel>>(json);
-            if (list != null)
-            {
-                queryBuilder.SetRules(list); // ✅ Dit werkt nu
-                return;
-            }
-        }
-        catch
-        {
-            // Do nothing, just load empty rules
-        }
-        
-        // Safe fallback: set empty rules
-        queryBuilder.SetRules(new List<Syncfusion.Blazor.QueryBuilder.RuleModel>());
+        queryBuilder.SetRules(new List<RuleModel>());
     }
 
     private async Task UpdateVisibleRowCountAsync()
@@ -331,7 +317,15 @@ else
     {
         if ( SelectedRecipientsList is null )
             return;
+        
+        if (SelectedRecipientsList != null && queryBuilder != null)
+        {
+            // Convert naar oud JSON formaat
+            SelectedRecipientsList.ListFilter = QueryBuilderJsonConverter.NewToOld(queryBuilder);
 
+            // Save via je service
+            //await MailingService.SaveRecipientListAsync(SelectedRecipientsList);
+        }
         if ( SelectedRecipientsList.ListId != 0 )
         {
             //await MailingService.UpdateRecipientsListAsync( SelectedRecipientsList );
@@ -395,7 +389,7 @@ else
         GeneratedJson = JsonSerializer.Serialize(rules, new JsonSerializerOptions { WriteIndented = true });
 
         // Generate Old JSON string for backwards compatibility
-        OldJson = QueryBuilderJsonConverter.NewToOld(GeneratedJson);
+        OldJson = QueryBuilderJsonConverter.NewToOld(queryBuilder);
     }
 
     // Recursieve helper to set all nested RuleSets to "and"
@@ -489,7 +483,7 @@ else
         {
             // Serialize to JSON
             GeneratedJson = JsonSerializer.Serialize(rootRules, new JsonSerializerOptions { WriteIndented = true });
-            OldJson = QueryBuilderJsonConverter.NewToOld(GeneratedJson);
+            OldJson = QueryBuilderJsonConverter.NewToOld(queryBuilder);
 
         }
         catch (Exception ex)
