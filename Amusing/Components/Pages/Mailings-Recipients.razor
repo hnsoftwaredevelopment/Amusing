@@ -1,6 +1,7 @@
 ﻿@page "/Recipients"
 @using Amusing.Models
 @using Amusing.Services
+@using Amusing.Helpers
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Grids
@@ -250,25 +251,61 @@ else
             MailingService.RecipientListSource.Persons => "persons",
             _                                          => string.Empty
         };
-        
+
         // Convert to new JSON and keep it in memory
         pendingRulesJson = QueryBuilderJsonConverter.OldToNew(SelectedRecipientsList.ListFilter);
+
         rulesPending = true;
 
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
 
     // Set  the rules of the selected recipientlist
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (rulesPending && queryBuilder is not null && pendingRulesJson is not null)
+        if (rulesPending && queryBuilder is not null && !string.IsNullOrEmpty(pendingRulesJson))
         {
-            var rule = JsonSerializer.Deserialize<RuleModel>(pendingRulesJson);
-            queryBuilder.SetRules(new List<RuleModel> { rule });
-
+            LoadRulesFromJson(pendingRulesJson);
             rulesPending = false;
             pendingRulesJson = null;
+            await InvokeAsync(StateHasChanged);
         }
+    }
+    private void LoadRulesFromJson(string json)
+    {
+        try
+        {
+            var root = JsonSerializer.Deserialize<Syncfusion.Blazor.QueryBuilder.RuleModel>(json);
+            if (root != null)
+            {
+                // Pass the entire structure as a single root element
+                queryBuilder.SetRules(root.Rules ?? new List<Syncfusion.Blazor.QueryBuilder.RuleModel>());
+                return;
+            }
+        }
+        catch
+        {
+            // Do nothing, just load empty rules
+        }
+
+        try
+        {
+
+            // Fallback: try JSON as a list of RuleModel
+            var list = JsonSerializer.Deserialize<List<Syncfusion.Blazor.QueryBuilder.RuleModel>>(json);
+            if (list != null)
+            {
+                queryBuilder.SetRules(list); // ✅ Dit werkt nu
+                return;
+            }
+        }
+        catch
+        {
+            // Do nothing, just load empty rules
+        }
+        
+        // Safe fallback: set empty rules
+        queryBuilder.SetRules(new List<Syncfusion.Blazor.QueryBuilder.RuleModel>());
     }
 
     private async Task UpdateVisibleRowCountAsync()
@@ -392,11 +429,6 @@ else
         rule.Type = type.ToString(); // "Number" of "String"
     }
 
-    // List<OperatorsModel> InOnlyOperator  = new List<OperatorsModel>
-    // {
-    //     new OperatorsModel { Value = "in", Text = "Bevat" },
-    // };
-
     List<string> InOnlyOperator = new List<string> { "in" };
 
     List<OperatorsModel> EqualOnlyOperator  = new List<OperatorsModel>
@@ -421,12 +453,6 @@ else
         new OperatorsModel { Value="lessthan", Text = "Kleiner dan" },
         new OperatorsModel { Value="lessthanorequal", Text = "Kleiner of gelijk aan" },
     };
-
-    // private void OnRuleChanged()
-    // {
-    //     var rules = queryBuilder?.GetRules()?.Rules;
-    //     FestivalSelected = rules?.Any( r => r.Field == "Festival" ) ?? false;
-    // }
 
     private void OnQueryChanged(Syncfusion.Blazor.QueryBuilder.ChangeEventArgs args)
     {
@@ -464,6 +490,7 @@ else
             // Serialize to JSON
             GeneratedJson = JsonSerializer.Serialize(rootRules, new JsonSerializerOptions { WriteIndented = true });
             OldJson = QueryBuilderJsonConverter.NewToOld(GeneratedJson);
+
         }
         catch (Exception ex)
         {
