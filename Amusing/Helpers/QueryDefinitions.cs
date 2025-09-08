@@ -1299,7 +1299,15 @@ public static class QueryDefinitions
 	        created AS ListCreated,
 	        changed AS ListChanged,
 	        source 	AS ListSource,
-	        filter	AS ListFilter
+	        filter	AS ListFilter,
+            query	AS ListQuery
         FROM amusing.ah_recipient_lists
         ORDER BY name;";
+    public static readonly string ModifyRecipientQueryById = @"
+    UPDATE amusing.ah_recipient_lists
+    SET 
+        name = @ListName,
+        source = @ListSource,
+        query = @ListQuery
+    WHERE id = @ListId;";
 }

@@ -101,8 +101,6 @@ else
                         }
                     </QueryBuilderColumns>
                 </SfQueryBuilder>
-
-                <button class="btn btn-primary" @onclick="GenerateJson">Genereer maillijst</button>
             }
 
             <!-- Toolbar -->
@@ -241,10 +239,10 @@ else
         }
     }
 
-    private async Task OnRowSelected(RowSelectEventArgs<RecipientListModel> args)
+    private async Task OnRowSelected( RowSelectEventArgs<RecipientListModel> args )
     {
         SelectedRecipientsList = args.Data;
-        editContext = new EditContext(SelectedRecipientsList);
+        editContext = new EditContext( SelectedRecipientsList );
 
         SourceChecked = SelectedRecipientsList.ListSource switch
         {
@@ -253,45 +251,128 @@ else
             _ => string.Empty
         };
 
-        // Convert old JSON naar nieuwe QueryBuilder regels
-        string convertedJson = QueryBuilderJsonConverter.OldToNew(SelectedRecipientsList.ListFilter);
-
-        // Laad regels in de QueryBuilder
-        QueryBuilderJsonConverter.LoadRulesFromJson(queryBuilder, convertedJson);
-
-        rulesPending = true;
-        await InvokeAsync(StateHasChanged);
-    }
-
-    // Set  the rules of the selected recipientlist
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (rulesPending && queryBuilder is not null && !string.IsNullOrEmpty(pendingRulesJson))
+        if ( queryBuilder != null )
         {
-            QueryBuilderJsonConverter.LoadRulesFromJson(queryBuilder, pendingRulesJson);
-            rulesPending = false;
-            pendingRulesJson = null;
-            await InvokeAsync(StateHasChanged);
+            if ( !string.IsNullOrEmpty( SelectedRecipientsList.ListQuery ) )
+            {
+                try
+                {
+                    // Deserialiseer root RuleModel
+                    var rootRule = JsonSerializer.Deserialize<RuleModel>(SelectedRecipientsList.ListQuery);
+                    if ( rootRule != null )
+                    {
+                        // Force AND op alle regels
+                        ForceAndCondition( rootRule );
+
+                        // Pak child rules als die bestaan, anders rootRule zelf
+                        if ( rootRule.Rules != null && rootRule.Rules.Any() )
+                            queryBuilder.SetRules( rootRule.Rules );
+                        else
+                            queryBuilder.SetRules( new List<RuleModel> { rootRule } );
+                    }
+                    else
+                    {
+                        queryBuilder.Reset();
+                    }
+                }
+                catch
+                {
+                    queryBuilder.Reset();
+                }
+            }
+            else
+            {
+                // Nog geen ListQuery → leegmaken
+                queryBuilder.Reset();
+            }
         }
+
+        await InvokeAsync( StateHasChanged );
     }
-    
-    public static void LoadRulesFromJson(SfQueryBuilder<RuleModel> queryBuilder, string json)
+
+    /// <summary>
+    /// Loads a RuleModel from JSON into the QueryBuilder.
+    /// If JSON is null/invalid, resets QueryBuilder.
+    /// </summary>
+    public static void LoadRulesFromJson( SfQueryBuilder<RuleModel> queryBuilder, string json )
     {
+        if ( queryBuilder == null )
+        {
+            // Niks doen, kan geen regels zetten
+            return;
+        }
+
+        if ( string.IsNullOrEmpty( json ) )
+        {
+            queryBuilder.Reset();
+            return;
+        }
+
         try
         {
-            var rulesList = JsonSerializer.Deserialize<List<RuleModel>>(json);
-            if (rulesList != null)
+            // Always deserialize to a single RuleModel
+            var rootRule = JsonSerializer.Deserialize<RuleModel>(json);
+
+            if ( rootRule != null )
             {
-                queryBuilder.SetRules(rulesList);
-                return;
+                // Force AND bij laden
+                ForceAndCondition( rootRule );
+
+                if ( rootRule.Rules != null && rootRule.Rules.Any() )
+                    queryBuilder.SetRules( rootRule.Rules );
+                else
+                    queryBuilder.SetRules( new List<RuleModel> { rootRule } );
+            }
+            else
+            {
+                queryBuilder.Reset();
             }
         }
         catch
         {
-            // fallback: lege lijst
+            queryBuilder.Reset();
+        }
+    }
+
+    private async Task LoadRulesAsync( string? json )
+    {
+        if ( queryBuilder is null )
+            return;
+
+        if ( string.IsNullOrWhiteSpace( json ) )
+        {
+            queryBuilder.Reset();
+            return;
         }
 
-        queryBuilder.SetRules(new List<RuleModel>());
+        try
+        {
+            var rulesList = JsonSerializer.Deserialize<List<RuleModel>>(json);
+
+            if ( rulesList != null )
+            {
+                queryBuilder.SetRules( rulesList );
+                return;
+            }
+            else
+            {
+                queryBuilder.Reset();
+            }
+        }
+        catch
+        {
+            queryBuilder.Reset();
+        }
+
+        await InvokeAsync( StateHasChanged );
+    }
+
+    protected override async Task OnAfterRenderAsync( bool firstRender )
+    {
+        if ( firstRender )
+        {
+            await UpdateVisibleRowCountAsync();
+        }
     }
 
     private async Task UpdateVisibleRowCountAsync()
@@ -317,18 +398,29 @@ else
     {
         if ( SelectedRecipientsList is null )
             return;
-        
-        if (SelectedRecipientsList != null && queryBuilder != null)
-        {
-            // Convert naar oud JSON formaat
-            SelectedRecipientsList.ListFilter = QueryBuilderJsonConverter.NewToOld(queryBuilder);
 
-            // Save via je service
-            //await MailingService.SaveRecipientListAsync(SelectedRecipientsList);
-        }
+        var rules = queryBuilder.GetRules();
+        
+        // Force AND
+        ForceAndCondition( rules );
+
+        SelectedRecipientsList.ListQuery = JsonSerializer.Serialize( rules, new JsonSerializerOptions
+        {
+            WriteIndented = true
+        } );
+
+        // if (SelectedRecipientsList != null && queryBuilder != null)
+        // {
+        //     // Convert naar oud JSON formaat
+        //     SelectedRecipientsList.ListFilter = QueryBuilderJsonConverter.NewToOld(queryBuilder);
+
+        //     // Save via je service
+        //     //await MailingService.SaveRecipientListAsync(SelectedRecipientsList);
+        // }
+
         if ( SelectedRecipientsList.ListId != 0 )
         {
-            //await MailingService.UpdateRecipientsListAsync( SelectedRecipientsList );
+            await MailingService.UpdateRecipientQueryAsync( SelectedRecipientsList );
         }
         else
         {
@@ -379,28 +471,21 @@ else
         await GridRef.Refresh();
     }
 
-    private void GenerateJson()
+    /// <summary>
+    /// Forces all nested RuleSets to AND condition
+    /// </summary>
+    private static void ForceAndCondition( RuleModel rule )
     {
-        var rules = queryBuilder.GetRules();
-        // Force condition to "and", ignore OR
-        ForceAndCondition(rules);
+        if ( rule == null )
+            return;
 
-        // Serialize to JSON
-        GeneratedJson = JsonSerializer.Serialize(rules, new JsonSerializerOptions { WriteIndented = true });
+        rule.Condition = "and";
 
-        // Generate Old JSON string for backwards compatibility
-        OldJson = QueryBuilderJsonConverter.NewToOld(queryBuilder);
-    }
-
-    // Recursieve helper to set all nested RuleSets to "and"
-    private void ForceAndCondition(RuleModel rule)
-    {
-        if (rule.Rules != null)
+        if ( rule.Rules != null )
         {
-            rule.Condition = "and";
-            foreach (var r in rule.Rules)
+            foreach ( var r in rule.Rules )
             {
-                ForceAndCondition(r);
+                ForceAndCondition( r );
             }
         }
     }

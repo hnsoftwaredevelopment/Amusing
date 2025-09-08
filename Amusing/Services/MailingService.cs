@@ -22,7 +22,6 @@ public class MailingService( GenericDataService dataService )
     );
     }
 
-
     public Task<List<RecipientListModel>> GetRecipientListsAsync()
     {
         return _dataService.ExecuteQueryAsync(
@@ -46,8 +45,9 @@ public class MailingService( GenericDataService dataService )
                    ListName = reader [ "ListName" ].ToString() ?? string.Empty,
                    ListCreated = reader [ "ListCreated" ].ToString() ?? string.Empty,
                    ListChanged = reader [ "ListChanged" ].ToString() ?? string.Empty,
-                   ListSource = listSourceEnum, // hier zet je de enum
-                   ListFilter = reader [ "ListFilter" ].ToString() ?? string.Empty
+                   ListSource = listSourceEnum,
+                   ListFilter = reader [ "ListFilter" ].ToString() ?? string.Empty,
+                   ListQuery = reader [ "ListQuery" ].ToString() ?? string.Empty
                };
            } );
     }
@@ -75,4 +75,18 @@ public class MailingService( GenericDataService dataService )
                 Singers = Convert.ToInt32( reader [ "Singers" ] )
             } );
     }
+
+    public async Task UpdateRecipientQueryAsync( RecipientListModel model )
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { "@ListId", model.ListId },
+            { "@ListName", model.ListName },
+            { "@ListSource", model.ListSource },
+            { "@ListQuery", model.ListQuery }
+            };
+
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyRecipientQueryById, parameters );
+    }
+
 }
