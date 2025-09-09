@@ -14,6 +14,7 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Syncfusion.Blazor.SplitButtons
 @using System.Text.Json
+@using System.Text.Json.Serialization
 
 @inject MailingService MailingService;
 
@@ -48,60 +49,107 @@ else
                 <SfQueryBuilder TValue="RuleModel" @ref="queryBuilder" Width="80%" MaxGroupCount="0">
                     <QueryBuilderEvents TValue="RuleModel" Changed="OnQueryChanged" />
                     <QueryBuilderColumns>
-                        <QueryBuilderColumn 
-                            Field="Festival" 
-                            Label="Groep is ingeschreven voor ..." 
-                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String" 
-                            Values="@FestivalValues"
-                            Operators="@(new List<OperatorsModel> {new OperatorsModel { Value="in", Text="Bevat" } } )" />
+                        <QueryBuilderColumn Field="Festival"
+                                            Label="Groep is ingeschreven voor ..."
+                                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String"
+                                            Operators="@(new List<OperatorsModel> { new OperatorsModel { Value = "in", Text = "Bevat" } } )">
+                            <QueryBuilderTemplates>
+                                <ValueTemplate>
+                                    @{
+                                        // context is provided door QueryBuilder templates; haal huidige selectie (veilig casten)
+                                        var selected = context.Value as string[] ?? Array.Empty<string>();
+                                    }
+                                    <SfMultiSelect TItem="string"
+                                                   TValue="string[]"
+                                                   DataSource="@FestivalValues"
+                                                   Value="@selected"
+                                                   Placeholder="Selecteer festivals">
+                                        <MultiSelectEvents TValue="string[]" TItem="string" ValueChange="@(( MultiSelectChangeEventArgs<string [ ]> e ) => ChangeValue( e, context ))" />
+                                    </SfMultiSelect>
+                                </ValueTemplate>
+                            </QueryBuilderTemplates>
+                        </QueryBuilderColumn>
+
                         <QueryBuilderColumn 
                             Field="IsPaid" 
                             Label="Groep heeft betaald" 
                             Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
                             Operators="EqualOnlyOperator" />
+
                         <QueryBuilderColumn 
                             Field="IsCanceled" 
                             Label="Groep is afgehaakt" 
                             Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
                             Operators="EqualOnlyOperator" />
+
                         <QueryBuilderColumn 
                             Field="Dressingroom" 
                             Label="Groep wil kleedkamer" 
                             Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
                             Operators="EqualOnlyOperator" />
+
                         <QueryBuilderColumn 
                             Field="Jury" 
                             Label="Groep wil beoordeling" 
                             Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
                             Operators="EqualOnlyOperator" />
+
                         <QueryBuilderColumn 
                             Field="Singers" 
                             Label="Aantal zangers" 
                             Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Number" 
                             Operators="NumberOperator" />
-                        <QueryBuilderColumn 
-                            Field="Role" 
-                            Label="Personen met de rol..." 
-                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String" 
-                            Values="@PersonRoles"
-                            Operators="@(new List<OperatorsModel> {new OperatorsModel { Value="in", Text="Bevat" } } )" />
+
+                        <QueryBuilderColumn Field="Role"
+                                            Label="Persson met de rol..."
+                                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String"
+                                            Operators="@(new List<OperatorsModel> { new OperatorsModel { Value = "in", Text = "Bevat" } } )">
+                            <QueryBuilderTemplates>
+                                <ValueTemplate>
+                                    @{
+                                        var selected = context.Value as string[] ?? Array.Empty<string>();
+                                    }
+                                    <SfMultiSelect TItem="string"
+                                                   TValue="string[]"
+                                                   DataSource="@PersonRoles"
+                                                   Value="@selected"
+                                                   Placeholder="Selecteer rollen">
+                                        <MultiSelectEvents TValue="string[]" TItem="string" ValueChange="@(( MultiSelectChangeEventArgs<string [ ]> e ) => ChangeValue( e, context ))" />
+                                    </SfMultiSelect>
+                                </ValueTemplate>
+                            </QueryBuilderTemplates>
+                        </QueryBuilderColumn>
+
                         <QueryBuilderColumn 
                             Field="Infomailing" 
                             Label="Persoon wil Infomailing" 
                             Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
                             Operators="EqualOnlyOperator" />
-                        @if ( FestivalSelected )
+
+                        @if (FestivalSelected)
                         {
-                            <QueryBuilderColumn 
-                                Field="Volunteer" 
-                                Label="Persoon is vrijwilliger voor festival..." 
-                                Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String"
-                                Values="@FestivalValues"
-                                Operators="@(new List<OperatorsModel> {new OperatorsModel { Value="in", Text="Bevat" } } )" />
+                            <QueryBuilderColumn Field="Volunteer"
+                                                Label="Persoon is vrijwilliger voor festival..."
+                                                Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String"
+                                                Operators="@(new List<OperatorsModel> { new OperatorsModel { Value = "in", Text = "Bevat" } } )">
+                                <QueryBuilderTemplates>
+                                    <ValueTemplate>
+                                        @{
+                                            var selected = context.Value as string[] ?? Array.Empty<string>();
+                                        }
+                                        <SfMultiSelect TItem="string"
+                                                       TValue="string[]"
+                                                       DataSource="@FestivalValues"
+                                                       Value="@selected"
+                                                       Placeholder="Selecteer festivals (vrijwilliger)">
+                                            <MultiSelectEvents TValue="string[]" TItem="string" ValueChange="@(( MultiSelectChangeEventArgs<string [ ]> e ) => ChangeValue( e, context ))" />
+                                        </SfMultiSelect>
+                                    </ValueTemplate>
+                                </QueryBuilderTemplates>
+                            </QueryBuilderColumn>
                         }
-                    </QueryBuilderColumns>
-                </SfQueryBuilder>
-            }
+                </QueryBuilderColumns>
+            </SfQueryBuilder>            }
 
             <!-- Toolbar -->
             <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
@@ -253,54 +301,16 @@ else
 
         if ( queryBuilder != null )
         {
-            if ( !string.IsNullOrEmpty( SelectedRecipientsList.ListQuery ) )
-            {
-                try
-                {
-                    // Deserialiseer root RuleModel
-                    var rootRule = JsonSerializer.Deserialize<RuleModel>(SelectedRecipientsList.ListQuery);
-                    if ( rootRule != null )
-                    {
-                        // Force AND op alle regels
-                        ForceAndCondition( rootRule );
-
-                        // Pak child rules als die bestaan, anders rootRule zelf
-                        if ( rootRule.Rules != null && rootRule.Rules.Any() )
-                            queryBuilder.SetRules( rootRule.Rules );
-                        else
-                            queryBuilder.SetRules( new List<RuleModel> { rootRule } );
-                    }
-                    else
-                    {
-                        queryBuilder.Reset();
-                    }
-                }
-                catch
-                {
-                    queryBuilder.Reset();
-                }
-            }
-            else
-            {
-                // Nog geen ListQuery → leegmaken
-                queryBuilder.Reset();
-            }
+            await LoadRulesAsync( SelectedRecipientsList?.ListQuery );
         }
 
         await InvokeAsync( StateHasChanged );
     }
 
-    /// <summary>
-    /// Loads a RuleModel from JSON into the QueryBuilder.
-    /// If JSON is null/invalid, resets QueryBuilder.
-    /// </summary>
     public static void LoadRulesFromJson( SfQueryBuilder<RuleModel> queryBuilder, string json )
     {
         if ( queryBuilder == null )
-        {
-            // Niks doen, kan geen regels zetten
             return;
-        }
 
         if ( string.IsNullOrEmpty( json ) )
         {
@@ -310,28 +320,122 @@ else
 
         try
         {
-            // Always deserialize to a single RuleModel
-            var rootRule = JsonSerializer.Deserialize<RuleModel>(json);
+            using var doc = JsonDocument.Parse(json);
+            var rootElem = doc.RootElement;
 
-            if ( rootRule != null )
-            {
-                // Force AND bij laden
-                ForceAndCondition( rootRule );
+            var rootRule = BuildRuleFromJsonElement(rootElem);
 
-                if ( rootRule.Rules != null && rootRule.Rules.Any() )
-                    queryBuilder.SetRules( rootRule.Rules );
-                else
-                    queryBuilder.SetRules( new List<RuleModel> { rootRule } );
-            }
+            // Force AND bij laden (zoals je al had)
+            ForceAndCondition( rootRule );
+
+            if ( rootRule.Rules != null && rootRule.Rules.Any() )
+                queryBuilder.SetRules( rootRule.Rules );
             else
-            {
-                queryBuilder.Reset();
-            }
+                queryBuilder.SetRules( new List<RuleModel> { rootRule } );
         }
         catch
         {
             queryBuilder.Reset();
         }
+    }
+
+    private static RuleModel BuildRuleFromJsonElement( JsonElement elem )
+    {
+        var rule = new RuleModel();
+
+        // Strings / eenvoudige velden
+        if ( elem.TryGetProperty( "Field", out var pField ) && pField.ValueKind == JsonValueKind.String )
+            rule.Field = pField.GetString();
+        if ( elem.TryGetProperty( "Label", out var pLabel ) && pLabel.ValueKind == JsonValueKind.String )
+            rule.Label = pLabel.GetString();
+        if ( elem.TryGetProperty( "Operator", out var pOperator ) )
+            rule.Operator = pOperator.ValueKind == JsonValueKind.String ? pOperator.GetString() : pOperator.ToString();
+        if ( elem.TryGetProperty( "Type", out var pType ) && pType.ValueKind == JsonValueKind.String )
+            rule.Type = pType.GetString();
+        if ( elem.TryGetProperty( "RuleId", out var pRuleId ) && pRuleId.ValueKind == JsonValueKind.String )
+            rule.RuleId = pRuleId.GetString();
+
+        // Booleans
+        if ( elem.TryGetProperty( "IsLocked", out var pIsLocked ) && pIsLocked.ValueKind != JsonValueKind.Null )
+        {
+            if ( pIsLocked.ValueKind == JsonValueKind.True )
+                rule.IsLocked = true;
+            else if ( pIsLocked.ValueKind == JsonValueKind.False )
+                rule.IsLocked = false;
+        }
+        if ( elem.TryGetProperty( "Not", out var pNot ) && pNot.ValueKind != JsonValueKind.Null )
+        {
+            if ( pNot.ValueKind == JsonValueKind.True )
+                rule.Not = true;
+            else if ( pNot.ValueKind == JsonValueKind.False )
+                rule.Not = false;
+        }
+        if ( elem.TryGetProperty( "Condition", out var pCond ) && pCond.ValueKind == JsonValueKind.String )
+            rule.Condition = pCond.GetString();
+
+        // Value: kan Array of Single value zijn
+        if ( elem.TryGetProperty( "Value", out var pValue ) )
+        {
+            // For convenience treat operator as string now
+            var op = rule.Operator?.ToString();
+
+            if ( pValue.ValueKind == JsonValueKind.Array )
+            {
+                var items = pValue.EnumerateArray()
+                              .Select(e => ConvertJsonElement(e, rule.Type))
+                              .ToList();
+
+                if ( string.Equals( op, "in", StringComparison.OrdinalIgnoreCase ) )
+                {
+                    rule.Value = rule.Type?.ToLower() switch
+                    {
+                        "string" => items.Select( v => v?.ToString() ?? string.Empty ).ToArray(),
+                        "boolean" => items.Select( v => Convert.ToBoolean( v ) ).ToArray(),
+                        "number" or "int" or "double" => items.Select( v => Convert.ToDouble( v ) ).ToArray(),
+                        _ => items.ToArray()
+                    };
+                }
+                else
+                {
+                    rule.Value = items.ToArray();
+                }
+            }
+            else
+            {
+                // single value
+                var single = ConvertJsonElement(pValue, rule.Type);
+
+                if ( string.Equals( op, "in", StringComparison.OrdinalIgnoreCase ) )
+                {
+                    // force array for 'in'
+                    if ( single == null )
+                        rule.Value = Array.Empty<string>();
+                    else if ( single is string s )
+                        rule.Value = new string [ ] { s };
+                    else if ( single is bool b )
+                        rule.Value = new bool [ ] { b };
+                    else if ( single is double d )
+                        rule.Value = new double [ ] { d };
+                    else
+                        rule.Value = new object [ ] { single };
+                }
+                else
+                {
+                    rule.Value = single;
+                }
+            }
+        }
+
+        // Recursief: child rules (Rules)
+        if ( elem.TryGetProperty( "Rules", out var pRules ) && pRules.ValueKind == JsonValueKind.Array )
+        {
+            var list = new List<RuleModel>();
+            foreach ( var child in pRules.EnumerateArray() )
+                list.Add( BuildRuleFromJsonElement( child ) );
+            rule.Rules = list;
+        }
+
+        return rule;
     }
 
     private async Task LoadRulesAsync( string? json )
@@ -347,17 +451,20 @@ else
 
         try
         {
-            var rulesList = JsonSerializer.Deserialize<List<RuleModel>>(json);
+            using var doc = JsonDocument.Parse(json);
+            var rootElem = doc.RootElement;
 
-            if ( rulesList != null )
-            {
-                queryBuilder.SetRules( rulesList );
-                return;
-            }
+            var rootRule = BuildRuleFromJsonElement(rootElem);
+
+            // Force AND en fix children
+            ForceAndCondition( rootRule );
+
+            if ( rootRule.Rules != null && rootRule.Rules.Any() )
+                queryBuilder.SetRules( rootRule.Rules );
             else
-            {
-                queryBuilder.Reset();
-            }
+                queryBuilder.SetRules( new List<RuleModel> { rootRule } );
+
+            return;
         }
         catch
         {
@@ -365,6 +472,108 @@ else
         }
 
         await InvokeAsync( StateHasChanged );
+    }
+
+    /// <summary>
+    /// Walk the tree and convert JsonElement values into real CLR types
+    /// (string, string[], bool, int) based on content and known boolean fields.
+    /// </summary>
+    private static readonly HashSet<string> BooleanFields = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "IsCanceled", "IsPaid", "Dressingroom", "Jury", "Infomailing"
+    };
+
+    private static object? ConvertJsonElement( JsonElement element, string? type )
+    {
+        if ( element.ValueKind == JsonValueKind.Null || element.ValueKind == JsonValueKind.Undefined )
+            return null;
+
+        return type?.ToLower() switch
+        {
+            "boolean" => element.GetBoolean(),
+            "number" or "double" or "int" => element.TryGetDouble( out var d ) ? d : 0,
+            "string" => element.GetString(),
+            _ => element.ToString() // fallback
+        };
+    }
+
+    private static object? ConvertJsonElementToClr( JsonElement elem, string? fieldName )
+    {
+        switch ( elem.ValueKind )
+        {
+            case JsonValueKind.True:
+            case JsonValueKind.False:
+                return elem.GetBoolean();
+
+            case JsonValueKind.Number:
+                // If the field is a boolean field (older data might save 0/1) => convert to bool
+                if ( !string.IsNullOrEmpty( fieldName ) && BooleanFields.Contains( fieldName ) )
+                {
+                    int n = 0;
+                    if ( elem.TryGetInt32( out n ) )
+                        return n != 0;
+                    if ( elem.TryGetInt64( out var l ) )
+                        return l != 0L;
+                }
+
+                // Otherwise return integer
+                if ( elem.TryGetInt32( out var i ) )
+                    return i;
+                if ( elem.TryGetInt64( out var l2 ) )
+                    return l2;
+                if ( elem.TryGetDouble( out var d ) )
+                    return d;
+                return elem.GetRawText();
+
+            case JsonValueKind.String:
+                var s = elem.GetString() ?? string.Empty;
+                // if string contains comma and operator was 'in' earlier, we may want an array,
+                // but decide later from RuleModel.Operator. For now return string.
+                // Some callers expect arrays, but FixRuleValues will also run on the parent to convert if needed.
+                // Convert "0"/"1" to bool for boolean fields
+                if ( !string.IsNullOrEmpty( fieldName ) && BooleanFields.Contains( fieldName ) )
+                {
+                    if ( s == "0" )
+                        return false;
+                    if ( s == "1" )
+                        return true;
+                    if ( bool.TryParse( s, out var bv ) )
+                        return bv;
+                }
+                return s;
+
+            case JsonValueKind.Array:
+                // convert all array items to strings (most common for 'in')
+                var items = elem.EnumerateArray()
+                    .Select(x => x.ValueKind == JsonValueKind.String ? x.GetString() ?? string.Empty : x.ToString())
+                    .Where(x => x != null)
+                    .ToArray();
+                return items;
+
+            default:
+                return elem.GetRawText();
+        }
+    }
+
+    /// <summary>
+    /// Force Condition = "and" only for groups (nodes that have children).
+    /// Leave leaf nodes Condition = null so they render as simple rules.
+    /// </summary>
+    private static void ForceAndCondition( RuleModel rule )
+    {
+        if ( rule == null )
+            return;
+
+        if ( rule.Rules != null && rule.Rules.Any() )
+        {
+            rule.Condition = "and";
+            foreach ( var r in rule.Rules )
+                ForceAndCondition( r );
+        }
+        else
+        {
+            rule.Condition = null;
+        }
     }
 
     protected override async Task OnAfterRenderAsync( bool firstRender )
@@ -400,13 +609,14 @@ else
             return;
 
         var rules = queryBuilder.GetRules();
-        
+
         // Force AND
         ForceAndCondition( rules );
 
         SelectedRecipientsList.ListQuery = JsonSerializer.Serialize( rules, new JsonSerializerOptions
         {
-            WriteIndented = true
+            WriteIndented = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         } );
 
         // if (SelectedRecipientsList != null && queryBuilder != null)
@@ -471,22 +681,38 @@ else
         await GridRef.Refresh();
     }
 
-    /// <summary>
-    /// Forces all nested RuleSets to AND condition
-    /// </summary>
-    private static void ForceAndCondition( RuleModel rule )
+    public class RuleModelConverter : JsonConverter<RuleModel>
     {
-        if ( rule == null )
-            return;
-
-        rule.Condition = "and";
-
-        if ( rule.Rules != null )
+        public override RuleModel Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
         {
-            foreach ( var r in rule.Rules )
+            var clone = JsonDocument.ParseValue(ref reader).RootElement;
+
+            var model = JsonSerializer.Deserialize<RuleModel>(clone.GetRawText(), options);
+
+            if ( model?.Value is JsonElement elem )
             {
-                ForceAndCondition( r );
+                if ( elem.ValueKind == JsonValueKind.String )
+                    model.Value = elem.GetString();
+                else if ( elem.ValueKind == JsonValueKind.True || elem.ValueKind == JsonValueKind.False )
+                    model.Value = elem.GetBoolean();
+                else if ( elem.ValueKind == JsonValueKind.Array )
+                {
+                    var values = new List<string>();
+                    foreach ( var item in elem.EnumerateArray() )
+                    {
+                        if ( item.ValueKind == JsonValueKind.String )
+                            values.Add( item.GetString() ?? "" );
+                    }
+                    model.Value = values.ToArray();
+                }
             }
+
+            return model!;
+        }
+
+        public override void Write( Utf8JsonWriter writer, RuleModel value, JsonSerializerOptions options )
+        {
+            JsonSerializer.Serialize( writer, ( object ) value, options );
         }
     }
 
@@ -535,49 +761,101 @@ else
 
     private void OnQueryChanged(Syncfusion.Blazor.QueryBuilder.ChangeEventArgs args)
     {
-        var rootRules = queryBuilder.GetRules();
+            var rootRules = queryBuilder.GetRules();
 
-        if (rootRules == null || rootRules.Rules == null || !rootRules.Rules.Any())
-        {
-            // Query nog niet compleet, niks doen
-            GeneratedJson = "Nog geen complete query...";
-            return;
-        }
-
-        foreach (var rule in rootRules.Rules)
-        {
-            if ((rule.Field == "Festival" || rule.Field == "Role" || rule.Field == "Volunteer")
-                && rule.Operator == "in")
+            if (rootRules == null || rootRules.Rules == null || !rootRules.Rules.Any())
             {
-                switch (rule.Value)
-                {
-                    case string s:
-                        // convert single string into an array
-                        rule.Value = new string[] { s };
-                        break;
+                // Query nog niet compleet, niks doen
+                GeneratedJson = "Nog geen complete query...";
+                return;
+            }
 
-                    case null:
-                        // ensure we have an empty array instead of null
-                        rule.Value = Array.Empty<string>();
-                        break;
+            foreach (var rule in rootRules.Rules)
+            {
+                if ((rule.Field == "Festival" || rule.Field == "Role" || rule.Field == "Volunteer")
+                    && rule.Operator == "in")
+                {
+                    switch (rule.Value)
+                    {
+                        case string s:
+                            // convert single string into an array
+                            rule.Value = new string[] { s };
+                            break;
+
+                        case null:
+                            // ensure we have an empty array instead of null
+                            rule.Value = Array.Empty<string>();
+                            break;
+                    }
                 }
             }
-        }
 
-        try
+            try
+            {
+                // Serialize to JSON
+                GeneratedJson = JsonSerializer.Serialize(rootRules, new JsonSerializerOptions { WriteIndented = true });
+                OldJson = QueryBuilderJsonConverter.NewToOld(queryBuilder);
+
+            }
+            catch (Exception ex)
+            {
+                GeneratedJson = $"Error: {ex.Message}";
+            }
+
+            //Alleen boolean gebruiken om te bepalen of festival geselecteerd is
+            FestivalSelected = rootRules.Rules.Any( r => r.Field == "Festival" && r.Value is string [ ] arr && arr.Length > 0 );
+
+    }
+
+    public class CustomConverter : JsonConverter<RuleModel>
+    {
+        public override RuleModel Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
         {
-            // Serialize to JSON
-            GeneratedJson = JsonSerializer.Serialize(rootRules, new JsonSerializerOptions { WriteIndented = true });
-            OldJson = QueryBuilderJsonConverter.NewToOld(queryBuilder);
-
+            throw new NotImplementedException();
         }
-        catch (Exception ex)
+        public override void Write( Utf8JsonWriter writer, RuleModel value, JsonSerializerOptions options )
         {
-            GeneratedJson = $"Error: {ex.Message}";
+            writer.WriteStartObject();
+            if ( value.Condition != null )
+            {
+                writer.WriteString( "Condition", value.Condition );
+            }
+            if ( value.Operator != null )
+            {
+                writer.WriteString( "Operator", value.Operator );
+            }
+            if ( value.Field != null )
+            {
+                writer.WriteString( "Field", value.Field );
+            }
+            if ( value.Type != null )
+            {
+                writer.WriteString( "Type", value.Type );
+            }
+            if ( value.Not != null )
+            {
+                writer.WriteBoolean( "Not", value.Not.Value );
+            }
+            if ( value.Value != null )
+            {
+                writer.WritePropertyName( "Value" );
+                JsonSerializer.Serialize( writer, value.Value, options );
+            }
+            if ( value.Rules != null )
+            {
+                writer.WritePropertyName( "Rules" );
+                JsonSerializer.Serialize( writer, value.Rules, options );
+            }
+            writer.WriteEndObject();
         }
+    }
 
-        // Alleen boolean gebruiken om te bepalen of festival geselecteerd is
-        FestivalSelected = rootRules.Rules.Any(r => r.Field == "Festival" && r.Value is string[] arr && arr.Length > 0);
+    private void ChangeValue( MultiSelectChangeEventArgs<string [ ]> args, RuleModel rule )
+    {
+        // Zorg dat de rule.Value exact de array bevat die door de MultiSelect wordt geleverd
+        rule.Value = args.Value ?? Array.Empty<string>();
+        // (optioneel) forceer UI update
+        StateHasChanged();
     }
 
     private async Task GenerateMailList()
