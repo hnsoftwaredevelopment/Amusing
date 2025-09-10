@@ -27,7 +27,7 @@ public partial class PersonModel
 
     [RequiredIfActive( "Active", ErrorMessage = "E-mail adres is verplicht" )]
     [EmailAddress( ErrorMessage = "E-mailadres is ongeldig" )]
-    public string? PersonsEmail { get; set; } = ""; // different e-mail field for person maintenance where e-mail address is mandetory
+    public string? PersonsEmail { get; set; } = ""; // different e-mail Field for person maintenance where e-mail address is mandetory
     public string? Address { get; set; } = "";
     public string? Street { get; set; } = "";
     public string? HomeNr { get; set; } = "";

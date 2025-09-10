@@ -101,7 +101,7 @@ else
                             Operators="NumberOperator" />
 
                         <QueryBuilderColumn Field="Role"
-                                            Label="Persson met de rol..."
+                                            Label="Persoon met de rol..."
                                             Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String"
                                             Operators="@(new List<OperatorsModel> { new OperatorsModel { Value = "in", Text = "Bevat" } } )">
                             <QueryBuilderTemplates>
@@ -301,6 +301,12 @@ else
 
         if ( queryBuilder != null )
         {
+            // If there already is a new QueryRule string available use this, otherwise get the old string and convert it
+            if ( string.IsNullOrWhiteSpace( SelectedRecipientsList.ListQuery ) )
+            {
+                SelectedRecipientsList.ListQuery = QueryBuilderJsonConverter.OldToNew( SelectedRecipientsList.ListFilter );
+            }
+
             await LoadRulesAsync( SelectedRecipientsList?.ListQuery );
         }
 
@@ -373,10 +379,10 @@ else
         if ( elem.TryGetProperty( "Condition", out var pCond ) && pCond.ValueKind == JsonValueKind.String )
             rule.Condition = pCond.GetString();
 
-        // Value: kan Array of Single value zijn
+        // Value: kan Array of Single Value zijn
         if ( elem.TryGetProperty( "Value", out var pValue ) )
         {
-            // For convenience treat operator as string now
+            // For convenience treat Operator as string now
             var op = rule.Operator?.ToString();
 
             if ( pValue.ValueKind == JsonValueKind.Array )
@@ -402,7 +408,7 @@ else
             }
             else
             {
-                // single value
+                // single Value
                 var single = ConvertJsonElement(pValue, rule.Type);
 
                 if ( string.Equals( op, "in", StringComparison.OrdinalIgnoreCase ) )
@@ -506,7 +512,7 @@ else
                 return elem.GetBoolean();
 
             case JsonValueKind.Number:
-                // If the field is a boolean field (older data might save 0/1) => convert to bool
+                // If the Field is a boolean Field (older data might save 0/1) => convert to bool
                 if ( !string.IsNullOrEmpty( fieldName ) && BooleanFields.Contains( fieldName ) )
                 {
                     int n = 0;
@@ -527,7 +533,7 @@ else
 
             case JsonValueKind.String:
                 var s = elem.GetString() ?? string.Empty;
-                // if string contains comma and operator was 'in' earlier, we may want an array,
+                // if string contains comma and Operator was 'in' earlier, we may want an array,
                 // but decide later from RuleModel.Operator. For now return string.
                 // Some callers expect arrays, but FixRuleValues will also run on the parent to convert if needed.
                 // Convert "0"/"1" to bool for boolean fields
@@ -794,7 +800,7 @@ else
             {
                 // Serialize to JSON
                 GeneratedJson = JsonSerializer.Serialize(rootRules, new JsonSerializerOptions { WriteIndented = true });
-                OldJson = QueryBuilderJsonConverter.NewToOld(queryBuilder);
+                //OldJson = QueryBuilderJsonConverter.NewToOld(queryBuilder);
 
             }
             catch (Exception ex)

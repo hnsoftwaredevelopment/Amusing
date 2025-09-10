@@ -181,7 +181,7 @@ else
         minslider = maxslider - 15;
         slidervalue = maxslider - 10;
 
-        FilterOnFestival = await RegistrationService.GetCurrentFestivalYearAsync() - 3; // This value should be equal to NumberOfYearsForExclusion in QueryDefinitions.GetFestivalOverviewQuery
+        FilterOnFestival = await RegistrationService.GetCurrentFestivalYearAsync() - 3; // This Value should be equal to NumberOfYearsForExclusion in QueryDefinitions.GetFestivalOverviewQuery
 
         await LoadDataAsync();    
     }

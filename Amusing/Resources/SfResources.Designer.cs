@@ -1600,7 +1600,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Default value.
+        ///   Looks up a localized string similar to Default Value.
         /// </summary>
         internal static string DocumentEditor_DefaultValue {
             get {
@@ -3157,7 +3157,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to NumberFormat value must be between.
+        ///   Looks up a localized string similar to NumberFormat Value must be between.
         /// </summary>
         internal static string DocumentEditor_NumberFormat_Alert {
             get {
@@ -7696,7 +7696,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enter the value.
+        ///   Looks up a localized string similar to Enter the Value.
         /// </summary>
         internal static string Gantt_EnterValue {
             get {
@@ -7831,7 +7831,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Left task label.
+        ///   Looks up a localized string similar to Left task Label.
         /// </summary>
         internal static string Gantt_LeftTaskLabel {
             get {
@@ -7984,7 +7984,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Right task label.
+        ///   Looks up a localized string similar to Right task Label.
         /// </summary>
         internal static string Gantt_RightTaskLabel {
             get {
@@ -8695,7 +8695,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enter the value.
+        ///   Looks up a localized string similar to Enter the Value.
         /// </summary>
         internal static string Grid_CustomFilterPlaceHolder {
             get {
@@ -8848,7 +8848,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enter the value.
+        ///   Looks up a localized string similar to Enter the Value.
         /// </summary>
         internal static string Grid_EnterValue {
             get {
@@ -11143,7 +11143,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Decrement value.
+        ///   Looks up a localized string similar to Decrement Value.
         /// </summary>
         internal static string NumericTextBox_DecrementTitle {
             get {
@@ -11152,7 +11152,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Increment value.
+        ///   Looks up a localized string similar to Increment Value.
         /// </summary>
         internal static string NumericTextBox_IncrementTitle {
             get {
@@ -13951,7 +13951,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Submit Form Button. Click this button to save the form field values as a JSON file..
+        ///   Looks up a localized string similar to Submit Form Button. Click this button to save the form Field values as a JSON file..
         /// </summary>
         internal static string PdfViewer_SubmitFormField {
             get {
@@ -14338,7 +14338,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add field here.
+        ///   Looks up a localized string similar to Add Field here.
         /// </summary>
         internal static string PivotView_AddFieldMessage {
             get {
@@ -14518,7 +14518,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Base field.
+        ///   Looks up a localized string similar to Base Field.
         /// </summary>
         internal static string PivotView_BaseField {
             get {
@@ -14617,7 +14617,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Clear edited field info.
+        ///   Looks up a localized string similar to Clear edited Field info.
         /// </summary>
         internal static string PivotView_CalculatedField_ClearTooltipMessage {
             get {
@@ -14626,7 +14626,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A calculation field already exists in this name. Do you want to replace it?.
+        ///   Looks up a localized string similar to A calculation Field already exists in this name. Do you want to replace it?.
         /// </summary>
         internal static string PivotView_CalculatedField_ConfirmMessage {
             get {
@@ -14644,7 +14644,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Drag field to formula.
+        ///   Looks up a localized string similar to Drag Field to formula.
         /// </summary>
         internal static string PivotView_CalculatedField_DragMessage {
             get {
@@ -14653,7 +14653,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Calculated field cannot be place in any other region except value axis..
+        ///   Looks up a localized string similar to Calculated Field cannot be place in any other region except Value axis..
         /// </summary>
         internal static string PivotView_CalculatedField_DropMessage {
             get {
@@ -14662,7 +14662,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Edit calculated field.
+        ///   Looks up a localized string similar to Edit calculated Field.
         /// </summary>
         internal static string PivotView_CalculatedField_EditTooltipMessage {
             get {
@@ -14680,7 +14680,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A field already exists in this name. Please enter a different name..
+        ///   Looks up a localized string similar to A Field already exists in this name. Please enter a different name..
         /// </summary>
         internal static string PivotView_CalculatedField_ExistMessage {
             get {
@@ -14698,7 +14698,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enter the field name.
+        ///   Looks up a localized string similar to Enter the Field name.
         /// </summary>
         internal static string PivotView_CalculatedField_NameWatermark {
             get {
@@ -14716,7 +14716,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Are you sure you want to delete this calculated field?.
+        ///   Looks up a localized string similar to Are you sure you want to delete this calculated Field?.
         /// </summary>
         internal static string PivotView_CalculatedField_RemoveMessage {
             get {
@@ -14725,7 +14725,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Drag and drop fields to create an expression. And, if you want to edit the existing the calculated fields! You can achieve it by simply selecting the field under &apos;Calculated Members&apos;..
+        ///   Looks up a localized string similar to Drag and drop fields to create an expression. And, if you want to edit the existing the calculated fields! You can achieve it by simply selecting the Field under &apos;Calculated Members&apos;..
         /// </summary>
         internal static string PivotView_CalculatedField_Tooltip {
             get {
@@ -14770,7 +14770,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Choose field.
+        ///   Looks up a localized string similar to Choose Field.
         /// </summary>
         internal static string PivotView_ChooseFieldMessage {
             get {
@@ -15256,7 +15256,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enter value.
+        ///   Looks up a localized string similar to Enter Value.
         /// </summary>
         internal static string PivotView_EnterValue {
             get {
@@ -15355,7 +15355,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enter the field caption.
+        ///   Looks up a localized string similar to Enter the Field caption.
         /// </summary>
         internal static string PivotView_FieldCaptionWatermark {
             get {
@@ -15364,7 +15364,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The field you are moving cannot be placed in that area of the report.
+        ///   Looks up a localized string similar to The Field you are moving cannot be placed in that area of the report.
         /// </summary>
         internal static string PivotView_FieldDropErrorMessage {
             get {
@@ -15589,7 +15589,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enter the caption for group field.
+        ///   Looks up a localized string similar to Enter the caption for group Field.
         /// </summary>
         internal static string PivotView_GroupFieldCaptionMessage {
             get {
@@ -15688,7 +15688,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Show the items for which the label.
+        ///   Looks up a localized string similar to Show the items for which the Label.
         /// </summary>
         internal static string PivotView_LabelTextMessage {
             get {
@@ -15913,7 +15913,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enter a value.
+        ///   Looks up a localized string similar to Enter a Value.
         /// </summary>
         internal static string PivotView_NoInputMessage {
             get {
@@ -15958,7 +15958,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No value.
+        ///   Looks up a localized string similar to No Value.
         /// </summary>
         internal static string PivotView_NoValue {
             get {
@@ -16480,7 +16480,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Show field list.
+        ///   Looks up a localized string similar to Show Field list.
         /// </summary>
         internal static string PivotView_ShowFieldList {
             get {
@@ -16858,7 +16858,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Drop value here.
+        ///   Looks up a localized string similar to Drop Value here.
         /// </summary>
         internal static string PivotView_ValueAxisWatermark {
             get {
@@ -16867,7 +16867,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Value field settings.
+        ///   Looks up a localized string similar to Value Field settings.
         /// </summary>
         internal static string PivotView_ValueFieldSettings {
             get {
@@ -17245,7 +17245,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Select a field.
+        ///   Looks up a localized string similar to Select a Field.
         /// </summary>
         internal static string QueryBuilder_SelectField {
             get {
@@ -17254,7 +17254,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Select operator.
+        ///   Looks up a localized string similar to Select Operator.
         /// </summary>
         internal static string QueryBuilder_SelectOperator {
             get {
@@ -17308,7 +17308,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This field is required.
+        ///   Looks up a localized string similar to This Field is required.
         /// </summary>
         internal static string QueryBuilder_ValidationMessage {
             get {
@@ -19864,7 +19864,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The entered date value is invalid..
+        ///   Looks up a localized string similar to The entered date Value is invalid..
         /// </summary>
         internal static string Schedule_InvalidDateError {
             get {
@@ -20458,7 +20458,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the absolute value of a Number.
+        ///   Looks up a localized string similar to Returns the absolute Value of a Number.
         /// </summary>
         internal static string Spreadsheet_ABS {
             get {
@@ -21034,7 +21034,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Chooses a value From a list of values.
+        ///   Looks up a localized string similar to Chooses a Value From a list of values.
         /// </summary>
         internal static string Spreadsheet_CHOOSE {
             get {
@@ -21358,7 +21358,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns smallest value for cumulative binomial distribution.
+        ///   Looks up a localized string similar to Returns smallest Value for cumulative binomial distribution.
         /// </summary>
         internal static string Spreadsheet_CRITBINOM {
             get {
@@ -21916,7 +21916,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the logical value FALSE.
+        ///   Looks up a localized string similar to Returns the logical Value FALSE.
         /// </summary>
         internal static string Spreadsheet_FALSE {
             get {
@@ -21988,7 +21988,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Finds one text value within another (case-sensitive).
+        ///   Looks up a localized string similar to Finds one text Value within another (case-sensitive).
         /// </summary>
         internal static string Spreadsheet_FIND {
             get {
@@ -21997,7 +21997,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Finds one text value within another (case-sensitive).
+        ///   Looks up a localized string similar to Finds one text Value within another (case-sensitive).
         /// </summary>
         internal static string Spreadsheet_FINDB {
             get {
@@ -22078,7 +22078,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns a value along a linear trend.
+        ///   Looks up a localized string similar to Returns a Value along a linear trend.
         /// </summary>
         internal static string Spreadsheet_FORECAST {
             get {
@@ -22150,7 +22150,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the future value of an investment.
+        ///   Looks up a localized string similar to Returns the future Value of an investment.
         /// </summary>
         internal static string Spreadsheet_FV {
             get {
@@ -22159,7 +22159,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns future value after compound interest rates.
+        ///   Looks up a localized string similar to Returns future Value after compound interest rates.
         /// </summary>
         internal static string Spreadsheet_FVSCHEDULE {
             get {
@@ -22231,7 +22231,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tests whether a Number is greater than a threshold value.
+        ///   Looks up a localized string similar to Tests whether a Number is greater than a threshold Value.
         /// </summary>
         internal static string Spreadsheet_GESTEP {
             get {
@@ -22312,7 +22312,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Looks in the top row of an array and returns the value of the indicated cell.
+        ///   Looks up a localized string similar to Looks in the top row of an array and returns the Value of the indicated cell.
         /// </summary>
         internal static string Spreadsheet_HLOOKUP {
             get {
@@ -22384,7 +22384,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns a specified value if a formula evaluates to an error.
+        ///   Looks up a localized string similar to Returns a specified Value if a formula evaluates to an error.
         /// </summary>
         internal static string Spreadsheet_IFERROR {
             get {
@@ -22393,7 +22393,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns value corresponding to first TRUE condition.
+        ///   Looks up a localized string similar to Returns Value corresponding to first TRUE condition.
         /// </summary>
         internal static string Spreadsheet_IFS {
             get {
@@ -22402,7 +22402,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the absolute value (modulus) of a complex Number.
+        ///   Looks up a localized string similar to Returns the absolute Value (modulus) of a complex Number.
         /// </summary>
         internal static string Spreadsheet_IMABS {
             get {
@@ -22582,7 +22582,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Uses an index to choose a value From a reference or array.
+        ///   Looks up a localized string similar to Uses an index to choose a Value From a reference or array.
         /// </summary>
         internal static string Spreadsheet_INDEX {
             get {
@@ -22591,7 +22591,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns a reference indicated by a text value.
+        ///   Looks up a localized string similar to Returns a reference indicated by a text Value.
         /// </summary>
         internal static string Spreadsheet_INDIRECT {
             get {
@@ -22807,7 +22807,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns TRUE if the value is blank.
+        ///   Looks up a localized string similar to Returns TRUE if the Value is blank.
         /// </summary>
         internal static string Spreadsheet_ISBLANK {
             get {
@@ -22816,7 +22816,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns TRUE if the value is any error value except #N/A.
+        ///   Looks up a localized string similar to Returns TRUE if the Value is any error Value except #N/A.
         /// </summary>
         internal static string Spreadsheet_ISERR {
             get {
@@ -22825,7 +22825,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns TRUE if the value is any error value.
+        ///   Looks up a localized string similar to Returns TRUE if the Value is any error Value.
         /// </summary>
         internal static string Spreadsheet_ISERROR {
             get {
@@ -22843,7 +22843,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns TRUE if the value is a logical value.
+        ///   Looks up a localized string similar to Returns TRUE if the Value is a logical Value.
         /// </summary>
         internal static string Spreadsheet_ISLOGICAL {
             get {
@@ -22852,7 +22852,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns TRUE if the value is the #N/A error value.
+        ///   Looks up a localized string similar to Returns TRUE if the Value is the #N/A error Value.
         /// </summary>
         internal static string Spreadsheet_ISNA {
             get {
@@ -22861,7 +22861,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns TRUE if the value is not text.
+        ///   Looks up a localized string similar to Returns TRUE if the Value is not text.
         /// </summary>
         internal static string Spreadsheet_ISNONTEXT {
             get {
@@ -22870,7 +22870,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns TRUE if the value is a Number.
+        ///   Looks up a localized string similar to Returns TRUE if the Value is a Number.
         /// </summary>
         internal static string Spreadsheet_ISNUMBER {
             get {
@@ -22897,7 +22897,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns TRUE if the value is a reference.
+        ///   Looks up a localized string similar to Returns TRUE if the Value is a reference.
         /// </summary>
         internal static string Spreadsheet_ISREF {
             get {
@@ -22906,7 +22906,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns TRUE if the value is text.
+        ///   Looks up a localized string similar to Returns TRUE if the Value is text.
         /// </summary>
         internal static string Spreadsheet_ISTEXT {
             get {
@@ -22969,7 +22969,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the k-th largest value in a data set.
+        ///   Looks up a localized string similar to Returns the k-th largest Value in a data set.
         /// </summary>
         internal static string Spreadsheet_LARGE {
             get {
@@ -23023,7 +23023,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the leftmost characters From a text value.
+        ///   Looks up a localized string similar to Returns the leftmost characters From a text Value.
         /// </summary>
         internal static string Spreadsheet_LEFT {
             get {
@@ -23032,7 +23032,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the leftmost characters From a text value.
+        ///   Looks up a localized string similar to Returns the leftmost characters From a text Value.
         /// </summary>
         internal static string Spreadsheet_LEFTB {
             get {
@@ -23239,7 +23239,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the maximum value in a list of arguments.
+        ///   Looks up a localized string similar to Returns the maximum Value in a list of arguments.
         /// </summary>
         internal static string Spreadsheet_MAX {
             get {
@@ -23248,7 +23248,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the maximum value in a list of arguments, including numbers, text, and logical values.
+        ///   Looks up a localized string similar to Returns the maximum Value in a list of arguments, including numbers, text, and logical values.
         /// </summary>
         internal static string Spreadsheet_MAXA {
             get {
@@ -23257,7 +23257,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns maximum value among cells meeting criteria.
+        ///   Looks up a localized string similar to Returns maximum Value among cells meeting criteria.
         /// </summary>
         internal static string Spreadsheet_MAXIFS {
             get {
@@ -23329,7 +23329,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the minimum value in a list of arguments.
+        ///   Looks up a localized string similar to Returns the minimum Value in a list of arguments.
         /// </summary>
         internal static string Spreadsheet_MIN {
             get {
@@ -23338,7 +23338,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the smallest value in a list of arguments, including numbers, text, and logical values.
+        ///   Looks up a localized string similar to Returns the smallest Value in a list of arguments, including numbers, text, and logical values.
         /// </summary>
         internal static string Spreadsheet_MINA {
             get {
@@ -23347,7 +23347,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns minimum value among cells meeting criteria.
+        ///   Looks up a localized string similar to Returns minimum Value among cells meeting criteria.
         /// </summary>
         internal static string Spreadsheet_MINIFS {
             get {
@@ -23401,7 +23401,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the most common value in a data set.
+        ///   Looks up a localized string similar to Returns the most common Value in a data set.
         /// </summary>
         internal static string Spreadsheet_MODE {
             get {
@@ -23464,7 +23464,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns a value converted to a Number.
+        ///   Looks up a localized string similar to Returns a Value converted to a Number.
         /// </summary>
         internal static string Spreadsheet_N {
             get {
@@ -23473,7 +23473,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the error value #N/A.
+        ///   Looks up a localized string similar to Returns the error Value #N/A.
         /// </summary>
         internal static string Spreadsheet_NA {
             get {
@@ -23680,7 +23680,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns net present value based on cash flows.
+        ///   Looks up a localized string similar to Returns net present Value based on cash flows.
         /// </summary>
         internal static string Spreadsheet_NPV {
             get {
@@ -23869,7 +23869,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the percentage rank of a value in a data set.
+        ///   Looks up a localized string similar to Returns the percentage rank of a Value in a data set.
         /// </summary>
         internal static string Spreadsheet_PERCENTRANK {
             get {
@@ -23887,7 +23887,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the value of pi.
+        ///   Looks up a localized string similar to Returns the Value of pi.
         /// </summary>
         internal static string Spreadsheet_PI {
             get {
@@ -23968,7 +23968,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Capitalizes the first letter in each word of a text value.
+        ///   Looks up a localized string similar to Capitalizes the first letter in each word of a text Value.
         /// </summary>
         internal static string Spreadsheet_PROPER {
             get {
@@ -24013,7 +24013,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the present value of an investment.
+        ///   Looks up a localized string similar to Returns the present Value of an investment.
         /// </summary>
         internal static string Spreadsheet_PV {
             get {
@@ -24229,7 +24229,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the rightmost characters From a text value.
+        ///   Looks up a localized string similar to Returns the rightmost characters From a text Value.
         /// </summary>
         internal static string Spreadsheet_RIGHT {
             get {
@@ -24238,7 +24238,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the rightmost characters From a text value.
+        ///   Looks up a localized string similar to Returns the rightmost characters From a text Value.
         /// </summary>
         internal static string Spreadsheet_RIGHTB {
             get {
@@ -24355,7 +24355,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Finds one text value within another (not case-sensitive).
+        ///   Looks up a localized string similar to Finds one text Value within another (not case-sensitive).
         /// </summary>
         internal static string Spreadsheet_SEARCHB {
             get {
@@ -24364,7 +24364,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Finds one text value within another (not case-sensitive).
+        ///   Looks up a localized string similar to Finds one text Value within another (not case-sensitive).
         /// </summary>
         internal static string Spreadsheet_SEARCHFormula {
             get {
@@ -24544,7 +24544,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the k-th smallest value in a data set.
+        ///   Looks up a localized string similar to Returns the k-th smallest Value in a data set.
         /// </summary>
         internal static string Spreadsheet_SMALL {
             get {
@@ -24625,7 +24625,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns a normalized value.
+        ///   Looks up a localized string similar to Returns a normalized Value.
         /// </summary>
         internal static string Spreadsheet_STANDARDIZE {
             get {
@@ -24679,7 +24679,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the standard error of the predicted y-value for each x in the regression.
+        ///   Looks up a localized string similar to Returns the standard error of the predicted y-Value for each x in the regression.
         /// </summary>
         internal static string Spreadsheet_STEYX {
             get {
@@ -24778,7 +24778,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns result matching first true value.
+        ///   Looks up a localized string similar to Returns result matching first true Value.
         /// </summary>
         internal static string Spreadsheet_SWITCH {
             get {
@@ -25039,7 +25039,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the logical value TRUE.
+        ///   Looks up a localized string similar to Returns the logical Value TRUE.
         /// </summary>
         internal static string Spreadsheet_TRUE {
             get {
@@ -25057,7 +25057,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns a Number indicating the data type of a value.
+        ///   Looks up a localized string similar to Returns a Number indicating the data type of a Value.
         /// </summary>
         internal static string Spreadsheet_TYPE {
             get {
@@ -25174,7 +25174,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the text From any specified value..
+        ///   Looks up a localized string similar to Returns the text From any specified Value..
         /// </summary>
         internal static string Spreadsheet_VALUETOTEXT {
             get {
@@ -25246,7 +25246,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Looks up value in first column and returns cell in same row.
+        ///   Looks up a localized string similar to Looks up Value in first column and returns cell in same row.
         /// </summary>
         internal static string Spreadsheet_VLOOKUP {
             get {
@@ -25327,7 +25327,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns value of first or approximate match.
+        ///   Looks up a localized string similar to Returns Value of first or approximate match.
         /// </summary>
         internal static string Spreadsheet_XLOOKUP {
             get {
@@ -25336,7 +25336,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns position of value in range.
+        ///   Looks up a localized string similar to Returns position of Value in range.
         /// </summary>
         internal static string Spreadsheet_XMATCH {
             get {
@@ -25372,7 +25372,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the one-tailed probability-value of a z-test.
+        ///   Looks up a localized string similar to Returns the one-tailed probability-Value of a z-test.
         /// </summary>
         internal static string Spreadsheet_ZTEST {
             get {

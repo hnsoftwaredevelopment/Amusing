@@ -1,269 +1,299 @@
 ﻿using System.Text.Json;
-
-using Syncfusion.Blazor.QueryBuilder;
+using System.Text.Json.Serialization;
 
 public static class QueryBuilderJsonConverter
 {
-    public static string OldToNew(string oldJson)
+    #region Public Methods
+    public static string OldToNew( string oldJson )
     {
-        if (string.IsNullOrWhiteSpace(oldJson) || oldJson == "[]")
-            return JsonSerializer.Serialize(new List<RuleModel>(), new JsonSerializerOptions { WriteIndented = true });
+        if ( string.IsNullOrWhiteSpace( oldJson ) || oldJson == "[]" )
+        {
+            return JsonSerializer.Serialize(
+                new NewQueryRuleGroup { Condition = "and", Rules = new List<NewQueryRule>(), IsLocked = false },
+                new JsonSerializerOptions { WriteIndented = true } );
+        }
 
-        List<OldQueryRule> oldList;
+        List<OldQueryRule>? oldList;
         try
         {
-            oldList = JsonSerializer.Deserialize<List<OldQueryRule>>(oldJson);
+            oldList = JsonSerializer.Deserialize<List<OldQueryRule>>( oldJson );
         }
         catch
         {
-            return JsonSerializer.Serialize(new List<RuleModel>(), new JsonSerializerOptions { WriteIndented = true });
+            return JsonSerializer.Serialize(
+                new NewQueryRuleGroup { Condition = "and", Rules = new List<NewQueryRule>(), IsLocked = false },
+                new JsonSerializerOptions { WriteIndented = true } );
         }
 
-        var newRules = new List<RuleModel>();
+        List<NewQueryRule> newRules = new();
+        int index = 0;
 
-        foreach (var old in oldList)
+        foreach ( OldQueryRule old in oldList ?? Enumerable.Empty<OldQueryRule>() )
         {
-            var fieldName = old.field?.value ?? string.Empty;
-            var op = MapOperatorToNew(old.@operator?.value ?? string.Empty);
-            var parsedValue = ParseValue(old);
+            NewQueryRule newRule = ConvertRule(old);
+            newRule.RuleId = $"querybuilder_group0_rule{index++}";
+            newRules.Add( newRule );
+        }
 
-            // --- Fix old contactpersonen ---
-            parsedValue = FixOldContactPersons(parsedValue);
+        NewQueryRuleGroup group = new()
+        {
+            Condition = "and",
+            Rules = newRules,
+            IsLocked = false
+        };
 
-            // --- Special cases ---
-            if (fieldName.Equals("enrolled", StringComparison.OrdinalIgnoreCase))
-            {
-                fieldName = "Festival";
-                op = "in"; // altijd multi-select
-                parsedValue = EnsureArray(parsedValue);
-            }
-            else if (fieldName.Equals("role", StringComparison.OrdinalIgnoreCase) ||
-                     fieldName.Equals("volunteered", StringComparison.OrdinalIgnoreCase))
-            {
-                parsedValue = EnsureArray(parsedValue);
-                op = "in";
-            }
+        return JsonSerializer.Serialize( group, new JsonSerializerOptions { WriteIndented = true } );
+    }
+    #endregion
 
-            // --- Map field names ---
-            string newField = fieldName switch
+    #region Private Helpers
+    private static readonly HashSet<string> BooleanFields = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "DroppedOut",
+        "IsCanceled",
+        "IsPaid",
+        "Dressingroom",
+        "Jury",
+        "Infomailing"
+    };
+
+    private static NewQueryRule ConvertRule( OldQueryRule old )
+    {
+        string fieldName = old.Field?.Value ?? string.Empty;
+        string label = old.Field?.Label ?? string.Empty;
+        string op = MapOperatorToNew(old.Operator?.Value ?? string.Empty);
+
+        object? rawValue = old.Value?.Value;
+
+        if ( old.Value != null && old.Value.Value.ValueKind != JsonValueKind.Undefined )
+        {
+            JsonElement je = old.Value.Value;
+
+            rawValue = je.ValueKind switch
             {
-                "role" => "Role",
-                "volunteered" => "Volunteer",
-                "mailing" => "Infomailing",
-                "droppedout" => "IsCanceled",
-                "payed" => "IsPaid",
-                "review" => "Jury",
-                "headcount" => "Singers",
-                "dressingroom" => "Dressingroom",
-                "enrolled" => "Festival",
-                _ => fieldName
+                JsonValueKind.String => je.GetString(),
+                JsonValueKind.Number => je.GetInt32(),
+                JsonValueKind.True => true,
+                JsonValueKind.False => false,
+                JsonValueKind.Array => je.EnumerateArray().Select( x => x.ToString() ).ToArray(),
+                _ => null
             };
-
-            // --- Determine type ---
-            string type = DetermineType(parsedValue, op);
-
-            newRules.Add(new RuleModel
-            {
-                Field = newField,
-                Label = old.field?.label ?? string.Empty,
-                Operator = op,
-                Type = type,
-                Value = parsedValue,
-                Rules = null
-            });
         }
 
-        return JsonSerializer.Serialize(newRules, new JsonSerializerOptions { WriteIndented = true });
-    }
-
-    public static string NewToOld(SfQueryBuilder<RuleModel> queryBuilder)
-    {
-        // Haal de huidige regels uit de querybuilder
-        var currentRules = queryBuilder.GetRules();
-
-        if (currentRules == null)
-            return string.Empty;
-
-        // Zet om naar jouw oude JSON formaat
-        // Voorbeeld: alles naar een "flat list" van RuleModels
-        var rulesList = currentRules.Rules ?? new List<RuleModel>();
-
-        // Serialize als oude JSON structuur
-        return JsonSerializer.Serialize(rulesList, new JsonSerializerOptions
+        // --- Special cases ---
+        if ( fieldName.Equals( "enrolled", StringComparison.OrdinalIgnoreCase ) )
         {
-            WriteIndented = false
-        });
-    }
-
-    private static object EnsureArray(object value)
-    {
-        if (value == null) return Array.Empty<string>();
-
-        if (value is string s)
-            return s.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                    .Select(x => x.Trim())
-                    .ToArray();
-
-        if (value is int i)
-            return new[] { i.ToString() };
-
-        if (value is string[] arr)
-            return arr;
-
-        if (value is IEnumerable<string> strEnum)
-            return strEnum.ToArray();
-
-        return new[] { value.ToString() };
-    }
-    private static string DetermineType(object value, string op)
-    {
-        if (op == "in") return "String";
-        if (value is bool) return "Boolean";
-        if (value is int) return "Number";
-        return "String";
-    }
-
-    private static object ParseValue(OldQueryRule rule)
-    {
-        if (rule.value == null) return null;
-
-        var fieldName = rule.field?.value ?? string.Empty;
-
-        // --- Known boolean fields ---
-        if (BooleanFields.Contains(fieldName, StringComparer.OrdinalIgnoreCase))
+            fieldName = "Festival";
+            op = "in"; // always force "in"
+            rawValue = EnsureArray( rawValue );
+        }
+        else if ( fieldName.Equals( "role", StringComparison.OrdinalIgnoreCase ) ||
+                  fieldName.Equals( "volunteered", StringComparison.OrdinalIgnoreCase ) )
         {
-            if (rule.value is JsonElement je)
+            op = "in"; // force "in" as well
+            rawValue = EnsureArray( rawValue );
+        }
+
+        rawValue = FixOldContactPersons( rawValue );
+
+        string newField = fieldName switch
+        {
+            "role" => "Role",
+            "volunteered" => "Volunteer",
+            "mailing" => "Infomailing",
+            "droppedout" => "IsCanceled",
+            "payed" => "IsPaid",
+            "review" => "Jury",
+            "headcount" => "Singers",
+            "dressingroom" => "Dressingroom",
+            "enrolled" => "Festival",
+            _ => fieldName
+        };
+
+        // --- Convert numeric booleans to true/false
+        if ( BooleanFields.Contains( fieldName ) )
+        {
+            if ( rawValue is int i )
             {
-                if (je.ValueKind == JsonValueKind.Number)
-                    return je.GetInt32() != 0;
-                if (je.ValueKind == JsonValueKind.True) return true;
-                if (je.ValueKind == JsonValueKind.False) return false;
-                if (je.ValueKind == JsonValueKind.String)
-                {
-                    var str = je.GetString();
-                    if (str == "0") return false;
-                    if (str == "1") return true;
-                    if (bool.TryParse(str, out bool b)) return b;
-                }
+                rawValue = i != 0;
             }
-            else if (rule.value is int i)
+            else if ( rawValue is string s )
             {
-                return i != 0;
-            }
-            else if (rule.value is string s)
-            {
-                if (s == "0") return false;
-                if (s == "1") return true;
-                if (bool.TryParse(s, out bool b)) return b;
+                rawValue = s == "1";
             }
         }
 
-        // --- Original JsonElement handling ---
-        if (rule.value is JsonElement je2)
+        return new NewQueryRule
         {
-            if (je2.ValueKind == JsonValueKind.Array)
-                return je2.EnumerateArray().Select(x => x.ToString()).ToArray();
-            if (je2.ValueKind == JsonValueKind.Number)
-                return je2.GetInt32();
-            if (je2.ValueKind == JsonValueKind.String)
-                return je2.GetString();
-            if (je2.ValueKind == JsonValueKind.True) return true;
-            if (je2.ValueKind == JsonValueKind.False) return false;
-        }
-
-        return rule.value;
-    }
-    private static string MapOperatorToNew(string oldOp)
-    {
-        return oldOp switch
-        {
-            "eq" => "equal",
-            "in" => "in",
-            "gt" => "greaterthan",
-            "lt" => "lessthan",
-            _ => oldOp
+            Field = newField,
+            Label = label,
+            Operator = op,
+            Type = DetermineType( rawValue, op, newField ),
+            Value = rawValue,
+            IsLocked = false
         };
     }
 
-    private static object FixOldContactPersons(object value)
+    private static object EnsureArray( object? value )
     {
-        if (value is string s)
+        if ( value == null )
         {
-            if (s.Contains("contactpersoon")) s = s.Replace("contactpersoon", "contactpersoon1");
-            if (s.Equals("contact", StringComparison.OrdinalIgnoreCase)) s = "contactpersoon1";
-            if (s.Contains("contact2")) s = s.Replace("contact2", "contactpersoon2");
-            return s.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim()).ToArray();
+            return Array.Empty<string>();
         }
-        if (value is string[] arr)
+
+        switch ( value )
         {
-            return arr.Select(x =>
-            {
-                if (x == "contactpersoon") return "contactpersoon1";
-                if (x == "contact2") return "contactpersoon2";
-                if (x.Equals("contact", StringComparison.OrdinalIgnoreCase)) return "contactpersoon1";
-                return x;
-            }).ToArray();
+            case string s:
+                return s.Split( ',', StringSplitOptions.RemoveEmptyEntries )
+                        .Select( x => x.Trim() )
+                        .ToArray();
+            case int i:
+                return new [ ] { i.ToString() };
+            case string [ ] arr:
+                return arr;
+            case IEnumerable<string> strEnum:
+                return strEnum.ToArray();
+            default:
+                return new [ ] { value.ToString()! };
         }
-        return value;
     }
 
-    private static readonly HashSet<string> BooleanFields =
-[
-    "IsCanceled",
-    "IsPaid",
-    "Dressingroom",
-    "Jury",
-    "Infomailing"
-];
+    private static string DetermineType( object? value, string op, string field )
+    {
+        if ( op == "in" )
+        {
+            return "String";
+        }
 
-    #region OldQueryRule
+        if ( BooleanFields.Contains( field ) )
+        {
+            return "Boolean";
+        }
+
+        if ( value is bool )
+        {
+            return "Boolean";
+        }
+
+        if ( value is int )
+        {
+            return "Number";
+        }
+
+        return "String";
+    }
+
+    private static string MapOperatorToNew( string oldOp ) => oldOp switch
+    {
+        "eq" => "equal",
+        "in" => "in",
+        "gt" => "greaterthan",
+        "lt" => "lessthan",
+        _ => oldOp
+    };
+
+    private static object FixOldContactPersons( object value )
+    {
+        if ( value is string s )
+        {
+            if ( s.Contains( "contactpersoon" ) )
+            {
+                s = s.Replace( "contactpersoon", "contactpersoon1" );
+            }
+
+            if ( s.Equals( "contact", StringComparison.OrdinalIgnoreCase ) )
+            {
+                s = "contactpersoon1";
+            }
+
+            if ( s.Contains( "contact2" ) )
+            {
+                s = s.Replace( "contact2", "contactpersoon2" );
+            }
+
+            return s.Split( ',', StringSplitOptions.RemoveEmptyEntries ).Select( x => x.Trim() ).ToArray();
+        }
+
+        if ( value is string [ ] arr )
+        {
+            return arr.Select( x =>
+            {
+                if ( x == "contactpersoon" )
+                {
+                    return "contactpersoon1";
+                }
+
+                if ( x == "contact2" )
+                {
+                    return "contactpersoon2";
+                }
+
+                if ( x.Equals( "contact", StringComparison.OrdinalIgnoreCase ) )
+                {
+                    return "contactpersoon1";
+                }
+
+                return x;
+            } ).ToArray();
+        }
+
+        return value;
+    }
+    #endregion
+
+    #region Models
+    private class NewQueryRuleGroup
+    {
+        public string Condition { get; set; }
+        public List<NewQueryRule> Rules { get; set; }
+        public bool IsLocked { get; set; }
+    }
+
+    public class NewQueryRule
+    {
+        public string Field { get; set; }
+        public string Label { get; set; }
+        public string Operator { get; set; }
+        public string Type { get; set; }
+        public object Value { get; set; }
+        public string RuleId { get; set; }
+        public bool IsLocked { get; set; }
+    }
+
     public class OldQueryRule
     {
-        public OldField field { get; set; }
-        public OldOperator @operator { get; set; }
-        public object value { get; set; }
+        [JsonPropertyName( "field" )]
+        public OldField Field { get; set; }
+
+        [JsonPropertyName( "operator" )]
+        public OldOperator Operator { get; set; }
+
+        [JsonPropertyName( "value" )]
+        public OldValue Value { get; set; }
     }
 
     public class OldField
     {
-        public string value { get; set; }
-        public string label { get; set; }
+        [JsonPropertyName( "value" )]
+        public string Value { get; set; }
+
+        [JsonPropertyName( "label" )]
+        public string Label { get; set; }
     }
 
     public class OldOperator
     {
-        public string value { get; set; }
+        [JsonPropertyName( "value" )]
+        public string Value { get; set; }
     }
-    #endregion
 
-    #region LoadRulesFromJson
-    public static void LoadRulesFromJson(SfQueryBuilder<RuleModel> queryBuilder, string json)
+    public class OldValue
     {
-        if (queryBuilder == null || string.IsNullOrWhiteSpace(json))
-        {
-            queryBuilder?.SetRules(new List<RuleModel>());
-            return;
-        }
+        [JsonPropertyName( "value" )]
+        public JsonElement Value { get; set; }
 
-        try
-        {
-            var rulesList = JsonSerializer.Deserialize<List<RuleModel>>(json);
-            if (rulesList != null)
-            {
-                foreach (var r in rulesList)
-                {
-                    Console.WriteLine($"Rule: Field={r.Field}, Type={r.Type}, ValueType={r.Value?.GetType()} Value={r.Value}");
-                }
-                queryBuilder.SetRules(rulesList);
-                return;
-            }
-        }
-        catch
-        {
-            // log eventueel
-        }
-
-        queryBuilder.SetRules(new List<RuleModel>());
+        [JsonPropertyName( "label" )]
+        public string Label { get; set; }
     }
     #endregion
 }
