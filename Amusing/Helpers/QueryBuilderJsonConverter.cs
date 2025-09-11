@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
+using Syncfusion.Blazor.QueryBuilder;
+
 public static class QueryBuilderJsonConverter
 {
     #region Public Methods
@@ -8,9 +10,12 @@ public static class QueryBuilderJsonConverter
     {
         if ( string.IsNullOrWhiteSpace( oldJson ) || oldJson == "[]" )
         {
-            return JsonSerializer.Serialize(
-                new NewQueryRuleGroup { Condition = "and", Rules = new List<NewQueryRule>(), IsLocked = false },
-                new JsonSerializerOptions { WriteIndented = true } );
+            return JsonSerializer.Serialize( new NewQueryRuleGroup
+            {
+                Condition = "and",
+                Rules = new List<NewQueryRule>(),
+                IsLocked = false
+            }, new JsonSerializerOptions { WriteIndented = true } );
         }
 
         List<OldQueryRule>? oldList;
@@ -20,9 +25,12 @@ public static class QueryBuilderJsonConverter
         }
         catch
         {
-            return JsonSerializer.Serialize(
-                new NewQueryRuleGroup { Condition = "and", Rules = new List<NewQueryRule>(), IsLocked = false },
-                new JsonSerializerOptions { WriteIndented = true } );
+            return JsonSerializer.Serialize( new NewQueryRuleGroup
+            {
+                Condition = "and",
+                Rules = new List<NewQueryRule>(),
+                IsLocked = false
+            }, new JsonSerializerOptions { WriteIndented = true } );
         }
 
         List<NewQueryRule> newRules = new();
@@ -44,6 +52,19 @@ public static class QueryBuilderJsonConverter
 
         return JsonSerializer.Serialize( group, new JsonSerializerOptions { WriteIndented = true } );
     }
+
+    public static List<RuleModel> ToRuleModels( string json )
+    {
+        if ( string.IsNullOrWhiteSpace( json ) )
+        {
+            return new List<RuleModel>();
+        }
+
+        using JsonDocument doc = JsonDocument.Parse(json);
+        JsonElement root = doc.RootElement;
+
+        return BuildRuleModels( root );
+    }
     #endregion
 
     #region Private Helpers
@@ -56,6 +77,63 @@ public static class QueryBuilderJsonConverter
         "Jury",
         "Infomailing"
     };
+
+    private static List<RuleModel> BuildRuleModels( JsonElement elem )
+    {
+        List<RuleModel> rules = new();
+
+        if ( elem.TryGetProperty( "Rules", out JsonElement pRules ) && pRules.ValueKind == JsonValueKind.Array )
+        {
+            foreach ( JsonElement child in pRules.EnumerateArray() )
+            {
+                rules.Add( BuildRuleModel( child ) );
+            }
+        }
+        else
+        {
+            rules.Add( BuildRuleModel( elem ) );
+        }
+
+        return rules;
+    }
+
+    private static RuleModel BuildRuleModel( JsonElement elem )
+    {
+        RuleModel rule = new()
+        {
+            Field = elem.GetProperty("Field").GetString(),
+            Label = elem.GetProperty("Label").GetString(),
+            Operator = elem.GetProperty("Operator").GetString(),
+            Type = elem.GetProperty("Type").GetString(),
+            RuleId = elem.GetProperty("RuleId").GetString(),
+            IsLocked = elem.TryGetProperty("IsLocked", out JsonElement pIsLocked ) && pIsLocked.GetBoolean()
+        };
+
+        // Value: array of single
+        if ( elem.TryGetProperty( "Value", out JsonElement pValue ) )
+        {
+            if ( pValue.ValueKind == JsonValueKind.Array )
+            {
+                rule.Value = pValue.EnumerateArray().Select( x => x.ValueKind == JsonValueKind.String ? x.GetString() : x.ToString() ).ToArray();
+            }
+            else
+            {
+                rule.Value = rule.Operator == "in" ? new string [ ] { pValue.GetString() } : pValue.GetString();
+            }
+        }
+
+        // Recursief child rules
+        if ( elem.TryGetProperty( "Rules", out JsonElement childRules ) && childRules.ValueKind == JsonValueKind.Array )
+        {
+            rule.Rules = new List<RuleModel>();
+            foreach ( JsonElement child in childRules.EnumerateArray() )
+            {
+                rule.Rules.Add( BuildRuleModel( child ) );
+            }
+        }
+
+        return rule;
+    }
 
     private static NewQueryRule ConvertRule( OldQueryRule old )
     {

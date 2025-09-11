@@ -17,7 +17,6 @@
 @using System.Text.Json.Serialization
 
 @inject MailingService MailingService;
-
 @inject NavigationManager NavManager
 @inject IJSRuntime JS
 
@@ -234,6 +233,19 @@ else
     private List<RecipientListModel> RecipientsList = [];
     private List<string> FestivalValues { get; set; } = new();
     private List<string> RoleValues { get; set; } = new();
+    private List<OperatorsModel> EqualOnlyOperator  = new List<OperatorsModel>
+    {
+        new OperatorsModel { Value = "equal", Text = "Is gelijk aan" }
+    };
+    private List<OperatorsModel> NumberOperator = new List<OperatorsModel>()
+    {
+        new OperatorsModel { Value="equal", Text = "Gelijk aan" },
+        new OperatorsModel { Value="notequal", Text = "Niet gelijk aan" },
+        new OperatorsModel { Value="greaterthan", Text = "Groter dan" },
+        new OperatorsModel { Value="greaterthanorequal", Text = "Groter of gelijk aan" },
+        new OperatorsModel { Value="lessthan", Text = "Kleiner dan" },
+        new OperatorsModel { Value="lessthanorequal", Text = "Kleiner of gelijk aan" },
+    };
     private RecipientListModel? SelectedRecipientsList;
     private SfGrid<RecipientListFilterModel>? GridRefReceipts;
     private SfGrid<RecipientListModel>? GridRef;
@@ -253,22 +265,22 @@ else
     {
         IsLoading = true;
 
+        //Get all recipientlists
         RecipientsList = await MailingService.GetRecipientListsAsync();
-
         SelectedRecipientsList = RecipientsList.FirstOrDefault();
         editContext = new EditContext( SelectedRecipientsList );
 
+        // Get Festival values
         FestivalValues = await MailingService.GetFestivalListAsync();
 
-        // Safety: fix all "in" fields so Value is always a string[]
-        var rules = queryBuilder?.GetRules()?.Rules;
-        if (rules != null)
+        if ( SelectedRecipientsList != null )
         {
-            foreach (var rule in rules.Where(r =>
-                InFields.Contains(r.Field) && r.Operator == "in"))
+            if ( string.IsNullOrWhiteSpace( SelectedRecipientsList.ListQuery ) && !string.IsNullOrWhiteSpace( SelectedRecipientsList.ListFilter ) )
             {
-                rule.Value ??= Array.Empty<string>();
+                SelectedRecipientsList.ListQuery = QueryBuilderJsonConverter.OldToNew( SelectedRecipientsList.ListFilter );
             }
+
+            LoadRulesIntoQueryBuilder( SelectedRecipientsList.ListQuery );
         }
 
         IsLoading = false;
@@ -280,13 +292,26 @@ else
         {
             _initialLoadDone = true;
             await UpdateVisibleRowCountAsync();
+
+            // Select first row in the SfGrid
             await GridRef.SelectRowAsync( 0 );
+
+            // filll QueryBuilder with query data from selected row
+            await SelectRecipientListAsync( RecipientsList [ 0 ] );
         }
     }
 
     private async Task OnRowSelected( RowSelectEventArgs<RecipientListModel> args )
     {
-        SelectedRecipientsList = args.Data;
+        await SelectRecipientListAsync( args.Data );
+    }
+
+    private async Task SelectRecipientListAsync( RecipientListModel recipient )
+    {
+        if ( recipient == null )
+            return;
+
+        SelectedRecipientsList = recipient;
         editContext = new EditContext( SelectedRecipientsList );
 
         SourceChecked = SelectedRecipientsList.ListSource switch
@@ -298,49 +323,97 @@ else
 
         if ( queryBuilder != null )
         {
-            // If there already is a new QueryRule string available use this, otherwise get the old string and convert it
-            if ( string.IsNullOrWhiteSpace( SelectedRecipientsList.ListQuery ) )
+            string json = SelectedRecipientsList.ListQuery;
+
+            // Alleen converteren als er geen nieuwe JSON is
+            if ( string.IsNullOrWhiteSpace( json ) && !string.IsNullOrWhiteSpace( SelectedRecipientsList.ListFilter ) )
             {
-                SelectedRecipientsList.ListQuery = QueryBuilderJsonConverter.OldToNew( SelectedRecipientsList.ListFilter );
+                json = QueryBuilderJsonConverter.OldToNew( SelectedRecipientsList.ListFilter );
+                SelectedRecipientsList.ListQuery = json;
             }
 
-            await LoadRulesAsync( SelectedRecipientsList?.ListQuery );
+            // Zet de regels in de QueryBuilder
+            await LoadRulesAsync( json );
+
+            // Fix alle "in"-velden die null zijn
+            FixInFields( queryBuilder.GetRules()?.Rules );
+
+            // Eventueel: subscribeer op nieuwe regels zodat sanity check automatisch blijft gelden
+            //queryBuilder.RuleAdded += ( sender, args ) => FixInFields( new [ ] { args.Rule } );
         }
 
         await InvokeAsync( StateHasChanged );
     }
 
-    public static void LoadRulesFromJson( SfQueryBuilder<RuleModel> queryBuilder, string json )
+    #region FixInFields
+    private void FixInFields( RuleModel rule )
+    {
+        if ( rule == null )
+            return;
+
+        if ( InFields.Contains( rule.Field ) && rule.Operator == "in" && rule.Value == null )
+            rule.Value = Array.Empty<string>();
+
+        if ( rule.Rules != null && rule.Rules.Any() )
+            FixInFields( rule.Rules );
+    }
+
+    private void FixInFields( IEnumerable<RuleModel> rules )
+    {
+        if ( rules == null )
+            return;
+        foreach ( var r in rules )
+            FixInFields( r );
+    }
+    #endregion
+
+    private void LoadRulesIntoQueryBuilder( string? json )
     {
         if ( queryBuilder == null )
             return;
 
-        if ( string.IsNullOrEmpty( json ) )
+        if ( string.IsNullOrWhiteSpace( json ) )
         {
             queryBuilder.Reset();
             return;
         }
 
-        try
+        var rules = QueryBuilderJsonConverter.ToRuleModels(json);
+        queryBuilder.SetRules( rules );
+
+        // Force AND condition en fix alle "in"-velden
+        ForceAndCondition( rules );
+        FixInFields( rules );
+    }
+
+    #region ForceAndCondition
+    private void ForceAndCondition( RuleModel rule )
+    {
+        if ( rule == null )
+            return;
+
+        if ( rule.Rules != null && rule.Rules.Any() )
         {
-            using var doc = JsonDocument.Parse(json);
-            var rootElem = doc.RootElement;
-
-            var rootRule = BuildRuleFromJsonElement(rootElem);
-
-            // Force AND bij laden (zoals je al had)
-            ForceAndCondition( rootRule );
-
-            if ( rootRule.Rules != null && rootRule.Rules.Any() )
-                queryBuilder.SetRules( rootRule.Rules );
-            else
-                queryBuilder.SetRules( new List<RuleModel> { rootRule } );
+            rule.Condition = "and";
+            // recurse into children
+            ForceAndCondition( rule.Rules );
         }
-        catch
+        else
         {
-            queryBuilder.Reset();
+            rule.Condition = null;
         }
     }
+
+    private void ForceAndCondition( IEnumerable<RuleModel> rules )
+    {
+        if ( rules == null )
+            return;
+        foreach ( var r in rules )
+        {
+            ForceAndCondition( r );
+        }
+    }
+    #endregion
 
     private static RuleModel BuildRuleFromJsonElement( JsonElement elem )
     {
@@ -477,10 +550,6 @@ else
         await InvokeAsync( StateHasChanged );
     }
 
-    /// <summary>
-    /// Walk the tree and convert JsonElement values into real CLR types
-    /// (string, string[], bool, int) based on content and known boolean fields.
-    /// </summary>
     private static readonly HashSet<string> BooleanFields = new(StringComparer.OrdinalIgnoreCase)
     {
         "IsCanceled", "IsPaid", "Dressingroom", "Jury", "Infomailing"
@@ -555,27 +624,6 @@ else
 
             default:
                 return elem.GetRawText();
-        }
-    }
-
-    /// <summary>
-    /// Force Condition = "and" only for groups (nodes that have children).
-    /// Leave leaf nodes Condition = null so they render as simple rules.
-    /// </summary>
-    private static void ForceAndCondition( RuleModel rule )
-    {
-        if ( rule == null )
-            return;
-
-        if ( rule.Rules != null && rule.Rules.Any() )
-        {
-            rule.Condition = "and";
-            foreach ( var r in rule.Rules )
-                ForceAndCondition( r );
-        }
-        else
-        {
-            rule.Condition = null;
         }
     }
 
@@ -684,41 +732,6 @@ else
         await GridRef.Refresh();
     }
 
-    public class RuleModelConverter : JsonConverter<RuleModel>
-    {
-        public override RuleModel Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
-        {
-            var clone = JsonDocument.ParseValue(ref reader).RootElement;
-
-            var model = JsonSerializer.Deserialize<RuleModel>(clone.GetRawText(), options);
-
-            if ( model?.Value is JsonElement elem )
-            {
-                if ( elem.ValueKind == JsonValueKind.String )
-                    model.Value = elem.GetString();
-                else if ( elem.ValueKind == JsonValueKind.True || elem.ValueKind == JsonValueKind.False )
-                    model.Value = elem.GetBoolean();
-                else if ( elem.ValueKind == JsonValueKind.Array )
-                {
-                    var values = new List<string>();
-                    foreach ( var item in elem.EnumerateArray() )
-                    {
-                        if ( item.ValueKind == JsonValueKind.String )
-                            values.Add( item.GetString() ?? "" );
-                    }
-                    model.Value = values.ToArray();
-                }
-            }
-
-            return model!;
-        }
-
-        public override void Write( Utf8JsonWriter writer, RuleModel value, JsonSerializerOptions options )
-        {
-            JsonSerializer.Serialize( writer, ( object ) value, options );
-        }
-    }
-
     private void onSourceChange( Microsoft.AspNetCore.Components.ChangeEventArgs args )
     {
         var value = args.Value?.ToString() ?? string.Empty;
@@ -730,37 +743,7 @@ else
             _ => MailingService.RecipientListSource.Unknown
         };
     }
-
-    private void EnsureIn( RuleModel rule, Syncfusion.Blazor.QueryBuilder.ColumnType type )
-    {
-        rule.Operator = "in";
-        rule.Type = type.ToString(); // "Number" of "String"
-    }
-
-    List<string> InOnlyOperator = new List<string> { "in" };
-
-    List<OperatorsModel> EqualOnlyOperator  = new List<OperatorsModel>
-    {
-        new OperatorsModel { Value = "equal", Text = "Is gelijk aan" }
-    };
-
-    private List<OperatorsModel> StringOperator = new List<OperatorsModel>()
-    {
-        new OperatorsModel { Value="equal", Text = "Gelijk aan" },
-        new OperatorsModel { Value="notequal", Text = "Niet gelijk aan" },
-        new OperatorsModel { Value="startswith", Text = "Begint met" },
-        new OperatorsModel { Value="endswith", Text = "Eindigt met" },
-        new OperatorsModel { Value="contains", Text = "Bevat" }
-    };
-    private List<OperatorsModel> NumberOperator = new List<OperatorsModel>()
-    {
-        new OperatorsModel { Value="equal", Text = "Gelijk aan" },
-        new OperatorsModel { Value="notequal", Text = "Niet gelijk aan" },
-        new OperatorsModel { Value="greaterthan", Text = "Groter dan" },
-        new OperatorsModel { Value="greaterthanorequal", Text = "Groter of gelijk aan" },
-        new OperatorsModel { Value="lessthan", Text = "Kleiner dan" },
-        new OperatorsModel { Value="lessthanorequal", Text = "Kleiner of gelijk aan" },
-    };
+    
 
     private void OnQueryChanged(Syncfusion.Blazor.QueryBuilder.ChangeEventArgs args)
     {
@@ -808,49 +791,6 @@ else
             //Alleen boolean gebruiken om te bepalen of festival geselecteerd is
             FestivalSelected = rootRules.Rules.Any( r => r.Field == "Festival" && r.Value is string [ ] arr && arr.Length > 0 );
 
-    }
-
-    public class CustomConverter : JsonConverter<RuleModel>
-    {
-        public override RuleModel Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
-        {
-            throw new NotImplementedException();
-        }
-        public override void Write( Utf8JsonWriter writer, RuleModel value, JsonSerializerOptions options )
-        {
-            writer.WriteStartObject();
-            if ( value.Condition != null )
-            {
-                writer.WriteString( "Condition", value.Condition );
-            }
-            if ( value.Operator != null )
-            {
-                writer.WriteString( "Operator", value.Operator );
-            }
-            if ( value.Field != null )
-            {
-                writer.WriteString( "Field", value.Field );
-            }
-            if ( value.Type != null )
-            {
-                writer.WriteString( "Type", value.Type );
-            }
-            if ( value.Not != null )
-            {
-                writer.WriteBoolean( "Not", value.Not.Value );
-            }
-            if ( value.Value != null )
-            {
-                writer.WritePropertyName( "Value" );
-                JsonSerializer.Serialize( writer, value.Value, options );
-            }
-            if ( value.Rules != null )
-            {
-                writer.WritePropertyName( "Rules" );
-                JsonSerializer.Serialize( writer, value.Rules, options );
-            }
-            writer.WriteEndObject();
-        }
     }
 
     private void ChangeValue( MultiSelectChangeEventArgs<string [ ]> args, RuleModel rule )
