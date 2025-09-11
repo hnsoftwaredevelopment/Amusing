@@ -88,10 +88,16 @@ public static class QueryBuilderJsonConverter
             rawValue = EnsureArray( rawValue );
         }
         else if ( fieldName.Equals( "role", StringComparison.OrdinalIgnoreCase ) ||
-                  fieldName.Equals( "volunteered", StringComparison.OrdinalIgnoreCase ) )
+          fieldName.Equals( "volunteered", StringComparison.OrdinalIgnoreCase ) )
         {
             op = "in"; // force "in" as well
             rawValue = EnsureArray( rawValue );
+
+            // Make absolutely sure it's a string[]
+            if ( rawValue is not string [ ] )
+            {
+                rawValue = new [ ] { rawValue?.ToString() ?? string.Empty };
+            }
         }
 
         rawValue = FixOldContactPersons( rawValue );
@@ -211,6 +217,16 @@ public static class QueryBuilderJsonConverter
                 s = s.Replace( "contact2", "contactpersoon2" );
             }
 
+            if ( s.Equals( "treasurer", StringComparison.OrdinalIgnoreCase ) )
+            {
+                s = "penningmeester";
+            }
+
+            if ( s.Equals( "singer", StringComparison.OrdinalIgnoreCase ) )
+            {
+                s = "zanger";
+            }
+
             return s.Split( ',', StringSplitOptions.RemoveEmptyEntries ).Select( x => x.Trim() ).ToArray();
         }
 
@@ -233,6 +249,15 @@ public static class QueryBuilderJsonConverter
                     return "contactpersoon1";
                 }
 
+                if ( x == "treasurer" )
+                {
+                    return "penningmeester";
+                }
+
+                if ( x == "singer" )
+                {
+                    return "zanger";
+                }
                 return x;
             } ).ToArray();
         }

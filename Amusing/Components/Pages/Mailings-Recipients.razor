@@ -126,8 +126,6 @@ else
                             Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
                             Operators="EqualOnlyOperator" />
 
-                        @if (FestivalSelected)
-                        {
                             <QueryBuilderColumn Field="Volunteer"
                                                 Label="Persoon is vrijwilliger voor festival..."
                                                 Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String"
@@ -147,7 +145,6 @@ else
                                     </ValueTemplate>
                                 </QueryBuilderTemplates>
                             </QueryBuilderColumn>
-                        }
                 </QueryBuilderColumns>
             </SfQueryBuilder>            }
 
