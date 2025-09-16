@@ -50,9 +50,11 @@ public static class QueryBuilderJsonConverter
             IsLocked = false
         };
 
+        // Normalize labels before serializing
+        NormalizeLabels( group );
+
         return JsonSerializer.Serialize( group, new JsonSerializerOptions { WriteIndented = true } );
     }
-
     public static List<RuleModel> ToRuleModels( string json )
     {
         if ( string.IsNullOrWhiteSpace( json ) )
@@ -77,7 +79,6 @@ public static class QueryBuilderJsonConverter
         "Jury",
         "Infomailing"
     };
-
     private static List<RuleModel> BuildRuleModels( JsonElement elem )
     {
         List<RuleModel> rules = new();
@@ -96,7 +97,6 @@ public static class QueryBuilderJsonConverter
 
         return rules;
     }
-
     private static RuleModel BuildRuleModel( JsonElement elem )
     {
         RuleModel rule = new()
@@ -134,7 +134,6 @@ public static class QueryBuilderJsonConverter
 
         return rule;
     }
-
     private static NewQueryRule ConvertRule( OldQueryRule old )
     {
         string fieldName = old.Field?.Value ?? string.Empty;
@@ -217,7 +216,6 @@ public static class QueryBuilderJsonConverter
             IsLocked = false
         };
     }
-
     private static object EnsureArray( object? value )
     {
         if ( value == null )
@@ -241,7 +239,6 @@ public static class QueryBuilderJsonConverter
                 return new [ ] { value.ToString()! };
         }
     }
-
     private static string DetermineType( object? value, string op, string field )
     {
         if ( op == "in" )
@@ -266,7 +263,6 @@ public static class QueryBuilderJsonConverter
 
         return "String";
     }
-
     private static string MapOperatorToNew( string oldOp ) => oldOp switch
     {
         "eq" => "equal",
@@ -275,7 +271,6 @@ public static class QueryBuilderJsonConverter
         "lt" => "lessthan",
         _ => oldOp
     };
-
     private static object FixOldContactPersons( object value )
     {
         if ( value is string s )
@@ -342,6 +337,40 @@ public static class QueryBuilderJsonConverter
 
         return value;
     }
+    private static void NormalizeLabels( NewQueryRuleGroup group )
+    {
+        if ( group?.Rules == null )
+        {
+            return;
+        }
+
+        foreach ( NewQueryRule rule in group.Rules )
+        {
+            if ( !string.IsNullOrWhiteSpace( rule.Field ) &&
+                FieldLabelMap.TryGetValue( rule.Field, out string? correctLabel ) )
+            {
+                rule.Label = correctLabel;
+            }
+
+            // Recursive for nested groups
+            //if ( rule is NewQueryRuleGroup nestedGroup )
+            //{
+            //    NormalizeLabels( nestedGroup );
+            //}
+        }
+    }
+    private static readonly Dictionary<string, string> FieldLabelMap = new()
+{
+    { "Dressingroom", "Groep wil kleedkamer" },
+    { "Festival", "Groep is ingeschreven voor ..." },
+    { "Infomailing", "Persoon wil Infomailing" },
+    { "IsCanceled", "Groep is afgehaakt" },
+    { "IsPaid", "Groep heeft betaald" },
+    { "Jury", "Groep wil beoordeling" },
+    { "Role", "Persoon met de rol..." },
+    { "Singers", "Aantal zangers" },
+    { "Volunteer", "Persoon is vrijwilliger voor festival..." },
+};
     #endregion
 
     #region Models
@@ -351,7 +380,6 @@ public static class QueryBuilderJsonConverter
         public List<NewQueryRule> Rules { get; set; }
         public bool IsLocked { get; set; }
     }
-
     public class NewQueryRule
     {
         public string Field { get; set; }
@@ -362,7 +390,6 @@ public static class QueryBuilderJsonConverter
         public string RuleId { get; set; }
         public bool IsLocked { get; set; }
     }
-
     public class OldQueryRule
     {
         [JsonPropertyName( "field" )]
@@ -374,7 +401,6 @@ public static class QueryBuilderJsonConverter
         [JsonPropertyName( "value" )]
         public OldValue Value { get; set; }
     }
-
     public class OldField
     {
         [JsonPropertyName( "value" )]
@@ -383,13 +409,11 @@ public static class QueryBuilderJsonConverter
         [JsonPropertyName( "label" )]
         public string Label { get; set; }
     }
-
     public class OldOperator
     {
         [JsonPropertyName( "value" )]
         public string Value { get; set; }
     }
-
     public class OldValue
     {
         [JsonPropertyName( "value" )]

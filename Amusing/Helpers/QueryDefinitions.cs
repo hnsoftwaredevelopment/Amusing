@@ -1201,17 +1201,19 @@ public static class QueryDefinitions
         WHERE user_id = @UserId;";
     public static readonly string GetPersonsList = @"
     SELECT  
-     per.voornaam AS Firstname,
-     CONCAT_WS(' ', NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Lastname,
-     CONCAT_WS(' ', per.voornaam, NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Name,
-     per.email AS Email,
-     per.infomailing AS Infomailing,
-     per.actief AS Active
+        per.persoon_id AS PersonId,
+        per.voornaam AS Firstname,
+        CONCAT_WS(' ', NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Lastname,
+        CONCAT_WS(' ', per.voornaam, NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Name,
+        per.email AS Email,
+        per.infomailing AS Infomailing,
+        per.actief AS Active
     FROM amusing.ah_personen per
     WHERE per.email IS NOT NULL;
     ";
     public static readonly string GetPersonsWithRoleList = @"
         SELECT  
+            per.persoon_id AS PersonId,
 	        per.voornaam AS Firstname,
 	        CONCAT_WS(' ', NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Lastname,
 	        CONCAT_WS(' ', per.voornaam, NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Name,
@@ -1225,6 +1227,7 @@ public static class QueryDefinitions
         ";
     public static readonly string GetPersonsWithRoleAndGroupList = @"
         SELECT  
+            per.persoon_id AS PersonId,
 	        per.voornaam AS Firstname,
 	        CONCAT_WS(' ', NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Lastname,
 	        CONCAT_WS(' ', per.voornaam, NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Name,
@@ -1240,6 +1243,7 @@ public static class QueryDefinitions
         ";
     public static readonly string GetPersonsWithRoleAndGroupAndSubscriptionList = @"
         SELECT  
+            per.persoon_id AS PersonId,
 	        per.voornaam AS Firstname,
 	        CONCAT_WS(' ', NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Lastname,
 	        CONCAT_WS(' ', per.voornaam, NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Name,
@@ -1253,6 +1257,10 @@ public static class QueryDefinitions
 	        IF(sub.afgehaakt IS NOT NULL, 1, 0) AS Canceled,
 	        IF(sub.betaald IS NOT NULL, 1, 0) AS Payed,
 	        IF(sub.bevestigd IS NOT NULL, 1, 0) AS Confirmed,
+	        IF(sub.wens_1 = 'ja', 1, 0) AS Dressingroom,
+	        IF(sub.wens_2 = 'ja', 1, 0) AS SingAlong,
+	        IF(sub.wens_3 = 'ja', 1, 0) AS Stand,
+	        IF(sub.wens_4 = 'ja', 1, 0) AS Judgement,
 	        sub.aantal_deelnemers AS Singers
         FROM amusing.ah_personen per
         LEFT JOIN amusing.ah_personen_rollen rol ON per.persoon_id = rol.persoon_id
@@ -1261,7 +1269,8 @@ public static class QueryDefinitions
         WHERE per.email IS NOT NULL;
         ";
     public static readonly string GetFullPersonsList = @"
-        SELECT  
+        SELECT 
+            per.persoon_id AS PersonId,
 	        per.voornaam AS Firstname,
 	        CONCAT_WS(' ', NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Lastname,
 	        CONCAT_WS(' ', per.voornaam, NULLIF(per.tussenvoegsel, ''), per.achternaam) AS Name,
@@ -1276,6 +1285,10 @@ public static class QueryDefinitions
 	        IF(sub.afgehaakt IS NOT NULL, 1, 0) AS Canceled,
 	        IF(sub.betaald IS NOT NULL, 1, 0) AS Payed,
 	        IF(sub.bevestigd IS NOT NULL, 1, 0) AS Confirmed,
+	        IF(sub.wens_1 = 'ja', 1, 0) AS Dressingroom,
+	        IF(sub.wens_2 = 'ja', 1, 0) AS SingAlong,
+	        IF(sub.wens_3 = 'ja', 1, 0) AS Stand,
+	        IF(sub.wens_4 = 'ja', 1, 0) AS Judgement,
 	        sub.aantal_deelnemers AS Singers,
 	        IF(vol.persoon_id IS NOT NULL, 1, 0) AS Volunteer
         FROM amusing.ah_personen per
@@ -1292,6 +1305,18 @@ public static class QueryDefinitions
 	        AND fes.festival_id = vol.festival_id	
         WHERE per.email IS NOT NULL;
         ";
+
+    public static readonly string WhereFestival = "YEAR(fes.festivaldatum)";
+    public static readonly string WherePaid        = "IF(sub.betaald IS NOT NULL, 1, 0)";
+    public static readonly string WhereCanceled    = "IF(sub.afgehaakt IS NOT NULL, 1, 0)";
+    public static readonly string WhereSubscribed  = "IF(sub.ingeschreven IS NOT NULL, 1, 0)";
+    public static readonly string WhereConfirmed   = "IF(sub.bevestigd IS NOT NULL, 1, 0)";
+    public static readonly string WhereDressingroom= "IF(sub.wens_1 = 'ja', 1, 0)";
+    public static readonly string WhereSingers     = "sub.aantal_deelnemers";
+    public static readonly string WhereVolunteer   = "vol.persoon_id";
+    public static readonly string WhereInfomailing = "per.infomailing";
+    public static readonly string WhereRole        = "rol.rol";
+    public static readonly string WhereJury        = "IF(sub.wens_4 = 'ja', 1, 0)";
     public static readonly string GetAllRecipientLists = @"
         SELECT 
 	        id 		AS ListId,
@@ -1308,6 +1333,16 @@ public static class QueryDefinitions
     SET 
         name = @ListName,
         source = @ListSource,
+        filter = @ListFilter,
         query = @ListQuery
     WHERE id = @ListId;";
+    public static readonly string AddNewRecipientQuery = @"
+        INSERT INTO ah_recipient_lists
+            (name, source, filter, query)
+        VALUES (@Name, @Source, @Filter, @Query);
+        SELECT LAST_INSERT_ID();
+        ";
+    public static readonly string DeleteRecipientQuery = @"
+        DELETE FROM ah_recipient_lists 
+        WHERE id = @QueryId;";
 }

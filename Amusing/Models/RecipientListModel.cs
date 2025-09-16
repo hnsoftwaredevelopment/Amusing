@@ -16,6 +16,6 @@ public class RecipientListModel
             RecipientListSource.Persons => "Personen",
             _ => "Onbekend"
         };
-    public string? ListFilter { get; set; } = null!; // Old JSON Filter query
+    public string? ListFilter { get; set; } = "[]"; // Old JSON Filter query
     public string? ListQuery { get; set; } = null!; // New JSON Filter query
 }

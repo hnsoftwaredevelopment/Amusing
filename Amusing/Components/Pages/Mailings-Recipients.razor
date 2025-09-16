@@ -13,6 +13,7 @@
 @using Syncfusion.Blazor.QueryBuilder;
 @using Microsoft.AspNetCore.Components.Forms
 @using Syncfusion.Blazor.SplitButtons
+@using System.Dynamic
 @using System.Text.Json
 @using System.Text.Json.Serialization
 
@@ -37,6 +38,7 @@ else
 
             <div class="spacer-small"></div>
             <SfTextBox Placeholder="Lijstnaam" FloatLabelType="FloatLabelType.Always" Width="300px" @bind-Value="SelectedRecipientsList.ListName" />
+
 
             @if (SourceChecked == "groups")
             {
@@ -72,11 +74,21 @@ else
                         <QueryBuilderColumn 
                             Field="IsPaid" 
                             Label="Groep heeft betaald" 
-                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
+                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
                             Operators="EqualOnlyOperator" />
 
                         <QueryBuilderColumn 
-                            Field="IsCanceled" 
+                            Field="IsSubscribed"
+                            Label="Groep is ingeschreven"
+                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
+                            Operators="EqualOnlyOperator" />
+
+                        <QueryBuilderColumn Field="IsConfirmed"
+                                            Label="Groep heeft bevestigd"
+                                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
+                                            Operators="EqualOnlyOperator" />
+
+                        <QueryBuilderColumn Field="IsCanceled" 
                             Label="Groep is afgehaakt" 
                             Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
                             Operators="EqualOnlyOperator" />
@@ -84,7 +96,7 @@ else
                         <QueryBuilderColumn 
                             Field="Dressingroom" 
                             Label="Groep wil kleedkamer" 
-                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
+                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
                             Operators="EqualOnlyOperator" />
 
                         <QueryBuilderColumn 
@@ -174,6 +186,30 @@ else
                                 </button>
                             </Template>
                         </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Separator"/>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn" @onclick="ExportToExcel" title="Exporteer naar een Excel bestand">
+                                    <img src="icons/excel.svg" class="icon" alt="Excel" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn" @onclick="ExportToCsv" title="Exporteer naar een CSV bestand">
+                                    <img src="icons/csv.svg" class="icon" alt="CSV" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn" @onclick="ExportToPdf" title="Maak een PDF bestand">
+                                    <img src="icons/pdf.svg" class="icon" alt="PDF" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
                         <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
                             <Template>
                                 <span class="toolbar-count">@FileName: @VisibleRowCount</span>
@@ -217,6 +253,12 @@ else
             </div>
         </div>
     </div>
+    <!-- Hidden grid used only for export -->
+    <SfGrid @ref="HiddenGridRef"
+            TValue="ExpandoObject"
+            DataSource="@(DynamicRecipients ?? new List<ExpandoObject>())"
+            Width="800px" Height="400px">
+    </SfGrid>
 }
 
 @code 
@@ -226,9 +268,12 @@ else
     private bool IsLoading = false;
     private bool RoleSelected = false;
     private bool rulesPending;
+    private bool ColumnsBuilt = false;
     private string? pendingRulesJson;
     private EditContext? editContext;
     private int VisibleRowCount = 0;
+    private List<ExpandoObject> DynamicRecipients { get; set; } = new List<ExpandoObject>();
+    private List<IDictionary<string, object>> DynamicRecipientsDict { get; set; } = new();
     private List<RecipientListFilterModel> RecipientsFilterList = [];
     private List<RecipientListModel> RecipientsList = [];
     private List<string> FestivalValues { get; set; } = new();
@@ -249,6 +294,7 @@ else
     private RecipientListModel? SelectedRecipientsList;
     private SfGrid<RecipientListFilterModel>? GridRefReceipts;
     private SfGrid<RecipientListModel>? GridRef;
+    private SfGrid<ExpandoObject>? HiddenGridRef;
     private SfQueryBuilder<RuleModel> queryBuilder;
     private SfToast ToastObj;
     private List<string> PersonRoles = new() { "contactpersoon1", "contactpersoon2", "dirigent", "muzikant", "penningmeester", "zanger" };
@@ -259,6 +305,7 @@ else
     private string[] YesNoValues = new string[] { "Ja", "Nee" };
     private string GeneratedJson = string.Empty;
     private string OldJson = string.Empty;
+    private RenderFragment<bool?> BooleanTemplate => ( value ) => @<span>@(value == true ? "Ja" : "Nee")</span>;
     private string[] LastSelectedFestivals = Array.Empty<string>(); // For autoselect the Festivals for Volunteers
 
     protected override async Task OnInitializedAsync()
@@ -323,7 +370,7 @@ else
 
         if ( queryBuilder != null )
         {
-            string json = SelectedRecipientsList.ListQuery;
+            string? json = SelectedRecipientsList.ListQuery;
 
             // Alleen converteren als er geen nieuwe JSON is
             if ( string.IsNullOrWhiteSpace( json ) && !string.IsNullOrWhiteSpace( SelectedRecipientsList.ListFilter ) )
@@ -337,6 +384,8 @@ else
 
             // Fix alle "in"-velden die null zijn
             FixInFields( queryBuilder.GetRules()?.Rules );
+
+            //TODO: Maak hier de selectie welke query gebruikt moet worden en voeg de WHERE values toe
 
             // Eventueel: subscribeer op nieuwe regels zodat sanity check automatisch blijft gelden
             //queryBuilder.RuleAdded += ( sender, args ) => FixInFields( new [ ] { args.Rule } );
@@ -552,7 +601,7 @@ else
 
     private static readonly HashSet<string> BooleanFields = new(StringComparer.OrdinalIgnoreCase)
     {
-        "IsCanceled", "IsPaid", "Dressingroom", "Jury", "Infomailing"
+        "IsCanceled", "IsPaid", "Dressingroom", "Jury", "Infomailing", "IsConfirmed", "IsSubscribed"
     };
 
     private static object? ConvertJsonElement( JsonElement element, string? type )
@@ -801,18 +850,151 @@ else
         StateHasChanged();
     }
 
+    // Export functions
+    private async Task ExportToExcel()
+    {
+        var exportProps = new ExcelExportProperties
+        {
+            FileName = $"{FileName}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx"
+        };
+        await GenerateMailList();
+        if ( HiddenGridRef != null )
+            await HiddenGridRef.ExportToExcelAsync( exportProps );
+    }
+
+    private async Task ExportToCsv()
+    {
+        var exportProps = new ExcelExportProperties
+        {
+            FileName = $"{FileName}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv"
+        };
+
+        await GenerateMailList();
+        if ( HiddenGridRef != null )
+            await HiddenGridRef.ExportToCsvAsync( exportProps );
+    }
+
+    private async Task ExportToPdf()
+    {
+        var exportProps = new PdfExportProperties
+        {
+            FileName = $"{FileName}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.pdf",
+            PageOrientation = PageOrientation.Landscape,
+            PageSize=PdfPageSize.A4,
+            AllowHorizontalOverflow = true
+        };
+
+        await GenerateMailList();
+        if ( HiddenGridRef != null )
+            await HiddenGridRef.ExportToPdfAsync( exportProps );
+    }
+
     private async Task GenerateMailList()
     {
         var rules = queryBuilder.GetRules();
-
-        string queryType = "GetFullPersonsList";
-
-        // Bepaal welke query te gebruiken
-        if ( rules.Rules.Any( r => r.Field == "Role" ) )
-            queryType = "GetPersonsWithRoleList";
-        if ( rules.Rules.Any( r => r.Field == "Festival" ) )
-            queryType = "GetPersonsWithRoleList";
-
+        // Force AND
+        ForceAndCondition( rules );
         
+        //var fields = QueryBuilderHelper.CollectFields(rules);
+        var fullQuery = QueryBuilderHelper.DetermineQueryFromRules(rules, SourceChecked);
+
+        var result = await MailingService.GetDynamicRecipientsAsync(fullQuery) ?? new List<ExpandoObject>();
+
+        // Convert values to Ja/Nee
+        foreach ( var row in result )
+        {
+            var dict = (IDictionary<string, object>)row;
+
+            if ( dict.TryGetValue( "Aktief", out var aktiefValue ) && aktiefValue is bool b )
+                dict [ "Aktief" ] = b ? "Ja" : "Nee";
+
+            foreach ( var key in new [ ] { "Infomailing","Ingeschreven","Afgehaakt","Betaald","Bevestigd",
+                                    "Kleedkamer","SingAlong","Stand","Beoordeling","Vrijwilliger" } )
+            {
+                if ( dict.TryGetValue( key, out var val ) && val is int i )
+                    dict [ key ] = i == 1 ? "Ja" : "Nee";
+            }
+        }
+
+        DynamicRecipients = result;
+
+        if ( !ColumnsBuilt && DynamicRecipientsDict.Any() )
+        {
+            BuildDynamicColumns( DynamicRecipientsDict );
+            ColumnsBuilt = true;
+        }
+
+        //HiddenGridRef.DataSource = DynamicRecipients;
+        await HiddenGridRef.Refresh();
+    }
+
+    private string TranslateToDutch( string field )
+    {
+        return field switch
+        {
+            "Firstname" => "Voornaam",
+            "Lastname" => "Achternaam",
+            "Name" => "Volledige naam",
+            "Email" => "E-mail",
+            "Role" => "Rol",
+            "ROLE" => "Rol",
+            "GroupName" => "Groep",
+            "Festival" => "Editie",
+            "StageType" => "Podiumtype",
+            "Dressingroom" => "Kleedkamer",
+            "Judgement" => "Beoordeling",
+            "Volunteer" => "Vrijwilliger",
+            "Active" => "Aktief",
+            "Subscribed" => "Ingeschreven",
+            "Canceled" => "Afgehaakt",
+            "Payed" => "Betaald",
+            "Confirmed" => "Bevestigd",
+            "Singers" => "Zangers",
+            "PersonId" => "PersoonId",
+            _ => field
+        };
+    }
+
+    private void BuildDynamicColumns( List<IDictionary<string, object>> data )
+    {
+        if ( data == null || !data.Any() || HiddenGridRef == null )
+            return;
+
+        HiddenGridRef.Columns?.Clear();
+
+        var firstRow = (IDictionary<string, object>)data.First();
+
+        foreach ( var key in firstRow.Keys )
+        {
+            HiddenGridRef.Columns.Add( new GridColumn
+            {
+                Field = key,
+                HeaderText = TranslateToDutch( key ),
+                TextAlign = TextAlign.Left
+            } );
+        }
+
+        ColumnsBuilt = true;
+    }
+
+    private ExpandoObject ConvertValuesToJaNee( ExpandoObject row )
+    {
+        var dict = (IDictionary<string, object>)row;
+        var newRow = new ExpandoObject();
+        var newDict = (IDictionary<string, object>)newRow;
+
+        foreach ( var kvp in dict )
+        {
+            if ( kvp.Key == "Aktief" && kvp.Value is bool b )
+                newDict [ kvp.Key ] = b ? "Ja" : "Nee";
+            else if ( new [ ] { "Infomailing","Ingeschreven","Afgehaakt","Betaald","Bevestigd",
+                        "Kleedkamer","SingAlong","Stand","Beoordeling","Vrijwilliger" }.Contains( kvp.Key )
+                     && kvp.Value is int i )
+                newDict [ kvp.Key ] = i == 1 ? "Ja" : "Nee";
+            else
+                newDict [ kvp.Key ] = kvp.Value;
+        }
+
+        return newRow;
     }
 }

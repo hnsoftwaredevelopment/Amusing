@@ -1,4 +1,6 @@
-﻿using Amusing.Helpers;
+﻿using System.Dynamic;
+
+using Amusing.Helpers;
 using Amusing.Models;
 
 namespace Amusing.Services;
@@ -52,12 +54,42 @@ public class MailingService( GenericDataService dataService )
            } );
     }
 
+    public async Task<List<ExpandoObject>> GetDynamicRecipientsAsync( string query )
+    {
+        List<Dictionary<string, object>> rawList = await _dataService.ExecuteQueryAsync(
+        query,
+        reader =>
+        {
+            Dictionary<string, object> row = new( StringComparer.OrdinalIgnoreCase );
+            for ( int i = 0; i < reader.FieldCount; i++ )
+            {
+                string columnName = reader.GetName(i);
+                object value = reader.IsDBNull(i) ? null! : reader.GetValue(i);
+                row [ columnName ] = value;
+            }
+            return row;
+        } );
+
+        return rawList.Select( ToExpando ).ToList();
+    }
+
+    private static ExpandoObject ToExpando( Dictionary<string, object> dict )
+    {
+        IDictionary<string, object> expando = new ExpandoObject();
+        foreach ( KeyValuePair<string, object> kvp in dict )
+        {
+            expando [ kvp.Key ] = kvp.Value;
+        }
+        return ( ExpandoObject ) expando;
+    }
+
     public Task<List<RecipientListFilterModel>> GetAllRecipientsAsync()
     {
         return _dataService.ExecuteQueryAsync(
             QueryDefinitions.GetFullPersonsList, // Zorg dat je hier je MySQL query in QueryDefinitions hebt staan
             reader => new RecipientListFilterModel
             {
+                PersonId = Convert.ToUInt16( reader [ "PersonId" ] ),
                 Firstname = reader [ "Firstname" ].ToString() ?? string.Empty,
                 Lastname = reader [ "Lastname" ].ToString() ?? string.Empty,
                 Name = reader [ "Name" ].ToString() ?? string.Empty,
@@ -83,10 +115,34 @@ public class MailingService( GenericDataService dataService )
             { "@ListId", model.ListId },
             { "@ListName", model.ListName },
             { "@ListSource", model.ListSource },
+            { "@ListFilter", model.ListFilter },
             { "@ListQuery", model.ListQuery }
             };
 
         await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyRecipientQueryById, parameters );
+    }
+
+    public async Task<uint> AddRecipientQueryAsync( RecipientListModel model )
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { "@Name", model.ListName },
+            { "@Source", model.ListSource },
+            { "@Filter", model.ListFilter },
+            { "@Query", model.ListQuery }
+        };
+
+        return await _dataService.ExecuteScalarAsync<uint>( QueryDefinitions.AddNewRecipientQuery, parameters );
+    }
+
+    public async Task DeleteRecipientQueryAsync( uint queryId )
+    {
+        Dictionary<string, object> parameters = new()
+    {
+        { "QueryId", queryId }
+    };
+
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.DeleteRecipientQuery, parameters );
     }
 
 }
