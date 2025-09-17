@@ -2,3 +2,46 @@
 .sfquerybuilder .e-lib.e-btn-group {
     display: none !important;
 }
+
+.e-toast {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 14px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 10px 16px;
+    min-width: 280px;
+    max-width: 400px;
+}
+
+/* Succes toast */
+.e-toast-success {
+    background-color: #28a745 !important;
+    color: #fff !important;
+    border-left: 6px solid #1e7e34;
+}
+
+/* Warning toast */
+.e-toast-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+    border-left: 6px solid #d39e00;
+}
+
+/* Error toast */
+.e-toast-danger,
+.e-toast-error {
+    background-color: #dc3545 !important;
+    color: #fff !important;
+    border-left: 6px solid #a71d2a;
+}
+
+/* Icon een beetje groter maken */
+.e-toast .e-toast-icon {
+    font-size: 18px;
+    margin-right: 10px;
+}
+
+/* Titel bold */
+.e-toast .e-toast-title {
+    font-weight: bold;
+}
