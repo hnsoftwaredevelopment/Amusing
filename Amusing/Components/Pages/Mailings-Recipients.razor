@@ -45,84 +45,86 @@ else
             else
             {
                 <h5>Personen</h5>
-                <SfQueryBuilder TValue="RuleModel" @ref="queryBuilder" Width="80%" MaxGroupCount="0">
-                    <QueryBuilderEvents TValue="RuleModel" Changed="OnQueryChanged" />
+            }
+            <SfQueryBuilder TValue="RuleModel" @ref="personsQueryBuilder" Width="80%" MaxGroupCount="0">
+                    <QueryBuilderEvents TValue="RuleModel" Changed="OnPersonsQueryChanged" />
                     <QueryBuilderColumns>
-                        <QueryBuilderColumn Field="Festival"
-                                            Label="Groep is ingeschreven voor ..."
-                                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String"
-                                            Operators="@(new List<OperatorsModel> { new OperatorsModel { Value = "in", Text = "Bevat" } } )">
-                            <QueryBuilderTemplates>
-                                <ValueTemplate>
-                                    @{
-                                        // context is provided door QueryBuilder templates; haal huidige selectie (veilig casten)
-                                        var selected = context.Value as string[] ?? Array.Empty<string>();
-                                    }
-                                    <SfMultiSelect TItem="string"
-                                                   TValue="string[]"
-                                                   DataSource="@FestivalValues"
-                                                   Value="@selected"
-                                                   Placeholder="Selecteer festivals">
-                                        <MultiSelectEvents TValue="string[]" TItem="string" ValueChange="@(( MultiSelectChangeEventArgs<string [ ]> e ) => ChangeValue( e, context ))" />
-                                    </SfMultiSelect>
-                                </ValueTemplate>
-                            </QueryBuilderTemplates>
-                        </QueryBuilderColumn>
+                    <QueryBuilderColumn Field="Festival"
+                                        Label="Groep is ingeschreven voor ..."
+                                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String"
+                                        Operators="@(new List<OperatorsModel> { new OperatorsModel { Value = "in", Text = "Bevat" } } )">
+                        <QueryBuilderTemplates>
+                            <ValueTemplate>
+                                @{
+                                    var selected = context.Value as string[] ?? Array.Empty<string>();
+                                }
+                                <SfMultiSelect TItem="string"
+                                                TValue="string[]"
+                                                DataSource="@FestivalValues"
+                                                Value="@selected"
+                                                Placeholder="Selecteer festivals">
+                                    <MultiSelectEvents TValue="string[]" TItem="string" ValueChange="@(( MultiSelectChangeEventArgs<string [ ]> e ) => ChangeValue( e, context ))" />
+                                </SfMultiSelect>
+                            </ValueTemplate>
+                        </QueryBuilderTemplates>
+                    </QueryBuilderColumn>
+
+                    @if ( SourceChecked == "persons" || ( SourceChecked == "groups" && FestivalSelected ) )
+                    {
+                        <QueryBuilderColumn 
+                        Field="IsPaid" 
+                        Label="Groep heeft betaald" 
+                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
+                        Operators="EqualOnlyOperator" />
 
                         <QueryBuilderColumn 
-                            Field="IsPaid" 
-                            Label="Groep heeft betaald" 
-                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
-                            Operators="EqualOnlyOperator" />
-
-                        <QueryBuilderColumn 
-                            Field="IsSubscribed"
-                            Label="Groep is ingeschreven"
-                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
-                            Operators="EqualOnlyOperator" />
+                        Field="IsSubscribed"
+                        Label="Groep is ingeschreven"
+                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
+                        Operators="EqualOnlyOperator" />
 
                         <QueryBuilderColumn Field="IsConfirmed"
-                                            Label="Groep heeft bevestigd"
-                                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
-                                            Operators="EqualOnlyOperator" />
+                        Label="Groep heeft bevestigd"
+                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
+                        Operators="EqualOnlyOperator" />
 
                         <QueryBuilderColumn Field="IsCanceled" 
-                            Label="Groep is afgehaakt" 
-                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
-                            Operators="EqualOnlyOperator" />
+                        Label="Groep is afgehaakt" 
+                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
+                        Operators="EqualOnlyOperator" />
 
                         <QueryBuilderColumn 
-                            Field="Dressingroom" 
-                            Label="Groep wil kleedkamer" 
-                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
-                            Operators="EqualOnlyOperator" />
+                        Field="Dressingroom" 
+                        Label="Groep wil kleedkamer" 
+                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
+                        Operators="EqualOnlyOperator" />
 
                         <QueryBuilderColumn 
-                            Field="Jury" 
-                            Label="Groep wil beoordeling" 
-                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
-                            Operators="EqualOnlyOperator" />
+                        Field="Jury" 
+                        Label="Groep wil beoordeling" 
+                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
+                        Operators="EqualOnlyOperator" />
 
                         <QueryBuilderColumn 
-                            Field="Singers" 
-                            Label="Aantal zangers" 
-                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Number" 
-                            Operators="NumberOperator" />
+                        Field="Singers" 
+                        Label="Aantal zangers" 
+                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Number" 
+                        Operators="NumberOperator" />
 
                         <QueryBuilderColumn Field="Role"
-                                            Label="Persoon met de rol..."
-                                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String"
-                                            Operators="@(new List<OperatorsModel> { new OperatorsModel { Value = "in", Text = "Bevat" } } )">
+                        Label="Persoon met de rol..."
+                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String"
+                        Operators="@(new List<OperatorsModel> { new OperatorsModel { Value = "in", Text = "Bevat" } } )">
                             <QueryBuilderTemplates>
                                 <ValueTemplate>
                                     @{
                                         var selected = context.Value as string[] ?? Array.Empty<string>();
                                     }
                                     <SfMultiSelect TItem="string"
-                                                   TValue="string[]"
-                                                   DataSource="@PersonRoles"
-                                                   Value="@selected"
-                                                   Placeholder="Selecteer rollen">
+                                    TValue="string[]"
+                                    DataSource="@PersonRoles"
+                                    Value="@selected"
+                                    Placeholder="Selecteer rollen">
                                         <MultiSelectEvents TValue="string[]" TItem="string" ValueChange="@(( MultiSelectChangeEventArgs<string [ ]> e ) => ChangeValue( e, context ))" />
                                     </SfMultiSelect>
                                 </ValueTemplate>
@@ -130,32 +132,33 @@ else
                         </QueryBuilderColumn>
 
                         <QueryBuilderColumn 
-                            Field="Infomailing" 
-                            Label="Persoon wil Infomailing" 
-                            Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
-                            Operators="EqualOnlyOperator" />
+                        Field="Infomailing" 
+                        Label="Persoon wil Infomailing" 
+                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
+                        Operators="EqualOnlyOperator" />
 
-                            <QueryBuilderColumn Field="Volunteer"
-                                                Label="Persoon is vrijwilliger voor festival..."
-                                                Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String"
-                                                Operators="@(new List<OperatorsModel> { new OperatorsModel { Value = "in", Text = "Bevat" } } )">
-                                <QueryBuilderTemplates>
-                                    <ValueTemplate>
-                                        @{
-                                            var selected = context.Value as string[] ?? Array.Empty<string>();
-                                        }
-                                        <SfMultiSelect TItem="string"
-                                                       TValue="string[]"
-                                                       DataSource="@FestivalValues"
-                                                       Value="@selected"
-                                                       Placeholder="Selecteer festivals (vrijwilliger)">
-                                            <MultiSelectEvents TValue="string[]" TItem="string" ValueChange="@(( MultiSelectChangeEventArgs<string [ ]> e ) => ChangeValue( e, context ))" />
-                                        </SfMultiSelect>
-                                    </ValueTemplate>
-                                </QueryBuilderTemplates>
-                            </QueryBuilderColumn>
+                        <QueryBuilderColumn Field="Volunteer"
+                        Label="Persoon is vrijwilliger voor festival..."
+                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String"
+                        Operators="@(new List<OperatorsModel> { new OperatorsModel { Value = "in", Text = "Bevat" } } )">
+                            <QueryBuilderTemplates>
+                                <ValueTemplate>
+                                    @{
+                                        var selected = context.Value as string[] ?? Array.Empty<string>();
+                                    }
+                                    <SfMultiSelect TItem="string"
+                                    TValue="string[]"
+                                    DataSource="@FestivalValues"
+                                    Value="@selected"
+                                    Placeholder="Selecteer festivals (vrijwilliger)">
+                                        <MultiSelectEvents TValue="string[]" TItem="string" ValueChange="@(( MultiSelectChangeEventArgs<string [ ]> e ) => ChangeValue( e, context ))" />
+                                    </SfMultiSelect>
+                                </ValueTemplate>
+                            </QueryBuilderTemplates>
+                        </QueryBuilderColumn>
+                    }
                 </QueryBuilderColumns>
-            </SfQueryBuilder>            }
+                 </SfQueryBuilder>
 
             <!-- Toolbar -->
             <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
@@ -263,6 +266,8 @@ else
     <!-- Hidden grid used only for export -->
     <SfGrid @ref="HiddenGridRef"
             TValue="ExpandoObject"
+            AllowExcelExport="true"
+			AllowPdfExport="true"
             DataSource="@DynamicRecipients"
             Width="800px" Height="400px">
         <GridColumns>

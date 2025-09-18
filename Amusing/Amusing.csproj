@@ -5,8 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-Amusing-d4b4dda8-27a3-4a96-94e4-f605690b8606</UserSecretsId>
-    <AssemblyVersion>25.9.16.27</AssemblyVersion>
-    <FileVersion>25.9.16.27</FileVersion>
+    <AssemblyVersion>25.9.17.4</AssemblyVersion>
+    <FileVersion>25.9.17.4</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -29,31 +29,30 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Bit.BlazorUI" Version="9.11.3" />
-    <PackageReference Include="Bit.BlazorUI.Assets" Version="9.11.3" />
+    <PackageReference Include="Bit.BlazorUI" Version="9.12.0" />
+    <PackageReference Include="Bit.BlazorUI.Assets" Version="9.12.0" />
     <PackageReference Include="Bit.BlazorUI.Charts" Version="4.9.9" />
-    <PackageReference Include="Bit.BlazorUI.Extras" Version="9.11.3" />
-    <PackageReference Include="Bit.BlazorUI.Icons" Version="9.11.3" />
-    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.8.0" />
-    <PackageReference Include="BootstrapBlazor.FontAwesome" Version="9.1.0" />
+    <PackageReference Include="Bit.BlazorUI.Extras" Version="9.12.0" />
+    <PackageReference Include="Bit.BlazorUI.Icons" Version="9.12.0" />
+    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.8.2" />
+    <PackageReference Include="BootstrapBlazor.FontAwesome" Version="9.1.1" />
     <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="FluentValidation" Version="12.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.8" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.8">
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.9">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="MySql.Data" Version="9.4.0" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0-preview.3.efcore.9.0.0" />
-    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="30.1.39" />
-    <PackageReference Include="Syncfusion.Blazor.Grid" Version="30.1.39" />
-    <PackageReference Include="Syncfusion.Blazor.QueryBuilder" Version="30.1.39" />
-    <PackageReference Include="Syncfusion.Blazor.RichTextEditor" Version="30.1.39" />
-    <PackageReference Include="Syncfusion.Blazor.Themes" Version="30.1.39" />
-    <PackageReference Include="Syncfusion.Pdf.Net.Core" Version="30.1.39" />
-    <PackageReference Include="Syncfusion.PdfExport.Net.Core" Version="30.1.39" />
-    <PackageReference Include="Syncfusion.XlsIO.Net.Core" Version="30.1.39" />
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
+    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="31.1.20" />
+    <PackageReference Include="Syncfusion.Blazor.Grid" Version="31.1.20" />
+    <PackageReference Include="Syncfusion.Blazor.QueryBuilder" Version="31.1.20" />
+    <PackageReference Include="Syncfusion.Blazor.RichTextEditor" Version="31.1.20" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="31.1.20" />
+    <PackageReference Include="Syncfusion.Pdf.Net.Core" Version="31.1.20" />
+    <PackageReference Include="Syncfusion.XlsIO.Net.Core" Version="31.1.20" />
   </ItemGroup>
 </Project>

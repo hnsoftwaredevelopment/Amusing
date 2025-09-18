@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 
 using Syncfusion.Blazor;
 
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense( "Mgo+DSMBPh8sVXN0S0d+X1ZPd11dXmJWd1p/THNYflR1fV9DaUwxOX1dQl9mSXlSdkVgWHpfdXBVQmNXUkQ=;Mgo+DSMBMAY9C3t3VVhhQlJDfV5AQmBIYVp/TGpJfl96cVxMZVVBJAtUQF1hTH5Ud0VjWn5bcXFRR2lVWkd2;Mzk0NDI0MUAzMzMwMmUzMDJlMzAzYjMzMzAzYk1jRWttUUNkT0x3SGtCeTlNQUNKWlA4dEtPcHpPUG9DUGxTUXJLMGtPc0U9" );
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense( "Ngo9BigBOggjHTQxAR8/V1JFaF5cXGRCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWXZfeHRRR2ZeUEVyX0FWYEg=" );
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
