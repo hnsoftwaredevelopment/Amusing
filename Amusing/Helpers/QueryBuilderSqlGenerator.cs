@@ -4,9 +4,12 @@ namespace Amusing.Helpers;
 
 public static class QueryBuilderSqlGenerator
 {
+    private static int IndexOfIgnoreCase( string text, string value ) =>
+    text.IndexOf( value, StringComparison.OrdinalIgnoreCase );
+
     public static string GenerateWhereClause( RuleModel rules )
     {
-        if ( rules == null || rules.Rules == null || !rules.Rules.Any() )
+        if ( rules == null || rules.Rules == null || rules.Rules.Count == 0 )
         {
             return string.Empty;
         }
@@ -16,7 +19,7 @@ public static class QueryBuilderSqlGenerator
 
     private static string BuildCondition( RuleModel rule )
     {
-        if ( rule.Rules != null && rule.Rules.Any() )
+        if ( rule.Rules != null && rule.Rules.Count != 0 )
         {
             IEnumerable<string> conditions = rule.Rules.Select( BuildCondition );
             string op = rule.Condition.Equals("or", StringComparison.OrdinalIgnoreCase) ? " OR " : " AND ";
@@ -44,26 +47,27 @@ public static class QueryBuilderSqlGenerator
     public static string AppendConditions( string baseQuery, string extraConditions )
     {
         if ( string.IsNullOrWhiteSpace( extraConditions ) )
-        {
             return baseQuery;
-        }
 
-        // Trim trailing semicolon
-        string trimmed = baseQuery.TrimEnd();
+        string trimmed = baseQuery.TrimEnd().TrimEnd(';');
 
-        if ( trimmed.EndsWith( ";" ) )
+        bool hasWhere = trimmed.Contains("WHERE", StringComparison.OrdinalIgnoreCase);
+        bool addedDummyWhere = false;
+
+        if ( !hasWhere )
         {
-            trimmed = trimmed.Substring( 0, trimmed.Length - 1 );
+            // Voeg tijdelijk dummy WHERE toe
+            trimmed += " WHERE 1=1";
+            addedDummyWhere = true;
         }
 
-        // Als baseQuery al een WHERE bevat, plak er "AND" achter
-        if ( trimmed.Contains( "WHERE", StringComparison.OrdinalIgnoreCase ) )
-        {
-            return $"{trimmed} AND {extraConditions}";
-        }
+        // Voeg altijd de extra voorwaarden toe met AND
+        string result = $"{trimmed} AND {extraConditions};";
 
-        // Anders zelf een WHERE toevoegen
-        return $"{trimmed} WHERE {extraConditions}";
+        // Verwijder de dummy WHERE 1=1 als we hem tijdelijk hadden toegevoegd
+        result = result.Replace( "WHERE 1=1 AND ", "WHERE " );
+
+        return result;
     }
 
     private static string MapOperator( string op ) =>
@@ -77,7 +81,7 @@ public static class QueryBuilderSqlGenerator
             _ => "="
         };
 
-    private static string FormatValue( object value, string type )
+    private static string? FormatValue( object value, string type )
     {
         if ( value == null )
         {

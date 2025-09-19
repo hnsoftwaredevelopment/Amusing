@@ -46,12 +46,12 @@ public static class QueryBuilderHelper
             Traverse( root );
         }
 
-        return fields.Distinct( StringComparer.OrdinalIgnoreCase ).ToList();
+        return [ .. fields.Distinct( StringComparer.OrdinalIgnoreCase ) ];
     }
 
     public static List<string> CollectFields( IEnumerable<RuleModel> roots )
     {
-        List<string> fields = new();
+        List<string> fields = [];
         if ( roots == null )
         {
             return fields;
@@ -62,7 +62,7 @@ public static class QueryBuilderHelper
             fields.AddRange( CollectFields( r ) );
         }
 
-        return fields.Distinct( StringComparer.OrdinalIgnoreCase ).ToList();
+        return [ .. fields.Distinct( StringComparer.OrdinalIgnoreCase ) ];
     }
 
     public static string DetermineQueryFromRules( RuleModel rules, string sourceChecked )
@@ -90,24 +90,32 @@ public static class QueryBuilderHelper
 
         if ( sourceChecked == "persons" )
         {
-            if ( fields.Contains( "Festival" ) || fields.Contains( "Dressingroom" ) || fields.Contains( "Jury" ) || fields.Contains( "Confirmend" ) || fields.Contains( "Subscribed" ) || fields.Contains( "Volunteer" ) )
+            if ( fields.Contains( "Festival" ) || fields.Contains( "Dressingroom" ) || fields.Contains( "Jury" ) || fields.Contains( "IsConfirmend" ) || fields.Contains( "IsSubscribed" ) || fields.Contains( "Volunteer" ) )
             {
                 return 4;
             }
 
-            if ( fields.Contains( "Paid" ) || fields.Contains( "Canceled" ) || fields.Contains( "Singers" ) )
+            if ( fields.Contains( "IsPaid" ) || fields.Contains( "IsCanceled" ) || fields.Contains( "Singers" ) )
             {
                 return 3;
             }
 
-            if ( fields.Contains( "Role" ) )
+            if ( fields.Contains( "Role") || fields.Contains( "Infomailing" ) )
             {
                 return 2;
             }
         }
         else
         {
-            // same for groups, return 1 is always the default and is not needed to be specified
+            var additionalFieldsSet = new[] { "Dressingroom", "Jury", "IsConfirmend", "IsSubscribed", "Volunteer", "IsPaid", "IsCanceled", "Singers", "Role", "Infomailing" };
+
+            if ( fields.Contains( "Festival" ) )
+            {
+                if ( !additionalFieldsSet.Any( f => fields.Contains( f ) ) )
+                    return 2; // only Festival
+
+                return 3; // Festival and one or more other
+            }
         }
 
         return 1;

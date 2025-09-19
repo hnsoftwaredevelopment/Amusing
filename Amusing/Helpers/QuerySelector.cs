@@ -17,13 +17,13 @@ public static class QuerySelector
         }
         else if ( sourceChecked == "groups" )
         {
-            // Later uitbreiden met je eigen group-queries
-            //return queryLevel switch
-            //{
-            //    1 => QueryDefinitions.GetGroupsList,
-            //    2 => QueryDefinitions.GetGroupsWithSomething,
-            //    _ => QueryDefinitions.GetGroupsList
-            //};
+            return queryLevel switch
+            {
+                1 => QueryDefinitions.GetGroupsList,
+                2 => QueryDefinitions.GetGroupsWithFestivalList,
+                3 => QueryDefinitions.GetFullGroupsList,
+                _ => QueryDefinitions.GetGroupsList
+            };
         }
 
         throw new InvalidOperationException( "Unknown SourceChecked value: " + sourceChecked );

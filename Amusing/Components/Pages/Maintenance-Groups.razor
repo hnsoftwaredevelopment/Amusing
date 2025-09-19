@@ -549,8 +549,6 @@ else
 
         if ( SelectedGroup.GroupId != 0 )
         {
-            var savedId = SelectedGroup.GroupId;
-
             await GroupService.UpdateGroupAsync( SelectedGroup );
             await GroupService.UpdateGroupDetailsAsync( SelectedGroup );
         }

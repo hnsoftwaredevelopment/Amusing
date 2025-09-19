@@ -6,6 +6,8 @@ using Amusing.Helpers;
 using Amusing.Models;
 using Amusing.Services;
 
+using Blazorise;
+
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
@@ -26,6 +28,7 @@ public class MailingsRecipientsBase : ComponentBase
 
     protected bool _initialLoadDone = false;
     protected bool FestivalSelected = false;
+    protected bool HasActiveRules { get; set; }
     protected bool IsLoading = false;
     protected bool RoleSelected = false;
     protected bool rulesPending;
@@ -586,12 +589,23 @@ public class MailingsRecipientsBase : ComponentBase
         }
         else
         {
+            // Save the new group and get the new group Id
+            var savedId = await MailingService.AddRecipientQueryAsync(SelectedRecipientsList);
+
             // Refresh the list
             RecipientsList = await MailingService.GetRecipientListsAsync();
             await Task.Delay( 50 );
             if ( GridRef != null )
             {
                 await GridRef.Refresh();
+            }
+
+            // Search the modified record
+            var index = RecipientsList.FindIndex(s => s.ListId == savedId);
+            if ( index >= 0 )
+            {
+                SelectedRecipientsList = RecipientsList [ index ];
+                await GridRef.SelectRowAsync( index );
             }
         }
     }
@@ -622,7 +636,7 @@ public class MailingsRecipientsBase : ComponentBase
             return;
         }
 
-        //await MailingService.DeleteRecipientsListAsync( SelectedRecipientsList );
+        await MailingService.DeleteRecipientQueryAsync( SelectedRecipientsList.ListId );
 
         // Refresh the list
         RecipientsList = await MailingService.GetRecipientListsAsync();
@@ -633,7 +647,7 @@ public class MailingsRecipientsBase : ComponentBase
         }
     }
 
-    protected void onSourceChange( Microsoft.AspNetCore.Components.ChangeEventArgs args )
+    protected void OnSourceChange( Microsoft.AspNetCore.Components.ChangeEventArgs args )
     {
         string value = args.Value?.ToString() ?? string.Empty;
 
@@ -645,7 +659,7 @@ public class MailingsRecipientsBase : ComponentBase
         };
     }
 
-    protected void OnPersonsQueryChanged( Syncfusion.Blazor.QueryBuilder.ChangeEventArgs args )
+    protected void OnOueryChanged( Syncfusion.Blazor.QueryBuilder.ChangeEventArgs args )
     {
         RuleModel? rootRules = personsQueryBuilder?.GetRules();
 
@@ -653,6 +667,8 @@ public class MailingsRecipientsBase : ComponentBase
         {
             // Query nog niet compleet, niks doen
             GeneratedJson = "Nog geen complete query...";
+            GeneratedJson = "Nog geen complete query...";
+            HasActiveRules = false;
             return;
         }
 
@@ -687,50 +703,7 @@ public class MailingsRecipientsBase : ComponentBase
         }
 
         //Alleen boolean gebruiken om te bepalen of festival geselecteerd is
-        FestivalSelected = rootRules.Rules.Any( r => r.Field == "Festival" && r.Value is string [ ] arr && arr.Length > 0 );
-    }
-    protected void OnGroupsQueryChanged( Syncfusion.Blazor.QueryBuilder.ChangeEventArgs args )
-    {
-        RuleModel? rootRules = personsQueryBuilder?.GetRules();
-
-        if ( rootRules == null || rootRules.Rules == null || !rootRules.Rules.Any() )
-        {
-            // Query nog niet compleet, niks doen
-            GeneratedJson = "Nog geen complete query...";
-            return;
-        }
-
-        foreach ( RuleModel? rule in rootRules.Rules )
-        {
-            if ( ( rule.Field == "Festival" || rule.Field == "Role" || rule.Field == "Volunteer" )
-                && rule.Operator == "in" )
-            {
-                switch ( rule.Value )
-                {
-                    case string s:
-                        // convert single string into an array
-                        rule.Value = new string [ ] { s };
-                        break;
-
-                    case null:
-                        // ensure we have an empty array instead of null
-                        rule.Value = Array.Empty<string>();
-                        break;
-                }
-            }
-        }
-
-        try
-        {
-            // Serialize to JSON
-            GeneratedJson = JsonSerializer.Serialize( rootRules, new JsonSerializerOptions { WriteIndented = true } );
-        }
-        catch ( Exception ex )
-        {
-            GeneratedJson = $"Error: {ex.Message}";
-        }
-
-        //Alleen boolean gebruiken om te bepalen of festival geselecteerd is
+        HasActiveRules = rootRules.Rules.Count != 0;
         FestivalSelected = rootRules.Rules.Any( r => r.Field == "Festival" && r.Value is string [ ] arr && arr.Length > 0 );
     }
 
@@ -742,7 +715,7 @@ public class MailingsRecipientsBase : ComponentBase
         StateHasChanged();
     }
 
-    // Export functions
+    #region Export related functions
     protected async Task ExportToExcel()
     {
         if ( !await PrepareExport() )
@@ -848,17 +821,17 @@ public class MailingsRecipientsBase : ComponentBase
         string fullQuery = QueryBuilderHelper.DetermineQueryFromRules(rules, SourceChecked);
         List<ExpandoObject> result = await MailingService.GetDynamicRecipientsAsync( fullQuery ) ?? [ ];
 
-        HashSet<string> jaNeeVelden = new( new [ ]
-        {
-            "Infomailing", "Active","Subscribed","Canceled","Payed","Confirmed",
+        HashSet<string> jaNeeVelden = new(
+		[
+			"Infomailing", "Active","Subscribed","Canceled","Payed","Confirmed",
             "Dressingroom","SingAlong","Stand","Judgement","Volunteer"
-        }, StringComparer.OrdinalIgnoreCase );
+        ], StringComparer.OrdinalIgnoreCase );
 
 
         // Convert values to Ja/Nee
         foreach ( var row in result )
         {
-            var dict = (IDictionary<string, object>)row;
+            var dict = row as IDictionary<string, object>;
 
             foreach ( var key in jaNeeVelden )
             {
@@ -930,9 +903,12 @@ public class MailingsRecipientsBase : ComponentBase
         HiddenGridRef.Columns ??= [ ];
         HiddenGridRef.Columns?.Clear();
 
-        IDictionary<string, object> firstRow = data.First();
+		if ( data.First() is not IDictionary<string, object?> firstRow )
+		{
+			return;
+		}
 
-        foreach ( KeyValuePair<string, object> key in firstRow )
+		foreach ( KeyValuePair<string, object?> key in firstRow )
         {
             HiddenGridRef.Columns.Add( new GridColumn
             {
@@ -944,35 +920,7 @@ public class MailingsRecipientsBase : ComponentBase
 
         ColumnsBuilt = true;
     }
-
-    protected ExpandoObject ConvertValuesToJaNee( ExpandoObject row )
-    {
-        IDictionary<string, object> dict = row;
-        ExpandoObject newRow = new();
-        IDictionary<string, object> newDict = newRow;
-
-        foreach ( KeyValuePair<string, object> kvp in dict )
-        {
-            if ( kvp.Key == "Aktief" && kvp.Value is bool b )
-            {
-                newDict [ kvp.Key ] = b ? "Ja" : "Nee";
-            }
-            else if ( new [ ] { "Infomailing","Ingeschreven","Afgehaakt","Betaald","Bevestigd",
-                            "Kleedkamer","SingAlong","Stand","Beoordeling","Vrijwilliger" }.Contains( kvp.Key )
-                         && kvp.Value is int i )
-            {
-                newDict [ kvp.Key ] = i == 1 ? "Ja" : "Nee";
-            }
-            else
-            {
-                newDict [ kvp.Key ] = kvp.Value;
-            }
-        }
-
-        return newRow;
-    }
-
-    // Show toast On Export
+    
     protected async Task ShowToast( string message, string type = "error" )
     {
         string css = type switch
@@ -1005,4 +953,5 @@ public class MailingsRecipientsBase : ComponentBase
     {
         // Do something after the toast cloases
     }
+    #endregion
 }

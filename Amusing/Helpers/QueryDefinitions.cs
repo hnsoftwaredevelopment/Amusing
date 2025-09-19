@@ -1323,123 +1323,117 @@ public static class QueryDefinitions
     #region Query definition for Recipientlists based on groups
     public static readonly string GetGroupsList = @"
         SELECT 
-            g.zanggroep_id  AS GroupId,
-            g.naam          AS GroupName,
+            grp.zanggroep_id  AS GroupId,
+            grp.naam          AS GroupName,
             COALESCE(
-                NULLIF(d.email, ''), 
+                NULLIF(det.email, ''), 
                 (
-                    SELECT p.email
-                    FROM amusing.ah_personen_rollen r
-                    JOIN amusing.ah_personen p 
-                      ON p.persoon_id = r.persoon_id
-                    WHERE r.zanggroep_id = g.zanggroep_id 
-                      AND r.rol IN ('contact', 'contactpersoon1', 'contact1', 'contact2', 'contactpersoon2')
-                      AND p.email <> ''
-                    ORDER BY FIELD(r.rol, 'contact', 'contactpersoon1', 'contact1', 'contact2', 'contactpersoon2')
+                    SELECT per.email
+                    FROM amusing.ah_personen_rollen rol
+                    JOIN amusing.ah_personen per
+                      ON per.persoon_id = rol.persoon_id
+                    WHERE rol.zanggroep_id = grp.zanggroep_id 
+                      AND rol.rol IN ('contact', 'contactpersoon1', 'contact1', 'contact2', 'contactpersoon2')
+                      AND per.email <> ''
+                    ORDER BY FIELD(rol.rol, 'contact', 'contactpersoon1', 'contact1', 'contact2', 'contactpersoon2')
                     LIMIT 1
                 )
             ) AS Email  
-        FROM amusing.ah_zanggroepen g
-        LEFT JOIN amusing.ah_zanggroep_details d 
-               ON d.id = g.zanggroep_id
-        WHERE g.actief = 1
+        FROM amusing.ah_zanggroepen grp
+        LEFT JOIN amusing.ah_zanggroep_details det 
+               ON det.id = grp.zanggroep_id
+        WHERE grp.actief = 1
           AND COALESCE(
-                  NULLIF(d.email, ''), 
+                  NULLIF(det.email, ''), 
                   (
-                      SELECT p.email
-                      FROM amusing.ah_personen_rollen r
-                      JOIN amusing.ah_personen p ON p.persoon_id = r.persoon_id
-                      WHERE r.zanggroep_id = g.zanggroep_id 
-                        AND r.rol IN ('contact', 'contactpersoon1', 'contact1', 'contact2', 'contactpersoon2')
-                        AND p.email <> ''
-                      ORDER BY FIELD(r.rol, 'contact', 'contactpersoon1', 'contact1', 'contact2', 'contactpersoon2')
+                      SELECT per.email
+                      FROM amusing.ah_personen_rollen rol
+                      JOIN amusing.ah_personen per ON per.persoon_id = rol.persoon_id
+                      WHERE rol.zanggroep_id = grp.zanggroep_id 
+                        AND rol.rol IN ('contact', 'contactpersoon1', 'contact1', 'contact2', 'contactpersoon2')
+                        AND per.email <> ''
+                      ORDER BY FIELD(rol.rol, 'contact', 'contactpersoon1', 'contact1', 'contact2', 'contactpersoon2')
                       LIMIT 1
                   )
               ) IS NOT NULL;";
     public static readonly string GetGroupsWithFestivalList = @"
-            SELECT 
-                g.zanggroep_id  AS GroupId,
-                g.naam AS GroupName,
-                COALESCE(
-                    NULLIF(d.email, ''), 
-                    (
-                        SELECT p.email
-                        FROM amusing.ah_personen_rollen r
-                        JOIN amusing.ah_personen p ON p.persoon_id = r.persoon_id
-                        WHERE r.zanggroep_id = g.zanggroep_id 
-                          AND r.rol IN ('contact', 'contact2', 'contactpersoon1', 'contactpersoon2')
-                          AND p.email <> ''
-                        ORDER BY FIELD(r.rol, 'contact', 'contactpersoon1', 'contact2', 'contactpersoon2')
-                        LIMIT 1
-                    )
-                ) AS Email,
-                YEAR(f.festivaldatum) AS Festival,
-                e.wens_4 AS Judgement,
-                e.aantal_deelnemers AS Singers,
-                e.podiumsoort AS StageType
-            FROM amusing.ah_inschrijvingen e
-            JOIN amusing.ah_zanggroepen g ON g.zanggroep_id = e.zanggroep_id
-            JOIN amusing.ah_zanggroep_details d ON d.id = g.zanggroep_id
-            JOIN amusing.ah_festivals f ON f.festival_id  = e.festival_id
-            GROUP BY 
-                g.zanggroep_id, 
-                g.naam, 
-                d.email, 
-                YEAR(f.festivaldatum), 
-                e.wens_4, 
-                e.aantal_deelnemers, 
-                e.podiumsoort;";
+        SELECT 
+            grp.zanggroep_id  AS GroupId,
+            grp.naam          AS GroupName,
+            COALESCE(
+                NULLIF(det.email, ''), 
+                (
+                    SELECT per.email
+                    FROM amusing.ah_personen_rollen rol
+                    JOIN amusing.ah_personen per
+                      ON per.persoon_id = rol.persoon_id
+                    WHERE rol.zanggroep_id = grp.zanggroep_id 
+                      AND rol.rol IN ('contact', 'contactpersoon1', 'contact1', 'contact2', 'contactpersoon2')
+                      AND per.email <> ''
+                    ORDER BY FIELD(rol.rol, 'contact', 'contactpersoon1', 'contact1', 'contact2', 'contactpersoon2')
+                    LIMIT 1
+                )
+            ) AS Email,  
+            YEAR(fes.festivaldatum) AS Festival,
+            sub.wens_4 AS Judgement,
+            sub.aantal_deelnemers AS Singers,
+            sub.podiumsoort AS StageType
+        FROM amusing.ah_inschrijvingen sub
+            JOIN amusing.ah_zanggroepen grp ON grp.zanggroep_id = sub.zanggroep_id
+            JOIN amusing.ah_zanggroep_details det ON det.id = grp.zanggroep_id
+            JOIN amusing.ah_festivals fes ON fes.festival_id  = sub.festival_id
+            WHERE 1=1;"; // Don not remove the Dummy WHERE 1=1 it is used tho be sure additional filters are placed correctly
     public static readonly string GetFullGroupsList = @"
         SELECT 
-            g.zanggroep_id  AS GroupId,
-            g.naam          AS GroupName,
-            p.voornaam      AS FirstName,
-            CONCAT_WS(' ', p.tussenvoegsel, p.achternaam) AS LastName,
-            CONCAT_WS(' ', p.voornaam, p.tussenvoegsel, p.achternaam) AS FullName,
-            p.email         AS PersonEmail,
-            r.rol           AS Role,
+            grp.zanggroep_id  AS GroupId,
+            grp.naam          AS GroupName,
+            per.voornaam      AS FirstName,
+            CONCAT_WS(' ', per.tussenvoegsel, per.achternaam) AS LastName,
+            CONCAT_WS(' ', per.voornaam, per.tussenvoegsel, per.achternaam) AS FullName,
+            per.email         AS PersonEmail,
+            rol.rol           AS Role,
             COALESCE(
-                NULLIF(d.email, ''), 
+                NULLIF(det.email, ''), 
                 (
-                    SELECT p2.email
-                    FROM amusing.ah_personen_rollen r2
-                    JOIN amusing.ah_personen p2 ON p2.persoon_id = r2.persoon_id
-                    WHERE r2.zanggroep_id = g.zanggroep_id 
-                      AND r2.rol IN ('contact', 'contact2', 'contactpersoon1', 'contactpersoon2')
-                      AND p2.email <> ''
-                    ORDER BY FIELD(r2.rol, 'contact', 'contactpersoon1', 'contact2', 'contactpersoon2')
+                    SELECT per2.email
+                    FROM amusing.ah_personen_rollen rol2
+                    JOIN amusing.ah_personen per2 ON per2.persoon_id = rol2.persoon_id
+                    WHERE rol2.zanggroep_id = grp.zanggroep_id 
+                      AND rol2.rol IN ('contact', 'contact2', 'contactpersoon1', 'contactpersoon2')
+                      AND per2.email <> ''
+                    ORDER BY FIELD(rol2.rol, 'contact', 'contactpersoon1', 'contact2', 'contactpersoon2')
                     LIMIT 1
                 )
             ) AS GroupEmail,
-            YEAR(f.festivaldatum) AS Festival,
-            IF(e.ingeschreven IS NOT NULL, ""ja"", ""nee"") AS Subscribed,
-            IF(e.afgehaakt   IS NOT NULL, ""ja"", ""nee"") AS Canceled,
-            IF(e.betaald     IS NOT NULL, ""ja"", ""nee"") AS Payed,
-            IF(e.bevestigd   IS NOT NULL, ""ja"", ""nee"") AS Confirmed,
-            IF(e.wens_1 = 'ja', ""ja"", ""nee"") AS Dressingroom,
-            IF(e.wens_2 = 'ja', ""ja"", ""nee"") AS SingAlong,
-            IF(e.wens_3 = 'ja', ""ja"", ""nee"") AS Stand,
-            IF(e.wens_4 = 'ja', ""ja"", ""nee"") AS Judgement,
-            e.aantal_deelnemers AS Singers,
-            e.podiumsoort       AS StageType,
-            IF(v.persoon_id IS NOT NULL, ""ja"", ""nee"") AS Vrijwilliger
-        FROM amusing.ah_inschrijvingen e
-        JOIN amusing.ah_zanggroepen g 
-              ON g.zanggroep_id = e.zanggroep_id
-        JOIN amusing.ah_zanggroep_details d 
-              ON d.id = g.zanggroep_id
-        JOIN amusing.ah_festivals f 
-              ON f.festival_id = e.festival_id
-        LEFT JOIN amusing.ah_personen_rollen r 
-              ON r.zanggroep_id = g.zanggroep_id
-        LEFT JOIN amusing.ah_personen p 
-              ON p.persoon_id = r.persoon_id
-        LEFT JOIN amusing.planner_vrijwilligersdiensten v
-              ON v.festival_id = f.festival_id
-             AND v.persoon_id  = p.persoon_id
-        WHERE g.actief = 1
-          AND p.email IS NOT NULL
-          AND p.email <> '';";
+            YEAR(fes.festivaldatum) AS Festival,
+            IF(sub.ingeschreven IS NOT NULL, 'ja', 'nee') AS Subscribed,
+            IF(sub.afgehaakt   IS NOT NULL, 'ja', 'nee') AS Canceled,
+            IF(sub.betaald     IS NOT NULL, 'ja', 'nee') AS Payed,
+            IF(sub.bevestigd   IS NOT NULL, 'ja', 'nee') AS Confirmed,
+            IF(sub.wens_1 = 'ja', 'ja', 'nee') AS Dressingroom,
+            IF(sub.wens_2 = 'ja', 'ja', 'nee') AS SingAlong,
+            IF(sub.wens_3 = 'ja', 'ja', 'nee') AS Stand,
+            IF(sub.wens_4 = 'ja', 'ja', 'nee') AS Judgement,
+            sub.aantal_deelnemers AS Singers,
+            sub.podiumsoort       AS StageType,
+            IF(vol.persoon_id IS NOT NULL, 'ja', 'nee') AS Vrijwilliger
+        FROM amusing.ah_inschrijvingen sub
+        JOIN amusing.ah_zanggroepen grp 
+              ON grp.zanggroep_id = sub.zanggroep_id
+        JOIN amusing.ah_zanggroep_details det 
+              ON det.id = grp.zanggroep_id
+        JOIN amusing.ah_festivals fes 
+              ON fes.festival_id = sub.festival_id
+        LEFT JOIN amusing.ah_personen_rollen rol 
+              ON rol.zanggroep_id = grp.zanggroep_id
+        LEFT JOIN amusing.ah_personen per 
+              ON per.persoon_id = rol.persoon_id
+        LEFT JOIN amusing.planner_vrijwilligersdiensten vol
+              ON vol.festival_id = fes.festival_id
+             AND vol.persoon_id  = per.persoon_id
+        WHERE grp.actief = 1
+          AND per.email IS NOT NULL
+          AND per.email <> '';";
     #endregion
 
     public static readonly string GetAllRecipientLists = @"

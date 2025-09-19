@@ -31,8 +31,8 @@ else
     <div class="page-container">
         <!-- Static detail fields-->
         <div class="fixed-header">
-            <SfRadioButton Label="Groepen" Name="source" Value="groups" TChecked="string" @onchange="onSourceChange" @bind-Checked="SourceChecked"></SfRadioButton>
-            <SfRadioButton Label="Personen" Name="source" Value="persons" TChecked="string" @onchange="onSourceChange" @bind-Checked="SourceChecked"></SfRadioButton>
+            <SfRadioButton Label="Groepen" Name="source" Value="groups" TChecked="string" @onchange="OnSourceChange" @bind-Checked="SourceChecked"></SfRadioButton>
+            <SfRadioButton Label="Personen" Name="source" Value="persons" TChecked="string" @onchange="OnSourceChange" @bind-Checked="SourceChecked"></SfRadioButton>
 
             <div class="spacer-small"></div>
             <SfTextBox Placeholder="Lijstnaam" FloatLabelType="FloatLabelType.Always" Width="300px" @bind-Value="SelectedRecipientsList.ListName" />
@@ -41,14 +41,21 @@ else
             @if (SourceChecked == "groups")
             {
                 <h5>Groepen</h5>
+                @if ( !FestivalSelected && HasActiveRules )
+                {
+                    <div class="alert alert-warning" role="alert">
+                        <strong>Let op:</strong> de gekozen filterregels geven pas een betrouwbare lijst
+                        wanneer eerst één of meerdere festivals zijn geselecteerd.
+                    </div>
+                }
             }
             else
             {
                 <h5>Personen</h5>
             }
             <SfQueryBuilder TValue="RuleModel" @ref="personsQueryBuilder" Width="80%" MaxGroupCount="0">
-                    <QueryBuilderEvents TValue="RuleModel" Changed="OnPersonsQueryChanged" />
-                    <QueryBuilderColumns>
+                <QueryBuilderEvents TValue="RuleModel" Changed="OnOueryChanged" />
+                <QueryBuilderColumns>
                     <QueryBuilderColumn Field="Festival"
                                         Label="Groep is ingeschreven voor ..."
                                         Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String"
@@ -69,49 +76,47 @@ else
                         </QueryBuilderTemplates>
                     </QueryBuilderColumn>
 
-                    @if ( SourceChecked == "persons" || ( SourceChecked == "groups" && FestivalSelected ) )
-                    {
-                        <QueryBuilderColumn 
-                        Field="IsPaid" 
+                    <QueryBuilderColumn 
+                        Field="IsPaid"
                         Label="Groep heeft betaald" 
                         Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
                         Operators="EqualOnlyOperator" />
 
-                        <QueryBuilderColumn 
+                    <QueryBuilderColumn 
                         Field="IsSubscribed"
                         Label="Groep is ingeschreven"
                         Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
                         Operators="EqualOnlyOperator" />
 
-                        <QueryBuilderColumn Field="IsConfirmed"
+                    <QueryBuilderColumn Field="IsConfirmed"
                         Label="Groep heeft bevestigd"
                         Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
                         Operators="EqualOnlyOperator" />
 
-                        <QueryBuilderColumn Field="IsCanceled" 
+                    <QueryBuilderColumn Field="IsCanceled" 
                         Label="Groep is afgehaakt" 
                         Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
                         Operators="EqualOnlyOperator" />
 
-                        <QueryBuilderColumn 
+                    <QueryBuilderColumn 
                         Field="Dressingroom" 
                         Label="Groep wil kleedkamer" 
                         Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
                         Operators="EqualOnlyOperator" />
 
-                        <QueryBuilderColumn 
+                    <QueryBuilderColumn 
                         Field="Jury" 
                         Label="Groep wil beoordeling" 
                         Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
                         Operators="EqualOnlyOperator" />
 
-                        <QueryBuilderColumn 
+                    <QueryBuilderColumn 
                         Field="Singers" 
                         Label="Aantal zangers" 
                         Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Number" 
                         Operators="NumberOperator" />
 
-                        <QueryBuilderColumn Field="Role"
+                    <QueryBuilderColumn Field="Role"
                         Label="Persoon met de rol..."
                         Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String"
                         Operators="@(new List<OperatorsModel> { new OperatorsModel { Value = "in", Text = "Bevat" } } )">
@@ -131,13 +136,13 @@ else
                             </QueryBuilderTemplates>
                         </QueryBuilderColumn>
 
-                        <QueryBuilderColumn 
+                    <QueryBuilderColumn 
                         Field="Infomailing" 
                         Label="Persoon wil Infomailing" 
                         Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
                         Operators="EqualOnlyOperator" />
 
-                        <QueryBuilderColumn Field="Volunteer"
+                    <QueryBuilderColumn Field="Volunteer"
                         Label="Persoon is vrijwilliger voor festival..."
                         Type="Syncfusion.Blazor.QueryBuilder.ColumnType.String"
                         Operators="@(new List<OperatorsModel> { new OperatorsModel { Value = "in", Text = "Bevat" } } )">
@@ -155,10 +160,9 @@ else
                                     </SfMultiSelect>
                                 </ValueTemplate>
                             </QueryBuilderTemplates>
-                        </QueryBuilderColumn>
-                    }
+                    </QueryBuilderColumn>
                 </QueryBuilderColumns>
-                 </SfQueryBuilder>
+             </SfQueryBuilder>
 
             <!-- Toolbar -->
             <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
