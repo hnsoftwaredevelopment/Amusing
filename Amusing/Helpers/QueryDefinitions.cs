@@ -1388,8 +1388,8 @@ public static class QueryDefinitions
             grp.zanggroep_id  AS GroupId,
             grp.naam          AS GroupName,
             per.voornaam      AS FirstName,
-            CONCAT_WS(' ', per.tussenvoegsel, per.achternaam) AS LastName,
-            CONCAT_WS(' ', per.voornaam, per.tussenvoegsel, per.achternaam) AS FullName,
+            CONCAT_WS(' ', NULLIF(per.tussenvoegsel, ''), per.achternaam) AS LastName,
+            CONCAT_WS(' ', per.voornaam, NULLIF(per.tussenvoegsel, ''), per.achternaam) AS FullName,
             per.email         AS PersonEmail,
             rol.rol           AS Role,
             COALESCE(
@@ -1464,4 +1464,21 @@ public static class QueryDefinitions
     public static readonly string DeleteRecipientQuery = @"
         DELETE FROM ah_recipient_lists 
         WHERE id = @QueryId;";
+
+    public static readonly string GetAllEmailTemplates = @"
+        SELECT 
+	        tpl.id 				AS TemplateId,
+	        tpl.created 		AS TemplateCreated,
+	        tpl.changed 		AS TemplateChanged,
+            COALESCE(tpl.recipientlist, 0) AS RecipientListId,
+	        IF(tpl.recipientlist IS NULL, 'geen', rec.name) AS RecipientListName,
+	        rec.`filter`		AS RecipientListFilter,
+	        rec.query 			AS RecipientListQuery,
+        	IF(tpl.recipientlist IS NULL, 'api', rec.source ) AS RecipientListSource,
+	        tpl.name 			AS TemplateName,
+	        tpl.subject 		AS TemplateSubject,
+	        tpl.content 		AS TemplateContent
+        FROM amusing.ah_mailing_templates tpl
+        LEFT JOIN amusing.ah_recipient_lists rec ON tpl.recipientlist = rec.id
+        ORDER BY tpl.name ;";
 }

@@ -1,0 +1,104 @@
+﻿@page "/MailTemplates"
+@using Amusing.Models
+@using Amusing.Services
+@using Amusing.Helpers
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+@using System.ComponentModel.DataAnnotations
+@using Syncfusion.Blazor.Notifications
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.QueryBuilder
+@using Microsoft.AspNetCore.Components.Forms
+@using Syncfusion.Blazor.SplitButtons
+@using System.Dynamic
+@using System.Text.Json
+@using System.Text.Json.Serialization
+
+@inject MailingService MailingService
+
+@if ( IsLoading )
+{
+    <div class="text-center p-2">
+        <SfSpinner CssClass="e-spin-center" />
+        <p>@PageName worden geladen...</p>
+    </div>
+}
+else
+{
+    <div class="page-container">
+        <!-- Static detail fields-->
+        <div class="fixed-header">
+
+            <!-- Toolbar -->
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+                <SfToolbar Width="760px">
+                    <ToolbarItems>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn"
+                                        @onclick="Save"
+                                        title="Bewaar sjabloon">
+                                    <img src="icons/button-save.svg" class="icon" alt="SAVE" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn" @onclick="AddNew" title="Voeg een nieuw sjabloon toe">
+                                    <img src="icons/button-add.svg" class="icon" alt="ADD" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
+                                <button class="custom-toolbar-btn" @onclick="Delete" title="verwijder de geselecteerde sjabloon">
+                                    <img src="icons/button-del.svg" class="icon" alt="DELETE" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                            <Template>
+                                <span class="toolbar-count">@PageName: @VisibleRowCount</span>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                            <Template>
+                                <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
+                            </Template>
+                        </ToolbarItem>
+                    </ToolbarItems>
+                </SfToolbar>
+            </div>
+        </div>
+
+        <div class="spacer-small"></div>
+
+        <!-- Scrollable area for main datagrid -->
+        <div class="scrollable-content">
+            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
+                <SfGrid @ref="GridRef"
+                        TValue="TemplatesListModel"
+                        Width="760"
+                        DataSource="@TemplatesList"
+                        EnableStickyHeader="true"
+                        AllowResizing="true"
+                        Height="280px"
+                        AllowSorting="true"
+                        AllowMultiSorting="true"
+                        AllowSelection="true">
+                    <GridEvents TValue="TemplatesListModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
+                    <GridEditSettings AllowAdding="true" NewRowPosition="NewRowPosition.Top"></GridEditSettings>
+                    <GridColumns>
+                        <GridColumn Field="@nameof( TemplatesListModel.TemplateId )" IsPrimaryKey="true" Visible="false" />
+                        <GridColumn Field="@nameof( TemplatesListModel.TemplateName )" HeaderText="Sjabloon" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="350px" />
+                        <GridColumn Field="@nameof( TemplatesListModel.RecipientListName )" HeaderText="Bron" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="250px" />
+                        <GridColumn Field="@nameof( TemplatesListModel.TemplateChanged )" HeaderText="Laatste wijzing" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="135px" />
+                    </GridColumns>
+                </SfGrid>
+            </div>
+        </div>
+    </div>
+}

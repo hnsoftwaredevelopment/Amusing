@@ -145,4 +145,22 @@ public class MailingService( GenericDataService dataService )
         await _dataService.ExecuteNonQueryAsync( QueryDefinitions.DeleteRecipientQuery, parameters );
     }
 
+    public Task<List<TemplatesListModel>> GetMailTemplatesAsync() 
+    {
+        return _dataService.ExecuteQueryAsync( QueryDefinitions.GetAllEmailTemplates,
+           reader => new TemplatesListModel
+           {
+               TemplateId = Convert.ToUInt32( reader [ "TemplateId" ] ),
+               TemplateCreated = reader [ "TemplateCreated" ].ToString() ?? string.Empty,
+               TemplateChanged = reader [ "TemplateChanged" ].ToString() ?? string.Empty,
+               RecipientListId = Convert.ToUInt32( reader [ "RecipientListId" ] ),
+               RecipientListName = reader [ "RecipientListName" ].ToString(),
+               RecipientListFilter = reader [ "RecipientListFilter" ].ToString() ?? string.Empty,
+               RecipientListQuery = reader [ "RecipientListQuery" ].ToString() ?? string.Empty,
+               RecipientListSource = reader [ "RecipientListSource" ].ToString(),
+               TemplateName = reader [ "TemplateName" ].ToString(),
+               TemplateSubject = reader [ "TemplateSubject" ].ToString(),
+               TemplateContent = reader [ "TemplateContent" ].ToString()
+           } );
+    }
 }

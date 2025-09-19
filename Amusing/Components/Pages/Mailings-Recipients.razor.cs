@@ -39,7 +39,7 @@ public class MailingsRecipientsBase : ComponentBase
     protected List<ExpandoObject> DynamicRecipients { get; set; } = new List<ExpandoObject>();
     protected List<IDictionary<string, object>> DynamicRecipientsDict { get; set; } = new();
     protected List<RecipientListFilterModel> RecipientsFilterList { get; set; } = new List<RecipientListFilterModel>();
-    protected List<RecipientListModel> RecipientsList { get; set; } = new List<RecipientListModel>();
+    protected List<RecipientListModel> RecipientsList { get; set; } = [];
     protected List<string> FestivalValues { get; set; } = new();
     protected List<string> RoleValues { get; set; } = new();
     protected List<OperatorsModel> EqualOnlyOperator  = new()
