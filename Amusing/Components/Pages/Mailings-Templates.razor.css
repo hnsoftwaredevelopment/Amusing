@@ -1,1 +1,62 @@
- 
+.groupbox {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 0px 12px 12px 12px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    position: relative;
+    background: #e9f0f6;
+}
+
+.groupbox-header {
+    font-size: 0.75rem;
+    font-weight: bold;
+    position: absolute;
+    top: -0.6em;
+    left: 10px;
+    color: #666;
+    background-color: #e9f0f6;
+    padding: 0 6px;
+}
+
+.groupbox-content {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 8px;
+}
+
+.groupbox-spacer {
+    flex-basis: 100%;
+    margin-top: 0.05rem;
+    height: 0;
+}
+
+.page-container {
+    background-color: #e9f0f6;
+    display: flex;
+    flex-direction: column;
+    height: 88vh; /* Fullscreen (100% - Page header) */
+    overflow: hidden; /* No scrollbar on whole page */
+    padding: 0.75rem; /* Reserve space for headers */
+    box-sizing: border-box;
+}
+
+/* ---- Rich Text Editor container ---- */
+.rte-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* Take all available space in page-container */
+    min-height: 0; /* Important: prevents flexbox overflow */
+}
+
+    /* Toolbar should stay visible */
+    .rte-container .e-toolbar {
+        flex-shrink: 0;
+    }
+
+    /* Editable area should scroll when content grows */
+    .rte-container .e-richtexteditor {
+        flex: 1;
+        min-height: 0; /* allow flexbox to shrink */
+        overflow-y: auto; /* scrollbar only inside editor content */
+    }

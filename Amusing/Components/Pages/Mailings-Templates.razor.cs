@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Net.NetworkInformation;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 using Amusing.Models;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Inputs;
 using Syncfusion.Blazor.QueryBuilder;
+using Syncfusion.Blazor.RichTextEditor;
 
 namespace Amusing.Components.Pages;
 
@@ -16,84 +18,125 @@ public partial class Mailings_Templates
 {
     private bool _initialLoadDone = false;
     private bool IsLoading = false;
-    private EditContext? editContext;
-    private int VisibleRowCount = 0;   
-    private List<TemplatesListModel> TemplatesList { get; set; } = [];
-    private SfGrid<TemplatesListModel>? GridRef;
-    private TemplatesListModel? SelectedTemplatesList;
+    private bool _disposed = false;
+    private int VisibleRowCount = 0;
     private string PageName = "Mail Templates";
+
+    private List<TemplatesListModel> TemplatesList { get; set; } = [];
+    private List<RecipientListModel> RecipientsList { get; set; } = [ ];
+    private TemplatesListModel SelectedTemplatesList;
+    
+    private EditContext? editContext;
+    private CancellationTokenSource _cts = new();
+
+    private readonly List<ToolbarItemModel> _rteTools =
+	[
+		new ToolbarItemModel() { Command = ToolbarCommand.Undo },
+        new ToolbarItemModel() { Command = ToolbarCommand.Redo },
+        new ToolbarItemModel() { Command = ToolbarCommand.Separator },
+        new ToolbarItemModel() { Command = ToolbarCommand.Bold },
+        new ToolbarItemModel() { Command = ToolbarCommand.Italic },
+        new ToolbarItemModel() { Command = ToolbarCommand.Underline },
+        new ToolbarItemModel() { Command = ToolbarCommand.StrikeThrough },
+        new ToolbarItemModel() { Command = ToolbarCommand.SuperScript },
+        new ToolbarItemModel() { Command = ToolbarCommand.SubScript },
+        new ToolbarItemModel() { Command = ToolbarCommand.Blockquote },
+        new ToolbarItemModel() { Command = ToolbarCommand.Separator },
+        new ToolbarItemModel() { Command = ToolbarCommand.LowerCase },
+        new ToolbarItemModel() { Command = ToolbarCommand.UpperCase },
+        new ToolbarItemModel() { Command = ToolbarCommand.Separator },
+        new ToolbarItemModel() { Command = ToolbarCommand.Formats },
+        new ToolbarItemModel() { Command = ToolbarCommand.FontName },
+        new ToolbarItemModel() { Command = ToolbarCommand.FontSize },
+        new ToolbarItemModel() { Command = ToolbarCommand.FontColor },
+        new ToolbarItemModel() { Command = ToolbarCommand.BackgroundColor },
+        new ToolbarItemModel() { Command = ToolbarCommand.ClearFormat },
+        new ToolbarItemModel() { Command = ToolbarCommand.HorizontalSeparator },
+        new ToolbarItemModel() { Command = ToolbarCommand.Alignments },
+        new ToolbarItemModel() { Command = ToolbarCommand.NumberFormatList },
+        new ToolbarItemModel() { Command = ToolbarCommand.BulletFormatList },
+        new ToolbarItemModel() { Command = ToolbarCommand.Indent },
+        new ToolbarItemModel() { Command = ToolbarCommand.Outdent },
+        new ToolbarItemModel() { Command = ToolbarCommand.Separator },
+        new ToolbarItemModel() { Command = ToolbarCommand.CreateTable },
+        new ToolbarItemModel() { Command = ToolbarCommand.CreateLink },
+        new ToolbarItemModel() { Command = ToolbarCommand.HorizontalLine },
+        new ToolbarItemModel() { Command = ToolbarCommand.Image },
+        new ToolbarItemModel() { Command = ToolbarCommand.Separator },
+        new ToolbarItemModel() { Command = ToolbarCommand.SourceCode },
+        new ToolbarItemModel() { Command = ToolbarCommand.CreateTable },
+        new ToolbarItemModel() { Command = ToolbarCommand.FullScreen }
+    ];
 
     protected override async Task OnInitializedAsync()
     {
         IsLoading = true;
 
-        //Get all Templateslists
         TemplatesList = await MailingService.GetMailTemplatesAsync();
-        SelectedTemplatesList = TemplatesList.FirstOrDefault();
-        if ( SelectedTemplatesList != null )
-        {
-            editContext = new EditContext( SelectedTemplatesList );
-        }
+        RecipientsList = await MailingService.GetRecipientListsAsync();
 
-        //if ( SelectedTemplatesList != null )
-        //{
-        //    if ( string.IsNullOrWhiteSpace( SelectedTemplatesList.ListQuery ) && !string.IsNullOrWhiteSpace( SelectedTemplatesList.ListFilter ) )
-        //    {
-        //        SelectedTemplatesList.ListQuery = QueryBuilderJsonConverter.OldToNew( SelectedTemplatesList.ListFilter );
-        //    }
+        // Add a fictive None row
+        TemplatesList.Insert( 0, new TemplatesListModel { TemplateId = 0, TemplateName = "geen", RecipientListId = 0, RecipientListName = "geen" } );
+        RecipientsList.Insert( 0, new RecipientListModel { ListId = null, ListName = "geen" } );
 
-        //    LoadRulesIntoQueryBuilder( SelectedTemplatesList.ListQuery );
-        //}
+        // Default selection
+        SelectedTemplatesList = TemplatesList.FirstOrDefault() ?? new TemplatesListModel();
+
+        // Set RecipientListId to null when RecipientListId is 0
+        if ( SelectedTemplatesList.RecipientListId == 0 )
+            SelectedTemplatesList.RecipientListId = null;
+
+        editContext = new EditContext( SelectedTemplatesList );
 
         IsLoading = false;
     }
 
-    protected async Task OnGridDataBound()
-    {
-        if ( !_initialLoadDone && TemplatesList?.Any() == true )
-        {
-            _initialLoadDone = true;
-            await UpdateVisibleRowCountAsync();
+    //protected async Task OnGridDataBound()
+    //{
+    //    if ( !_initialLoadDone && TemplatesList?.Any() == true )
+    //    {
+    //        _initialLoadDone = true;
+    //        await UpdateVisibleRowCountAsync();
 
-            // Select first row in the SfGrid
-            if ( GridRef != null )
-            {
-                await GridRef.SelectRowAsync( 0 );
-            }
+    //        // Select first row in the SfGrid
+    //        if ( GridRef != null )
+    //        {
+    //            await GridRef.SelectRowAsync( 0 );
+    //        }
 
-            // filll QueryBuilder with query data from selected row
-            //if ( TemplatesList.Count > 0 )
-            //{
-            //    await SelectTemplatesListAsync( TemplatesList [ 0 ] );
-            //}
-        }
-    }
+    //        // filll QueryBuilder with query data from selected row
+    //        //if ( TemplatesList.Count > 0 )
+    //        //{
+    //        //    await SelectTemplatesListAsync( TemplatesList [ 0 ] );
+    //        //}
+    //    }
+    //}
 
     protected async Task OnRowSelected( RowSelectEventArgs<TemplatesListModel> args )
     {
-        //await SelectTemplatesListAsync( args.Data );
+        await SelectTemplateListAsync( args.Data );
     }
 
-    protected async Task UpdateVisibleRowCountAsync()
-    {
-        if ( GridRef is not null )
-        {
-            List<TemplatesListModel> records = await GridRef.GetCurrentViewRecordsAsync();
-            await Task.Delay( 150 );
-            VisibleRowCount = records?.Count ?? 0;
-            StateHasChanged();
-        }
-    }
+    //protected async Task UpdateVisibleRowCountAsync()
+    //{
+    //    if ( GridRef is not null )
+    //    {
+    //        List<TemplatesListModel> records = await GridRef.GetCurrentViewRecordsAsync();
+    //        await Task.Delay( 150 );
+    //        VisibleRowCount = records?.Count ?? 0;
+    //        StateHasChanged();
+    //    }
+    //}
 
-    public async Task OnInput( InputEventArgs args )
-    {
-        if ( GridRef != null )
-        {
-            await GridRef.SearchAsync( args.Value );
-            await Task.Delay( 50 );
-            await UpdateVisibleRowCountAsync();
-        }
-    }
+    //public async Task OnInput( InputEventArgs args )
+    //{
+    //    if ( GridRef != null )
+    //    {
+    //        await GridRef.SearchAsync( args.Value );
+    //        await Task.Delay( 50 );
+    //        await UpdateVisibleRowCountAsync();
+    //    }
+    //}
 
     protected async Task Save()
     {
@@ -175,5 +218,79 @@ public partial class Mailings_Templates
     //    {
     //        await GridRef.Refresh();
     //    }
+    }
+
+    protected async Task SelectTemplateListAsync( TemplatesListModel template )
+    {
+        if ( template == null )
+        {
+            return;
+        }
+
+        SelectedTemplatesList = template;
+        
+        if ( string.IsNullOrEmpty( template.RecipientListId.ToString() ) )
+            SelectedTemplatesList.RecipientListId = 0;
+
+        editContext = new EditContext( SelectedTemplatesList );    
+
+        await InvokeAsync( StateHasChanged );
+    }
+
+    private uint? SelectedTemplatesListId
+    {
+        get => SelectedTemplatesList?.TemplateId;
+        set
+        {
+            if ( value.HasValue && TemplatesList != null )
+            {
+                SelectedTemplatesList = TemplatesList.FirstOrDefault( t => t.TemplateId == value.Value )
+                    ?? new TemplatesListModel();
+
+                // Force “geen” as RecipientListId When there is no RecipientList
+                if ( !RecipientsList.Any( r => r.ListId == SelectedTemplatesList.RecipientListId ) )
+                {
+                    SelectedTemplatesList.RecipientListId = null;
+                }
+
+                // Re-create the EditContext to bind the new template
+                editContext = new EditContext( SelectedTemplatesList );
+
+                // Force UI to refresh
+                InvokeAsync( StateHasChanged );
+            }
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync( bool firstRender )
+    {
+        if ( firstRender && !_disposed )
+        {
+            try
+            {
+                await LoadTemplatesAsync( _cts.Token );
+            }
+            catch ( OperationCanceledException ) { }
+        }
+    }
+
+    public void Dispose()
+    {
+        _disposed = true;
+        _cts.Cancel();
+        _cts.Dispose();
+    }
+
+    private async Task LoadTemplatesAsync( CancellationToken token )
+    {
+        TemplatesList = await MailingService.GetMailTemplatesAsync();
+        RecipientsList = await MailingService.GetRecipientListsAsync();
+        token.ThrowIfCancellationRequested();
+
+        // Default selection
+        SelectedTemplatesList = TemplatesList.FirstOrDefault() ?? new TemplatesListModel();
+        editContext = new EditContext( SelectedTemplatesList );
+
+        await InvokeAsync( StateHasChanged );
     }
 }

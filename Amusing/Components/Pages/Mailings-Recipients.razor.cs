@@ -636,7 +636,7 @@ public class MailingsRecipientsBase : ComponentBase
             return;
         }
 
-        await MailingService.DeleteRecipientQueryAsync( SelectedRecipientsList.ListId );
+        await MailingService.DeleteRecipientQueryAsync( ( uint )  SelectedRecipientsList.ListId  );
 
         // Refresh the list
         RecipientsList = await MailingService.GetRecipientListsAsync();

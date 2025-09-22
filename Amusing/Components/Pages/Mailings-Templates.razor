@@ -11,6 +11,7 @@
 @using Syncfusion.Blazor.Notifications
 @using Syncfusion.Blazor.Popups
 @using Syncfusion.Blazor.QueryBuilder
+@using Syncfusion.Blazor.RichTextEditor
 @using Microsoft.AspNetCore.Components.Forms
 @using Syncfusion.Blazor.SplitButtons
 @using System.Dynamic
@@ -29,76 +30,104 @@
 else
 {
     <div class="page-container">
-        <!-- Static detail fields-->
-        <div class="fixed-header">
+        <div class="groupbox top-info" style="flex:0 0 auto;">
+            <div class="groupbox-header">Template informatie</div>
+            <div class="groupbox-content">
+                @if ( TemplatesList.Any() )
+                {
+                    <SfDropDownList 
+                        TValue="uint?"
+                        TItem="TemplatesListModel"
+                        DataSource="@TemplatesList"
+                        @bind-Value="SelectedTemplatesListId"
+                        Placeholder="Selecteer sjabloon"
+                        CssClass="e-multi-column" 
+                        FloatLabelType="FloatLabelType.Always"
+                        Width="40%"
+                        PopupWidth="800px">
+                        <DropDownListFieldSettings Value="TemplateId" Text="TemplateName"></DropDownListFieldSettings>
+                        <DropDownListTemplates TItem="TemplatesListModel">
+                            <ItemTemplate>
+                                <table>
+                                    <tr>
+                                        <td>@(( context as TemplatesListModel ).TemplateName)</td>
+                                        <td>@(( context as TemplatesListModel ).RecipientListName)</td>
+                                        <td>@(( context as TemplatesListModel ).TemplateChanged)</td>
+                                    </tr>
+                                </table>
+                            </ItemTemplate>
+                        </DropDownListTemplates>
+                    </SfDropDownList>
+                }
+                 <SfComboBox 
+                    TValue="uint?" 
+                    TItem="RecipientListModel" 
+                    FloatLabelType="FloatLabelType.Always"
+                    Placeholder="Ontvangerslijst" 
+                    DataSource="@RecipientsList" 
+                    Width="30%" 
+                    @bind-Value="SelectedTemplatesList.RecipientListId">
+                    <ComboBoxFieldSettings Value="ListId" Text="ListName"></ComboBoxFieldSettings>
+                </SfComboBox>
+                <div class="groupbox-spacer"></div>
+                <SfTextBox Placeholder="Aangemaakt" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="SelectedTemplatesList.TemplateCreated" />
+                <SfTextBox Placeholder="Laatste wijziging" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="SelectedTemplatesList.TemplateChanged" />
+            </div>
+        </div>
+        <div class="spacer-medium"></div>
+        <div class="groupbox rte-section">
+            <div class="groupbox-header">E-Mail sjabloon</div>
+            <div class="groupbox-content">
+                <SfTextBox 
+                    Placeholder="Onderwerp" 
+                    FloatLabelType="FloatLabelType.Always" 
+                    Width="600px" 
+                    @bind-Value="SelectedTemplatesList.TemplateSubject" />
 
-            <!-- Toolbar -->
-            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
-                <SfToolbar Width="760px">
-                    <ToolbarItems>
-                        <ToolbarItem Type="ItemType.Button">
-                            <Template>
-                                <button class="custom-toolbar-btn"
-                                        @onclick="Save"
-                                        title="Bewaar sjabloon">
-                                    <img src="icons/button-save.svg" class="icon" alt="SAVE" />
-                                </button>
-                            </Template>
-                        </ToolbarItem>
-                        <ToolbarItem Type="ItemType.Button">
-                            <Template>
-                                <button class="custom-toolbar-btn" @onclick="AddNew" title="Voeg een nieuw sjabloon toe">
-                                    <img src="icons/button-add.svg" class="icon" alt="ADD" />
-                                </button>
-                            </Template>
-                        </ToolbarItem>
-                        <ToolbarItem Type="ItemType.Button">
-                            <Template>
-                                <button class="custom-toolbar-btn" @onclick="Delete" title="verwijder de geselecteerde sjabloon">
-                                    <img src="icons/button-del.svg" class="icon" alt="DELETE" />
-                                </button>
-                            </Template>
-                        </ToolbarItem>
-                        <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
-                            <Template>
-                                <span class="toolbar-count">@PageName: @VisibleRowCount</span>
-                            </Template>
-                        </ToolbarItem>
-                        <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
-                            <Template>
-                                <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
-                            </Template>
-                        </ToolbarItem>
-                    </ToolbarItems>
-                </SfToolbar>
+                <div style="rte-scroll">
+                    <Syncfusion.Blazor.RichTextEditor.SfRichTextEditor 
+                        ID="rteContent" 
+                        Width="100%" 
+                        Height="100%" 
+                        Placeholder="Beschrijving" 
+                        @bind-Value="SelectedTemplatesList.TemplateContent" >
+                        <Syncfusion.Blazor.RichTextEditor.RichTextEditorToolbarSettings 
+                            Items="@_rteTools"
+                            EnableFloating="true"/>
+                        </Syncfusion.Blazor.RichTextEditor.SfRichTextEditor>
+                </div>
             </div>
         </div>
 
-        <div class="spacer-small"></div>
-
-        <!-- Scrollable area for main datagrid -->
-        <div class="scrollable-content">
-            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
-                <SfGrid @ref="GridRef"
-                        TValue="TemplatesListModel"
-                        Width="760"
-                        DataSource="@TemplatesList"
-                        EnableStickyHeader="true"
-                        AllowResizing="true"
-                        Height="280px"
-                        AllowSorting="true"
-                        AllowMultiSorting="true"
-                        AllowSelection="true">
-                    <GridEvents TValue="TemplatesListModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
-                    <GridEditSettings AllowAdding="true" NewRowPosition="NewRowPosition.Top"></GridEditSettings>
-                    <GridColumns>
-                        <GridColumn Field="@nameof( TemplatesListModel.TemplateId )" IsPrimaryKey="true" Visible="false" />
-                        <GridColumn Field="@nameof( TemplatesListModel.TemplateName )" HeaderText="Sjabloon" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="350px" />
-                        <GridColumn Field="@nameof( TemplatesListModel.RecipientListName )" HeaderText="Bron" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="250px" />
-                        <GridColumn Field="@nameof( TemplatesListModel.TemplateChanged )" HeaderText="Laatste wijzing" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="135px" />
-                    </GridColumns>
-                </SfGrid>
-            </div>
+        <!-- Toolbar -->
+        <div style="flex:0 0 auto; margin-top:0.5rem;">
+            <SfToolbar>
+                <ToolbarItems>
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn"
+                                    @onclick="Save"
+                                    title="Bewaar sjabloon">
+                                <img src="icons/button-save.svg" class="icon" alt="SAVE" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn" @onclick="AddNew" title="Voeg een nieuw sjabloon toe">
+                                <img src="icons/button-add.svg" class="icon" alt="ADD" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+                    <ToolbarItem Type="ItemType.Button">
+                        <Template>
+                            <button class="custom-toolbar-btn" @onclick="Delete" title="verwijder de geselecteerde sjabloon">
+                                <img src="icons/button-del.svg" class="icon" alt="DELETE" />
+                            </button>
+                        </Template>
+                    </ToolbarItem>
+                </ToolbarItems>
+            </SfToolbar>
         </div>
     </div>
 }

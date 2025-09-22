@@ -4,7 +4,7 @@ namespace Amusing.Models;
 
 public class RecipientListModel
 {
-    public uint ListId { get; set; }
+    public uint? ListId { get; set; }
     public string? ListName { get; set; } = null!;
     public string? ListCreated { get; set; }
     public string? ListChanged { get; set; }
