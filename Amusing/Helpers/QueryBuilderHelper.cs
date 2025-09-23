@@ -80,6 +80,7 @@ public static class QueryBuilderHelper
 
         // Build the WHERE-clause
         string whereClause = QueryBuilderSqlGenerator.GenerateWhereClause(rules);
+        var temp = QueryBuilderSqlGenerator.AppendConditions( baseQuery, whereClause );
 
         return QueryBuilderSqlGenerator.AppendConditions( baseQuery, whereClause );
     }

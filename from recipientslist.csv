@@ -1,0 +1,4 @@
+﻿RuleModel;RuleModel.Condition;RuleModel.Field;RuleModel.Label;RuleModel.Not;RuleModel.Operator;RuleModel.Type;RuleModel.Value;RuleModel.Rules;RuleModel.RuleId;RuleModel.IsLocked
+Syncfusion.Blazor.QueryBuilder.RuleModel;"";Role;"Persoon met de rol...";"";in;String;"[contactpersoon1, contactpersoon2]";"";querybuilder_group0_rule0;False
+Syncfusion.Blazor.QueryBuilder.RuleModel;"";IsCanceled;"Groep is afgehaakt";"";equal;Boolean;False;"";querybuilder_group0_rule1;False
+Syncfusion.Blazor.QueryBuilder.RuleModel;"";Festival;"Groep is ingeschreven voor ...";"";in;String;[2018];"";querybuilder_group0_rule2;False

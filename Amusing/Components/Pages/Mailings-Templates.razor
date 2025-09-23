@@ -29,49 +29,53 @@
 }
 else
 {
-    <div class="page-container">
+    <div class="page-container" style="display:flex; flex-direction:column; height:88vh; padding-top:1rem; overflow:hidden;">
         <div class="groupbox top-info" style="flex:0 0 auto;">
             <div class="groupbox-header">Template informatie</div>
             <div class="groupbox-content">
                 @if ( TemplatesList.Any() )
                 {
-                    <SfDropDownList 
-                        TValue="uint?"
-                        TItem="TemplatesListModel"
-                        DataSource="@TemplatesList"
-                        @bind-Value="SelectedTemplatesListId"
-                        Placeholder="Selecteer sjabloon"
-                        CssClass="e-multi-column" 
+                    <div class="inline-row">
+                        <SfDropDownList 
+                            TValue="uint?"
+                            TItem="TemplatesListModel"
+                            DataSource="@TemplatesList"
+                            @bind-Value="SelectedTemplatesListId"
+                            Placeholder="Selecteer sjabloon"
+                            CssClass="e-multi-column" 
+                            FloatLabelType="FloatLabelType.Always"
+                            Width="40%"
+                            PopupWidth="800px">
+                            <DropDownListFieldSettings Value="TemplateId" Text="TemplateName"></DropDownListFieldSettings>
+                            <DropDownListTemplates TItem="TemplatesListModel">
+                                <ItemTemplate>
+                                    <table>
+                                        <tr>
+                                            <td>@(( context as TemplatesListModel ).TemplateName)</td>
+                                            <td>@(( context as TemplatesListModel ).RecipientListName)</td>
+                                            <td>@(( context as TemplatesListModel ).TemplateChanged)</td>
+                                        </tr>
+                                    </table>
+                                </ItemTemplate>
+                            </DropDownListTemplates>
+                        </SfDropDownList>
+                     <SfComboBox 
+                        TValue="uint?" 
+                        TItem="RecipientListModel" 
                         FloatLabelType="FloatLabelType.Always"
-                        Width="40%"
-                        PopupWidth="800px">
-                        <DropDownListFieldSettings Value="TemplateId" Text="TemplateName"></DropDownListFieldSettings>
-                        <DropDownListTemplates TItem="TemplatesListModel">
-                            <ItemTemplate>
-                                <table>
-                                    <tr>
-                                        <td>@(( context as TemplatesListModel ).TemplateName)</td>
-                                        <td>@(( context as TemplatesListModel ).RecipientListName)</td>
-                                        <td>@(( context as TemplatesListModel ).TemplateChanged)</td>
-                                    </tr>
-                                </table>
-                            </ItemTemplate>
-                        </DropDownListTemplates>
-                    </SfDropDownList>
+                        Placeholder="Ontvangerslijst" 
+                        DataSource="@RecipientsList" 
+                        Width="30%"
+                        @bind-Value="RecipientListId">
+                        <ComboBoxFieldSettings Value="ListId" Text="ListName"></ComboBoxFieldSettings>
+                    </SfComboBox>
+                </div>
                 }
-                 <SfComboBox 
-                    TValue="uint?" 
-                    TItem="RecipientListModel" 
-                    FloatLabelType="FloatLabelType.Always"
-                    Placeholder="Ontvangerslijst" 
-                    DataSource="@RecipientsList" 
-                    Width="30%" 
-                    @bind-Value="SelectedTemplatesList.RecipientListId">
-                    <ComboBoxFieldSettings Value="ListId" Text="ListName"></ComboBoxFieldSettings>
-                </SfComboBox>
                 <div class="groupbox-spacer"></div>
-                <SfTextBox Placeholder="Aangemaakt" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="SelectedTemplatesList.TemplateCreated" />
-                <SfTextBox Placeholder="Laatste wijziging" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="SelectedTemplatesList.TemplateChanged" />
+                <div class="inline-row">
+                    <SfTextBox Placeholder="Aangemaakt" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="SelectedTemplatesList.TemplateCreated" />
+                    <SfTextBox Placeholder="Laatste wijziging" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="SelectedTemplatesList.TemplateChanged" />
+                </div>
             </div>
         </div>
         <div class="spacer-medium"></div>
@@ -84,11 +88,12 @@ else
                     Width="600px" 
                     @bind-Value="SelectedTemplatesList.TemplateSubject" />
 
-                <div style="rte-scroll">
+                <div class="rte-scroll">
                     <Syncfusion.Blazor.RichTextEditor.SfRichTextEditor 
                         ID="rteContent" 
+                        EditorMode="EditorMode.HTML"
                         Width="100%" 
-                        Height="100%" 
+                        Height="100%"
                         Placeholder="Beschrijving" 
                         @bind-Value="SelectedTemplatesList.TemplateContent" >
                         <Syncfusion.Blazor.RichTextEditor.RichTextEditorToolbarSettings 

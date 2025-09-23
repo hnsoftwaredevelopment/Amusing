@@ -1,62 +1,105 @@
-.groupbox {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 0px 12px 12px 12px;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-    position: relative;
-    background: #e9f0f6;
-}
-
-.groupbox-header {
-    font-size: 0.75rem;
-    font-weight: bold;
-    position: absolute;
-    top: -0.6em;
-    left: 10px;
-    color: #666;
-    background-color: #e9f0f6;
-    padding: 0 6px;
-}
-
-.groupbox-content {
-    margin-top: 10px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2px 8px;
-}
-
-.groupbox-spacer {
-    flex-basis: 100%;
-    margin-top: 0.05rem;
-    height: 0;
-}
-
+/* Page container */
 .page-container {
-    background-color: #e9f0f6;
     display: flex;
     flex-direction: column;
-    height: 88vh; /* Fullscreen (100% - Page header) */
-    overflow: hidden; /* No scrollbar on whole page */
-    padding: 0.75rem; /* Reserve space for headers */
+    height: 100vh; /* vul het scherm, geen outer scrollbar */
+    overflow: hidden; /* outer page mag niet scrollen */
+    background: #e9f0f6; /* achtergrond rondom groupboxes (pas aan) */
+    padding: 0.75rem;
     box-sizing: border-box;
 }
 
-/* ---- Rich Text Editor container ---- */
-.rte-container {
-    display: flex;
-    flex-direction: column;
-    flex: 1; /* Take all available space in page-container */
-    min-height: 0; /* Important: prevents flexbox overflow */
+/* Algemene groupbox styling (voorbeeld) */
+.groupbox {
+    position: relative;
+    background: #e9f0f6;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+    box-sizing: border-box;
 }
 
-    /* Toolbar should stay visible */
-    .rte-container .e-toolbar {
-        flex-shrink: 0;
+/* header */
+.groupbox-header {
+    position: absolute;
+    top: -0.6rem;
+    left: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: bold;
+    background: #e9f0f6;
+    padding: 0 0.25rem;
+}
+
+/* Top info area: neemt alleen benodigde hoogte */
+.top-info {
+    flex: 0 0 auto;
+}
+
+/* RTE section: neemt de overgebleven ruimte.
+   min-height:0 is essentieel zodat child overflow werkt */
+.rte-section {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* CRUCIAAL voor internal scrollbars */
+}
+
+/* Content binnen groupbox (fix voor layout) */
+.groupbox-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.inline-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* kleine ruimte tussen de velden */
+}
+
+    .inline-row > * {
+        flex: 0 0 auto; /* neemt alleen de ruimte die nodig is */
     }
 
-    /* Editable area should scroll when content grows */
-    .rte-container .e-richtexteditor {
-        flex: 1;
-        min-height: 0; /* allow flexbox to shrink */
-        overflow-y: auto; /* scrollbar only inside editor content */
+
+/* Het scrollbare gebied rond de RTE */
+.rte-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    position: relative;
+}
+
+    /* Zorg dat de RTE zelf 100% hoogte inneemt van de container */
+    .rte-scroll .e-richtexteditor {
+        height: 100%;
+        box-sizing: border-box;
+        background: transparent; /* laat groupbox achtergrond zichtbaar zijn */
     }
+
+    /* Maak toolbar sticky binnen de RTE-container */
+    .rte-scroll .e-rte-toolbar,
+    .rte-scroll .e-toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: inherit; /* neemt groupbox achtergrond */
+    }
+
+    /* Zorg dat de content editable voldoende padding heeft (zodat toolbar niet over tekst ligt) */
+    .rte-scroll .e-richtexteditor .e-editable {
+        padding-top: 0.5rem;
+        box-sizing: border-box;
+    }
+
+/* Optioneel: style van subject textbox zodat die full width boven editor staat */
+.subject-box {
+    width: 100%;
+    max-width: 100%;
+}

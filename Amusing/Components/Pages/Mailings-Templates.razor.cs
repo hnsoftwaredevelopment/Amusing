@@ -1,7 +1,9 @@
-﻿using System.Net.NetworkInformation;
+﻿using System.Dynamic;
+using System.Net.NetworkInformation;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+using Amusing.Helpers;
 using Amusing.Models;
 using Amusing.Services;
 
@@ -24,10 +26,25 @@ public partial class Mailings_Templates
 
     private List<TemplatesListModel> TemplatesList { get; set; } = [];
     private List<RecipientListModel> RecipientsList { get; set; } = [ ];
+    private List<string> AvailableFields { get; set; } = new();
+
     private TemplatesListModel SelectedTemplatesList;
     
     private EditContext? editContext;
     private CancellationTokenSource _cts = new();
+
+    private uint? RecipientListId
+    {
+        get => SelectedTemplatesList?.RecipientListId;
+        set
+        {
+            if ( SelectedTemplatesList != null && SelectedTemplatesList.RecipientListId != value )
+            {
+                SelectedTemplatesList.RecipientListId = value;
+                _ = OnRecipientListChanged( value );
+            }
+        }
+    }
 
     private readonly List<ToolbarItemModel> _rteTools =
 	[
@@ -293,4 +310,118 @@ public partial class Mailings_Templates
 
         await InvokeAsync( StateHasChanged );
     }
+
+    private async Task OnRecipientListChanged( uint? listId )
+    {
+        if ( listId == null )
+            return;
+
+        // Vind de geselecteerde lijst
+        var selectedList = RecipientsList.FirstOrDefault(r => r.ListId == listId.Value);
+        if ( selectedList == null )
+            return;
+
+        // Converteer eventueel oude filter naar nieuwe QueryBuilder JSON
+        if ( string.IsNullOrWhiteSpace( selectedList.ListQuery ) && !string.IsNullOrWhiteSpace( selectedList.ListFilter ) )
+        {
+            selectedList.ListQuery = QueryBuilderJsonConverter.OldToNew( selectedList.ListFilter );
+        }
+
+        if ( string.IsNullOrWhiteSpace( selectedList.ListQuery ) )
+        {
+            AvailableFields.Clear();
+            return;
+        }
+
+        try
+        {
+            // JSON → RuleModel
+            var rules = JsonSerializer.Deserialize<RuleModel>(selectedList.ListQuery);
+            if ( rules == null )
+            {
+                AvailableFields.Clear();
+                return;
+            }
+
+            // Force all operators to string
+            NormalizeOperators( rules );
+
+            // Force AND voor consistentie
+            ForceAndCondition( rules );
+
+            // Afleiden van SourceChecked
+            string sourceChecked = selectedList.ListSource switch
+            {
+                MailingService.RecipientListSource.Persons => "persons",
+                MailingService.RecipientListSource.Groups => "groups",
+                _ => "persons"
+            };
+
+            // Maak de echte SQL-query
+            string fullQuery = QueryBuilderHelper.DetermineQueryFromRules(rules, sourceChecked);
+
+            // Ophalen van dynamische resultaten
+            var dynamicRecipients = await MailingService.GetDynamicRecipientsAsync(fullQuery) ?? new List<ExpandoObject>();
+
+            // Bepaal de beschikbare kolommen
+            AvailableFields = dynamicRecipients.FirstOrDefault() is IDictionary<string, object> firstRow
+                ? firstRow.Keys.ToList()
+                : new List<string>();
+        }
+        catch ( Exception ex )
+        {
+            // Fallback bij parsing/fouten
+            Console.Error.WriteLine( $"Error processing recipient list {listId}: {ex.Message}" );
+            AvailableFields.Clear();
+        }
+    }
+
+    protected void ForceAndCondition( RuleModel? rule )
+    {
+        if ( rule == null )
+            return;
+
+        if ( rule.Rules != null && rule.Rules.Any() )
+        {
+            rule.Condition = "and";
+            foreach ( var child in rule.Rules )
+            {
+                ForceAndCondition( child );
+            }
+        }
+        else
+        {
+            rule.Condition = null;
+        }
+    }
+
+    private void NormalizeOperators( RuleModel rule )
+    {
+        if ( rule == null )
+            return;
+
+        if ( rule.Operator is JsonElement je )
+        {
+            // Convert JsonElement to string safely
+            rule.Operator = je.ValueKind switch
+            {
+                JsonValueKind.String => je.GetString(),
+                JsonValueKind.Number => je.GetRawText(), // numbers als string
+                JsonValueKind.Null => null,
+                JsonValueKind.True => "true",
+                JsonValueKind.False => "false",
+                _ => je.GetRawText()
+            };
+        }
+
+        // Recursief voor subrules
+        if ( rule.Rules != null )
+        {
+            foreach ( var subRule in rule.Rules )
+            {
+                NormalizeOperators( subRule );
+            }
+        }
+    }
+
 }
