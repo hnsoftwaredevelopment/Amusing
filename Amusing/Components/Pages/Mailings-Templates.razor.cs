@@ -7,6 +7,8 @@ using Amusing.Helpers;
 using Amusing.Models;
 using Amusing.Services;
 
+using Blazorise;
+
 using Microsoft.AspNetCore.Components.Forms;
 
 using Syncfusion.Blazor.Grids;
@@ -18,11 +20,10 @@ namespace Amusing.Components.Pages;
 
 public partial class Mailings_Templates
 {
-    private bool _initialLoadDone = false;
     private bool IsLoading = false;
     private bool _disposed = false;
-    private int VisibleRowCount = 0;
     private string PageName = "Mail Templates";
+    protected static readonly string[] InFields = { "Festival", "Role", "Volunteer" };
 
     private List<TemplatesListModel> TemplatesList { get; set; } = [];
     private List<RecipientListModel> RecipientsList { get; set; } = [ ];
@@ -107,53 +108,6 @@ public partial class Mailings_Templates
 
         IsLoading = false;
     }
-
-    //protected async Task OnGridDataBound()
-    //{
-    //    if ( !_initialLoadDone && TemplatesList?.Any() == true )
-    //    {
-    //        _initialLoadDone = true;
-    //        await UpdateVisibleRowCountAsync();
-
-    //        // Select first row in the SfGrid
-    //        if ( GridRef != null )
-    //        {
-    //            await GridRef.SelectRowAsync( 0 );
-    //        }
-
-    //        // filll QueryBuilder with query data from selected row
-    //        //if ( TemplatesList.Count > 0 )
-    //        //{
-    //        //    await SelectTemplatesListAsync( TemplatesList [ 0 ] );
-    //        //}
-    //    }
-    //}
-
-    protected async Task OnRowSelected( RowSelectEventArgs<TemplatesListModel> args )
-    {
-        await SelectTemplateListAsync( args.Data );
-    }
-
-    //protected async Task UpdateVisibleRowCountAsync()
-    //{
-    //    if ( GridRef is not null )
-    //    {
-    //        List<TemplatesListModel> records = await GridRef.GetCurrentViewRecordsAsync();
-    //        await Task.Delay( 150 );
-    //        VisibleRowCount = records?.Count ?? 0;
-    //        StateHasChanged();
-    //    }
-    //}
-
-    //public async Task OnInput( InputEventArgs args )
-    //{
-    //    if ( GridRef != null )
-    //    {
-    //        await GridRef.SearchAsync( args.Value );
-    //        await Task.Delay( 50 );
-    //        await UpdateVisibleRowCountAsync();
-    //    }
-    //}
 
     protected async Task Save()
     {
@@ -361,7 +315,8 @@ public partial class Mailings_Templates
             string fullQuery = QueryBuilderHelper.DetermineQueryFromRules(rules, sourceChecked);
 
             // Ophalen van dynamische resultaten
-            var dynamicRecipients = await MailingService.GetDynamicRecipientsAsync(fullQuery) ?? new List<ExpandoObject>();
+            //var dynamicRecipients = await MailingService.GetDynamicRecipientsAsync(fullQuery) ?? new List<ExpandoObject>();
+            var dynamicRecipients = await MailingService.GetDynamicRecipientsAsync(fullQuery);
 
             // Bepaal de beschikbare kolommen
             AvailableFields = dynamicRecipients.FirstOrDefault() is IDictionary<string, object> firstRow
@@ -415,13 +370,67 @@ public partial class Mailings_Templates
         }
 
         // Recursief voor subrules
-        if ( rule.Rules != null )
+        //if ( rule.Rules != null )
+        //{
+        //    foreach ( var subRule in rule.Rules )
+        //    {
+        //        NormalizeOperators( subRule );
+        //    }
+        //}
+    }
+
+    #region FixInFields
+    protected void FixInFields( RuleModel? rule )
+    {
+        if ( rule == null )
+            return;
+
+        if ( InFields.Contains( rule.Field ) && rule.Operator == "in" )
         {
-            foreach ( var subRule in rule.Rules )
+            // Case 1: Value is null → leeg array
+            if ( rule.Value == null )
             {
-                NormalizeOperators( subRule );
+                rule.Value = Array.Empty<string>();
             }
+            // Case 2: Value is een JsonElement → parse naar string[]
+            else if ( rule.Value is JsonElement json && json.ValueKind == JsonValueKind.Array )
+            {
+                var list = new List<string>();
+                foreach ( var item in json.EnumerateArray() )
+                {
+                    list.Add( item.GetString() ?? string.Empty );
+                }
+                rule.Value = list.ToArray();
+            }
+            // Case 3: Value is een string die er uitziet als JSON array → deserializen
+            else if ( rule.Value is string s && s.TrimStart().StartsWith( "[" ) )
+            {
+                try
+                {
+                    rule.Value = JsonSerializer.Deserialize<string [ ]>( s ) ?? Array.Empty<string>();
+                }
+                catch
+                {
+                    // fallback: laat de raw string staan
+                }
+            }
+        }
+
+        // Recurse
+        if ( rule.Rules != null && rule.Rules.Any() )
+        {
+            //FixInFields( rule.Rules );
         }
     }
 
+    protected void FixInFields( IEnumerable<RuleModel>? rules )
+    {
+        if ( rules == null )
+            return;
+        foreach ( var r in rules )
+        {
+            //FixInFields( r );
+        }
+    }
+    #endregion
 }

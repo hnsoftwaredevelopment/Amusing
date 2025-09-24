@@ -160,7 +160,7 @@ public class MailingsRecipientsBase : ComponentBase
             await LoadRulesAsync( json );
 
             // Fix alle "in"-velden die null zijn
-            FixInFields( personsQueryBuilder.GetRules()?.Rules );
+            //FixInFields( personsQueryBuilder.GetRules()?.Rules );
 
             // Eventueel: subscribeer op nieuwe regels zodat sanity check automatisch blijft gelden
             //queryBuilder.RuleAdded += ( sender, args ) => FixInFields( new [ ] { args.Rule } );
@@ -182,10 +182,10 @@ public class MailingsRecipientsBase : ComponentBase
             rule.Value = Array.Empty<string>();
         }
 
-        if ( rule.Rules != null && rule.Rules.Any() )
-        {
-            FixInFields( rule.Rules );
-        }
+        //if ( rule.Rules != null && rule.Rules.Any() )
+        //{
+        //    FixInFields( rule.Rules );
+        //}
     }
 
     protected void FixInFields( IEnumerable<RuleModel>? rules )
@@ -195,10 +195,10 @@ public class MailingsRecipientsBase : ComponentBase
             return;
         }
 
-        foreach ( RuleModel r in rules )
-        {
-            FixInFields( r );
-        }
+        //foreach ( RuleModel r in rules )
+        //{
+        //    FixInFields( r );
+        //}
     }
     #endregion
 
@@ -220,7 +220,7 @@ public class MailingsRecipientsBase : ComponentBase
 
         // Force AND condition en fix alle "in"-velden
         ForceAndCondition( rules );
-        FixInFields( rules );
+        //FixInFields( rules );
     }
 
     #region ForceAndCondition

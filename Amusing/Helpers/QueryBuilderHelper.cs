@@ -1,4 +1,6 @@
-﻿using Syncfusion.Blazor.QueryBuilder;
+﻿using System.Text.Json;
+
+using Syncfusion.Blazor.QueryBuilder;
 
 namespace Amusing.Helpers;
 
@@ -67,10 +69,14 @@ public static class QueryBuilderHelper
 
     public static string DetermineQueryFromRules( RuleModel rules, string sourceChecked )
     {
-        if ( rules == null )
-        {
-            throw new ArgumentNullException( nameof( rules ) );
-        }
+		ArgumentNullException.ThrowIfNull( rules );
+
+		// Debug routine to visualize the rules
+		var options = new JsonSerializerOptions { WriteIndented = true };
+        string json = JsonSerializer.Serialize(rules, options);
+        Console.WriteLine( "===== RULES INPUT =====" );
+        Console.WriteLine( json );
+        Console.WriteLine( "=======================" );
 
         // Determine queryLevel based on rules
         int queryLevel = DetermineQueryLevel(rules, sourceChecked);

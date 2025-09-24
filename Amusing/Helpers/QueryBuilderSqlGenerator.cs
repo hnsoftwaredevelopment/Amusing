@@ -1,11 +1,17 @@
-﻿using Syncfusion.Blazor.QueryBuilder;
+﻿using System.Text.Json;
+
+using Syncfusion.Blazor.QueryBuilder;
 
 namespace Amusing.Helpers;
 
 public static class QueryBuilderSqlGenerator
 {
     private static int IndexOfIgnoreCase( string text, string value ) =>
-    text.IndexOf( value, StringComparison.OrdinalIgnoreCase );
+        text.IndexOf( value, StringComparison.OrdinalIgnoreCase );
+    private static readonly HashSet<string> InFields = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "Festival", "Role", "Volunteer"
+    };
 
     public static string GenerateWhereClause( RuleModel rules )
     {
@@ -14,14 +20,80 @@ public static class QueryBuilderSqlGenerator
             return string.Empty;
         }
 
+        // Always normalize before building conditions
+        NormalizeRules( rules );
+
         return BuildCondition( rules );
+    }
+
+    private static void NormalizeRules( RuleModel? rule )
+    {
+        if ( rule == null )
+            return;
+
+        // Fix Not: zet null om naar false
+        if ( rule.Not == null )
+        {
+            rule.Not = false;
+        }
+
+        // Special handling for IN fields
+        if ( rule.Operator == "in" )
+        {
+            rule.Value = NormalizeValue( rule.Value );
+        }
+
+        // Recurse
+        if ( rule.Rules != null && rule.Rules.Any() )
+        {
+            foreach ( var child in rule.Rules )
+            {
+                NormalizeRules( child );
+                child.Not = null;
+            }
+        }
+    }
+
+    private static object? NormalizeValue( object? value )
+    {
+        if ( value is JsonElement el )
+        {
+            switch ( el.ValueKind )
+            {
+                case JsonValueKind.String:
+                    return el.GetString();
+                case JsonValueKind.Number:
+                    return el.TryGetInt32( out var i ) ? i : ( object ) el.GetDouble();
+                case JsonValueKind.True:
+                case JsonValueKind.False:
+                    return el.GetBoolean();
+                case JsonValueKind.Array:
+                    var list = new List<object?>();
+                    foreach ( var item in el.EnumerateArray() )
+                    {
+                        list.Add( NormalizeValue( item ) );
+                    }
+                    return list.ToArray();
+                case JsonValueKind.Null:
+                case JsonValueKind.Undefined:
+                    return null;
+            }
+        }
+
+        // If it's already an array, normalize inner values
+        if ( value is IEnumerable<object> enumerable && value is not string )
+        {
+            return enumerable.Select( NormalizeValue ).ToArray();
+        }
+
+        return value;
     }
 
     private static string BuildCondition( RuleModel rule )
     {
         if ( rule.Rules != null && rule.Rules.Count != 0 )
         {
-            IEnumerable<string> conditions = rule.Rules.Select( BuildCondition );
+            IEnumerable<string> conditions = rule.Rules.Select(BuildCondition);
             string op = rule.Condition.Equals("or", StringComparison.OrdinalIgnoreCase) ? " OR " : " AND ";
             return "(" + string.Join( op, conditions ) + ")";
         }
@@ -30,11 +102,14 @@ public static class QueryBuilderSqlGenerator
         {
             string column = MapFieldToColumn(rule.Field);
 
-            // Meerdere waarden
-            if ( rule.Value is IEnumerable<object> list )
+            // Multiple values (e.g., IN operator)
+            if ( rule.Value is IEnumerable<object> list && !( rule.Value is string ) )
             {
-                IEnumerable<string> formatted = list.Select( v => FormatValue( v, rule.Type ) );
-                string op = rule.Operator.Equals("equal", StringComparison.OrdinalIgnoreCase) ? " = " : MapOperator(rule.Operator);
+                IEnumerable<string> formatted = list.Select(v => FormatValue(v, rule.Type));
+                string op = rule.Operator.Equals("equal", StringComparison.OrdinalIgnoreCase)
+                                ? " = "
+                                : MapOperator(rule.Operator);
+
                 return "(" + string.Join( " OR ", formatted.Select( f => $"{column}{op}{f}" ) ) + ")";
             }
 
@@ -56,15 +131,12 @@ public static class QueryBuilderSqlGenerator
 
         if ( !hasWhere )
         {
-            // Voeg tijdelijk dummy WHERE toe
             trimmed += " WHERE 1=1";
             addedDummyWhere = true;
         }
 
-        // Voeg altijd de extra voorwaarden toe met AND
         string result = $"{trimmed} AND {extraConditions};";
 
-        // Verwijder de dummy WHERE 1=1 als we hem tijdelijk hadden toegevoegd
         result = result.Replace( "WHERE 1=1 AND ", "WHERE " );
 
         return result;
@@ -78,10 +150,11 @@ public static class QueryBuilderSqlGenerator
             "greaterthan" => ">",
             "lessthan" => "<",
             "contains" => "LIKE",
+            "in" => "=", // handled as OR chain
             _ => "="
         };
 
-    private static string? FormatValue( object value, string type )
+    private static string? FormatValue( object? value, string type )
     {
         if ( value == null )
         {
@@ -103,7 +176,6 @@ public static class QueryBuilderSqlGenerator
             return b ? "1" : "0";
         }
 
-        // Strings en numerieke waarden correct quoten
         return value is string ? $"'{value}'" : value.ToString();
     }
 
@@ -122,7 +194,7 @@ public static class QueryBuilderSqlGenerator
             "Confirmed" => QueryDefinitions.WhereConfirmed,
             "Infomailing" => QueryDefinitions.WhereInfomailing,
             "Role" => QueryDefinitions.WhereRole,
-            _ => field // fallback voor gewone velden
+            _ => field
         };
     }
 }
