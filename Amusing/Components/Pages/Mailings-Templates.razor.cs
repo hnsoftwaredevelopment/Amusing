@@ -6,7 +6,9 @@ using Amusing.Models;
 using Amusing.Services;
 
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.JSInterop;
 
+using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.QueryBuilder;
 using Syncfusion.Blazor.RichTextEditor;
 
@@ -16,12 +18,23 @@ public partial class Mailings_Templates
 {
     private bool _isLoading = false;
     private bool _disposed = false;
+    private bool _showRTE = true;
     private readonly string _pageName = "Mail Templates";
     protected static readonly string[] InFields = { "Festival", "Role", "Volunteer" };
 
     private List<TemplatesListModel> TemplatesList { get; set; } = [ ];
     private List<RecipientListModel> RecipientsList { get; set; } = [ ];
-    private List<string> AvailableFields { get; set; } = new();
+    private List<string> AvailableFields { get; set; } = [ ];
+    private List<SlashMenuItemModel> _slashMenuItems = new();
+    private List<SlashMenuItemModel> SlashMenuItems
+    {
+        get => _slashMenuItems;
+        set => _slashMenuItems = value;
+    }
+    private SfRichTextEditor _rte;
+    private SfAutoComplete<string, string> _subjectAuto;
+    private int _lastCaretPos = 0;
+    private Dictionary<string, object> _subjectHtmlAttr = new() { { "id", "subjectAutoInput" } };
 
     private TemplatesListModel _selectedTemplatesList;
 
@@ -254,10 +267,12 @@ public partial class Mailings_Templates
                 }
                 _selectedTemplatesList.TemplateSubject = _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateSubject, true );
                 _selectedTemplatesList.TemplateContent = _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateContent, true );
+                await JSRuntime.InvokeVoidAsync( "rteHelpers.registerInput", "subjectAutoInput" );
             }
             catch ( OperationCanceledException ) { }
         }
     }
+
 
     public void Dispose()
     {
@@ -345,7 +360,16 @@ public partial class Mailings_Templates
             // Fields are Translated for the user
             if ( dynamicRecipients.FirstOrDefault() is IDictionary<string, object> firstRow )
             {
-                AvailableFields = _mappingService.GetAvailableLabels( firstRow.Keys ).ToList();
+                AvailableFields = [ .. _mappingService.GetAvailableLabels( firstRow.Keys ) ];
+
+                SlashMenuItems = [ .. AvailableFields.Select( f => new SlashMenuItemModel { Text = f, IconCss = "e-icons e-named-set", GroupBy = "Variabelen:" } ) ];
+
+                // To be sure the SlashMenuItems become visible it is necesary
+                // to rerender the RTE, so disable it and reaneble it again
+                _showRTE = false;
+                StateHasChanged();
+                _showRTE = true;
+                StateHasChanged();
             }
             else
             {
@@ -407,22 +431,96 @@ public partial class Mailings_Templates
                 _ => je.GetRawText()
             };
         }
-
-        // Recursief voor subrules
-        //if ( rule.Rules != null )
-        //{
-        //    foreach ( var subRule in rule.Rules )
-        //    {
-        //        NormalizeOperators( subRule );
-        //    }
-        //}
     }
 
     private FieldMappingService _mappingService;
 
-    public class FieldOption
+    public async Task OnSlashMenuItemSelect( SlashMenuSelectEventArgs args ) => await _rte.ExecuteCommandAsync( CommandName.InsertHTML, args.ItemData.Text );
+
+    private async Task OnFiltering( FilteringEventArgs args )
     {
-        public string InternalName { get; set; } = string.Empty;
-        public string DisplayName { get; set; } = string.Empty;
+        // voorkom default filtering
+        args.PreventDefaultAction = true;
+
+        // huidige waarde en caret ophalen via JS
+        string currentValue = await JSRuntime.InvokeAsync<string>("rteHelpers.getActiveValue");
+        int caret = await JSRuntime.InvokeAsync<int>("rteHelpers.getLastCaret");
+
+        // fallback: caret > 0, anders laatste bekende
+        if ( caret <= 0 )
+        {
+            caret = _lastCaretPos;
+        }
+
+        // sanity-check boundaries
+        caret = Math.Clamp( caret, 0, currentValue?.Length ?? 0 );
+
+        bool trigger = false;
+
+        // als we precies op een '{' staan of args.Text eindigt met '{'
+        if ( !string.IsNullOrEmpty( currentValue ) && caret > 0 && currentValue [ caret - 1 ] == '{' )
+        {
+            trigger = true;
+        }
+        else if ( !string.IsNullOrEmpty( args.Text ) && args.Text.EndsWith( "{" ) )
+        {
+            trigger = true;
+        }
+
+        if ( trigger )
+        {
+            // laat AutoComplete zien met volledige lijst
+            await _subjectAuto.FilterAsync( AvailableFields );
+            await _subjectAuto.ShowPopupAsync();
+        }
+        else
+        {
+            // sluit de lijst, geen items tonen
+            await _subjectAuto.FilterAsync( new List<string>() );
+        }
+
+        // update fallback caret
+        _lastCaretPos = caret;
     }
+
+    private async Task OnValueSelect( SelectEventArgs<string> args )
+    {
+        args.Cancel = true;
+
+        string selected = args.ItemData ?? string.Empty;
+        string current = _selectedTemplatesList.TemplateSubject ?? string.Empty;
+
+        // zorg dat de variabele correct tussen {} staat, maar niet dubbel
+        if ( !selected.StartsWith( "{" ) && !selected.EndsWith( "}" ) )
+        {
+            selected = "{" + selected + "}";
+        }
+
+        // caret ophalen
+        int caret = await JSRuntime.InvokeAsync<int>("rteHelpers.getLastCaret");
+        if ( caret <= 0 )
+        {
+            caret = _lastCaretPos;
+        }
+
+        caret = Math.Clamp( caret, 0, current.Length );
+
+        // check voor spaties voor en na
+        bool addSpaceBefore = caret > 0 && current[caret - 1] != ' ' && !selected.StartsWith("{");
+        bool addSpaceAfter = caret < current.Length && current[caret] != ' ';
+
+        string insertText = (addSpaceBefore ? " " : "") + selected + (addSpaceAfter ? " " : "");
+
+        // voeg in op caret
+        current = current.Insert( caret, insertText );
+
+        // update model en caret
+        _selectedTemplatesList.TemplateSubject = current;
+        _lastCaretPos = caret + insertText.Length;
+
+        StateHasChanged();
+
+        await JSRuntime.InvokeVoidAsync( "rteHelpers.setCaretById", "subjectAutoInput", _lastCaretPos );
+    }
+
 }

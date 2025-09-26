@@ -19,6 +19,7 @@
 @using System.Text.Json.Serialization
 
 @inject MailingService MailingService
+@inject IJSRuntime JSRuntime
 
 @if ( _isLoading )
 {
@@ -82,24 +83,46 @@ else
         <div class="groupbox rte-section">
             <div class="groupbox-header">E-Mail sjabloon</div>
             <div class="groupbox-content">
-                <SfTextBox 
-                    Placeholder="Onderwerp" 
-                    FloatLabelType="FloatLabelType.Always" 
-                    Width="600px" 
-                    @bind-Value="_selectedTemplatesList.TemplateSubject" />
+@*                 <SfTextBox
+                           Placeholder="Onderwerp"
+                           FloatLabelType="FloatLabelType.Always"
+                           Width="600px"
+                           @bind-Value="_selectedTemplatesList.TemplateSubject" />
+ *@
+                <SfAutoComplete TValue="string" TItem="string"
+                                @ref="_subjectAuto"
+                                @bind-Value="_selectedTemplatesList.TemplateSubject"
+                                Placeholder="Onderwerp"
+                                AllowFiltering="true"
+                                AllowCustom="true"
+                                DataSource="@AvailableFields"
+                                SuggestionCount="10"
+                                Width="600px"
+                                HtmlAttributes="@(new Dictionary<string, object> { { "id", "subjectAutoInput" } })">
+                    <AutoCompleteEvents TValue="string" TItem="string"
+                                        Filtering="OnFiltering"
+                                        OnValueSelect="OnValueSelect" />
+                </SfAutoComplete>
+
 
                 <div class="rte-scroll">
-                    <Syncfusion.Blazor.RichTextEditor.SfRichTextEditor 
-                        ID="rteContent" 
-                        EditorMode="EditorMode.HTML"
-                        Width="100%" 
-                        Height="100%"
-                        Placeholder="Beschrijving" 
-                        @bind-Value="_selectedTemplatesList.TemplateContent" >
-                        <Syncfusion.Blazor.RichTextEditor.RichTextEditorToolbarSettings 
-                            Items="@_rteTools"
-                            EnableFloating="true"/>
-                        </Syncfusion.Blazor.RichTextEditor.SfRichTextEditor>
+                    @if (_showRTE)
+                    {
+                        <Syncfusion.Blazor.RichTextEditor.SfRichTextEditor 
+                            @ref="_rte"
+                            ID="rteContent" 
+                            EditorMode="EditorMode.HTML"
+                            Width="100%" 
+                            Height="100%"
+                            Placeholder="Beschrijving" 
+                            @bind-Value="_selectedTemplatesList.TemplateContent" >
+                            <RichTextEditorEvents SlashMenuItemSelecting="OnSlashMenuItemSelect" />
+                            <RichTextEditorSlashMenuSettings Enable="true" Items="@SlashMenuItems" />
+                            <Syncfusion.Blazor.RichTextEditor.RichTextEditorToolbarSettings 
+                                Items="@_rteTools"
+                                EnableFloating="true"/>
+                        </Syncfusion.Blazor.RichTextEditor.SfRichTextEditor>                      
+                    }
                 </div>
             </div>
         </div>
