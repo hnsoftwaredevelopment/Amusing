@@ -20,11 +20,11 @@
 
 @inject MailingService MailingService
 
-@if ( IsLoading )
+@if ( _isLoading )
 {
     <div class="text-center p-2">
         <SfSpinner CssClass="e-spin-center" />
-        <p>@PageName worden geladen...</p>
+        <p>@_pageName worden geladen...</p>
     </div>
 }
 else
@@ -73,8 +73,8 @@ else
                 }
                 <div class="groupbox-spacer"></div>
                 <div class="inline-row">
-                    <SfTextBox Placeholder="Aangemaakt" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="SelectedTemplatesList.TemplateCreated" />
-                    <SfTextBox Placeholder="Laatste wijziging" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="SelectedTemplatesList.TemplateChanged" />
+                    <SfTextBox Placeholder="Aangemaakt" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="_selectedTemplatesList.TemplateCreated" />
+                    <SfTextBox Placeholder="Laatste wijziging" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="_selectedTemplatesList.TemplateChanged" />
                 </div>
             </div>
         </div>
@@ -86,7 +86,7 @@ else
                     Placeholder="Onderwerp" 
                     FloatLabelType="FloatLabelType.Always" 
                     Width="600px" 
-                    @bind-Value="SelectedTemplatesList.TemplateSubject" />
+                    @bind-Value="_selectedTemplatesList.TemplateSubject" />
 
                 <div class="rte-scroll">
                     <Syncfusion.Blazor.RichTextEditor.SfRichTextEditor 
@@ -95,7 +95,7 @@ else
                         Width="100%" 
                         Height="100%"
                         Placeholder="Beschrijving" 
-                        @bind-Value="SelectedTemplatesList.TemplateContent" >
+                        @bind-Value="_selectedTemplatesList.TemplateContent" >
                         <Syncfusion.Blazor.RichTextEditor.RichTextEditorToolbarSettings 
                             Items="@_rteTools"
                             EnableFloating="true"/>

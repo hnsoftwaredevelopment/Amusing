@@ -6,12 +6,12 @@ namespace Amusing.Helpers;
 
 public static class QueryBuilderSqlGenerator
 {
-    private static int IndexOfIgnoreCase( string text, string value ) =>
-        text.IndexOf( value, StringComparison.OrdinalIgnoreCase );
-    private static readonly HashSet<string> InFields = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-    {
-        "Festival", "Role", "Volunteer"
-    };
+    // Fields that should always be treated as "IN" (can be extended)
+    private static readonly HashSet<string> InFields = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "Festival", "Role", "Volunteer"
+        };
+
 
     public static string GenerateWhereClause( RuleModel rules )
     {
@@ -29,110 +29,228 @@ public static class QueryBuilderSqlGenerator
     private static void NormalizeRules( RuleModel? rule )
     {
         if ( rule == null )
+        {
             return;
-
-        // Fix Not: zet null om naar false
-        if ( rule.Not == null )
-        {
-            rule.Not = false;
         }
 
-        // Special handling for IN fields
-        if ( rule.Operator == "in" )
+        // Normalize OPERATOR
+        if ( rule.Operator is JsonElement jeOp )
         {
-            rule.Value = NormalizeValue( rule.Value );
+            rule.Operator = jeOp.ValueKind == JsonValueKind.String ? jeOp.GetString() : jeOp.GetRawText();
+        }
+        else
+        {
+            rule.Operator = rule.Operator?.ToString();
         }
 
-        // Recurse
+        // Normalize VALUE (convert JsonElement, stringified arrays, collections)
+        rule.Value = NormalizeValue( rule.Value, rule.Type );
+
+        // Force arrays for known IN-fields
+        if ( !string.IsNullOrEmpty( rule.Field ) && InFields.Contains( rule.Field ) )
+        {
+            if ( rule.Value == null )
+            {
+                rule.Value = Array.Empty<object>();
+            }
+            else if ( rule.Value is string )
+            {
+                rule.Value = new object [ ] { rule.Value };
+            }
+            else if ( rule.Value is not System.Collections.IEnumerable )
+            {
+                rule.Value = new object [ ] { rule.Value };
+            }
+        }
+
+        // Recurse into children
         if ( rule.Rules != null && rule.Rules.Any() )
         {
-            foreach ( var child in rule.Rules )
+            foreach ( RuleModel? child in rule.Rules )
             {
                 NormalizeRules( child );
-                child.Not = null;
             }
         }
     }
 
-    private static object? NormalizeValue( object? value )
+    private static object? NormalizeValue( object? value, string? type )
     {
-        if ( value is JsonElement el )
+        if ( value == null )
         {
-            switch ( el.ValueKind )
+            return null;
+        }
+
+        // Handle JsonElement values
+        if ( value is JsonElement je )
+        {
+            switch ( je.ValueKind )
             {
                 case JsonValueKind.String:
-                    return el.GetString();
+                    return je.GetString();
+
                 case JsonValueKind.Number:
-                    return el.TryGetInt32( out var i ) ? i : ( object ) el.GetDouble();
+                    if ( je.TryGetInt32( out int i ) )
+                    {
+                        return i;
+                    }
+
+                    if ( je.TryGetInt64( out long l ) )
+                    {
+                        return l;
+                    }
+
+                    if ( je.TryGetDouble( out double d ) )
+                    {
+                        return d;
+                    }
+
+                    return je.GetRawText();
+
                 case JsonValueKind.True:
                 case JsonValueKind.False:
-                    return el.GetBoolean();
+                    return je.GetBoolean();
+
                 case JsonValueKind.Array:
-                    var list = new List<object?>();
-                    foreach ( var item in el.EnumerateArray() )
+                    List<object?> arr = new();
+                    foreach ( JsonElement child in je.EnumerateArray() )
                     {
-                        list.Add( NormalizeValue( item ) );
+                        arr.Add( NormalizeValue( child, type ) );
                     }
-                    return list.ToArray();
+                    return arr.ToArray();
+
                 case JsonValueKind.Null:
                 case JsonValueKind.Undefined:
+                default:
                     return null;
             }
         }
 
-        // If it's already an array, normalize inner values
-        if ( value is IEnumerable<object> enumerable && value is not string )
+        // Try to parse stringified JSON arrays
+        if ( value is string s )
         {
-            return enumerable.Select( NormalizeValue ).ToArray();
+            string t = s.Trim();
+            if ( t.StartsWith( "[" ) && t.EndsWith( "]" ) )
+            {
+                try
+                {
+                    string [ ]? maybe = JsonSerializer.Deserialize<string[]>(t);
+                    if ( maybe != null )
+                    {
+                        return maybe;
+                    }
+
+                    object [ ]? maybeObj = JsonSerializer.Deserialize<object[]>(t);
+                    if ( maybeObj != null )
+                    {
+                        return maybeObj;
+                    }
+                }
+                catch
+                {
+                    // Ignore and return raw string
+                }
+            }
+
+            return s;
         }
 
+        // Normalize IEnumerable (non-string) values recursively
+        if ( value is System.Collections.IEnumerable enumerable && !( value is string ) )
+        {
+            List<object?> tmp = new();
+            foreach ( object? item in enumerable )
+            {
+                tmp.Add( NormalizeValue( item, type ) );
+            }
+            return tmp.ToArray();
+        }
+
+        // Primitive types (already normalized)
         return value;
     }
 
     private static string BuildCondition( RuleModel rule )
     {
+        if ( rule == null )
+        {
+            return string.Empty;
+        }
+
+        // Composite node with child rules
         if ( rule.Rules != null && rule.Rules.Count != 0 )
         {
-            IEnumerable<string> conditions = rule.Rules.Select(BuildCondition);
-            string op = rule.Condition.Equals("or", StringComparison.OrdinalIgnoreCase) ? " OR " : " AND ";
-            return "(" + string.Join( op, conditions ) + ")";
+            List<string> conditions = rule.Rules
+            .Select( BuildCondition )
+            .Where( x => !string.IsNullOrWhiteSpace( x ) )
+            .ToList();
+
+            string cond = (rule.Condition ?? "and").ToString();
+            string joinOp = string.Equals(cond, "or", StringComparison.OrdinalIgnoreCase) ? " OR " : " AND ";
+
+            return conditions.Any() ? "(" + string.Join( joinOp, conditions ) + ")" : string.Empty;
         }
 
-        if ( !string.IsNullOrEmpty( rule.Field ) )
+        // Leaf node (single condition)
+        if ( string.IsNullOrEmpty( rule.Field ) )
         {
-            string column = MapFieldToColumn(rule.Field);
+            return string.Empty;
+        }
 
-            // Multiple values (e.g., IN operator)
-            if ( rule.Value is IEnumerable<object> list && !( rule.Value is string ) )
+        string column = MapFieldToColumn(rule.Field);
+        string operatorValue = (rule.Operator ?? "equal").ToString();
+
+        // Handle array values as IN/NOT IN
+        if ( rule.Value is System.Collections.IEnumerable valEnum && !( rule.Value is string ) )
+        {
+            List<string> items = new();
+            foreach ( object? v in valEnum )
             {
-                IEnumerable<string> formatted = list.Select(v => FormatValue(v, rule.Type));
-                string op = rule.Operator.Equals("equal", StringComparison.OrdinalIgnoreCase)
-                                ? " = "
-                                : MapOperator(rule.Operator);
-
-                return "(" + string.Join( " OR ", formatted.Select( f => $"{column}{op}{f}" ) ) + ")";
+                string? formatted = FormatValue( v, rule.Type );
+                if ( !string.IsNullOrEmpty( formatted ) )
+                {
+                    items.Add( formatted );
+                }
             }
 
-            return $"{column} {MapOperator( rule.Operator )} {FormatValue( rule.Value, rule.Type )}";
+            if ( !items.Any() )
+            {
+                return string.Empty;
+            }
+
+            if ( string.Equals( operatorValue, "notequal", StringComparison.OrdinalIgnoreCase ) )
+            {
+                return $"{column} NOT IN ({string.Join( ", ", items )})";
+            }
+            else
+            {
+                return $"{column} IN ({string.Join( ", ", items )})";
+            }
         }
 
-        return string.Empty;
+        // Handle single value
+        dynamic single = FormatValue(rule.Value, rule.Type);
+        if ( string.IsNullOrEmpty( single ) )
+        {
+            return string.Empty;
+        }
+
+        return $"{column} {MapOperator( operatorValue )} {single}";
     }
 
     public static string AppendConditions( string baseQuery, string extraConditions )
     {
         if ( string.IsNullOrWhiteSpace( extraConditions ) )
+        {
             return baseQuery;
+        }
 
         string trimmed = baseQuery.TrimEnd().TrimEnd(';');
 
         bool hasWhere = trimmed.Contains("WHERE", StringComparison.OrdinalIgnoreCase);
-        bool addedDummyWhere = false;
 
         if ( !hasWhere )
         {
             trimmed += " WHERE 1=1";
-            addedDummyWhere = true;
         }
 
         string result = $"{trimmed} AND {extraConditions};";
@@ -154,30 +272,45 @@ public static class QueryBuilderSqlGenerator
             _ => "="
         };
 
-    private static string? FormatValue( object? value, string type )
+    private static string? FormatValue( object? value, string? type )
     {
         if ( value == null )
         {
             return "NULL";
         }
 
-        if ( type.Equals( "Boolean", StringComparison.OrdinalIgnoreCase ) )
+        // Boolean values -> return 1 or 0
+        if ( !string.IsNullOrEmpty( type ) && type.Equals( "Boolean", StringComparison.OrdinalIgnoreCase ) )
         {
             bool b = false;
-            if ( value is bool boolVal )
+            if ( value is bool bb )
             {
-                b = boolVal;
+                b = bb;
             }
             else if ( value is string s )
             {
                 bool.TryParse( s, out b );
             }
+            else if ( value is int iv )
+            {
+                b = iv != 0;
+            }
 
             return b ? "1" : "0";
         }
 
-        return value is string ? $"'{value}'" : value.ToString();
+        // Numeric values -> no quotes
+        if ( value is int || value is long || value is double || value is float || value is decimal )
+        {
+            return value.ToString();
+        }
+
+        // Strings -> escape single quotes
+        string str = value.ToString() ?? string.Empty;
+        str = str.Replace( "'", "''" );
+        return $"'{str}'";
     }
+
 
     private static string MapFieldToColumn( string field )
     {

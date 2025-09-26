@@ -1,18 +1,12 @@
 ﻿using System.Dynamic;
-using System.Net.NetworkInformation;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 using Amusing.Helpers;
 using Amusing.Models;
 using Amusing.Services;
 
-using Blazorise;
-
 using Microsoft.AspNetCore.Components.Forms;
 
-using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Inputs;
 using Syncfusion.Blazor.QueryBuilder;
 using Syncfusion.Blazor.RichTextEditor;
 
@@ -20,36 +14,37 @@ namespace Amusing.Components.Pages;
 
 public partial class Mailings_Templates
 {
-    private bool IsLoading = false;
+    private bool _isLoading = false;
     private bool _disposed = false;
-    private string PageName = "Mail Templates";
+    private readonly string _pageName = "Mail Templates";
     protected static readonly string[] InFields = { "Festival", "Role", "Volunteer" };
 
-    private List<TemplatesListModel> TemplatesList { get; set; } = [];
+    private List<TemplatesListModel> TemplatesList { get; set; } = [ ];
     private List<RecipientListModel> RecipientsList { get; set; } = [ ];
     private List<string> AvailableFields { get; set; } = new();
 
-    private TemplatesListModel SelectedTemplatesList;
-    
-    private EditContext? editContext;
-    private CancellationTokenSource _cts = new();
+    private TemplatesListModel _selectedTemplatesList;
+
+    private EditContext? _editContext;
+    private readonly CancellationTokenSource _cts = new();
+    private CancellationTokenSource _loadCts = new();
 
     private uint? RecipientListId
     {
-        get => SelectedTemplatesList?.RecipientListId;
+        get => _selectedTemplatesList?.RecipientListId;
         set
         {
-            if ( SelectedTemplatesList != null && SelectedTemplatesList.RecipientListId != value )
+            if ( _selectedTemplatesList != null && _selectedTemplatesList.RecipientListId != value )
             {
-                SelectedTemplatesList.RecipientListId = value;
-                _ = OnRecipientListChanged( value );
+                _selectedTemplatesList.RecipientListId = value;
+                _ = LoadRecipientDataAsync( value );
             }
         }
     }
 
     private readonly List<ToolbarItemModel> _rteTools =
-	[
-		new ToolbarItemModel() { Command = ToolbarCommand.Undo },
+    [
+        new ToolbarItemModel() { Command = ToolbarCommand.Undo },
         new ToolbarItemModel() { Command = ToolbarCommand.Redo },
         new ToolbarItemModel() { Command = ToolbarCommand.Separator },
         new ToolbarItemModel() { Command = ToolbarCommand.Bold },
@@ -88,7 +83,9 @@ public partial class Mailings_Templates
 
     protected override async Task OnInitializedAsync()
     {
-        IsLoading = true;
+        _mappingService = new FieldMappingService();
+
+        _isLoading = true;
 
         TemplatesList = await MailingService.GetMailTemplatesAsync();
         RecipientsList = await MailingService.GetRecipientListsAsync();
@@ -98,19 +95,22 @@ public partial class Mailings_Templates
         RecipientsList.Insert( 0, new RecipientListModel { ListId = null, ListName = "geen" } );
 
         // Default selection
-        SelectedTemplatesList = TemplatesList.FirstOrDefault() ?? new TemplatesListModel();
+        _selectedTemplatesList = TemplatesList.FirstOrDefault() ?? new TemplatesListModel();
 
-        // Set RecipientListId to null when RecipientListId is 0
-        if ( SelectedTemplatesList.RecipientListId == 0 )
-            SelectedTemplatesList.RecipientListId = null;
+        // Replace old DB tokens with internal template keys + NL labels
+        _selectedTemplatesList.TemplateSubject = _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateSubject );
+        _selectedTemplatesList.TemplateContent = _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateContent );
 
-        editContext = new EditContext( SelectedTemplatesList );
-
-        IsLoading = false;
+        _editContext = new EditContext( _selectedTemplatesList );
+        _isLoading = false;
     }
 
     protected async Task Save()
     {
+        //Cnvert Dutch labels with Englisch field keys.
+        _selectedTemplatesList.TemplateSubject = _mappingService.ReplaceLabelsWithKeys( _selectedTemplatesList.TemplateSubject );
+        _selectedTemplatesList.TemplateContent = _mappingService.ReplaceLabelsWithKeys( _selectedTemplatesList.TemplateContent );
+
         //if ( SelectedRecipientsList is null )
         //{
         //    return;
@@ -169,26 +169,26 @@ public partial class Mailings_Templates
         //}
 
         //SelectedRecipientsList = newRecipientsList;
-        //editContext = new EditContext( SelectedRecipientsList );
+        //_editContext = new EditContext( SelectedRecipientsList );
         //StateHasChanged();
     }
 
     protected async Task Delete()
     {
-    //    if ( SelectedRecipientsList == null || SelectedRecipientsList.ListId == 0 )
-    //    {
-    //        return;
-    //    }
+        //    if ( SelectedRecipientsList == null || SelectedRecipientsList.ListId == 0 )
+        //    {
+        //        return;
+        //    }
 
-    //    await MailingService.DeleteRecipientQueryAsync( SelectedRecipientsList.ListId );
+        //    await MailingService.DeleteRecipientQueryAsync( SelectedRecipientsList.ListId );
 
-    //    // Refresh the list
-    //    RecipientsList = await MailingService.GetRecipientListsAsync();
-    //    await Task.Delay( 50 );
-    //    if ( GridRef != null )
-    //    {
-    //        await GridRef.Refresh();
-    //    }
+        //    // Refresh the list
+        //    RecipientsList = await MailingService.GetRecipientListsAsync();
+        //    await Task.Delay( 50 );
+        //    if ( GridRef != null )
+        //    {
+        //        await GridRef.Refresh();
+        //    }
     }
 
     protected async Task SelectTemplateListAsync( TemplatesListModel template )
@@ -198,37 +198,44 @@ public partial class Mailings_Templates
             return;
         }
 
-        SelectedTemplatesList = template;
-        
-        if ( string.IsNullOrEmpty( template.RecipientListId.ToString() ) )
-            SelectedTemplatesList.RecipientListId = 0;
+        _selectedTemplatesList = template;
 
-        editContext = new EditContext( SelectedTemplatesList );    
+        if ( string.IsNullOrEmpty( template.RecipientListId.ToString() ) )
+        {
+            _selectedTemplatesList.RecipientListId = 0;
+        }
+
+        _selectedTemplatesList.TemplateSubject = _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateSubject, true );
+        _selectedTemplatesList.TemplateContent = _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateContent, true );
+
+        _editContext = new EditContext( _selectedTemplatesList );
 
         await InvokeAsync( StateHasChanged );
     }
 
     private uint? SelectedTemplatesListId
     {
-        get => SelectedTemplatesList?.TemplateId;
+        get => _selectedTemplatesList?.TemplateId;
         set
         {
             if ( value.HasValue && TemplatesList != null )
             {
-                SelectedTemplatesList = TemplatesList.FirstOrDefault( t => t.TemplateId == value.Value )
+                _selectedTemplatesList = TemplatesList.FirstOrDefault( t => t.TemplateId == value.Value )
                     ?? new TemplatesListModel();
 
                 // Force “geen” as RecipientListId When there is no RecipientList
-                if ( !RecipientsList.Any( r => r.ListId == SelectedTemplatesList.RecipientListId ) )
+                if ( !RecipientsList.Any( r => r.ListId == _selectedTemplatesList.RecipientListId ) )
                 {
-                    SelectedTemplatesList.RecipientListId = null;
+                    _selectedTemplatesList.RecipientListId = null;
                 }
 
-                // Re-create the EditContext to bind the new template
-                editContext = new EditContext( SelectedTemplatesList );
+                _selectedTemplatesList.TemplateSubject = _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateSubject, true );
+                _selectedTemplatesList.TemplateContent = _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateContent, true );
 
-                // Force UI to refresh
+                _editContext = new EditContext( _selectedTemplatesList );
                 InvokeAsync( StateHasChanged );
+
+                _ = LoadRecipientDataAsync( _selectedTemplatesList.RecipientListId );
             }
         }
     }
@@ -240,6 +247,13 @@ public partial class Mailings_Templates
             try
             {
                 await LoadTemplatesAsync( _cts.Token );
+
+                if ( _selectedTemplatesList?.RecipientListId != null )
+                {
+                    await LoadRecipientDataAsync( _selectedTemplatesList.RecipientListId );
+                }
+                _selectedTemplatesList.TemplateSubject = _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateSubject, true );
+                _selectedTemplatesList.TemplateContent = _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateContent, true );
             }
             catch ( OperationCanceledException ) { }
         }
@@ -259,23 +273,36 @@ public partial class Mailings_Templates
         token.ThrowIfCancellationRequested();
 
         // Default selection
-        SelectedTemplatesList = TemplatesList.FirstOrDefault() ?? new TemplatesListModel();
-        editContext = new EditContext( SelectedTemplatesList );
+        _selectedTemplatesList = TemplatesList.FirstOrDefault() ?? new TemplatesListModel();
+        _editContext = new EditContext( _selectedTemplatesList );
 
         await InvokeAsync( StateHasChanged );
     }
 
-    private async Task OnRecipientListChanged( uint? listId )
+    private async Task LoadRecipientDataAsync( uint? recipientListId )
     {
-        if ( listId == null )
-            return;
+        // Cancel previous load
+        _loadCts.Cancel();
+        _loadCts.Dispose();
+        _loadCts = new CancellationTokenSource();
+        CancellationToken token = _loadCts.Token;
 
-        // Vind de geselecteerde lijst
-        var selectedList = RecipientsList.FirstOrDefault(r => r.ListId == listId.Value);
+        if ( recipientListId == null )
+        {
+            AvailableFields.Clear();
+            StateHasChanged();
+            return;
+        }
+
+        RecipientListModel? selectedList = RecipientsList.FirstOrDefault( r => r.ListId == recipientListId.Value );
         if ( selectedList == null )
+        {
+            AvailableFields.Clear();
+            StateHasChanged();
             return;
+        }
 
-        // Converteer eventueel oude filter naar nieuwe QueryBuilder JSON
+        // Convert old filter JSON to new QueryBuilder JSON
         if ( string.IsNullOrWhiteSpace( selectedList.ListQuery ) && !string.IsNullOrWhiteSpace( selectedList.ListFilter ) )
         {
             selectedList.ListQuery = QueryBuilderJsonConverter.OldToNew( selectedList.ListFilter );
@@ -284,26 +311,24 @@ public partial class Mailings_Templates
         if ( string.IsNullOrWhiteSpace( selectedList.ListQuery ) )
         {
             AvailableFields.Clear();
+            StateHasChanged();
             return;
         }
 
         try
         {
             // JSON → RuleModel
-            var rules = JsonSerializer.Deserialize<RuleModel>(selectedList.ListQuery);
+            RuleModel? rules = JsonSerializer.Deserialize<RuleModel>( selectedList.ListQuery );
             if ( rules == null )
             {
                 AvailableFields.Clear();
+                StateHasChanged();
                 return;
             }
 
-            // Force all operators to string
             NormalizeOperators( rules );
-
-            // Force AND voor consistentie
             ForceAndCondition( rules );
 
-            // Afleiden van SourceChecked
             string sourceChecked = selectedList.ListSource switch
             {
                 MailingService.RecipientListSource.Persons => "persons",
@@ -311,35 +336,47 @@ public partial class Mailings_Templates
                 _ => "persons"
             };
 
-            // Maak de echte SQL-query
             string fullQuery = QueryBuilderHelper.DetermineQueryFromRules(rules, sourceChecked);
 
-            // Ophalen van dynamische resultaten
-            //var dynamicRecipients = await MailingService.GetDynamicRecipientsAsync(fullQuery) ?? new List<ExpandoObject>();
-            var dynamicRecipients = await MailingService.GetDynamicRecipientsAsync(fullQuery);
+            List<ExpandoObject> dynamicRecipients = await MailingService.GetDynamicRecipientsAsync( fullQuery );
 
-            // Bepaal de beschikbare kolommen
-            AvailableFields = dynamicRecipients.FirstOrDefault() is IDictionary<string, object> firstRow
-                ? firstRow.Keys.ToList()
-                : new List<string>();
+            // Get the available fields for the template, based on the selected RecipientList
+            // Banned fields are stripped from the list
+            // Fields are Translated for the user
+            if ( dynamicRecipients.FirstOrDefault() is IDictionary<string, object> firstRow )
+            {
+                AvailableFields = _mappingService.GetAvailableLabels( firstRow.Keys ).ToList();
+            }
+            else
+            {
+                AvailableFields.Clear();
+            }
+
+            StateHasChanged();
+        }
+        catch ( OperationCanceledException )
+        {
+            // Load werd gecanceld: doe niets
         }
         catch ( Exception ex )
         {
-            // Fallback bij parsing/fouten
-            Console.Error.WriteLine( $"Error processing recipient list {listId}: {ex.Message}" );
+            Console.Error.WriteLine( $"Error processing recipient list {recipientListId}: {ex.Message}" );
             AvailableFields.Clear();
+            StateHasChanged();
         }
     }
 
     protected void ForceAndCondition( RuleModel? rule )
     {
         if ( rule == null )
+        {
             return;
+        }
 
         if ( rule.Rules != null && rule.Rules.Any() )
         {
             rule.Condition = "and";
-            foreach ( var child in rule.Rules )
+            foreach ( RuleModel? child in rule.Rules )
             {
                 ForceAndCondition( child );
             }
@@ -350,10 +387,12 @@ public partial class Mailings_Templates
         }
     }
 
-    private void NormalizeOperators( RuleModel rule )
+    private static void NormalizeOperators( RuleModel rule )
     {
         if ( rule == null )
+        {
             return;
+        }
 
         if ( rule.Operator is JsonElement je )
         {
@@ -379,58 +418,11 @@ public partial class Mailings_Templates
         //}
     }
 
-    #region FixInFields
-    protected void FixInFields( RuleModel? rule )
+    private FieldMappingService _mappingService;
+
+    public class FieldOption
     {
-        if ( rule == null )
-            return;
-
-        if ( InFields.Contains( rule.Field ) && rule.Operator == "in" )
-        {
-            // Case 1: Value is null → leeg array
-            if ( rule.Value == null )
-            {
-                rule.Value = Array.Empty<string>();
-            }
-            // Case 2: Value is een JsonElement → parse naar string[]
-            else if ( rule.Value is JsonElement json && json.ValueKind == JsonValueKind.Array )
-            {
-                var list = new List<string>();
-                foreach ( var item in json.EnumerateArray() )
-                {
-                    list.Add( item.GetString() ?? string.Empty );
-                }
-                rule.Value = list.ToArray();
-            }
-            // Case 3: Value is een string die er uitziet als JSON array → deserializen
-            else if ( rule.Value is string s && s.TrimStart().StartsWith( "[" ) )
-            {
-                try
-                {
-                    rule.Value = JsonSerializer.Deserialize<string [ ]>( s ) ?? Array.Empty<string>();
-                }
-                catch
-                {
-                    // fallback: laat de raw string staan
-                }
-            }
-        }
-
-        // Recurse
-        if ( rule.Rules != null && rule.Rules.Any() )
-        {
-            //FixInFields( rule.Rules );
-        }
+        public string InternalName { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
     }
-
-    protected void FixInFields( IEnumerable<RuleModel>? rules )
-    {
-        if ( rules == null )
-            return;
-        foreach ( var r in rules )
-        {
-            //FixInFields( r );
-        }
-    }
-    #endregion
 }

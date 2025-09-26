@@ -11,8 +11,8 @@ Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense( "Ngo9BigBOggjHTQ
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("nl-NL");
-CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("nl-NL");
+CultureInfo.DefaultThreadCurrentCulture = new CultureInfo( "nl-NL" );
+CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo( "nl-NL" );
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
@@ -49,7 +49,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>
 
 //builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddSyncfusionBlazor();
-builder.Services.AddSingleton(typeof(ISyncfusionStringLocalizer), typeof(SyncfusionLocalizer));
+builder.Services.AddSingleton( typeof( ISyncfusionStringLocalizer ), typeof( SyncfusionLocalizer ) );
 
 WebApplication app = builder.Build();
 

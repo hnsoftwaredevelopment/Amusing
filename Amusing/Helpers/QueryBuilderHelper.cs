@@ -1,6 +1,4 @@
-﻿using System.Text.Json;
-
-using Syncfusion.Blazor.QueryBuilder;
+﻿using Syncfusion.Blazor.QueryBuilder;
 
 namespace Amusing.Helpers;
 
@@ -69,14 +67,7 @@ public static class QueryBuilderHelper
 
     public static string DetermineQueryFromRules( RuleModel rules, string sourceChecked )
     {
-		ArgumentNullException.ThrowIfNull( rules );
-
-		// Debug routine to visualize the rules
-		var options = new JsonSerializerOptions { WriteIndented = true };
-        string json = JsonSerializer.Serialize(rules, options);
-        Console.WriteLine( "===== RULES INPUT =====" );
-        Console.WriteLine( json );
-        Console.WriteLine( "=======================" );
+        ArgumentNullException.ThrowIfNull( rules );
 
         // Determine queryLevel based on rules
         int queryLevel = DetermineQueryLevel(rules, sourceChecked);
@@ -86,7 +77,6 @@ public static class QueryBuilderHelper
 
         // Build the WHERE-clause
         string whereClause = QueryBuilderSqlGenerator.GenerateWhereClause(rules);
-        var temp = QueryBuilderSqlGenerator.AppendConditions( baseQuery, whereClause );
 
         return QueryBuilderSqlGenerator.AppendConditions( baseQuery, whereClause );
     }
@@ -107,19 +97,21 @@ public static class QueryBuilderHelper
                 return 3;
             }
 
-            if ( fields.Contains( "Role") || fields.Contains( "Infomailing" ) )
+            if ( fields.Contains( "Role" ) || fields.Contains( "Infomailing" ) )
             {
                 return 2;
             }
         }
         else
         {
-            var additionalFieldsSet = new[] { "Dressingroom", "Jury", "IsConfirmend", "IsSubscribed", "Volunteer", "IsPaid", "IsCanceled", "Singers", "Role", "Infomailing" };
+            string [ ] additionalFieldsSet = new[] { "Dressingroom", "Jury", "IsConfirmend", "IsSubscribed", "Volunteer", "IsPaid", "IsCanceled", "Singers", "Role", "Infomailing" };
 
             if ( fields.Contains( "Festival" ) )
             {
                 if ( !additionalFieldsSet.Any( f => fields.Contains( f ) ) )
+                {
                     return 2; // only Festival
+                }
 
                 return 3; // Festival and one or more other
             }
