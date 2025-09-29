@@ -488,16 +488,14 @@ public partial class Mailings_Templates
         args.Cancel = true;
 
         string selected = args.ItemData ?? string.Empty;
-        string current = _selectedTemplatesList.TemplateSubject ?? string.Empty;
+        string current = await JSRuntime.InvokeAsync<string>("rteHelpers.getActiveValue");
+        int caret = await JSRuntime.InvokeAsync<int>("rteHelpers.getLastCaret");
 
         // zorg dat de variabele correct tussen {} staat, maar niet dubbel
-        if ( !selected.StartsWith( "{" ) && !selected.EndsWith( "}" ) )
-        {
-            selected = "{" + selected + "}";
-        }
+        selected = selected.Trim( '{', '}' );
+        selected = "{" + selected + "}";
 
         // caret ophalen
-        int caret = await JSRuntime.InvokeAsync<int>("rteHelpers.getLastCaret");
         if ( caret <= 0 )
         {
             caret = _lastCaretPos;
@@ -511,11 +509,18 @@ public partial class Mailings_Templates
 
         string insertText = (addSpaceBefore ? " " : "") + selected + (addSpaceAfter ? " " : "");
 
+        // When char before caret is a { then remove it
+        if ( caret > 0 && current [ caret - 1 ] == '{' )
+        {
+            current = current.Remove( caret - 1, 1 );
+            caret--; // possition carret 1 step back
+        }
+
         // voeg in op caret
-        current = current.Insert( caret, insertText );
+        string newValue = current.Insert(caret, insertText);
 
         // update model en caret
-        _selectedTemplatesList.TemplateSubject = current;
+        _selectedTemplatesList.TemplateSubject = newValue;
         _lastCaretPos = caret + insertText.Length;
 
         StateHasChanged();
