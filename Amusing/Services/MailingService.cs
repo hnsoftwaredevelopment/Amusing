@@ -108,6 +108,19 @@ public class MailingService( GenericDataService dataService )
             } );
     }
 
+    public async Task<uint> AddRecipientQueryAsync( RecipientListModel model )
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { "@Name", model.ListName },
+            { "@Source", model.ListSource },
+            { "@Filter", model.ListFilter },
+            { "@Query", model.ListQuery }
+        };
+
+        return await _dataService.ExecuteScalarAsync<uint>( QueryDefinitions.AddNewRecipientQuery, parameters );
+    }
+
     public async Task UpdateRecipientQueryAsync( RecipientListModel model )
     {
         Dictionary<string, object> parameters = new()
@@ -122,19 +135,6 @@ public class MailingService( GenericDataService dataService )
         await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyRecipientQueryById, parameters );
     }
 
-    public async Task<uint> AddRecipientQueryAsync( RecipientListModel model )
-    {
-        Dictionary<string, object> parameters = new()
-        {
-            { "@Name", model.ListName },
-            { "@Source", model.ListSource },
-            { "@Filter", model.ListFilter },
-            { "@Query", model.ListQuery }
-        };
-
-        return await _dataService.ExecuteScalarAsync<uint>( QueryDefinitions.AddNewRecipientQuery, parameters );
-    }
-
     public async Task DeleteRecipientQueryAsync( uint queryId )
     {
         Dictionary<string, object> parameters = new()
@@ -145,17 +145,7 @@ public class MailingService( GenericDataService dataService )
         await _dataService.ExecuteNonQueryAsync( QueryDefinitions.DeleteRecipientQuery, parameters );
     }
 
-    public async Task DeleteTemplateQueryAsync( uint queryId )
-    {
-        Dictionary<string, object> parameters = new()
-    {
-        { "QueryId", queryId }
-    };
-
-        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.DeleteTemplateQuery, parameters );
-    }
-
-    public Task<List<TemplatesListModel>> GetMailTemplatesAsync() 
+    public Task<List<TemplatesListModel>> GetMailTemplatesAsync()
     {
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetAllEmailTemplates,
            reader => new TemplatesListModel
@@ -172,5 +162,42 @@ public class MailingService( GenericDataService dataService )
                TemplateSubject = reader [ "TemplateSubject" ].ToString(),
                TemplateContent = reader [ "TemplateContent" ].ToString()
            } );
+    }
+
+    public async Task<uint> AddTemplateQueryAsync( TemplatesListModel model )
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { "@TemplateName", model.TemplateName },
+            { "@TemplateSubject", model.TemplateSubject },
+            { "@TemplateContent", model.TemplateContent },
+            { "@RecipientListId", model.RecipientListId }
+        };
+
+        return await _dataService.ExecuteScalarAsync<uint>( QueryDefinitions.AddNewTemplateQuery, parameters );
+    }
+
+    public async Task UpdateTemplateQueryAsync( TemplatesListModel model )
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { "@TemplateId", model.TemplateId },
+            { "@TemplateName", model.TemplateName },
+            { "@TemplateSubject", model.TemplateSubject },
+            { "@TemplateContent", model.TemplateContent },
+            { "@RecipientListId", model.RecipientListId }
+        };
+
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyTemplateQueryById, parameters );
+    }
+
+    public async Task DeleteTemplateQueryAsync( uint queryId )
+    {
+        Dictionary<string, object> parameters = new()
+    {
+        { "QueryId", queryId }
+    };
+
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.DeleteTemplateQuery, parameters );
     }
 }

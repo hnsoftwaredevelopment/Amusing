@@ -73,6 +73,9 @@ else
                 </div>
                 }
                 <div class="groupbox-spacer"></div>
+                <div>
+					<SfTextBox Placeholder="Sjabloonnaam" FloatLabelType="FloatLabelType.Always" Width="300px" @bind-Value="_selectedTemplatesList.TemplateName" />
+                </div>
                 <div class="inline-row">
                     <SfTextBox Placeholder="Aangemaakt" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="_selectedTemplatesList.TemplateCreated" />
                     <SfTextBox Placeholder="Laatste wijziging" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="_selectedTemplatesList.TemplateChanged" />

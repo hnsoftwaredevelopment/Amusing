@@ -1476,11 +1476,25 @@ public static class QueryDefinitions
 	        rec.query 			AS RecipientListQuery,
         	IF(tpl.recipientlist IS NULL, 'api', rec.source ) AS RecipientListSource,
 	        tpl.name 			AS TemplateName,
-	        tpl.subject 		AS TemplateSubject,
-	        tpl.content 		AS TemplateContent
+	        COALESCE(NULLIF(tpl.templatesubject, ''), tpl.subject) AS TemplateSubject,
+	        COALESCE(NULLIF(tpl.templatecontent, ''), tpl.content) AS TemplateContent
         FROM amusing.ah_mailing_templates tpl
         LEFT JOIN amusing.ah_recipient_lists rec ON tpl.recipientlist = rec.id
         ORDER BY tpl.name ;";
+    public static readonly string ModifyTemplateQueryById = @"
+    UPDATE amusing.ah_mailing_templates
+    SET 
+        name = @TemplateName,
+        templatesubject = @TemplateSubject,
+        templatecontent = @TemplateContent,
+        recipientlist = @RecipientListId
+    WHERE id = @TemplateId;";
+    public static readonly string AddNewTemplateQuery = @"
+        INSERT INTO amusing.ah_mailing_templates
+            (name, templatesubject, templatecontent, recipientlist, subject)
+        VALUES (@TemplateName, @TemplateSubject, @TemplateContent, @RecipientListId, '');
+        SELECT LAST_INSERT_ID();
+        ";
     public static readonly string DeleteTemplateQuery = @"
         DELETE FROM amusing.ah_mailing_templates 
         WHERE id = @QueryId;";

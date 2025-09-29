@@ -13,4 +13,6 @@ public class TemplatesListModel
     public string? TemplateName { get; set; } = null!;
     public string? TemplateSubject { get; set; } = null!;
     public string? TemplateContent { get; set; }
+    public string? TemplateNewSubject { get; set; } = null!;
+    public string? TemplateNewContent { get; set; }
 }

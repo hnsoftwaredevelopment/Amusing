@@ -21,7 +21,6 @@ public partial class Mailings_Templates
     private bool _showRTE = true;
     private readonly string _pageName = "Mail Templates";
     protected static readonly string[] InFields = { "Festival", "Role", "Volunteer" };
-
     private List<TemplatesListModel> TemplatesList { get; set; } = [ ];
     private List<RecipientListModel> RecipientsList { get; set; } = [ ];
     private List<string> AvailableFields { get; set; } = [ ];
@@ -35,9 +34,7 @@ public partial class Mailings_Templates
     private SfAutoComplete<string, string> _subjectAuto;
     private int _lastCaretPos = 0;
     private Dictionary<string, object> _subjectHtmlAttr = new() { { "id", "subjectAutoInput" } };
-
     private TemplatesListModel _selectedTemplatesList;
-
     private EditContext? _editContext;
     private readonly CancellationTokenSource _cts = new();
     private CancellationTokenSource _loadCts = new();
@@ -120,51 +117,38 @@ public partial class Mailings_Templates
 
     protected async Task Save()
     {
-        //Cnvert Dutch labels with Englisch field keys.
+        //Convert Dutch labels with Englisch field keys.
         _selectedTemplatesList.TemplateSubject = _mappingService.ReplaceLabelsWithKeys( _selectedTemplatesList.TemplateSubject );
         _selectedTemplatesList.TemplateContent = _mappingService.ReplaceLabelsWithKeys( _selectedTemplatesList.TemplateContent );
 
-        //if ( SelectedRecipientsList is null )
-        //{
-        //    return;
-        //}
+        if ( _selectedTemplatesList is null )
+        {
+            return;
+        }
 
-        //RuleModel? rules = personsQueryBuilder?.GetRules();
+        // Ensure the RTE has committed the latest changes
+        _selectedTemplatesList.TemplateContent = await _rte.GetXhtmlAsync();
 
-        //// Force AND
-        //ForceAndCondition( rules );
+        if ( _selectedTemplatesList.TemplateId != 0 )
+        {
+            await MailingService.UpdateTemplateQueryAsync( _selectedTemplatesList );
+        }
+        else
+        {
+            // Save the new group and get the new group Id
+            uint savedId = await MailingService.AddTemplateQueryAsync(_selectedTemplatesList);
 
-        //SelectedRecipientsList.ListQuery = JsonSerializer.Serialize( rules, new JsonSerializerOptions
-        //{
-        //    WriteIndented = true,
-        //    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        //} );
+            // Refresh the list
+            TemplatesList = await MailingService.GetMailTemplatesAsync();
 
-        //if ( SelectedRecipientsList.ListId != 0 )
-        //{
-        //    await MailingService.UpdateRecipientQueryAsync( SelectedRecipientsList );
-        //}
-        //else
-        //{
-        //    // Save the new group and get the new group Id
-        //    var savedId = await MailingService.AddRecipientQueryAsync(SelectedRecipientsList);
+            // Search the modified record
+            int index = TemplatesList.FindIndex(s => s.TemplateId == savedId);
+            if ( index >= 0 )
+            {
+                _selectedTemplatesList = TemplatesList [ index ];
+            }
+        }
 
-        //    // Refresh the list
-        //    RecipientsList = await MailingService.GetRecipientListsAsync();
-        //    await Task.Delay( 50 );
-        //    if ( GridRef != null )
-        //    {
-        //        await GridRef.Refresh();
-        //    }
-
-        //    // Search the modified record
-        //    var index = RecipientsList.FindIndex(s => s.ListId == savedId);
-        //    if ( index >= 0 )
-        //    {
-        //        SelectedRecipientsList = RecipientsList [ index ];
-        //        await GridRef.SelectRowAsync( index );
-        //    }
-        //}
     }
 
     protected void AddNew()
@@ -187,7 +171,7 @@ public partial class Mailings_Templates
 
         RecipientListId = RecipientsList.FirstOrDefault()?.ListId;
 
-        
+
         _editContext = new EditContext( _selectedTemplatesList );
 
         _selectedTemplatesList.TemplateSubject = "";
