@@ -148,12 +148,6 @@ public class FieldMappingService
             result = result.Replace( from, to, StringComparison.OrdinalIgnoreCase );
         }
 
-        // 2) internal tokens -> DB tokens
-        foreach ( KeyValuePair<string, string> kv in _fieldMappings.OrderByDescending( x => x.Value.Length ) )
-        {
-            result = result.Replace( kv.Value, kv.Key, StringComparison.OrdinalIgnoreCase );
-        }
-
         return result;
     }
 

@@ -117,10 +117,6 @@ public partial class Mailings_Templates
 
     protected async Task Save()
     {
-        //Convert Dutch labels with Englisch field keys.
-        _selectedTemplatesList.TemplateSubject = _mappingService.ReplaceLabelsWithKeys( _selectedTemplatesList.TemplateSubject );
-        _selectedTemplatesList.TemplateContent = _mappingService.ReplaceLabelsWithKeys( _selectedTemplatesList.TemplateContent );
-
         if ( _selectedTemplatesList is null )
         {
             return;
@@ -128,6 +124,13 @@ public partial class Mailings_Templates
 
         // Ensure the RTE has committed the latest changes
         _selectedTemplatesList.TemplateContent = await _rte.GetXhtmlAsync();
+
+        string? _tempSubject = _selectedTemplatesList.TemplateSubject;
+        string _tempContent = _selectedTemplatesList.TemplateContent;
+
+        //Convert Dutch labels with Englisch field keys.
+        _selectedTemplatesList.TemplateSubject = _mappingService.ReplaceLabelsWithKeys( _selectedTemplatesList.TemplateSubject );
+        _selectedTemplatesList.TemplateContent = _mappingService.ReplaceLabelsWithKeys( _selectedTemplatesList.TemplateContent );
 
         if ( _selectedTemplatesList.TemplateId != 0 )
         {
@@ -148,6 +151,10 @@ public partial class Mailings_Templates
                 _selectedTemplatesList = TemplatesList [ index ];
             }
         }
+
+        // Restore the duct fieldnames in the UI
+        _selectedTemplatesList.TemplateSubject = _tempSubject;
+        _selectedTemplatesList.TemplateContent = _tempContent;
 
     }
 
