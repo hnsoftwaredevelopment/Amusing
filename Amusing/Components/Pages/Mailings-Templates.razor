@@ -83,12 +83,7 @@ else
         <div class="groupbox rte-section">
             <div class="groupbox-header">E-Mail sjabloon</div>
             <div class="groupbox-content">
-@*                 <SfTextBox
-                           Placeholder="Onderwerp"
-                           FloatLabelType="FloatLabelType.Always"
-                           Width="600px"
-                           @bind-Value="_selectedTemplatesList.TemplateSubject" />
- *@
+
                 <SfAutoComplete TValue="string" TItem="string"
                                 @ref="_subjectAuto"
                                 @bind-Value="_selectedTemplatesList.TemplateSubject"
@@ -116,7 +111,8 @@ else
                             Height="100%"
                             Placeholder="Beschrijving" 
                             @bind-Value="_selectedTemplatesList.TemplateContent" >
-                            <RichTextEditorEvents SlashMenuItemSelecting="OnSlashMenuItemSelect" />
+                            <RichTextEditorEvents 
+                                SlashMenuItemSelecting="OnSlashMenuItemSelect" />
                             <RichTextEditorSlashMenuSettings Enable="true" Items="@SlashMenuItems" />
                             <Syncfusion.Blazor.RichTextEditor.RichTextEditorToolbarSettings 
                                 Items="@_rteTools"

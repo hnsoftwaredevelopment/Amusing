@@ -439,25 +439,20 @@ public partial class Mailings_Templates
 
     private async Task OnFiltering( FilteringEventArgs args )
     {
-        // voorkom default filtering
         args.PreventDefaultAction = true;
 
-        // huidige waarde en caret ophalen via JS
         string currentValue = await JSRuntime.InvokeAsync<string>("rteHelpers.getActiveValue");
         int caret = await JSRuntime.InvokeAsync<int>("rteHelpers.getLastCaret");
 
-        // fallback: caret > 0, anders laatste bekende
         if ( caret <= 0 )
         {
             caret = _lastCaretPos;
         }
 
-        // sanity-check boundaries
         caret = Math.Clamp( caret, 0, currentValue?.Length ?? 0 );
 
         bool trigger = false;
 
-        // als we precies op een '{' staan of args.Text eindigt met '{'
         if ( !string.IsNullOrEmpty( currentValue ) && caret > 0 && currentValue [ caret - 1 ] == '{' )
         {
             trigger = true;
@@ -466,20 +461,25 @@ public partial class Mailings_Templates
         {
             trigger = true;
         }
+        else if ( !string.IsNullOrEmpty( currentValue ) && caret > 0 && currentValue [ caret - 1 ] == '/' )
+        {
+            trigger = true;
+        }
+        else if ( !string.IsNullOrEmpty( args.Text ) && args.Text.EndsWith( "/" ) )
+        {
+            trigger = true;
+        }
 
         if ( trigger )
         {
-            // laat AutoComplete zien met volledige lijst
             await _subjectAuto.FilterAsync( AvailableFields );
             await _subjectAuto.ShowPopupAsync();
         }
         else
         {
-            // sluit de lijst, geen items tonen
             await _subjectAuto.FilterAsync( new List<string>() );
         }
 
-        // update fallback caret
         _lastCaretPos = caret;
     }
 
@@ -510,7 +510,7 @@ public partial class Mailings_Templates
         string insertText = (addSpaceBefore ? " " : "") + selected + (addSpaceAfter ? " " : "");
 
         // When char before caret is a { then remove it
-        if ( caret > 0 && current [ caret - 1 ] == '{' )
+        if ( caret > 0 && ( current [ caret - 1 ] == '{' || current [ caret - 1 ] == '/' ) )
         {
             current = current.Remove( caret - 1, 1 );
             caret--; // possition carret 1 step back
