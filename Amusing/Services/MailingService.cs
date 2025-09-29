@@ -145,6 +145,16 @@ public class MailingService( GenericDataService dataService )
         await _dataService.ExecuteNonQueryAsync( QueryDefinitions.DeleteRecipientQuery, parameters );
     }
 
+    public async Task DeleteTemplateQueryAsync( uint queryId )
+    {
+        Dictionary<string, object> parameters = new()
+    {
+        { "QueryId", queryId }
+    };
+
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.DeleteTemplateQuery, parameters );
+    }
+
     public Task<List<TemplatesListModel>> GetMailTemplatesAsync() 
     {
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetAllEmailTemplates,

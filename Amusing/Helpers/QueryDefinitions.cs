@@ -1456,13 +1456,13 @@ public static class QueryDefinitions
         query = @ListQuery
     WHERE id = @ListId;";
     public static readonly string AddNewRecipientQuery = @"
-        INSERT INTO ah_recipient_lists
+        INSERT INTO amusing.ah_recipient_lists
             (name, source, filter, query)
         VALUES (@Name, @Source, @Filter, @Query);
         SELECT LAST_INSERT_ID();
         ";
     public static readonly string DeleteRecipientQuery = @"
-        DELETE FROM ah_recipient_lists 
+        DELETE FROM amusing.ah_recipient_lists 
         WHERE id = @QueryId;";
 
     public static readonly string GetAllEmailTemplates = @"
@@ -1481,4 +1481,8 @@ public static class QueryDefinitions
         FROM amusing.ah_mailing_templates tpl
         LEFT JOIN amusing.ah_recipient_lists rec ON tpl.recipientlist = rec.id
         ORDER BY tpl.name ;";
+    public static readonly string DeleteTemplateQuery = @"
+        DELETE FROM amusing.ah_mailing_templates 
+        WHERE id = @QueryId;";
+
 }

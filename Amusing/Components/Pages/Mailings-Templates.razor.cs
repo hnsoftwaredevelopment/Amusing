@@ -202,20 +202,22 @@ public partial class Mailings_Templates
 
     protected async Task Delete()
     {
-        //    if ( SelectedRecipientsList == null || SelectedRecipientsList.ListId == 0 )
-        //    {
-        //        return;
-        //    }
+        if ( _selectedTemplatesList == null || _selectedTemplatesList.TemplateId == 0 )
+        {
+            return;
+        }
 
-        //    await MailingService.DeleteRecipientQueryAsync( SelectedRecipientsList.ListId );
+        await MailingService.DeleteTemplateQueryAsync( _selectedTemplatesList.TemplateId );
 
-        //    // Refresh the list
-        //    RecipientsList = await MailingService.GetRecipientListsAsync();
-        //    await Task.Delay( 50 );
-        //    if ( GridRef != null )
-        //    {
-        //        await GridRef.Refresh();
-        //    }
+        // Refresh the list
+        TemplatesList = await MailingService.GetMailTemplatesAsync();
+        _selectedTemplatesList = TemplatesList.FirstOrDefault() ?? new TemplatesListModel();
+
+        // Replace old DB tokens with internal template keys + NL labels
+        _selectedTemplatesList.TemplateSubject = _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateSubject );
+        _selectedTemplatesList.TemplateContent = _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateContent );
+
+        _editContext = new EditContext( _selectedTemplatesList );
     }
 
     protected async Task SelectTemplateListAsync( TemplatesListModel template )
