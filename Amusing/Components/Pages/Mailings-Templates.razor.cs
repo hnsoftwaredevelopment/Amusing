@@ -167,23 +167,37 @@ public partial class Mailings_Templates
         //}
     }
 
-    protected async Task AddNew()
+    protected void AddNew()
     {
-        //RecipientListModel newRecipientsList = new()
-        //{
-        //    ListId = 0,
-        //    ListName = ""
-        //};
+        uint tempId = (uint)(TemplatesList.Count(t => t.TemplateId == 0) + 1);
 
-        //if ( GridRef != null )
-        //{
-        //    await GridRef.AddRecordAsync( newRecipientsList, 0 );
-        //    await GridRef.SelectRowAsync( 0 );
-        //}
+        TemplatesListModel newTemplate = new()
+        {
+            TemplateId = 0,
+            TemplateName = "",
+            TemplateSubject = "",
+            TemplateContent = "",
+            RecipientListId = RecipientsList.FirstOrDefault()?.ListId
+        };
 
-        //SelectedRecipientsList = newRecipientsList;
-        //_editContext = new EditContext( SelectedRecipientsList );
-        //StateHasChanged();
+        TemplatesList.Add( newTemplate );
+
+        SelectedTemplatesListId = newTemplate.TemplateId;
+        _selectedTemplatesList = newTemplate;
+
+        RecipientListId = RecipientsList.FirstOrDefault()?.ListId;
+
+        
+        _editContext = new EditContext( _selectedTemplatesList );
+
+        _selectedTemplatesList.TemplateSubject = "";
+        _selectedTemplatesList.TemplateContent = "";
+        AvailableFields.Clear();
+        SlashMenuItems.Clear();
+        _showRTE = false; // force rerender van RTE
+        StateHasChanged();
+        _showRTE = true;
+        StateHasChanged();
     }
 
     protected async Task Delete()
@@ -272,7 +286,6 @@ public partial class Mailings_Templates
             catch ( OperationCanceledException ) { }
         }
     }
-
 
     public void Dispose()
     {
