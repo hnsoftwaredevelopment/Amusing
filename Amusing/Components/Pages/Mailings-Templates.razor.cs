@@ -1,10 +1,14 @@
 ﻿using System.Dynamic;
+using System.Linq;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Amusing.Helpers;
 using Amusing.Models;
 using Amusing.Services;
 
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 
@@ -14,30 +18,60 @@ using Syncfusion.Blazor.RichTextEditor;
 
 namespace Amusing.Components.Pages;
 
-public partial class Mailings_Templates
+public partial class Mailings_Templates : ComponentBase, IDisposable
 {
     private bool _isLoading = false;
     private bool _disposed = false;
     private bool _showRTE = true;
     private readonly string _pageName = "Mail Templates";
     protected static readonly string[] InFields = { "Festival", "Role", "Volunteer" };
-    private List<TemplatesListModel> TemplatesList { get; set; } = [ ];
-    private List<RecipientListModel> RecipientsList { get; set; } = [ ];
-    private List<string> AvailableFields { get; set; } = [ ];
+
+    private List<TemplatesListModel> TemplatesList { get; set; } = new();
+    private List<RecipientListModel> RecipientsList { get; set; } = new();
+    private List<string> AvailableFields { get; set; } = new();
+
     private List<SlashMenuItemModel> _slashMenuItems = new();
     private List<SlashMenuItemModel> SlashMenuItems
     {
         get => _slashMenuItems;
         set => _slashMenuItems = value;
     }
-    private SfRichTextEditor _rte;
-    private SfAutoComplete<string, string> _subjectAuto;
+
+    private SfRichTextEditor? _rte;
+    private SfAutoComplete<string, string>? _subjectAuto;
     private int _lastCaretPos = 0;
     private Dictionary<string, object> _subjectHtmlAttr = new() { { "id", "subjectAutoInput" } };
-    private TemplatesListModel _selectedTemplatesList;
+    private TemplatesListModel _selectedTemplatesList = new();
     private EditContext? _editContext;
     private readonly CancellationTokenSource _cts = new();
     private CancellationTokenSource _loadCts = new();
+    private bool _showPreviewDialog = false;
+    private List<string> _previewRecipients = new();
+    private int _currentPreviewIndex = 0;
+    private int _currentRecipientIndex = 0;
+    private string _selectedPreviewRecipient = string.Empty;
+    private string _previewSubject = string.Empty;
+    private string _previewBody = string.Empty;
+    private string? _currentRecipientQuery;
+    private List<ExpandoObject> _recipientData = [];
+    private ExpandoObject? _selectedRecipient;
+    private ExpandoObject? SelectedRecipient
+    {
+        get => _selectedRecipient;
+        set
+        {
+            if ( _selectedRecipient != value )
+            {
+                _selectedRecipient = value;
+                if ( _selectedRecipient != null )
+                    UpdatePreview( _selectedRecipient );
+            }
+        }
+    }
+
+    private string _rawSubjectTemplate = "";
+    private string _rawBodyTemplate = "";
+    //private RecipientListFilterModel? _selectedRecipient;
 
     private uint? RecipientListId
     {
@@ -52,8 +86,8 @@ public partial class Mailings_Templates
         }
     }
 
-    private readonly List<ToolbarItemModel> _rteTools =
-    [
+    private readonly List<ToolbarItemModel> _rteTools = new()
+    {
         new ToolbarItemModel() { Command = ToolbarCommand.Undo },
         new ToolbarItemModel() { Command = ToolbarCommand.Redo },
         new ToolbarItemModel() { Command = ToolbarCommand.Separator },
@@ -89,7 +123,10 @@ public partial class Mailings_Templates
         new ToolbarItemModel() { Command = ToolbarCommand.SourceCode },
         new ToolbarItemModel() { Command = ToolbarCommand.CreateTable },
         new ToolbarItemModel() { Command = ToolbarCommand.FullScreen }
-    ];
+    };
+
+    [Inject] public MailingService MailingService { get; set; } = default!;
+    [Inject] public IJSRuntime JSRuntime { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -123,12 +160,14 @@ public partial class Mailings_Templates
         }
 
         // Ensure the RTE has committed the latest changes
-        _selectedTemplatesList.TemplateContent = await _rte.GetXhtmlAsync();
+        if ( _rte is not null )
+        {
+            _selectedTemplatesList.TemplateContent = await _rte.GetXhtmlAsync();
+        }
 
+        //Convert Dutch labels to Englisch field keys.
         string? _tempSubject = _selectedTemplatesList.TemplateSubject;
-        string _tempContent = _selectedTemplatesList.TemplateContent;
-
-        //Convert Dutch labels with Englisch field keys.
+        string _tempContent = _selectedTemplatesList.TemplateContent ?? string.Empty;
         _selectedTemplatesList.TemplateSubject = _mappingService.ReplaceLabelsWithKeys( _selectedTemplatesList.TemplateSubject );
         _selectedTemplatesList.TemplateContent = _mappingService.ReplaceLabelsWithKeys( _selectedTemplatesList.TemplateContent );
 
@@ -152,10 +191,9 @@ public partial class Mailings_Templates
             }
         }
 
-        // Restore the duct fieldnames in the UI
+        // Restore the dutch fieldnames in the UI
         _selectedTemplatesList.TemplateSubject = _tempSubject;
         _selectedTemplatesList.TemplateContent = _tempContent;
-
     }
 
     protected void AddNew()
@@ -177,7 +215,6 @@ public partial class Mailings_Templates
         _selectedTemplatesList = newTemplate;
 
         RecipientListId = RecipientsList.FirstOrDefault()?.ListId;
-
 
         _editContext = new EditContext( _selectedTemplatesList );
 
@@ -272,9 +309,14 @@ public partial class Mailings_Templates
                 {
                     await LoadRecipientDataAsync( _selectedTemplatesList.RecipientListId );
                 }
+
                 _selectedTemplatesList.TemplateSubject = _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateSubject, true );
                 _selectedTemplatesList.TemplateContent = _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateContent, true );
-                await JSRuntime.InvokeVoidAsync( "rteHelpers.registerInput", "subjectAutoInput" );
+
+                if ( JSRuntime is not null )
+                {
+                    await JSRuntime.InvokeVoidAsync( "rteHelpers.registerInput", "subjectAutoInput" );
+                }
             }
             catch ( OperationCanceledException ) { }
         }
@@ -311,15 +353,17 @@ public partial class Mailings_Templates
         if ( recipientListId == null )
         {
             AvailableFields.Clear();
-            StateHasChanged();
+            _currentRecipientQuery = null;
+            await InvokeAsync( StateHasChanged );
             return;
         }
 
-        RecipientListModel? selectedList = RecipientsList.FirstOrDefault( r => r.ListId == recipientListId.Value );
+        RecipientListModel? selectedList = RecipientsList.FirstOrDefault(r => r.ListId == recipientListId.Value);
         if ( selectedList == null )
         {
             AvailableFields.Clear();
-            StateHasChanged();
+            _currentRecipientQuery = null;
+            await InvokeAsync( StateHasChanged );
             return;
         }
 
@@ -332,18 +376,20 @@ public partial class Mailings_Templates
         if ( string.IsNullOrWhiteSpace( selectedList.ListQuery ) )
         {
             AvailableFields.Clear();
-            StateHasChanged();
+            _currentRecipientQuery = null;
+            await InvokeAsync( StateHasChanged );
             return;
         }
 
         try
         {
             // JSON → RuleModel
-            RuleModel? rules = JsonSerializer.Deserialize<RuleModel>( selectedList.ListQuery );
+            RuleModel? rules = JsonSerializer.Deserialize<RuleModel>(selectedList.ListQuery);
             if ( rules == null )
             {
                 AvailableFields.Clear();
-                StateHasChanged();
+                _currentRecipientQuery = null;
+                await InvokeAsync( StateHasChanged );
                 return;
             }
 
@@ -357,32 +403,32 @@ public partial class Mailings_Templates
                 _ => "persons"
             };
 
-            string fullQuery = QueryBuilderHelper.DetermineQueryFromRules(rules, sourceChecked);
+            _currentRecipientQuery = QueryBuilderHelper.DetermineQueryFromRules( rules, sourceChecked );
 
-            List<ExpandoObject> dynamicRecipients = await MailingService.GetDynamicRecipientsAsync( fullQuery );
+            List<ExpandoObject> dynamicRecipients = await MailingService.GetDynamicRecipientsAsync(_currentRecipientQuery);
 
             // Get the available fields for the template, based on the selected RecipientList
             // Banned fields are stripped from the list
             // Fields are Translated for the user
             if ( dynamicRecipients.FirstOrDefault() is IDictionary<string, object> firstRow )
             {
-                AvailableFields = [ .. _mappingService.GetAvailableLabels( firstRow.Keys ) ];
-
-                SlashMenuItems = [ .. AvailableFields.Select( f => new SlashMenuItemModel { Text = f, IconCss = "e-icons e-named-set", GroupBy = "Variabelen:" } ) ];
+                AvailableFields = _mappingService.GetAvailableLabels( firstRow.Keys );
+                SlashMenuItems = AvailableFields.Select( f => new SlashMenuItemModel { Text = f, IconCss = "e-icons e-named-set", GroupBy = "Variabelen:" } ).ToList();
 
                 // To be sure the SlashMenuItems become visible it is necesary
                 // to rerender the RTE, so disable it and reaneble it again
                 _showRTE = false;
-                StateHasChanged();
+                await InvokeAsync( StateHasChanged );
                 _showRTE = true;
-                StateHasChanged();
+                await InvokeAsync( StateHasChanged );
             }
             else
             {
                 AvailableFields.Clear();
+                _currentRecipientQuery = null;
             }
 
-            StateHasChanged();
+            await InvokeAsync( StateHasChanged );
         }
         catch ( OperationCanceledException )
         {
@@ -392,7 +438,8 @@ public partial class Mailings_Templates
         {
             Console.Error.WriteLine( $"Error processing recipient list {recipientListId}: {ex.Message}" );
             AvailableFields.Clear();
-            StateHasChanged();
+            _currentRecipientQuery = null;
+            await InvokeAsync( StateHasChanged );
         }
     }
 
@@ -417,7 +464,7 @@ public partial class Mailings_Templates
         }
     }
 
-    private static void NormalizeOperators( RuleModel rule )
+    private static void NormalizeOperators( RuleModel? rule )
     {
         if ( rule == null )
         {
@@ -439,9 +486,8 @@ public partial class Mailings_Templates
         }
     }
 
-    private FieldMappingService _mappingService;
-
-    public async Task OnSlashMenuItemSelect( SlashMenuSelectEventArgs args ) => await _rte.ExecuteCommandAsync( CommandName.InsertHTML, args.ItemData.Text );
+    private FieldMappingService _mappingService = new();
+    public async Task OnSlashMenuItemSelect( SlashMenuSelectEventArgs args ) => await ( _rte?.ExecuteCommandAsync( CommandName.InsertHTML, args.ItemData.Text ) ?? Task.CompletedTask );
 
     private async Task OnFiltering( FilteringEventArgs args )
     {
@@ -478,12 +524,15 @@ public partial class Mailings_Templates
 
         if ( trigger )
         {
-            await _subjectAuto.FilterAsync( AvailableFields );
-            await _subjectAuto.ShowPopupAsync();
+            if ( _subjectAuto is not null )
+                await _subjectAuto.FilterAsync( AvailableFields );
+            if ( _subjectAuto is not null )
+                await _subjectAuto.ShowPopupAsync();
         }
         else
         {
-            await _subjectAuto.FilterAsync( new List<string>() );
+            if ( _subjectAuto is not null )
+                await _subjectAuto.FilterAsync( new List<string>() );
         }
 
         _lastCaretPos = caret;
@@ -529,9 +578,134 @@ public partial class Mailings_Templates
         _selectedTemplatesList.TemplateSubject = newValue;
         _lastCaretPos = caret + insertText.Length;
 
-        StateHasChanged();
+        await InvokeAsync( StateHasChanged );
 
         await JSRuntime.InvokeVoidAsync( "rteHelpers.setCaretById", "subjectAutoInput", _lastCaretPos );
     }
 
+    protected async Task MailPreview()
+    {
+        if ( _selectedTemplatesList?.RecipientListId == null )
+            return;
+
+        //Convert Dutch labels to Englisch field keys.
+        string? _tempSubject = _selectedTemplatesList.TemplateSubject;
+        string _tempContent = _selectedTemplatesList.TemplateContent ?? string.Empty;
+        _selectedTemplatesList.TemplateSubject = _mappingService.ReplaceLabelsWithKeys( _selectedTemplatesList.TemplateSubject );
+        _selectedTemplatesList.TemplateContent = _mappingService.ReplaceLabelsWithKeys( _selectedTemplatesList.TemplateContent );
+
+
+        // Haal dynamische data van recipients op
+        _recipientData = await MailingService.GetDynamicRecipientsAsync( _currentRecipientQuery );
+
+        if ( !_recipientData.Any() )
+            return;
+
+        _previewRecipients = _recipientData
+            .Select( r => ( r as IDictionary<string, object> )? [ "Email" ]?.ToString() ?? string.Empty )
+            .Where( e => !string.IsNullOrEmpty( e ) )
+            .ToList();
+
+        _currentPreviewIndex = 0;
+        _selectedPreviewRecipient = _previewRecipients.First();
+
+        UpdatePreview( _recipientData [ _currentPreviewIndex ] );
+        _showPreviewDialog = true;
+
+        // Restore the dutch fieldnames in the UI
+        _selectedTemplatesList.TemplateSubject = _tempSubject;
+        _selectedTemplatesList.TemplateContent = _tempContent;
+    }
+
+    private void UpdatePreview( ExpandoObject recipient )
+    {
+        if ( recipient is not IDictionary<string, object> data )
+            return;
+
+        // 1. Start met de originele template (NL labels)
+        string subjectTemplate = _selectedTemplatesList.TemplateSubject ?? "";
+        string bodyTemplate = _selectedTemplatesList.TemplateContent ?? "";
+
+        // 2. Zet NL labels om naar interne keys die exact overeenkomen met database kolommen
+        subjectTemplate = _mappingService.ReplaceLabelsWithKeys( subjectTemplate );
+        bodyTemplate = _mappingService.ReplaceLabelsWithKeys( bodyTemplate );
+
+        // 3. Vervang interne keys door waarden uit de database
+        foreach ( var kvp in data )
+        {
+            string key = "{" + kvp.Key + "}"; // bv "{GroupName}", "{Firstname}"
+            string value = kvp.Value?.ToString() ?? string.Empty;
+
+            subjectTemplate = subjectTemplate.Replace( key, value, StringComparison.OrdinalIgnoreCase );
+            bodyTemplate = bodyTemplate.Replace( key, value, StringComparison.OrdinalIgnoreCase );
+        }
+
+        _previewSubject = subjectTemplate;
+        _previewBody = bodyTemplate;
+    }
+
+    private void OnRecipientChange( object? newValue )
+    {
+        if ( newValue is ExpandoObject recipient )
+        {
+            SelectedRecipient = recipient;
+            _currentRecipientIndex = _recipientData.IndexOf( recipient );
+            UpdatePreview( SelectedRecipient );
+        }
+    }
+
+    private void FirstRecipient()
+    {
+        if ( _recipientData == null || !_recipientData.Any() )
+            return;
+
+        if ( _currentRecipientIndex > 0 )
+            _currentRecipientIndex--;
+
+        SelectedRecipient = _recipientData [ 0 ];
+        UpdatePreview( SelectedRecipient );
+    }
+
+    private void PreviousRecipient()
+    {
+        if ( _recipientData == null || !_recipientData.Any() )
+            return;
+
+        if ( _currentRecipientIndex > 0 )
+            _currentRecipientIndex--;
+
+        SelectedRecipient = _recipientData [ _currentRecipientIndex ];
+        UpdatePreview( SelectedRecipient );
+    }
+
+    private void NextRecipient()
+    {
+        if ( _recipientData == null || !_recipientData.Any() )
+            return;
+
+        if ( _currentRecipientIndex < _recipientData.Count - 1 )
+            _currentRecipientIndex++;
+
+        SelectedRecipient = _recipientData [ _currentRecipientIndex ];
+        UpdatePreview( SelectedRecipient );
+    }
+
+    private void LastRecipient()
+    {
+        if ( _recipientData != null && _recipientData.Count > 0 )
+        {
+            SelectedRecipient = _recipientData [ ^1 ]; // ^1 = laatste element
+            UpdatePreview( SelectedRecipient );
+        }
+    }
+
+    protected async Task MailTest()
+    {
+        await Task.CompletedTask;
+    }
+
+    protected async Task MailSend()
+    {
+        await Task.CompletedTask;
+    }
 }

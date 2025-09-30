@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="25mm"
+   height="16.104525mm"
+   viewBox="0 0 25 16.104525"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <rect
+       x="234.21458"
+       y="641.10852"
+       width="51.892612"
+       height="16.684299"
+       id="rect15" />
+    <rect
+       x="205.28667"
+       y="636.92157"
+       width="52.019489"
+       height="16.240231"
+       id="rect4" />
+  </defs>
+  <g
+     id="layer1"
+     transform="translate(-80.387489,-174.11897)">
+    <rect
+       style="fill:#ff2a2a;fill-opacity:1;fill-rule:evenodd;stroke-width:0.277475"
+       id="rect1"
+       width="25"
+       height="16.104525"
+       x="80.387489"
+       y="174.11897"
+       ry="0.45100701"
+       rx="0.45100704" />
+    <polygon
+       class="cls-2"
+       points="112.39,47.12 76.6,78.39 112.39,109.75 "
+       id="polygon1"
+       style="fill:#ffd5d5"
+       transform="matrix(0.21541119,0,0,0.2034671,80.163182,165.62917)" />
+    <polygon
+       class="cls-2"
+       points="5.49,47.15 5.49,109.63 40.79,78.69 "
+       id="polygon2"
+       style="fill:#ffd5d5;fill-opacity:1"
+       transform="matrix(0.21541119,0,0,0.2034671,80.163182,165.62917)" />
+    <path
+       class="cls-2"
+       d="m 92.338223,184.49871 -2.503079,-2.11199 -8.489355,7.02775 v 0.0631 a 0.0366199,0.03458941 0 0 0 0,0.0265 v 0 a 0.04739046,0.04476276 0 0 0 0.02801,0 h 22.960671 a 0.04739046,0.04476276 0 0 0 0.028,0 v 0 a 0.0366199,0.03458941 0 0 0 0,-0.0265 v -0.0428 l -8.592755,-7.12136 -2.649557,2.18931 v 0 a 0.58807254,0.55546519 0 0 1 -0.779787,0 z"
+       id="path2"
+       style="fill:#ffd5d5;fill-opacity:1;stroke-width:0.209353" />
+    <polygon
+       class="cls-2"
+       points="5.49,109.63 40.79,78.69 5.49,47.15 "
+       id="polygon3"
+       style="fill:#ffd5d5;fill-opacity:1"
+       transform="matrix(0,0.23361622,-0.34092174,0,119.63543,173.89431)" />
+    <text
+       xml:space="preserve"
+       transform="scale(0.26458333)"
+       id="text4"
+       style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:condensed;font-size:7.55906px;font-family:Bahnschrift;-inkscape-font-specification:'Bahnschrift, Light Condensed @wght=300,wdth=75';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;font-variation-settings:'wdth' 75, 'wght' 300;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect4);display:inline;fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#666666;stroke-width:4.0252;stroke-miterlimit:0;paint-order:stroke fill markers" />
+    <text
+       xml:space="preserve"
+       transform="scale(0.26458333)"
+       id="text15"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:7.55906px;font-family:Bandar;-inkscape-font-specification:'Bandar, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect15);display:inline;fill:#338000;fill-opacity:1;fill-rule:evenodd;stroke:#666666;stroke-width:4.0252;stroke-miterlimit:0;paint-order:stroke fill markers" />
+    <g
+       id="g2"
+       transform="matrix(0.14065355,0,0,0.14065355,89.447107,145.12431)" />
+    <g
+       id="g15"
+       transform="matrix(0.14065355,0,0,0.14065355,87.516481,145.12431)" />
+  </g>
+</svg>

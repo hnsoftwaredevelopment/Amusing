@@ -40,6 +40,7 @@ public class FieldMappingService
         { "[Volunteer]", "{Volunteer}" }
     };
 
+    // Map from old DB tokens (with square brackets) -> internal tokens (curly braces, no spaces)
     // Map from internal token name (no braces) -> UI label (Dutch)
     private readonly Dictionary<string, string> _uiFieldMappings = new(StringComparer.OrdinalIgnoreCase)
     {

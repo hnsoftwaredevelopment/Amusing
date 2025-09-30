@@ -18,143 +18,217 @@
 @using System.Text.Json
 @using System.Text.Json.Serialization
 
-@inject MailingService MailingService
-@inject IJSRuntime JSRuntime
-
 @if ( _isLoading )
 {
-    <div class="text-center p-2">
-        <SfSpinner CssClass="e-spin-center" />
-        <p>@_pageName worden geladen...</p>
-    </div>
+	<div class="text-center p-2">
+		<SfSpinner CssClass="e-spin-center" />
+		<p>@_pageName worden geladen...</p>
+	</div>
 }
 else
 {
-    <div class="page-container" style="display:flex; flex-direction:column; height:88vh; padding-top:1rem; overflow:hidden;">
-        <div class="groupbox top-info" style="flex:0 0 auto;">
-            <div class="groupbox-header">Template informatie</div>
-            <div class="groupbox-content">
-                @if ( TemplatesList.Any() )
-                {
-                    <div class="inline-row">
-                        <SfDropDownList 
-                            TValue="uint?"
-                            TItem="TemplatesListModel"
-                            DataSource="@TemplatesList"
-                            @bind-Value="SelectedTemplatesListId"
-                            Placeholder="Selecteer sjabloon"
-                            CssClass="e-multi-column" 
-                            FloatLabelType="FloatLabelType.Always"
-                            Width="40%"
-                            PopupWidth="800px">
-                            <DropDownListFieldSettings Value="TemplateId" Text="TemplateName"></DropDownListFieldSettings>
-                            <DropDownListTemplates TItem="TemplatesListModel">
-                                <ItemTemplate>
-                                    <table>
-                                        <tr>
-                                            <td>@(( context as TemplatesListModel ).TemplateName)</td>
-                                            <td>@(( context as TemplatesListModel ).RecipientListName)</td>
-                                            <td>@(( context as TemplatesListModel ).TemplateChanged)</td>
-                                        </tr>
-                                    </table>
-                                </ItemTemplate>
-                            </DropDownListTemplates>
-                        </SfDropDownList>
-                     <SfComboBox 
-                        TValue="uint?" 
-                        TItem="RecipientListModel" 
-                        FloatLabelType="FloatLabelType.Always"
-                        Placeholder="Ontvangerslijst" 
-                        DataSource="@RecipientsList" 
-                        Width="30%"
-                        @bind-Value="RecipientListId">
-                        <ComboBoxFieldSettings Value="ListId" Text="ListName"></ComboBoxFieldSettings>
-                    </SfComboBox>
-                </div>
-                }
-                <div class="groupbox-spacer"></div>
-                <div>
+	<div class="page-container" style="display:flex; flex-direction:column; height:88vh; padding-top:1rem; overflow:hidden;">
+		<div class="groupbox top-info" style="flex:0 0 auto;">
+			<div class="groupbox-header">Template informatie</div>
+			<div class="groupbox-content">
+				@if ( TemplatesList.Any() )
+				{
+					<div class="inline-row">
+						<SfDropDownList 
+							TValue="uint?"
+							TItem="TemplatesListModel"
+							DataSource="@TemplatesList"
+							@bind-Value="SelectedTemplatesListId"
+							Placeholder="Selecteer sjabloon"
+							CssClass="e-multi-column" 
+							FloatLabelType="FloatLabelType.Always"
+							Width="40%"
+							PopupWidth="800px">
+							<DropDownListFieldSettings Value="TemplateId" Text="TemplateName"></DropDownListFieldSettings>
+							<DropDownListTemplates TItem="TemplatesListModel">
+								<ItemTemplate>
+									<table>
+										<tr>
+											<td>@(( context as TemplatesListModel ).TemplateName)</td>
+											<td>@(( context as TemplatesListModel ).RecipientListName)</td>
+											<td>@(( context as TemplatesListModel ).TemplateChanged)</td>
+										</tr>
+									</table>
+								</ItemTemplate>
+							</DropDownListTemplates>
+						</SfDropDownList>
+					 <SfComboBox 
+						TValue="uint?" 
+						TItem="RecipientListModel" 
+						FloatLabelType="FloatLabelType.Always"
+						Placeholder="Ontvangerslijst" 
+						DataSource="@RecipientsList" 
+						Width="30%"
+						@bind-Value="RecipientListId">
+						<ComboBoxFieldSettings Value="ListId" Text="ListName"></ComboBoxFieldSettings>
+					</SfComboBox>
+				</div>
+				}
+				<div class="groupbox-spacer"></div>
+				<div>
 					<SfTextBox Placeholder="Sjabloonnaam" FloatLabelType="FloatLabelType.Always" Width="300px" @bind-Value="_selectedTemplatesList.TemplateName" />
-                </div>
-                <div class="inline-row">
-                    <SfTextBox Placeholder="Aangemaakt" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="_selectedTemplatesList.TemplateCreated" />
-                    <SfTextBox Placeholder="Laatste wijziging" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="_selectedTemplatesList.TemplateChanged" />
-                </div>
-            </div>
-        </div>
-        <div class="spacer-medium"></div>
-        <div class="groupbox rte-section">
-            <div class="groupbox-header">E-Mail sjabloon</div>
-            <div class="groupbox-content">
+				</div>
+				<div class="inline-row">
+					<SfTextBox Placeholder="Aangemaakt" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="_selectedTemplatesList.TemplateCreated" />
+					<SfTextBox Placeholder="Laatste wijziging" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="_selectedTemplatesList.TemplateChanged" />
+				</div>
+			</div>
+		</div>
+		<div class="spacer-medium"></div>
+		<div class="groupbox rte-section">
+			<div class="groupbox-header">E-Mail sjabloon</div>
+			<div class="groupbox-content">
 
-                <SfAutoComplete TValue="string" TItem="string"
-                                @ref="_subjectAuto"
-                                @bind-Value="_selectedTemplatesList.TemplateSubject"
-                                Placeholder="Onderwerp"
-                                AllowFiltering="true"
-                                AllowCustom="true"
-                                DataSource="@AvailableFields"
-                                SuggestionCount="10"
-                                Width="600px"
-                                HtmlAttributes="@(new Dictionary<string, object> { { "id", "subjectAutoInput" } })">
-                    <AutoCompleteEvents TValue="string" TItem="string"
-                                        Filtering="OnFiltering"
-                                        OnValueSelect="OnValueSelect" />
-                </SfAutoComplete>
+				<SfAutoComplete TValue="string" TItem="string"
+								@ref="_subjectAuto"
+								@bind-Value="_selectedTemplatesList.TemplateSubject"
+								Placeholder="Onderwerp"
+								AllowFiltering="true"
+								AllowCustom="true"
+								DataSource="@AvailableFields"
+								SuggestionCount="10"
+								Width="600px"
+								HtmlAttributes="@(new Dictionary<string, object> { { "id", "subjectAutoInput" } })">
+					<AutoCompleteEvents TValue="string" TItem="string"
+										Filtering="OnFiltering"
+										OnValueSelect="OnValueSelect" />
+				</SfAutoComplete>
 
 
-                <div class="rte-scroll">
-                    @if (_showRTE)
-                    {
-                        <Syncfusion.Blazor.RichTextEditor.SfRichTextEditor 
-                            @ref="_rte"
-                            ID="rteContent" 
-                            EditorMode="EditorMode.HTML"
-                            Width="100%" 
-                            Height="100%"
-                            Placeholder="Beschrijving" 
-                            @bind-Value="_selectedTemplatesList.TemplateContent" >
-                            <RichTextEditorEvents 
-                                SlashMenuItemSelecting="OnSlashMenuItemSelect" />
-                            <RichTextEditorSlashMenuSettings Enable="true" Items="@SlashMenuItems" />
-                            <Syncfusion.Blazor.RichTextEditor.RichTextEditorToolbarSettings 
-                                Items="@_rteTools"
-                                EnableFloating="true"/>
-                        </Syncfusion.Blazor.RichTextEditor.SfRichTextEditor>                      
-                    }
-                </div>
-            </div>
-        </div>
+				<div class="rte-scroll">
+					@if (_showRTE)
+					{
+						<Syncfusion.Blazor.RichTextEditor.SfRichTextEditor 
+							@ref="_rte"
+							ID="rteContent" 
+							EditorMode="EditorMode.HTML"
+							Width="100%" 
+							Height="100%"
+							Placeholder="Beschrijving" 
+							@bind-Value="_selectedTemplatesList.TemplateContent" >
+							<RichTextEditorEvents 
+								SlashMenuItemSelecting="OnSlashMenuItemSelect" />
+							<RichTextEditorSlashMenuSettings Enable="true" Items="@SlashMenuItems" />
+							<Syncfusion.Blazor.RichTextEditor.RichTextEditorToolbarSettings 
+								Items="@_rteTools"
+								EnableFloating="true"/>
+						</Syncfusion.Blazor.RichTextEditor.SfRichTextEditor>                      
+					}
+				</div>
+			</div>
+		</div>
 
-        <!-- Toolbar -->
-        <div style="flex:0 0 auto; margin-top:0.5rem;">
-            <SfToolbar>
-                <ToolbarItems>
-                    <ToolbarItem Type="ItemType.Button">
-                        <Template>
-                            <button class="custom-toolbar-btn"
-                                    @onclick="Save"
-                                    title="Bewaar sjabloon">
-                                <img src="icons/button-save.svg" class="icon" alt="SAVE" />
-                            </button>
-                        </Template>
-                    </ToolbarItem>
-                    <ToolbarItem Type="ItemType.Button">
-                        <Template>
-                            <button class="custom-toolbar-btn" @onclick="AddNew" title="Voeg een nieuw sjabloon toe">
-                                <img src="icons/button-add.svg" class="icon" alt="ADD" />
-                            </button>
-                        </Template>
-                    </ToolbarItem>
-                    <ToolbarItem Type="ItemType.Button">
-                        <Template>
-                            <button class="custom-toolbar-btn" @onclick="Delete" title="verwijder de geselecteerde sjabloon">
-                                <img src="icons/button-del.svg" class="icon" alt="DELETE" />
-                            </button>
-                        </Template>
-                    </ToolbarItem>
-                </ToolbarItems>
-            </SfToolbar>
-        </div>
-    </div>
+		<!-- Toolbar -->
+		<div style="flex:0 0 auto; margin-top:0.5rem;">
+			<SfToolbar>
+				<ToolbarItems>
+					<ToolbarItem Type="ItemType.Button">
+						<Template>
+							<button class="custom-toolbar-btn"
+									@onclick="Save"
+									title="Bewaar sjabloon">
+								<img src="icons/button-save.svg" class="icon" alt="SAVE" />
+							</button>
+						</Template>
+					</ToolbarItem>
+					<ToolbarItem Type="ItemType.Button">
+						<Template>
+							<button class="custom-toolbar-btn" @onclick="AddNew" title="Voeg een nieuw sjabloon toe">
+								<img src="icons/button-add.svg" class="icon" alt="ADD" />
+							</button>
+						</Template>
+					</ToolbarItem>
+					<ToolbarItem Type="ItemType.Button">
+						<Template>
+							<button class="custom-toolbar-btn" @onclick="Delete" title="verwijder de geselecteerde sjabloon">
+								<img src="icons/button-del.svg" class="icon" alt="DELETE" />
+							</button>
+						</Template>
+					</ToolbarItem>
+					<ToolbarItem Type="ItemType.Separator" />
+					<ToolbarItem Type="ItemType.Button">
+						<Template>
+							<button class="custom-toolbar-btn" @onclick="MailPreview" title="Bekijk het geselecteerde sjabloon op het scherm">
+								<img src="icons/sendpreview.svg" class="icon" alt="MAILPREVIEW" Height="30"/>
+							</button>
+						</Template>
+					</ToolbarItem>
+					<ToolbarItem Type="ItemType.Button">
+						<Template>
+							<button class="custom-toolbar-btn" @onclick="MailTest" title="Verstuur een willekeurige selectie naar 1 mail adres">
+								<img src="icons/sendtest.svg" class="icon" alt="MAILTEST" Height="30"/>
+							</button>
+						</Template>
+					</ToolbarItem>
+					<ToolbarItem Type="ItemType.Button">
+						<Template>
+							<button class="custom-toolbar-btn" @onclick="MailSend" title="Verstuur de mail uit het geselecteerde sjabloon naar alle e-mail adressen uit de ontvangerslijst">
+								<img src="icons/send.svg" class="icon" alt="MAILSEND" Height="25"/>
+							</button>
+						</Template>
+					</ToolbarItem>
+				</ToolbarItems>
+			</SfToolbar>
+		</div>
+	</div>
+
+	<SfDialog @bind-Visible="_showPreviewDialog" Width="1100px">
+		<DialogTemplates>
+			<Header>
+				<div class="flex items-center gap-2 mb-3">
+					<!-- First recipient -->
+					<SfButton CssClass="e-outline e-primary square-btn"
+						IconCss="e-icons e-first-page"
+						@onclick="FirstRecipient"
+						Title="Eerste ontvanger">
+			        </SfButton>
+
+					<!-- Previous -->
+					<SfButton CssClass="e-outline e-primary square-btn"
+						IconCss="e-icons e-chevron-left"
+						@onclick="PreviousRecipient"
+						Title="Vorige ontvanger">
+			        </SfButton>
+
+					<!-- DropDown for manualy selecting a recipient -->
+					<SfDropDownList TValue="ExpandoObject" Width=500px
+						TItem="ExpandoObject"
+						DataSource="_recipientData"
+						Placeholder="Select recipient"
+						@bind-Value="SelectedRecipient"
+						ValueChange="OnRecipientChange">
+						<DropDownListFieldSettings Text="Email" Value="this"/>
+					</SfDropDownList>
+
+					<!-- Next -->
+					<SfButton CssClass="e-outline e-primary square-btn"
+						IconCss="e-icons e-chevron-right"
+						@onclick="NextRecipient"
+						Title="Volgende ontvanger">
+					</SfButton>
+
+					<!-- Last recipient in the list -->
+					<SfButton CssClass="e-outline e-primary square-btn"
+						IconCss="e-icons e-last-page"
+						@onclick="LastRecipient"
+						Title="Laatste ontvanger">
+					</SfButton>
+				</div>
+			</Header>
+
+			<Content>
+				<h4>@_previewSubject</h4>
+				<div>@((MarkupString)_previewBody)</div>
+			</Content>
+
+			<FooterTemplate>
+				<button class="btn btn-secondary" @onclick="()=>_showPreviewDialog=false">Sluiten</button>
+			</FooterTemplate>
+		</DialogTemplates>
+	</SfDialog>
 }
