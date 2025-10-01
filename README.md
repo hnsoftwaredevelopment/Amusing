@@ -1,7 +1,7 @@
 
 # Amusing - Modern Project Management Platform
 
-![Amusing Dashboard](https://via.placeholder.com/1200x600/3B82F6/FFFFFF?text=Amusing+Dashboard+Preview)
+<img width="783" height="461" alt="image" src="https://github.com/user-attachments/assets/e1c37bfe-4fbb-48b3-8182-7e91e866af7d" />
 *A modern, intuitive platform for project management and team collaboration*
 
 ## 📖 Overview
@@ -13,19 +13,13 @@ Amusing is a comprehensive web-based project management solution designed to str
 ### ✅ Fully Implemented
 
 #### 🏠 **Homepage & Navigation**
-![Homepage](https://via.placeholder.com/800x400/10B981/FFFFFF?text=Modern+Homepage+Design)
+<img width="247" height="460" alt="image" src="https://github.com/user-attachments/assets/998ed987-0c1a-40a4-95cf-0643f1b07144" />
+
 - **Responsive Design**: Fully optimized for desktop, tablet, and mobile devices
 - **Intuitive Navigation**: Clean menu structure with easy access to all sections
 - **Hero Section**: Engaging landing area with clear call-to-action elements
 
-#### 📊 **Dashboard**
-![Dashboard](https://via.placeholder.com/800x400/8B5CF6/FFFFFF?text=Comprehensive+Dashboard)
-- **Project Overview**: Quick glance at ongoing projects and progress
-- **Activity Feed**: Recent updates and team activities
-- **Performance Metrics**: Visual charts and statistics for project tracking
-
 #### 👥 **User Management**
-![User Management](https://via.placeholder.com/800x400/EF4444/FFFFFF?text=User+Management+System)
 - **User Profiles**: Detailed user information and preferences
 - **Role-based Access**: Different permission levels for team members
 - **Team Collaboration**: Easy team member addition and management
@@ -37,8 +31,14 @@ Amusing is a comprehensive web-based project management solution designed to str
 
 ### 🚧 In Development / Planned Features
 
+#### 📊 **Dashboard** 
+- **Project Overview**: Quick glance at ongoing projects and progress
+- **Activity Feed**: Recent updates and team activities
+- **Performance Metrics**: Visual charts and statistics for project tracking
+- **Information**:  about current festival in relation to the past.
+- **Graphs**: for status info
+
 #### 📋 **Project Management** (Partially Implemented)
-![Project Interface](https://via.placeholder.com/800x400/F59E0B/FFFFFF?text=Project+Management+Tools)
 - **Task Creation & Assignment** - *Basic structure in place, full functionality in progress*
 - **Project Timeline View** - *Navigation available, implementation ongoing*
 - **File Sharing System** - *UI elements present, backend integration needed*
@@ -54,7 +54,6 @@ Amusing is a comprehensive web-based project management solution designed to str
 - **Performance Insights** - *Charts and metrics in development*
 
 #### ⚙️ **Settings & Customization**
-![Settings Panel](https://via.placeholder.com/800x400/6B7280/FFFFFF?text=Settings+%26+Preferences)
 - **Workspace Settings** - *Navigation accessible, full options in progress*
 - **Theme Customization** - *Basic theming available, advanced options planned*
 - **Integration Setup** - *Third-party connection interfaces in development*
@@ -90,8 +89,6 @@ Amusing is a comprehensive web-based project management solution designed to str
 - **Security**: Robust authentication and data protection
 
 ## 📱 Mobile Experience
-
-![Mobile View](https://via.placeholder.com/400x700/60A5FA/FFFFFF?text=Mobile+Optimized)
 - **Touch-friendly Interface**: Optimized for mobile devices
 - **Responsive Layout**: Adapts to different screen sizes
 - **Full Feature Access**: All major features available on mobile
@@ -103,13 +100,14 @@ Amusing is a comprehensive web-based project management solution designed to str
 - ✅ User authentication system
 - ✅ Basic project management
 - ✅ Responsive design implementation
-- ✅ Dashboard and navigation
+- ✅ Navigation
 
 ### Active Development:
 - 🚧 Advanced project features
 - 🚧 Communication tools
 - 🚧 Analytics and reporting
 - 🚧 Integration capabilities
+- 🚧 Dashboard
 
 ### Planned Enhancements:
 - 📋 Third-party integrations
