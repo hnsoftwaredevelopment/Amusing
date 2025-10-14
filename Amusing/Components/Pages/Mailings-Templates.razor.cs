@@ -1,8 +1,5 @@
 ﻿using System.Dynamic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 
 using Amusing.Helpers;
 using Amusing.Models;
@@ -13,6 +10,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 
 using Syncfusion.Blazor.DropDowns;
+using Syncfusion.Blazor.Navigations;
 using Syncfusion.Blazor.QueryBuilder;
 using Syncfusion.Blazor.RichTextEditor;
 
@@ -26,11 +24,11 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
     private readonly string _pageName = "Mail Templates";
     protected static readonly string[] InFields = { "Festival", "Role", "Volunteer" };
 
-    private List<TemplatesListModel> TemplatesList { get; set; } = new();
-    private List<RecipientListModel> RecipientsList { get; set; } = new();
-    private List<string> AvailableFields { get; set; } = new();
+    private List<TemplatesListModel> TemplatesList { get; set; } = [];
+    private List<RecipientListModel> RecipientsList { get; set; } = [];
+    private List<string> AvailableFields { get; set; } = [ ];
 
-    private List<SlashMenuItemModel> _slashMenuItems = new();
+    private List<SlashMenuItemModel> _slashMenuItems = [];
     private List<SlashMenuItemModel> SlashMenuItems
     {
         get => _slashMenuItems;
@@ -46,7 +44,7 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
     private readonly CancellationTokenSource _cts = new();
     private CancellationTokenSource _loadCts = new();
     private bool _showPreviewDialog = false;
-    private List<string> _previewRecipients = new();
+    private List<string> _previewRecipients = [];
     private int _currentPreviewIndex = 0;
     private int _currentRecipientIndex = 0;
     private string _selectedPreviewRecipient = string.Empty;
@@ -305,28 +303,49 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
             {
                 await LoadTemplatesAsync( _cts.Token );
 
+                // Als er templates zijn, selecteer de eerste en trigger je logica
+                if ( TemplatesList?.Any() == true && SelectedTemplatesListId == 0 )
+                {
+                    SelectedTemplatesListId = TemplatesList [ 0 ].TemplateId;
+                }
+
                 if ( _selectedTemplatesList?.RecipientListId != null )
                 {
                     await LoadRecipientDataAsync( _selectedTemplatesList.RecipientListId );
                 }
 
-                _selectedTemplatesList.TemplateSubject = _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateSubject, true );
-                _selectedTemplatesList.TemplateContent = _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateContent, true );
+                _selectedTemplatesList.TemplateSubject =
+                    _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateSubject, true );
+
+                _selectedTemplatesList.TemplateContent =
+                    _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateContent, true );
 
                 if ( JSRuntime is not null )
                 {
                     await JSRuntime.InvokeVoidAsync( "rteHelpers.registerInput", "subjectAutoInput" );
                 }
             }
-            catch ( OperationCanceledException ) { }
+            catch ( OperationCanceledException )
+            {
+                // niets, netjes afbreken
+            }
         }
     }
+
 
     public void Dispose()
     {
         _disposed = true;
         _cts.Cancel();
         _cts.Dispose();
+
+        // Also cancel any outstanding recipient-load operation to avoid continuations after disposal.
+        try
+        {
+            _loadCts?.Cancel();
+            _loadCts?.Dispose();
+        }
+        catch { }
     }
 
     private async Task LoadTemplatesAsync( CancellationToken token )
@@ -415,11 +434,9 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
                 AvailableFields = _mappingService.GetAvailableLabels( firstRow.Keys );
                 SlashMenuItems = AvailableFields.Select( f => new SlashMenuItemModel { Text = f, IconCss = "e-icons e-named-set", GroupBy = "Variabelen:" } ).ToList();
 
-                // To be sure the SlashMenuItems become visible it is necesary
-                // to rerender the RTE, so disable it and reaneble it again
-                _showRTE = false;
-                await InvokeAsync( StateHasChanged );
-                _showRTE = true;
+                // update the client-side RTE slash menu items without re-creating the RTE
+                await UpdateRteSlashMenuAsync();
+
                 await InvokeAsync( StateHasChanged );
             }
             else
@@ -487,6 +504,7 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
     }
 
     private FieldMappingService _mappingService = new();
+
     public async Task OnSlashMenuItemSelect( SlashMenuSelectEventArgs args ) => await ( _rte?.ExecuteCommandAsync( CommandName.InsertHTML, args.ItemData.Text ) ?? Task.CompletedTask );
 
     private async Task OnFiltering( FilteringEventArgs args )
@@ -708,4 +726,71 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
     {
         await Task.CompletedTask;
     }
+
+    private async Task UpdateRteSlashMenuAsync()
+    {
+        if ( JSRuntime is null )
+            return;
+
+        var jsItems = SlashMenuItems?.Select(s => new
+        {
+            text = s.Text,
+            iconCss = s.IconCss,
+            category = s.GroupBy
+        }).ToArray() ?? Array.Empty<object>();
+
+        const int maxAttempts = 8;
+        const int delayMs = 120;
+
+        for ( int attempt = 0; attempt < maxAttempts; attempt++ )
+        {
+            try
+            {
+                // Invoke the helper; it now returns true/false
+                var ok = await JSRuntime.InvokeAsync<bool>("rteHelpers.updateSlashMenu", "rteContent", jsItems);
+                if ( ok )
+                {
+                    return;
+                }
+            }
+            catch ( JSException )
+            {
+                // ignore - RTE might not be ready
+            }
+            await Task.Delay( delayMs );
+        }
+
+        // last attempt without throwing
+        try
+        { await JSRuntime.InvokeVoidAsync( "rteHelpers.updateSlashMenu", "rteContent", jsItems ); }
+        catch { }
+
+        // Forceer RTE herladen
+        _showRTE = false;
+        StateHasChanged();
+        await Task.Delay( 50 ); // kleine delay
+        _showRTE = true;
+        StateHasChanged();
+    }
+
+    private async Task OnTemplateChanged(uint? templateId)
+    {
+        if ( templateId != null  && templateId != 0)
+        {
+            SelectedTemplatesListId = templateId;
+            //_selectedTemplatesList = TemplatesList.FirstOrDefault( t => t.TemplateId == templateId );
+
+            await UpdateRteSlashMenuAsync();
+        }
+    }
+
+    private async Task OnRecipientListChanged( uint? recipientListId )
+    {
+        if ( recipientListId != null && recipientListId != 0)
+        {
+            RecipientListId = RecipientsList[(int)recipientListId.Value].ListId;
+            await UpdateRteSlashMenuAsync();
+        }
+    }
+
 }
