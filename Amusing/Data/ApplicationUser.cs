@@ -6,59 +6,29 @@ using Microsoft.AspNetCore.Identity;
 namespace Amusing.Data;
 
 [Table( "ah_beheer" )]
-public class ApplicationUser : IdentityUser
+public class ApplicationUser : IdentityUser<uint>
 {
     [Key]
     [Column( "user_id" )]
-    public override string Id { get; set; } = Guid.NewGuid().ToString();
+    public override uint Id { get; set; }
 
     [Column( "username" )]
-    public override string? UserName { get; set; } = string.Empty;
+    public override string? UserName { get; set; }
 
+    // Laat deze kolom ongemoeid, alleen legacy MD5
     [Column( "password" )]
-    public override string? PasswordHash { get; set; } = string.Empty;
+    public string LegacyPassword { get; set; } = "";
+
+    // Nieuwe Identity-hash
+    [Column( "PasswordHash" )]
+    public override string? PasswordHash { get; set; }
 
     [Column( "role" )]
-    public string Role { get; set; } = string.Empty;
+    public string Role { get; set; } = "";
 
-    // Deze properties worden genegeerd in EF maar Identity verwacht ze wel
-    // We geven ze automatisch waarden gebaseerd op UserName
-    public override string? Email
-    {
-        get => UserName ?? string.Empty;
-        set { } // Setter doet niets omdat we Email niet opslaan
-    }
+    [Column( "SecurityStamp" )]
+    public override string SecurityStamp { get; set; } = Guid.NewGuid().ToString();
 
-    public override string? NormalizedUserName
-    {
-        get => UserName?.ToUpper() ?? string.Empty;
-        set { }
-    }
-
-    public override string? NormalizedEmail
-    {
-        get => UserName?.ToUpper() ?? string.Empty;
-        set { }
-    }
-
-    public override string? SecurityStamp
-    {
-        get => "default-stamp";
-        set { }
-    }
-
-    public override string? ConcurrencyStamp
-    {
-        get => "default-concurrency";
-        set { }
-    }
-
-    // Andere Identity properties met defaults
-    public override bool EmailConfirmed { get; set; } = true;
-    public override string? PhoneNumber { get; set; } = string.Empty;
-    public override bool PhoneNumberConfirmed { get; set; } = false;
-    public override bool TwoFactorEnabled { get; set; } = false;
-    public override DateTimeOffset? LockoutEnd { get; set; } = null;
-    public override bool LockoutEnabled { get; set; } = false;
-    public override int AccessFailedCount { get; set; } = 0;
+    [Column( "ConcurrencyStamp" )]
+    public override string ConcurrencyStamp { get; set; } = Guid.NewGuid().ToString();
 }

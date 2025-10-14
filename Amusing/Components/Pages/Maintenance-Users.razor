@@ -231,6 +231,7 @@ else
         {
             // Save the new Person and get the new Person Id
             SelectedUser.Password = CustomAuthenticationService.ComputeMd5Hash( SelectedUser.Password ); 
+            SelectedUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword( SelectedUser.PasswordHash );
 
             var savedId = await UserService.AddUserAsync(SelectedUser);
 
@@ -248,11 +249,6 @@ else
                 SelectedUser = Users [ index ];
                 await GridRef.SelectRowAsync( index );
             }
-
-            if (SelectedUser.Password != "")
-            {
-
-            }
         }
     }
 
@@ -263,6 +259,7 @@ else
             UserId = 0,
             Username = "",
             Password = "",
+            PasswordHash = "",
             Role =  ""
         };
 

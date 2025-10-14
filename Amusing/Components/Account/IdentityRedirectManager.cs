@@ -1,9 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Components;
 
-namespace Amusing.Components.Account
-{
-    internal sealed class IdentityRedirectManager(NavigationManager navigationManager)
+namespace Amusing.Components.Account;
+
+    public sealed class IdentityRedirectManager(NavigationManager navigationManager)
     {
         public const string StatusCookieName = "Identity.StatusMessage";
 
@@ -56,4 +56,3 @@ namespace Amusing.Components.Account
         public void RedirectToCurrentPageWithStatus(string message, HttpContext context)
             => RedirectToWithStatus(CurrentPath, message, context);
     }
-}

@@ -1194,7 +1194,8 @@ public static class QueryDefinitions
     public static readonly string ModifyPasswordByUserId = @"
         UPDATE amusing.ah_beheer
         SET 
-            password = @Password
+            password = @Password,
+            PasswordHash = @PasswordHash    
         WHERE user_id = @UserId;";
     public static readonly string DeleteUserByUserId = @"
         DELETE FROM ah_beheer 

@@ -1,9 +1,16 @@
 using System.Globalization;
 
+using Amusing.Components.Account;
+using Amusing.Data;
+using Amusing.Security;
 using Amusing.Services;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
+using Microsoft.EntityFrameworkCore;
 
 using Syncfusion.Blazor;
 
@@ -32,22 +39,29 @@ builder.Services.AddScoped<StageService>();
 builder.Services.AddScoped<StageTypeService>();
 builder.Services.AddScoped<TaskService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<VolunteerService>();
+builder.Services.AddHttpClient<TransipMailingService>();
+builder.Services.AddScoped<IEmailSender<ApplicationUser>, TransipEmailSender<ApplicationUser>>();
+builder.Services.AddScoped<IPasswordHasher<ApplicationUser>, LegacyPasswordHasher>();
 
-builder.Services.AddAuthentication( CookieAuthenticationDefaults.AuthenticationScheme )
-    .AddCookie( options =>
-    {
-        options.LoginPath = "/login";
-        options.LogoutPath = "/logout";
-    } );
+builder.Services.AddDbContext<ApplicationDbContext>( options =>
+    options.UseMySql(
+        builder.Configuration.GetConnectionString( "DefaultConnection" ),
+        ServerVersion.AutoDetect( builder.Configuration.GetConnectionString( "DefaultConnection" ) )
+    ) );
 
-builder.Services.AddAuthorization();
-
-// Register de bestaande authenticatieservice
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddAuthentication( CookieAuthenticationDefaults.AuthenticationScheme ).AddCookie();
 builder.Services.AddScoped<CustomAuthenticationService>();
+builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+builder.Services.AddScoped<ProtectedSessionStorage>();
+builder.Services.AddAuthorizationCore();
 
-//builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+
+
 builder.Services.AddSyncfusionBlazor();
 builder.Services.AddSingleton( typeof( ISyncfusionStringLocalizer ), typeof( SyncfusionLocalizer ) );
 

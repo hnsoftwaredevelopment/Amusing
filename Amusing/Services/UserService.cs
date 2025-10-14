@@ -40,7 +40,8 @@ public class UserService( GenericDataService dataService )
         Dictionary<string, object> parameters = new()
         {
             { "@UserId", model.UserId },
-            { "@Password", model.Password }
+            { "@Password", model.Password },
+            { "@PasswordHash", model.PasswordHash }
             };
 
         await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyPasswordByUserId, parameters );
