@@ -1,9 +1,12 @@
-﻿using System.Dynamic;
+﻿using System.Diagnostics;
+using System.Dynamic;
 using System.Text.Json;
 
 using Amusing.Helpers;
 using Amusing.Models;
 using Amusing.Services;
+
+using FluentValidation.Internal;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -41,7 +44,7 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
     private Dictionary<string, object> _subjectHtmlAttr = new() { { "id", "subjectAutoInput" } };
     private TemplatesListModel _selectedTemplatesList = new();
     private EditContext? _editContext;
-    private readonly CancellationTokenSource _cts = new();
+    private CancellationTokenSource _cts = new();
     private CancellationTokenSource _loadCts = new();
     private bool _showPreviewDialog = false;
     private List<string> _previewRecipients = [];
@@ -297,38 +300,48 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
 
     protected override async Task OnAfterRenderAsync( bool firstRender )
     {
-        if ( firstRender && !_disposed )
+        if ( !firstRender || _disposed ) return;
+
+        try
         {
-            try
+            await LoadTemplatesAsync( _cts.Token );
+
+            if ( TemplatesList?.Any() == true && SelectedTemplatesListId == 0 )
             {
-                await LoadTemplatesAsync( _cts.Token );
+                SelectedTemplatesListId = TemplatesList [ 0 ].TemplateId;
+                _selectedTemplatesList = TemplatesList [ 0 ];
+            }
 
-                // Als er templates zijn, selecteer de eerste en trigger je logica
-                if ( TemplatesList?.Any() == true && SelectedTemplatesListId == 0 )
-                {
-                    SelectedTemplatesListId = TemplatesList [ 0 ].TemplateId;
-                }
+            if ( _selectedTemplatesList?.RecipientListId != null )
+            {
+                await LoadRecipientDataAsync( _selectedTemplatesList.RecipientListId );
+            }
 
-                if ( _selectedTemplatesList?.RecipientListId != null )
-                {
-                    await LoadRecipientDataAsync( _selectedTemplatesList.RecipientListId );
-                }
+            _selectedTemplatesList.TemplateSubject =
+                _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateSubject, true );
 
-                _selectedTemplatesList.TemplateSubject =
-                    _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateSubject, true );
+            _selectedTemplatesList.TemplateContent =
+                _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateContent, true );
 
-                _selectedTemplatesList.TemplateContent =
-                    _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateContent, true );
+            var rteReady = await WaitForRteReadyAsync(maxAttempts: 15, delayMs: 100);
+            if ( rteReady )
+            {
+                await UpdateRteSlashMenuAsync();
 
                 if ( JSRuntime is not null )
                 {
                     await JSRuntime.InvokeVoidAsync( "rteHelpers.registerInput", "subjectAutoInput" );
                 }
             }
-            catch ( OperationCanceledException )
+            else
             {
-                // niets, netjes afbreken
+                Debug.WriteLine( "RTE not ready after waiting, skipping slash menu initialization." );
             }
+        }
+        catch ( OperationCanceledException ) { }
+        catch ( Exception ex )
+        {
+            Debug.WriteLine( $"OnAfterRenderAsync unexpected: {ex.Message}" );
         }
     }
 
@@ -729,57 +742,64 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
 
     private async Task UpdateRteSlashMenuAsync()
     {
-        if ( JSRuntime is null )
+        SlashMenuItems ??= [ ];
+
+        var ready = await WaitForRteReadyAsync(maxAttempts: 15, delayMs: 100);
+
+        if ( !ready )
+        {
+            Console.WriteLine( "UpdateRteSlashMenuAsync: RTE not ready, aborting update." );
             return;
-
-        var jsItems = SlashMenuItems?.Select(s => new
-        {
-            text = s.Text,
-            iconCss = s.IconCss,
-            category = s.GroupBy
-        }).ToArray() ?? Array.Empty<object>();
-
-        const int maxAttempts = 8;
-        const int delayMs = 120;
-
-        for ( int attempt = 0; attempt < maxAttempts; attempt++ )
-        {
-            try
-            {
-                // Invoke the helper; it now returns true/false
-                var ok = await JSRuntime.InvokeAsync<bool>("rteHelpers.updateSlashMenu", "rteContent", jsItems);
-                if ( ok )
-                {
-                    return;
-                }
-            }
-            catch ( JSException )
-            {
-                // ignore - RTE might not be ready
-            }
-            await Task.Delay( delayMs );
         }
 
-        // last attempt without throwing
         try
-        { await JSRuntime.InvokeVoidAsync( "rteHelpers.updateSlashMenu", "rteContent", jsItems ); }
-        catch { }
+        {
+            var jsItems = SlashMenuItems?.Select(s => new
+            {
+                text = s.Text,
+                iconCss = s.IconCss,
+                category = s.GroupBy
+            }).ToArray() ?? Array.Empty<object>();
 
-        // Forceer RTE herladen
+            if ( jsItems.Length == 0 )
+            {
+                Debug.WriteLine( "UpdateRteSlashMenuAsync: no items available for the SlashMenu." );
+                return;
+            }
+
+            await InvokeAsync( async () =>
+            {
+                try
+                {
+                    await JSRuntime.InvokeVoidAsync( "rteHelpers.updateSlashMenu", "rteContent", jsItems );
+                }
+                catch ( JSException jsEx )
+                {
+                    Debug.WriteLine( $"[UpdateRteSlashMenuAsync] JS error: {jsEx.Message}" );
+                }
+            } );
+        }
+        catch ( TaskCanceledException ) { /* ignore */ }
+        catch ( ObjectDisposedException ) { /* ignore */ }
+        catch ( Exception ex )
+        {
+            Debug.WriteLine( $"[UpdateRteSlashMenuAsync] Unexpected: {ex.Message}" );
+        }
+
         _showRTE = false;
         StateHasChanged();
-        await Task.Delay( 50 ); // kleine delay
+        await Task.Delay( 20 );
+
         _showRTE = true;
         StateHasChanged();
     }
 
     private async Task OnTemplateChanged(uint? templateId)
     {
-        if ( templateId != null  && templateId != 0)
+        if ( templateId != null && templateId != 0)
         {
             SelectedTemplatesListId = templateId;
-            //_selectedTemplatesList = TemplatesList.FirstOrDefault( t => t.TemplateId == templateId );
-
+            await Task.Delay( 50 );
             await UpdateRteSlashMenuAsync();
         }
     }
@@ -788,9 +808,41 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
     {
         if ( recipientListId != null && recipientListId != 0)
         {
-            RecipientListId = RecipientsList[(int)recipientListId.Value].ListId;
+            RecipientListId = recipientListId;
+            await Task.Delay( 50 );
             await UpdateRteSlashMenuAsync();
         }
+    }
+
+    private async Task<bool> WaitForRteReadyAsync( int maxAttempts = 10, int delayMs = 100 )
+    {
+        if ( JSRuntime is null ) return false;
+
+        for ( int i = 0; i < maxAttempts; i++ )
+        {
+            try
+            {
+                bool ready = false;
+                try
+                {
+                    ready = await JSRuntime.InvokeAsync<bool>( "rteHelpers.isRteReady", "rteContent" );
+                }
+                catch ( Exception ex )
+                {
+                    Debug.WriteLine( $"WaitForRteReadyAsync attempt {i + 1} failed: {ex.GetType().Name} - {ex.Message}" );
+                }
+
+                if ( ready )
+                    return true;
+            }
+            catch ( TaskCanceledException ) { return false; }
+            catch ( ObjectDisposedException ) { return false; }
+
+            await Task.Delay( delayMs );
+        }
+
+        Debug.WriteLine( "WaitForRteReadyAsync: RTE not ready after waiting." );
+        return false;
     }
 
 }

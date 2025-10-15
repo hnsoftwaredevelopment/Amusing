@@ -37,7 +37,7 @@ else
 						<SfDropDownList TValue="uint?" TItem="TemplatesListModel"
 										DataSource="@TemplatesList"
 										Value="SelectedTemplatesListId"
-										ValueChange="@(async ( uint? id ) => await OnTemplateChanged( id ))"
+										ValueChanged="@(async ( uint? id ) => await OnTemplateChanged( id ))"
 										Placeholder="Selecteer sjabloon"
 										CssClass="e-multi-column"
 										FloatLabelType="FloatLabelType.Always"
@@ -61,7 +61,7 @@ else
 									DataSource="@RecipientsList"
 									Width="30%"
 									Value="RecipientListId"
-									ValueChange="@(async ( uint? id ) => await OnRecipientListChanged( id ))"
+									ValueChanged="@(async ( uint? id ) => await OnRecipientListChanged( id ))"
 									Placeholder="Ontvangerslijst">
 							<ComboBoxFieldSettings Value="ListId" Text="ListName"></ComboBoxFieldSettings>
 						</SfComboBox>
@@ -228,8 +228,4 @@ else
 			</FooterTemplate>
 		</DialogTemplates>
 	</SfDialog>
-}
-private void OnTemplateChanged(Microsoft.AspNetCore.Components.ChangeEventArgs args)
-{
-throw new NotImplementedException();
 }

@@ -1,6 +1,4 @@
 ﻿(function () {
-    console.debug('rteHelpers.js geladen ✅');
-
     var caretPositions = {};
 
     function _findInputById(id) {
@@ -79,23 +77,20 @@
                 }
             }
         } catch (e) {
-            if (window.DEBUG) console.debug('rteHelpers._findRteInstance error', e);
+            console.debug('rteHelpers._findRteInstance error', e);
         }
         return null;
     }
 
-    // Try to set menu datasource and fields in many possible internal locations.
     function _applyMenuUpdate(inst, normalized) {
-        console.debug('_applyMenuUpdate');
         let updated = false;
 
-        // Helper to safely execute actions without constant try/catch spam
         const safe = (fn) => {
             try {
                 fn();
                 return true;
             } catch (e) {
-                if (window.DEBUG) console.debug('rteHelpers.safe ignored error:', e);
+                console.debug('rteHelpers.safe ignored error:', e);
                 return false;
             }
         };
@@ -172,7 +167,6 @@
     }
 
     function updateSlashMenu(elementId, items) {
-        console.debug('UpdateSlashMenu');
         try {
             var normalized = Array.isArray(items)
                 ? items.map(i => ({ text: i?.text || '', iconCss: i?.iconCss || '' }))
@@ -188,23 +182,50 @@
                     if (attempts++ < maxAttempts) {
                         setTimeout(tryUpdate, 100); // probeer opnieuw na 100ms
                     } else {
-                        if (window.DEBUG) console.warn(`rteHelpers.updateSlashMenu: geen instance gevonden voor ${elementId}`);
+                        console.warn(`rteHelpers.updateSlashMenu: geen instance gevonden voor ${elementId}`);
                     }
                     return;
                 }
                 const applied = _applyMenuUpdate(inst, normalized);
-                if (window.DEBUG) console.debug('rteHelpers.updateSlashMenu: applied?', applied, 'count', normalized.length, 'elementId', elementId);
+                console.debug('rteHelpers.updateSlashMenu: applied?', applied, 'count', normalized.length, 'elementId', elementId);
             };
 
             setTimeout(tryUpdate, 50);
             return true;
         } catch (e) {
-            if (window.DEBUG) console.error('rteHelpers.updateSlashMenu error:', e);
+            console.error('rteHelpers.updateSlashMenu error:', e?.message || e);
             return false;
         }
     }
 
     window.rteHelpers = window.rteHelpers || {};
+    window.rteHelpers.isRteReady = function (elementId) {
+        try {
+            var el = document.getElementById(elementId) || document.querySelector('#' + elementId);
+            if (!el) return false;
+
+            // vaak zit de client instance in ej2_instances op het element of een child
+            var inst = (el.ej2_instances && el.ej2_instances[0]) || null;
+            if (!inst) {
+                var children = el.querySelectorAll('*');
+                for (var i = 0; i < children.length; i++) {
+                    var c = children[i];
+                    if (c && c.ej2_instances && c.ej2_instances[0]) {
+                        inst = c.ej2_instances[0];
+                        break;
+                    }
+                }
+            }
+
+            // als we een instance hebben en die een element property heeft, is het meestal OK
+            return inst && inst.element ? true : false;
+        } catch (e) {
+            // geen paniek — return false zodat C# kan retryen
+            console.debug('rteHelpers.isRteReady error', e);
+            return false;
+        }
+    };
+
     window.rteHelpers.registerInput = registerInput;
     window.rteHelpers.getLastCaret = getLastCaret;
     window.rteHelpers.getActiveValue = getActiveValue;
