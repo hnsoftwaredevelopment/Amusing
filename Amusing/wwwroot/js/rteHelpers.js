@@ -123,6 +123,39 @@
         editor.execCommand('insertText', text);
     }
 
+    function _insertTextIntoRteInstance(rteInstance, text) {
+        // Insert using instance.executeCommand if available
+        try {
+            if (rteInstance && typeof rteInstance.executeCommand === 'function') {
+                // Some Syncfusion versions expose executeCommand
+                rteInstance.executeCommand('insertText', text);
+                return true;
+            }
+
+            // If there's an editorManager with execCommand (classic approach)
+            if (rteInstance && rteInstance.editorManager && typeof rteInstance.editorManager.execCommand === 'function') {
+                rteInstance.editorManager.execCommand('insertText', text);
+                return true;
+            }
+
+            // Some versions expose getDocument/selection and rely on document.execCommand fallback
+            // Best-effort fallback: try to use the DOM selection/execCommand
+            try {
+                if (document.queryCommandSupported && document.queryCommandSupported('insertText')) {
+                    document.execCommand('insertText', false, text);
+                    return true;
+                }
+            } catch (e) {
+                // ignore fallback failure
+            }
+
+        } catch (e) {
+            // swallow internal errors from unknown syncfusion internals
+            console.debug('rteHelpers._insertTextIntoRteInstance error', e);
+        }
+        return false;
+    }
+
     // --- Public functions ---
     window.rteHelpers.registerInput = function (id) {
         const el = _findInputById(id);
@@ -143,7 +176,35 @@
         if (!el) return false;
         try { el.focus(); if (el.setSelectionRange) el.setSelectionRange(pos, pos); return true; } catch (e) { return false; }
     };
-    window.rteHelpers.insertTextAtCursor = insertTextAtCursor;
+    window.rteHelpers.insertTextAtCursor = function (rteIdOrInstance, text) {
+        try {
+            var instance = null;
+
+            // If caller passed the instance itself
+            if (rteIdOrInstance && typeof rteIdOrInstance === 'object' && (rteIdOrInstance.ej2_instances || rteIdOrInstance.element || rteIdOrInstance.editorManager)) {
+                // likely already an element or instance — normalize
+                if (rteIdOrInstance.ej2_instances) {
+                    instance = rteIdOrInstance.ej2_instances[0];
+                } else {
+                    instance = rteIdOrInstance;
+                }
+            } else if (typeof rteIdOrInstance === 'string') {
+                // treat as element id
+                var el = document.getElementById(rteIdOrInstance);
+                instance = el?.ej2_instances?.[0] || null;
+            }
+
+            if (!instance) {
+                // nothing to insert into
+                return false;
+            }
+
+            return _insertTextIntoRteInstance(instance, text);
+        } catch (e) {
+            console.debug('rteHelpers.insertTextAtCursor error', e);
+            return false;
+        }
+    };
     window.rteHelpers.updateSlashMenu = function (elementId, items) {
         const normalized = Array.isArray(items)
             ? items.map(i => ({ text: i?.text || '', iconCss: i?.iconCss || '' }))
@@ -197,83 +258,127 @@
             }
         };
     };
-    window.rteHelpers.attachContextMenu = function (rteId, menuItems) {
-        const rteEl = document.getElementById(rteId);
-        if (!rteEl) return;
-
-        rteEl.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
-
-            const existing = document.getElementById('rteContextMenu');
-            if (existing) existing.remove();
-
-            const menu = document.createElement('ul');
-            menu.id = 'rteContextMenu';
-            menu.style.position = 'absolute';
-            menu.style.top = e.pageY + 'px';
-            menu.style.left = e.pageX + 'px';
-            menu.style.background = '#fff';
-            menu.style.border = '1px solid #ccc';
-            menu.style.padding = '5px';
-            menu.style.zIndex = '1000';
-
-            menuItems.forEach(item => {
-                const li = document.createElement('li');
-                li.textContent = item.text;
-                li.style.padding = '2px 5px';
-                li.style.cursor = 'pointer';
-                li.onclick = () => {
-                    const rteInst = rteEl?.ej2_instances?.[0];
-                    if (rteInst) rteInst.executeCommand('insertText', item.text);
-                    menu.remove();
-                };
-                menu.appendChild(li);
-            });
-
-            document.body.appendChild(menu);
-            document.addEventListener('click', function handler() { menu.remove(); document.removeEventListener('click', handler); });
-        });
-    };
+    
     window.rteHelpers.updateContextMenu = function (rteId, items) {
-        const rteEl = document.getElementById(rteId);
-        const rte = rteEl?.ej2_instances?.[0];
-        if (!rte) return;
+        try {
+            var rteEl = document.getElementById(rteId);
+            if (!rteEl) {
+                console.warn('rteHelpers.updateContextMenu: rte element not found', rteId);
+                return false;
+            }
 
-        rte.element.addEventListener("contextmenu", function (e) {
-            e.preventDefault();
+            // try get the instance in multiple ways (robust)
+            var instance = rteEl?.ej2_instances?.[0] || null;
+            if (!instance) {
+                // scan children quickly for an instance
+                var children = rteEl.querySelectorAll('*');
+                for (var i = 0; i < children.length && !instance; i++) {
+                    var c = children[i];
+                    if (c && c.ej2_instances && c.ej2_instances[0]) instance = c.ej2_instances[0];
+                }
+            }
 
-            // Remove existing menu
-            const existing = document.getElementById("customRteContextMenu");
-            if (existing) existing.remove();
+            // Remove previously attached custom menu handler to avoid duplicates
+            // We store a flag on the element so we can know if we attached already.
+            if (rteEl._rteHelpersContextHandlerAttached) {
+                // update items only (menu recreated on open), still keep single handler
+                rteEl._rteHelpersContextItems = (Array.isArray(items) ? items.slice() : []);
+                return true;
+            }
 
-            const menu = document.createElement("ul");
-            menu.id = "customRteContextMenu";
-            menu.style.position = "absolute";
-            menu.style.top = e.pageY + "px";
-            menu.style.left = e.pageX + "px";
-            menu.style.background = "#fff";
-            menu.style.border = "1px solid #ccc";
-            menu.style.padding = "4px";
-            menu.style.zIndex = 10000;
-            menu.style.listStyle = "none";
+            // store items to be used by the handler
+            rteEl._rteHelpersContextItems = (Array.isArray(items) ? items.slice() : []);
 
-            items.forEach(i => {
-                const li = document.createElement("li");
-                li.textContent = i.text;
-                li.style.cursor = "pointer";
-                li.style.padding = "2px 6px";
-                li.onclick = () => {
-                    // Insert text at current cursor position
-                    insertTextAtCursor(rte, i.text);
-                    menu.remove();
+            // Add the listener on the element (not on instance) so it survives instance internals
+            rteEl.addEventListener('contextmenu', function (ev) {
+                ev.preventDefault();
+
+                // get latest items (they may have been replaced)
+                var menuItems = rteEl._rteHelpersContextItems || [];
+                if (!menuItems || menuItems.length === 0) {
+                    return;
+                }
+
+                // remove existing custom menu if any
+                var existing = document.getElementById('rteCustomContextMenu');
+                if (existing) existing.remove();
+
+                // create menu DOM
+                var menu = document.createElement('ul');
+                menu.id = 'rteCustomContextMenu';
+                menu.style.position = 'absolute';
+                menu.style.top = (ev.pageY) + 'px';
+                menu.style.left = (ev.pageX) + 'px';
+                menu.style.background = '#fff';
+                menu.style.border = '1px solid rgba(0,0,0,0.12)';
+                menu.style.padding = '4px';
+                menu.style.zIndex = 2147483647; // very high
+                menu.style.listStyle = 'none';
+                menu.style.borderRadius = '4px';
+                menu.style.boxShadow = '0 2px 10px rgba(0,0,0,0.12)';
+                menu.style.minWidth = '160px';
+
+                // append items
+                menuItems.forEach(function (it) {
+                    var li = document.createElement('li');
+                    li.textContent = it.text || '';
+                    li.style.padding = '6px 10px';
+                    li.style.cursor = 'pointer';
+                    li.style.userSelect = 'none';
+                    li.onmouseenter = function () { li.style.background = 'rgba(0,0,0,0.04)'; };
+                    li.onmouseleave = function () { li.style.background = 'transparent'; };
+                    li.onclick = function (clickEv) {
+                        // prevent closing race
+                        clickEv.preventDefault();
+
+                        // determine instance on click (re-evaluate — instance might exist on a child element)
+                        var inst = instance;
+                        if (!inst) {
+                            inst = rteEl?.ej2_instances?.[0] || null;
+                            if (!inst) {
+                                // scan children quick
+                                var ch = rteEl.querySelectorAll('*');
+                                for (var k = 0; k < ch.length && !inst; k++) {
+                                    var cc = ch[k];
+                                    if (cc && cc.ej2_instances && cc.ej2_instances[0]) inst = cc.ej2_instances[0];
+                                }
+                            }
+                        }
+
+                        // try to insert using the best available API
+                        var inserted = false;
+                        if (inst) {
+                            inserted = _insertTextIntoRteInstance(inst, it.text);
+                        }
+
+                        // fallback: try document.execCommand
+                        if (!inserted) {
+                            try { document.execCommand('insertText', false, it.text); } catch (e) { /* ignore */ }
+                        }
+
+                        // remove menu
+                        menu.remove();
+                    };
+                    menu.appendChild(li);
+                });
+
+                document.body.appendChild(menu);
+
+                // remove when clicking elsewhere
+                var rmHandler = function () {
+                    var el = document.getElementById('rteCustomContextMenu');
+                    if (el) el.remove();
+                    document.removeEventListener('click', rmHandler);
                 };
-                menu.appendChild(li);
+                setTimeout(function () { document.addEventListener('click', rmHandler); }, 0);
             });
 
-            document.body.appendChild(menu);
-
-            document.addEventListener("click", () => menu.remove(), { once: true });
-        });
+            rteEl._rteHelpersContextHandlerAttached = true;
+            return true;
+        } catch (err) {
+            console.debug('rteHelpers.updateContextMenu error', err);
+            return false;
+        }
     };
     window.rteHelpers.isRteReady = function (elementId) {
         const inst = _findRteInstance(elementId);
