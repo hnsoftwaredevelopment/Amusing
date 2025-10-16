@@ -16,6 +16,7 @@ using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Navigations;
 using Syncfusion.Blazor.QueryBuilder;
 using Syncfusion.Blazor.RichTextEditor;
+using Syncfusion.XlsIO.Parser.Biff_Records.ObjRecords;
 
 using ChangeEventArgs = Syncfusion.Blazor.Navigations.ChangeEventArgs;
 
@@ -306,6 +307,12 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
     {
         if ( !firstRender || _disposed )
             return;
+
+        if ( firstRender )
+        {
+            await Task.Delay( 200 ); // tiny grace delay to let Syncfusion finish its init
+            await JSRuntime.InvokeVoidAsync( "rteHelpers.updateContextMenu", "rteContent", SlashMenuItems );
+        }
 
         try
         {
