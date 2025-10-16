@@ -106,7 +106,6 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
         new ToolbarItemModel() { Command = ToolbarCommand.LowerCase },
         new ToolbarItemModel() { Command = ToolbarCommand.UpperCase },
         new ToolbarItemModel() { Command = ToolbarCommand.Separator },
-        new ToolbarItemModel { TooltipText = "Voeg veld in", Name = "InsertField" },
         new ToolbarItemModel() { Command = ToolbarCommand.Separator },
         new ToolbarItemModel() { Command = ToolbarCommand.Formats },
         new ToolbarItemModel() { Command = ToolbarCommand.FontName },
@@ -860,18 +859,18 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
         }
     }
 
-    private async Task InsertFieldAsync( string selectedText )
-    {
-        if ( !string.IsNullOrEmpty( selectedText ) )
-        {
-            // Insert the selected text at the current cursor position
-            await JSRuntime.InvokeVoidAsync( "rteHelpers.insertTextAtCursor", "rteContent", selectedText );
-            //await _rte.ExecuteCommandAsync( CommandName.InsertText, selectedText );
+    //private async Task InsertFieldAsync( string selectedText )
+    //{
+    //    if ( !string.IsNullOrEmpty( selectedText ) )
+    //    {
+    //        // Insert the selected text at the current cursor position
+    //        await JSRuntime.InvokeVoidAsync( "rteHelpers.insertTextAtCursor", "rteContent", selectedText );
+    //        //await _rte.ExecuteCommandAsync( CommandName.InsertText, selectedText );
 
-            // Optional: reset or close dropdown
-            await InvokeAsync( StateHasChanged );
-        }
-    }
+    //        // Optional: reset or close dropdown
+    //        await InvokeAsync( StateHasChanged );
+    //    }
+    //}
 
     private async Task<bool> WaitForRteReadyAsync( int maxAttempts = 10, int delayMs = 100 )
     {
