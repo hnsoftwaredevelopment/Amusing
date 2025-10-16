@@ -63,10 +63,9 @@
     gap: 0.5rem; /* kleine ruimte tussen de velden */
 }
 
-    .inline-row > * {
+.inline-row > * {
         flex: 0 0 auto; /* neemt alleen de ruimte die nodig is */
     }
-
 
 /* Het scrollbare gebied rond de RTE */
 .rte-scroll {
@@ -76,31 +75,45 @@
     position: relative;
 }
 
-    /* Zorg dat de RTE zelf 100% hoogte inneemt van de container */
-    .rte-scroll .e-richtexteditor {
-        height: 100%;
-        box-sizing: border-box;
-        background: transparent; /* laat groupbox achtergrond zichtbaar zijn */
-    }
+/* Zorg dat de RTE zelf 100% hoogte inneemt van de container */
+.rte-scroll .e-richtexteditor {
+    height: 100%;
+    box-sizing: border-box;
+    background: transparent; /* laat groupbox achtergrond zichtbaar zijn */
+}
 
-    /* Maak toolbar sticky binnen de RTE-container */
-    .rte-scroll .e-rte-toolbar,
-    .rte-scroll .e-toolbar {
-        position: sticky;
-        top: 0;
-        z-index: 20;
-        background: inherit; /* neemt groupbox achtergrond */
-    }
+/* Maak toolbar sticky binnen de RTE-container */
+.rte-scroll .e-rte-toolbar,
+.rte-scroll .e-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: inherit; /* neemt groupbox achtergrond */
+}
 
-    /* Zorg dat de content editable voldoende padding heeft (zodat toolbar niet over tekst ligt) */
-    .rte-scroll .e-richtexteditor .e-editable {
-        padding-top: 0.5rem;
-        box-sizing: border-box;
-    }
+/* Zorg dat de content editable voldoende padding heeft (zodat toolbar niet over tekst ligt) */
+.rte-scroll .e-richtexteditor .e-editable {
+    padding-top: 0.5rem;
+    box-sizing: border-box;
+}
 
 /* Optioneel: style van subject textbox zodat die full width boven editor staat */
 .subject-box {
     width: 100%;
     max-width: 100%;
 }
+
+/* Styling form custom RTE Toolbar elements */
+.custom-context-menu li,
+.toolbar-insert-menu li {
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.custom-context-menu li:hover,
+.toolbar-insert-menu li:hover {
+    background: #e6f0ff;
+}
+
 

@@ -104,7 +104,7 @@ else
 							@ref="_rte"
 							ID="rteContent" 
 							EditorMode="EditorMode.HTML"
-							Width="100%" 
+							Width="100%"
 							Height="100%"
 							Placeholder="Beschrijving" 
 							@bind-Value="_selectedTemplatesList.TemplateContent" >
@@ -112,8 +112,23 @@ else
 								SlashMenuItemSelecting="OnSlashMenuItemSelect" />
 							<RichTextEditorSlashMenuSettings Enable="true" Items="@SlashMenuItems" />
 							<Syncfusion.Blazor.RichTextEditor.RichTextEditorToolbarSettings 
-								Items="@_rteTools"
-								EnableFloating="true"/>
+								Items="@RTEToolbarItems"
+								EnableFloating="true">
+								<RichTextEditorCustomToolbarItems>
+									<RichTextEditorCustomToolbarItem Name="InsertField">
+										<Template>
+											<SfDropDownList
+												TValue="string" 
+												TItem="string"
+												DataSource="@SlashMenuItems.Select(x => x.Text).ToList()"
+												Placeholder="Voeg veld in"
+												Width="150px"
+												ValueChanged="@(async ( string selectedText ) => await InsertFieldAsync( selectedText ))">
+											</SfDropDownList>
+										</Template>
+									</RichTextEditorCustomToolbarItem>
+							</RichTextEditorCustomToolbarItems>
+							</Syncfusion.Blazor.RichTextEditor.RichTextEditorToolbarSettings>
 						</Syncfusion.Blazor.RichTextEditor.SfRichTextEditor>                      
 					}
 				</div>

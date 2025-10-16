@@ -17,6 +17,8 @@ using Syncfusion.Blazor.Navigations;
 using Syncfusion.Blazor.QueryBuilder;
 using Syncfusion.Blazor.RichTextEditor;
 
+using ChangeEventArgs = Syncfusion.Blazor.Navigations.ChangeEventArgs;
+
 namespace Amusing.Components.Pages;
 
 public partial class Mailings_Templates : ComponentBase, IDisposable
@@ -87,7 +89,7 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
         }
     }
 
-    private readonly List<ToolbarItemModel> _rteTools = new()
+    private readonly List<ToolbarItemModel> RTEToolbarItems = new()
     {
         new ToolbarItemModel() { Command = ToolbarCommand.Undo },
         new ToolbarItemModel() { Command = ToolbarCommand.Redo },
@@ -102,6 +104,8 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
         new ToolbarItemModel() { Command = ToolbarCommand.Separator },
         new ToolbarItemModel() { Command = ToolbarCommand.LowerCase },
         new ToolbarItemModel() { Command = ToolbarCommand.UpperCase },
+        new ToolbarItemModel() { Command = ToolbarCommand.Separator },
+        new ToolbarItemModel { TooltipText = "Voeg veld in", Name = "InsertField" },
         new ToolbarItemModel() { Command = ToolbarCommand.Separator },
         new ToolbarItemModel() { Command = ToolbarCommand.Formats },
         new ToolbarItemModel() { Command = ToolbarCommand.FontName },
@@ -300,37 +304,57 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
 
     protected override async Task OnAfterRenderAsync( bool firstRender )
     {
-        if ( !firstRender || _disposed ) return;
+        if ( !firstRender || _disposed )
+            return;
 
         try
         {
+            var ready = await WaitForRteReadyAsync();
+            if ( ready )
+                await UpdateRteSlashMenuAsync();
+            else
+                Debug.WriteLine( "RTE never ready, skipping slash menu." );
+
+            // Load the available templates
             await LoadTemplatesAsync( _cts.Token );
 
+            // Select the first template if none is selected
             if ( TemplatesList?.Any() == true && SelectedTemplatesListId == 0 )
             {
                 SelectedTemplatesListId = TemplatesList [ 0 ].TemplateId;
                 _selectedTemplatesList = TemplatesList [ 0 ];
             }
 
+            // Load recipient data if the template has a recipient list
             if ( _selectedTemplatesList?.RecipientListId != null )
             {
                 await LoadRecipientDataAsync( _selectedTemplatesList.RecipientListId );
             }
 
+            // Replace placeholders in subject and content
             _selectedTemplatesList.TemplateSubject =
                 _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateSubject, true );
 
             _selectedTemplatesList.TemplateContent =
                 _mappingService.ReplaceKeysWithLabels( _selectedTemplatesList.TemplateContent, true );
 
+            // Wait for the RTE to be ready before applying changes
             var rteReady = await WaitForRteReadyAsync(maxAttempts: 15, delayMs: 100);
             if ( rteReady )
             {
+                // Update slash menu and re-render the editor if necessary
                 await UpdateRteSlashMenuAsync();
 
+                // Register autocomplete or slash functionality for subject input
                 if ( JSRuntime is not null )
                 {
                     await JSRuntime.InvokeVoidAsync( "rteHelpers.registerInput", "subjectAutoInput" );
+                }
+
+                // Initialize right-click context menu for subject (optional enhancement)
+                if ( JSRuntime is not null )
+                {
+                    await JSRuntime.InvokeVoidAsync( "rteHelpers.updateContextMenu", "rteContent", SlashMenuItems.Select( x => new { text = x.Text } ) );
                 }
             }
             else
@@ -338,13 +362,15 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
                 Debug.WriteLine( "RTE not ready after waiting, skipping slash menu initialization." );
             }
         }
-        catch ( OperationCanceledException ) { }
+        catch ( OperationCanceledException )
+        {
+            // Ignore cancellation since it may occur during reload
+        }
         catch ( Exception ex )
         {
             Debug.WriteLine( $"OnAfterRenderAsync unexpected: {ex.Message}" );
         }
     }
-
 
     public void Dispose()
     {
@@ -609,9 +635,11 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
         _selectedTemplatesList.TemplateSubject = newValue;
         _lastCaretPos = caret + insertText.Length;
 
-        await InvokeAsync( StateHasChanged );
+        //await InvokeAsync( StateHasChanged );
 
-        await JSRuntime.InvokeVoidAsync( "rteHelpers.setCaretById", "subjectAutoInput", _lastCaretPos );
+        await JSRuntime.InvokeVoidAsync( "rteHelpers.insertTextAtCursor", "subjectAutoInput", selected );
+        await JSRuntime.InvokeVoidAsync( "rteHelpers.setCaretById", "subjectAutoInput", caret + selected.Length );
+        //await JSRuntime.InvokeVoidAsync( "rteHelpers.setCaretById", "subjectAutoInput", _lastCaretPos );
     }
 
     protected async Task MailPreview()
@@ -640,7 +668,12 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
         _currentPreviewIndex = 0;
         _selectedPreviewRecipient = _previewRecipients.First();
 
-        UpdatePreview( _recipientData [ _currentPreviewIndex ] );
+        if ( _recipientData?.Count > 0 )
+        {
+            SelectedRecipient = _recipientData [ 0 ];
+            UpdatePreview( SelectedRecipient );
+        }
+        //UpdatePreview( _recipientData [ _currentPreviewIndex ] );
         _showPreviewDialog = true;
 
         // Restore the dutch fieldnames in the UI
@@ -745,21 +778,23 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
         SlashMenuItems ??= [ ];
 
         var ready = await WaitForRteReadyAsync(maxAttempts: 15, delayMs: 100);
-
         if ( !ready )
         {
-            Console.WriteLine( "UpdateRteSlashMenuAsync: RTE not ready, aborting update." );
+            Debug.WriteLine( "UpdateRteSlashMenuAsync: RTE not ready, aborting update." );
             return;
         }
 
         try
         {
-            var jsItems = SlashMenuItems?.Select(s => new
+            // Prepare JS items from the slash menu list
+            var jsItems = SlashMenuItems
+            .Select(s => new
             {
                 text = s.Text,
                 iconCss = s.IconCss,
                 category = s.GroupBy
-            }).ToArray() ?? Array.Empty<object>();
+            })
+            .ToArray();
 
             if ( jsItems.Length == 0 )
             {
@@ -767,11 +802,16 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
                 return;
             }
 
+            // Call JS to refresh slash menu and context menu in one go
             await InvokeAsync( async () =>
             {
                 try
                 {
+                    // Update slash menu (as before)
                     await JSRuntime.InvokeVoidAsync( "rteHelpers.updateSlashMenu", "rteContent", jsItems );
+                    await JSRuntime.InvokeVoidAsync( "rteHelpers.addInsertFieldHandler", "rteContent", jsItems );
+                    await JSRuntime.InvokeVoidAsync( "rteHelpers.updateContextMenu", "rteContent", SlashMenuItems.Select( s => new { text = s.Text, iconCss = s.IconCss } ) );
+
                 }
                 catch ( JSException jsEx )
                 {
@@ -779,38 +819,50 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
                 }
             } );
         }
-        catch ( TaskCanceledException ) { /* ignore */ }
-        catch ( ObjectDisposedException ) { /* ignore */ }
+        catch ( TaskCanceledException )
+        {
+            // Ignored because we might switch templates quickly
+        }
+        catch ( ObjectDisposedException )
+        {
+            // Happens if user navigates away mid-update
+        }
         catch ( Exception ex )
         {
             Debug.WriteLine( $"[UpdateRteSlashMenuAsync] Unexpected: {ex.Message}" );
         }
-
-        _showRTE = false;
-        StateHasChanged();
-        await Task.Delay( 20 );
-
-        _showRTE = true;
-        StateHasChanged();
     }
 
-    private async Task OnTemplateChanged(uint? templateId)
+    private async Task OnTemplateChanged( uint? templateId )
     {
-        if ( templateId != null && templateId != 0)
+        if ( templateId != null && templateId != 0 )
         {
             SelectedTemplatesListId = templateId;
-            await Task.Delay( 50 );
+            await Task.Delay( 100 ); // Allow UI state to settle
             await UpdateRteSlashMenuAsync();
         }
     }
 
     private async Task OnRecipientListChanged( uint? recipientListId )
     {
-        if ( recipientListId != null && recipientListId != 0)
+        if ( recipientListId != null && recipientListId != 0 )
         {
             RecipientListId = recipientListId;
-            await Task.Delay( 50 );
+            await Task.Delay( 100 ); // Allow UI state to settle
             await UpdateRteSlashMenuAsync();
+        }
+    }
+
+    private async Task InsertFieldAsync( string selectedText )
+    {
+        if ( !string.IsNullOrEmpty( selectedText ) )
+        {
+            // Insert the selected text at the current cursor position
+            await JSRuntime.InvokeVoidAsync( "rteHelpers.insertTextAtCursor", "rteContent", selectedText );
+            //await _rte.ExecuteCommandAsync( CommandName.InsertText, selectedText );
+
+            // Optional: reset or close dropdown
+            await InvokeAsync( StateHasChanged );
         }
     }
 
