@@ -1,13 +1,94 @@
-﻿using System.Dynamic;
+﻿using MailKit.Net.Smtp;
+using MailKit.Security;
+using MimeKit;
+using System.Dynamic;
 
 using Amusing.Helpers;
 using Amusing.Models;
 
 namespace Amusing.Services;
 
-public class MailingService( GenericDataService dataService )
+public class MailingService
 {
-    private readonly GenericDataService _dataService = dataService;
+    private readonly GenericDataService _dataService;
+    private readonly EmailSettings _emailSettings;
+
+    public MailingService( GenericDataService dataService, EmailSettings emailSettings )
+    {
+        _dataService = dataService;
+        _emailSettings = emailSettings;
+    }
+
+    public async Task SendMailAsync(
+        TemplatesListModel template,
+        List<ExpandoObject> recipients,
+        bool isTestMail = false,
+        string? testRecipient = null )
+    {
+        if ( recipients == null || !recipients.Any() )
+            return;
+
+        // Als testmail, gebruik alleen eerste 15 recipients
+        var recipientsToUse = isTestMail ? recipients.Take(15).ToList() : recipients;
+
+        foreach ( var recipient in recipientsToUse )
+        {
+            try
+            {
+                var message = new MimeMessage();
+
+                // From
+                message.From.Add( new MailboxAddress( _emailSettings.SenderName, _emailSettings.SenderAddress ) );
+
+                // To
+                if ( isTestMail && !string.IsNullOrWhiteSpace( testRecipient ) )
+                    message.To.Add( MailboxAddress.Parse( testRecipient ) );
+                else
+                {
+                    var dict = recipient as IDictionary<string, object>;
+                    if ( dict != null && dict.ContainsKey( "Email" ) )
+                        message.To.Add( MailboxAddress.Parse( dict [ "Email" ]?.ToString() ?? "" ) );
+                }
+
+                // Subject & Body
+                string subject = ReplaceTemplateFields(template.TemplateSubject, recipient);
+                string body = ReplaceTemplateFields(template.TemplateContent ?? "", recipient);
+
+                message.Subject = subject;
+                message.Body = new TextPart( "html" ) { Text = body };
+
+                // Verzenden
+                using var client = new SmtpClient();
+                await client.ConnectAsync( _emailSettings.SmtpHost, _emailSettings.SmtpPort, SecureSocketOptions.StartTls );
+                await client.AuthenticateAsync( _emailSettings.SmtpUser, _emailSettings.SmtpPass );
+                await client.SendAsync( message );
+                await client.DisconnectAsync( true );
+
+                // Logging kan hier
+                Console.WriteLine( $"Mail sent to {( isTestMail ? testRecipient : ( recipient as IDictionary<string, object> )? [ "Email" ] )}" );
+            }
+            catch ( Exception ex )
+            {
+                Console.WriteLine( $"Error sending mail: {ex.Message}" );
+                // hier eventueel ook log naar database
+            }
+        }
+    }
+
+    private string ReplaceTemplateFields( string templateText, ExpandoObject recipient )
+    {
+        if ( recipient is not IDictionary<string, object> data )
+            return templateText;
+
+        foreach ( var kvp in data )
+        {
+            string key = "{" + kvp.Key + "}";  // bijvoorbeeld {Firstname}
+            string value = kvp.Value?.ToString() ?? "";
+            templateText = templateText.Replace( key, value, StringComparison.OrdinalIgnoreCase );
+        }
+        return templateText;
+    }
+
 
     public enum RecipientListSource
     {
