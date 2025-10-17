@@ -145,6 +145,17 @@
         return false;
     }
 
+    function insertTextAtCursor(rte, text) {
+        // Ensure editor and selection exist
+        if (!rte || !rte.editorManager) return;
+
+        const editor = rte.editorManager;
+        const selection = rte.getSelection(); // get current selection
+        if (!selection) return;
+
+        editor.execCommand('insertText', text);
+    }
+
     // --- Public functions ---
     window.rteHelpers.registerInput = function (id) {
         const el = _findInputById(id);
@@ -346,6 +357,121 @@
     window.rteHelpers.getActiveValue = function () {
         var el = document.activeElement;
         return (el && el.value) ? el.value : "";
+    };
+
+    // Insert custom field for Subject SfAutoComplete
+    window.rteHelpers.insertTextAtCursor = function (rteIdOrInstance, text) {
+        try {
+            var instance = null;
+
+            // If caller passed the instance itself
+            if (rteIdOrInstance && typeof rteIdOrInstance === 'object' && (rteIdOrInstance.ej2_instances || rteIdOrInstance.element || rteIdOrInstance.editorManager)) {
+                // likely already an element or instance — normalize
+                if (rteIdOrInstance.ej2_instances) {
+                    instance = rteIdOrInstance.ej2_instances[0];
+                } else {
+                    instance = rteIdOrInstance;
+                }
+            } else if (typeof rteIdOrInstance === 'string') {
+                // treat as element id
+                var el = document.getElementById(rteIdOrInstance);
+                instance = el?.ej2_instances?.[0] || null;
+            }
+
+            if (!instance) {
+                // nothing to insert into
+                return false;
+            }
+
+            return _insertTextIntoRteInstance(instance, text);
+        } catch (e) {
+            console.debug('rteHelpers.insertTextAtCursor error', e);
+            return false;
+        }
+    };
+
+    // --- Add context menu support for Subject SfAutoComplete ---
+    window.rteHelpers.updateContextMenu = function (elementId, items) {
+        try {
+            var inputEl = document.getElementById(elementId);
+            if (!inputEl) {
+                console.warn('rteHelpers.updateContextMenu: element not found', elementId);
+                return false;
+            }
+
+            // Prevent duplicate binding
+            if (inputEl._rteHelpersContextHandlerAttached) {
+                inputEl._rteHelpersContextItems = (Array.isArray(items) ? items.slice() : []);
+                return true;
+            }
+
+            inputEl._rteHelpersContextItems = (Array.isArray(items) ? items.slice() : []);
+
+            inputEl.addEventListener('contextmenu', function (ev) {
+                ev.preventDefault();
+
+                // Remove any existing menu
+                var existing = document.getElementById('rteCustomContextMenu');
+                if (existing) existing.remove();
+
+                // Create custom context menu
+                var menu = document.createElement('ul');
+                menu.id = 'rteCustomContextMenu';
+                menu.style.position = 'absolute';
+                menu.style.top = ev.pageY + 'px';
+                menu.style.left = ev.pageX + 'px';
+                menu.style.background = '#fff';
+                menu.style.border = '1px solid rgba(0,0,0,0.12)';
+                menu.style.padding = '4px';
+                menu.style.zIndex = 2147483647;
+                menu.style.listStyle = 'none';
+                menu.style.borderRadius = '4px';
+                menu.style.boxShadow = '0 2px 10px rgba(0,0,0,0.12)';
+                menu.style.minWidth = '160px';
+
+                // Append menu items
+                (inputEl._rteHelpersContextItems || []).forEach(function (it) {
+                    var li = document.createElement('li');
+                    li.textContent = it.text || '';
+                    li.style.padding = '6px 10px';
+                    li.style.cursor = 'pointer';
+                    li.style.userSelect = 'none';
+
+                    // Highlight on hover
+                    li.onmouseenter = function () { li.style.background = 'rgba(0,0,0,0.04)'; };
+                    li.onmouseleave = function () { li.style.background = 'transparent'; };
+
+                    // On click, insert text at caret position
+                    li.onclick = function () {
+                        var pos = inputEl.selectionStart || 0;
+                        var value = inputEl.value;
+                        inputEl.value = value.substring(0, pos) + it.text + value.substring(pos);
+                        inputEl.focus();
+                        var newCaret = pos + it.text.length;
+                        inputEl.setSelectionRange(newCaret, newCaret);
+                        menu.remove();
+                    };
+
+                    menu.appendChild(li);
+                });
+
+                document.body.appendChild(menu);
+
+                // Remove menu when clicking elsewhere
+                var rmHandler = function () {
+                    var el = document.getElementById('rteCustomContextMenu');
+                    if (el) el.remove();
+                    document.removeEventListener('click', rmHandler);
+                };
+                setTimeout(function () { document.addEventListener('click', rmHandler); }, 0);
+            });
+
+            inputEl._rteHelpersContextHandlerAttached = true;
+            return true;
+        } catch (err) {
+            console.debug('rteHelpers.updateContextMenu error', err);
+            return false;
+        }
     };
 
 })();

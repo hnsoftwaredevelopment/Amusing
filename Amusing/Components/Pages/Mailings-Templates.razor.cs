@@ -90,9 +90,9 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
         }
     }
 
-    private readonly List<ToolbarItemModel> RTEToolbarItems = new()
-    {
-        new ToolbarItemModel() { Command = ToolbarCommand.Undo },
+    private readonly List<ToolbarItemModel> _rteToolbarItems =
+	[
+		new ToolbarItemModel() { Command = ToolbarCommand.Undo },
         new ToolbarItemModel() { Command = ToolbarCommand.Redo },
         new ToolbarItemModel() { Command = ToolbarCommand.Separator },
         new ToolbarItemModel() { Command = ToolbarCommand.Bold },
@@ -128,7 +128,7 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
         new ToolbarItemModel() { Command = ToolbarCommand.SourceCode },
         new ToolbarItemModel() { Command = ToolbarCommand.CreateTable },
         new ToolbarItemModel() { Command = ToolbarCommand.FullScreen }
-    };
+    ];
 
     [Inject] public MailingService MailingService { get; set; } = default!;
     [Inject] public IJSRuntime JSRuntime { get; set; } = default!;
@@ -311,6 +311,13 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
         {
             await Task.Delay( 200 ); // tiny grace delay to let Syncfusion finish its init
             await JSRuntime.InvokeVoidAsync( "rteHelpers.updateContextMenu", "rteContent", SlashMenuItems );
+
+            // Register caret tracking for the AutoComplete input
+            await JSRuntime.InvokeVoidAsync( "rteHelpers.registerInput", "subjectAutoInput" );
+
+            // Initialize the right-click context menu for the subject input
+            //await JSRuntime.InvokeVoidAsync( "rteHelpers.updateContextMenu", "subjectAutoInput", AvailableFields.Select( x => new { text = x } ).ToList() );
+            await JSRuntime.InvokeVoidAsync( "rteHelpers.updateContextMenu", "subjectAutoInput", SlashMenuItems );
         }
 
         try
@@ -361,6 +368,7 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
                 if ( JSRuntime is not null )
                 {
                     await JSRuntime.InvokeVoidAsync( "rteHelpers.updateContextMenu", "rteContent", SlashMenuItems.Select( x => new { text = x.Text } ) );
+                    await JSRuntime.InvokeVoidAsync( "rteHelpers.updateContextMenu", "subjectAutoInput", SlashMenuItems.Select( x => new { text = x.Text } ) );
                 }
             }
             else
@@ -557,7 +565,7 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
         args.PreventDefaultAction = true;
 
         string currentValue = await JSRuntime.InvokeAsync<string>("rteHelpers.getActiveValue");
-        int caret = await JSRuntime.InvokeAsync<int>("rteHelpers.getLastCaret");
+        int caret = await JSRuntime.InvokeAsync<int>("rteHelpers.getLastCaret", "subjectAutoInput");
 
         if ( caret <= 0 )
         {
@@ -566,31 +574,48 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
 
         caret = Math.Clamp( caret, 0, currentValue?.Length ?? 0 );
 
-        bool trigger = false;
+        //bool trigger = false;
+        bool trigger = !string.IsNullOrEmpty(currentValue)
+                       && caret > 0
+                       && (currentValue[caret - 1] == '/' || currentValue[caret - 1] == '{');
 
-        if ( !string.IsNullOrEmpty( currentValue ) && caret > 0 && currentValue [ caret - 1 ] == '{' )
-        {
-            trigger = true;
-        }
-        else if ( !string.IsNullOrEmpty( args.Text ) && args.Text.EndsWith( "{" ) )
-        {
-            trigger = true;
-        }
-        else if ( !string.IsNullOrEmpty( currentValue ) && caret > 0 && currentValue [ caret - 1 ] == '/' )
-        {
-            trigger = true;
-        }
-        else if ( !string.IsNullOrEmpty( args.Text ) && args.Text.EndsWith( "/" ) )
-        {
-            trigger = true;
-        }
+        //if ( !string.IsNullOrEmpty( currentValue ) && caret > 0 && currentValue [ caret - 1 ] == '{' )
+        //{
+        //    trigger = true;
+        //}
+        //else if ( !string.IsNullOrEmpty( args.Text ) && args.Text.EndsWith( "{" ) )
+        //{
+        //    trigger = true;
+        //}
+        //else if ( !string.IsNullOrEmpty( currentValue ) && caret > 0 && currentValue [ caret - 1 ] == '/' )
+        //{
+        //    trigger = true;
+        //}
+        //else if ( !string.IsNullOrEmpty( args.Text ) && args.Text.EndsWith( "/" ) )
+        //{
+        //    trigger = true;
+        //}
+
+        //if ( trigger )
+        //{
+        //    if ( _subjectAuto is not null )
+        //        await _subjectAuto.FilterAsync( AvailableFields );
+        //    if ( _subjectAuto is not null )
+        //        await _subjectAuto.ShowPopupAsync();
+        //}
+        //else
+        //{
+        //    if ( _subjectAuto is not null )
+        //        await _subjectAuto.FilterAsync( new List<string>() );
+        //}
 
         if ( trigger )
         {
             if ( _subjectAuto is not null )
+            {
                 await _subjectAuto.FilterAsync( AvailableFields );
-            if ( _subjectAuto is not null )
                 await _subjectAuto.ShowPopupAsync();
+            }
         }
         else
         {
@@ -607,13 +632,12 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
 
         string selected = args.ItemData ?? string.Empty;
         string current = await JSRuntime.InvokeAsync<string>("rteHelpers.getActiveValue");
-        int caret = await JSRuntime.InvokeAsync<int>("rteHelpers.getLastCaret");
+        int caret = await JSRuntime.InvokeAsync<int>("rteHelpers.getLastCaret", "subjectAutoInput");
 
-        // zorg dat de variabele correct tussen {} staat, maar niet dubbel
+        // Normalize variable format
         selected = selected.Trim( '{', '}' );
         selected = "{" + selected + "}";
 
-        // caret ophalen
         if ( caret <= 0 )
         {
             caret = _lastCaretPos;
@@ -636,16 +660,12 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
 
         // voeg in op caret
         string newValue = current.Insert(caret, insertText);
-
-        // update model en caret
         _selectedTemplatesList.TemplateSubject = newValue;
         _lastCaretPos = caret + insertText.Length;
 
-        //await InvokeAsync( StateHasChanged );
-
-        await JSRuntime.InvokeVoidAsync( "rteHelpers.insertTextAtCursor", "subjectAutoInput", selected );
-        await JSRuntime.InvokeVoidAsync( "rteHelpers.setCaretById", "subjectAutoInput", caret + selected.Length );
-        //await JSRuntime.InvokeVoidAsync( "rteHelpers.setCaretById", "subjectAutoInput", _lastCaretPos );
+        //await JSRuntime.InvokeVoidAsync( "rteHelpers.insertTextAtCursor", "subjectAutoInput", selected );
+        //await JSRuntime.InvokeVoidAsync( "rteHelpers.setCaretById", "subjectAutoInput", caret + selected.Length );
+        await JSRuntime.InvokeVoidAsync( "rteHelpers.setCaretById", "subjectAutoInput", _lastCaretPos );
     }
 
     protected async Task MailPreview()

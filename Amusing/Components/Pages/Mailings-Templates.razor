@@ -59,7 +59,7 @@ else
 
 						<SfComboBox TValue="uint?" TItem="RecipientListModel"
 									DataSource="@RecipientsList"
-									Width="30%"
+									Width="30%" FloatLabelType="FloatLabelType.Always"
 									Value="RecipientListId"
 									ValueChanged="@(async ( uint? id ) => await OnRecipientListChanged( id ))"
 									Placeholder="Ontvangerslijst">
@@ -111,7 +111,7 @@ else
 							<RichTextEditorEvents 
 								SlashMenuItemSelecting="OnSlashMenuItemSelect" />
 							<Syncfusion.Blazor.RichTextEditor.RichTextEditorToolbarSettings 
-								Items="@RTEToolbarItems"
+								Items="@_rteToolbarItems"
 								EnableFloating="true">
 							</Syncfusion.Blazor.RichTextEditor.RichTextEditorToolbarSettings>
 						</Syncfusion.Blazor.RichTextEditor.SfRichTextEditor>                      
