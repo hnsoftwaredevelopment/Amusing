@@ -631,12 +631,13 @@ public class MailingsRecipientsBase : ComponentBase
 
     protected async Task Delete()
     {
-        if ( SelectedRecipientsList == null || SelectedRecipientsList.ListId == 0 )
+        var list = SelectedRecipientsList;
+        if ( list == null || list.ListId == 0 )
         {
             return;
         }
 
-        await MailingService.DeleteRecipientQueryAsync( ( uint )  SelectedRecipientsList.ListId  );
+        await MailingService.DeleteRecipientQueryAsync( ( uint ) list.ListId  );
 
         // Refresh the list
         RecipientsList = await MailingService.GetRecipientListsAsync();

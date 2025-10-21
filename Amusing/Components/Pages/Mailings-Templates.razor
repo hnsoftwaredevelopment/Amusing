@@ -228,4 +228,39 @@ else
 			</FooterTemplate>
 		</DialogTemplates>
 	</SfDialog>
+
+	<SfDialog @bind-Visible="_showTestDialog" Width="535px">
+		<DialogTemplates>
+			<Header>
+				Verstuur Test mailing
+			</Header>
+			<Content>
+				<div style="display:flex;gap:20px;align-items:flex-end">
+				<SfTooltip Content="Vul hier het e-mailadres in waar alle testmails naartoe gestuurd moeten worden" Position="Position.BottomCenter">
+					<SfTextBox 
+						Placeholder="E-mail adres"
+						FloatLabelType="FloatLabelType.Always" 
+						Input = "@OnEmailInput"
+						Width="375px" 
+						@bind-Value="_testEmailAddress">
+					</SfTextBox>
+				</SfTooltip>
+
+					<SfTooltip Content="Selecteer hoeveel e-mails uit de mailing ter test naar het testadres moeten worden verzonden" Position="Position.BottomCenter">
+						<SfComboBox TValue="int"
+									TItem="int"
+									@bind-Value="_testRecipientCount"
+									DataSource="new int[] {1,5,10,15,25}"
+									FloatLabelType="FloatLabelType.Always"
+									Placeholder="Aantal"
+									Width="95px" />
+					</SfTooltip>
+				</div>
+			</Content>
+			<FooterTemplate>
+				<button class="btn btn-primary" @onclick="SendTestMail" disabled="@(IsTestMailValid ? null : "disabled")">Verstuur test e-mail</button>
+				<button class="btn btn-secondary" @onclick="()=>_showTestDialog=false">Annuleren</button>
+			</FooterTemplate>
+		</DialogTemplates>
+	</SfDialog>
 }

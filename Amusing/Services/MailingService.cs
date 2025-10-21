@@ -1,10 +1,13 @@
-﻿using MailKit.Net.Smtp;
-using MailKit.Security;
-using MimeKit;
-using System.Dynamic;
+﻿using System.Dynamic;
 
 using Amusing.Helpers;
+using Amusing.Interfaces;
 using Amusing.Models;
+
+using MailKit.Net.Smtp;
+using MailKit.Security;
+
+using MimeKit;
 
 namespace Amusing.Services;
 
@@ -12,11 +15,113 @@ public class MailingService
 {
     private readonly GenericDataService _dataService;
     private readonly EmailSettings _emailSettings;
+    private readonly FieldMappingService _mappingService;
+    private readonly IMailingLogger _logger;
 
-    public MailingService( GenericDataService dataService, EmailSettings emailSettings )
+
+    public MailingService( GenericDataService dataService, EmailSettings emailSettings, FieldMappingService mappingService, IMailingLogger logger )
     {
         _dataService = dataService;
         _emailSettings = emailSettings;
+        _mappingService = mappingService;
+        _logger = logger;
+    }
+
+    private (string Subject, string Body) PrepareMailContent(
+        string subjectTemplate,
+        string bodyTemplate,
+        IDictionary<string, object> recipientData )
+    {
+        string subject = _mappingService.ReplaceLabelsWithKeys(subjectTemplate);
+        string body = _mappingService.ReplaceLabelsWithKeys(bodyTemplate);
+
+        foreach ( var kvp in recipientData )
+        {
+            string placeholder = "{" + kvp.Key + "}";
+            string value = kvp.Value?.ToString() ?? string.Empty;
+
+            subject = subject.Replace( placeholder, value, StringComparison.OrdinalIgnoreCase );
+            body = body.Replace( placeholder, value, StringComparison.OrdinalIgnoreCase );
+        }
+
+        return (subject, body);
+    }
+
+    public async Task<List<(string Recipient, string Subject, string Body)>> GeneratePreviewAsync(
+        string subjectTemplate,
+        string bodyTemplate,
+        IEnumerable<IDictionary<string, object>> recipients )
+    {
+        var result = new List<(string, string, string)>();
+
+        foreach ( var recipient in recipients )
+        {
+            var (subject, body) = PrepareMailContent( subjectTemplate, bodyTemplate, recipient );
+            string recipientEmail = recipient.TryGetValue("Email", out var val)
+                ? val?.ToString() ?? string.Empty
+                : string.Empty;
+
+            await _logger.LogPreviewGeneratedAsync( recipientEmail, subject );
+            result.Add( (recipientEmail, subject, body) );
+        }
+
+        return result;
+    }
+
+    private async Task SendMailAsync( string toAddress, string subject, string body )
+    {
+        try
+        {
+            var message = new MimeMessage();
+            message.From.Add( new MailboxAddress( "Amusing Hengelo", "koren@amusing-hengelo.nl" ) );
+            message.To.Add( new MailboxAddress( toAddress, toAddress ) );
+            message.Subject = subject;
+            message.Body = new TextPart( "html" ) { Text = body };
+
+            using var client = new SmtpClient();
+            await client.ConnectAsync( "mail.amusing-hengelo.nl", 587, false );
+            await client.AuthenticateAsync( "koren@amusing-hengelo.nl", "JE_WACHTWOORD_HIER" );
+            await client.SendAsync( message );
+            await client.DisconnectAsync( true );
+
+            await _logger.LogMailSentAsync( toAddress, subject, success: true );
+        }
+        catch ( Exception ex )
+        {
+            await _logger.LogMailSentAsync( toAddress, subject, success: false, errorMessage: ex.Message );
+        }
+    }
+
+    public async Task SendTestMailAsync(
+        string subjectTemplate,
+        string bodyTemplate,
+        IEnumerable<IDictionary<string, object>> recipients,
+        string testEmail,
+        int numberToSend )
+    {
+        var testRecipients = recipients.Take(numberToSend).ToList();
+
+        foreach ( var recipient in testRecipients )
+        {
+            var (subject, body) = PrepareMailContent( subjectTemplate, bodyTemplate, recipient );
+            await SendMailAsync( testEmail, subject, body );
+        }
+    }
+
+    public async Task SendBulkMailAsync(
+        string subjectTemplate,
+        string bodyTemplate,
+        IEnumerable<IDictionary<string, object>> recipients )
+    {
+        foreach ( var recipient in recipients )
+        {
+            if ( !recipient.TryGetValue( "Email", out var mailObj ) ||
+                string.IsNullOrWhiteSpace( mailObj?.ToString() ) )
+                continue;
+
+            var (subject, body) = PrepareMailContent( subjectTemplate, bodyTemplate, recipient );
+            await SendMailAsync( mailObj.ToString()!, subject, body );
+        }
     }
 
     public async Task SendMailAsync(
