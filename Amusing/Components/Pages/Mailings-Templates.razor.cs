@@ -58,12 +58,22 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
 	private bool _showPreviewDialog = false;
 	private bool _showTestDialog = false;
 	private List<string> _previewRecipients = [];
-	private int _currentPreviewIndex = 0;
-	private int _currentRecipientIndex = 0;
+    private List<string> _testRecipients = [];
+    private List<string> _mailRecipients = [];
+    private int _currentPreviewIndex = 0;
+    private int _currentTestIndex = 0;
+    private int _currentSendIndex = 0;
+    private int _currentRecipientIndex = 0;
 	private string _selectedPreviewRecipient = string.Empty;
-	private string _previewSubject = string.Empty;
+    private string _selectedTestRecipient = string.Empty;
+    private string _selectedSendRecipient = string.Empty;
+    private string _previewSubject = string.Empty;
 	private string _previewBody = string.Empty;
-	private string? _currentRecipientQuery;
+    private string _testSubject = string.Empty;
+    private string _testBody = string.Empty;
+    private string _sendSubject = string.Empty;
+    private string _sendBody = string.Empty;
+    private string? _currentRecipientQuery;
 	private List<ExpandoObject> _recipientData = [];
 	private ExpandoObject? _selectedRecipient;
 	private ExpandoObject? SelectedRecipient
@@ -671,11 +681,7 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
 		//Convert Dutch labels to Englisch field keys.
 		string? _tempSubject = _selectedTemplatesList.TemplateSubject;
 		string _tempContent = _selectedTemplatesList.TemplateContent ?? string.Empty;
-		//_selectedTemplatesList.TemplateSubject = _mappingService.ReplaceLabelsWithKeys( _selectedTemplatesList.TemplateSubject );
-		//_selectedTemplatesList.TemplateContent = _mappingService.ReplaceLabelsWithKeys( _selectedTemplatesList.TemplateContent );
 
-
-		// Haal dynamische data van recipients op
 		_recipientData = await MailingService.GetDynamicRecipientsAsync( _currentRecipientQuery );
 
 		if ( !_recipientData.Any() )
@@ -701,18 +707,19 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
 		_selectedTemplatesList.TemplateContent = _tempContent;
 	}
 
-	protected async Task MailTest()
+    #region Send Test mail
+    protected async Task MailTest()
 	{
-		_testEmailAddress = string.Empty;
+        // Open dialog to enter email address and number of test mails
+        _testEmailAddress = string.Empty;
 		_testRecipientCount = 15;
 		
 		_showTestDialog = true;
 	}
 
-
 	protected async Task SendTestMail()
 	{
-
+		// Execure sending the testmail to the entered test mail account
         try
         {
             if ( _selectedTemplatesList?.RecipientListId == null )
@@ -726,14 +733,19 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
 
             _showTestDialog = false;
 
+			var _tempTemplateList = _selectedTemplatesList;
+
+            _tempTemplateList.TemplateSubject = _mappingService.ReplaceLabelsWithKeys( _tempTemplateList.TemplateSubject );
+            _tempTemplateList.TemplateContent = _mappingService.ReplaceLabelsWithKeys( _tempTemplateList.TemplateContent );
+
             _recipientData = await MailingService.GetDynamicRecipientsAsync( _currentRecipientQuery );
 
-            await MailingService.SendTestMailAsync(
-                _selectedTemplatesList,
-                _recipientData,
-                _testEmailAddress,
-                _testRecipientCount
-            );
+			await MailingService.SendTestMailAsync(
+                _tempTemplateList,
+				_recipientData,
+				_testEmailAddress,
+				_testRecipientCount
+			);
 
             // Eventueel feedback aan gebruiker
             Debug.WriteLine( $"Testmail(s) verzonden naar {_testEmailAddress}" );
@@ -745,18 +757,25 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
             _logger.LogError(ex, "Error sending test mail");
         }
     }
+    #endregion
 
-	protected async Task SendMailing()
+    protected async Task MailSend()
 	{
+		// Send mail from selected template to recipients of the selected recipientlist
         try
         {
             if ( _selectedTemplatesList?.RecipientListId == null )
                 return;
 
+            var _tempTemplateList = _selectedTemplatesList;
+
+            _tempTemplateList.TemplateSubject = _mappingService.ReplaceLabelsWithKeys( _tempTemplateList.TemplateSubject );
+            _tempTemplateList.TemplateContent = _mappingService.ReplaceLabelsWithKeys( _tempTemplateList.TemplateContent );
+
             _recipientData = await MailingService.GetDynamicRecipientsAsync( _currentRecipientQuery );
 
             await MailingService.SendBulkMailAsync(
-                _selectedTemplatesList,
+                _tempTemplateList,
                 _recipientData
             );
 
@@ -766,11 +785,6 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
         {
             Debug.WriteLine( $"Fout bij verzenden bulkmailing: {ex.Message}" );
         }
-    }
-
-    protected async Task MailSend()
-    {
-        await Task.CompletedTask;
     }
 
     private void UpdatePreview( ExpandoObject recipient )
