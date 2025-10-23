@@ -82,14 +82,15 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
 
 	private string _rawSubjectTemplate = "";
 	private string _rawBodyTemplate = "";
+    private readonly ILogger<TransipMailingService> _logger;
 
     private bool IsValidEmail( string email )
     {
         if ( string.IsNullOrWhiteSpace( email ) )
             return false;
 
-        // Must have one @ and at least one dot in the domain part
-        var pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+        // At least one @, a dot, and 2-3 letters after the last dot
+        var pattern = @"^[^@\s]+@[^@\s]+\.[a-zA-Z]{2,}$";
         return Regex.IsMatch( email, pattern, RegexOptions.IgnoreCase );
     }
 
@@ -97,8 +98,8 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
 
 	private void OnEmailInput( InputEventArgs args )
 	{
-		// force UI update zodat de button enabled/disabled aangepast wordt
-		StateHasChanged();
+        _testEmailAddress = args.Value?.ToString();
+        StateHasChanged();
 	}
 
 	//private RecipientListFilterModel? _selectedRecipient;
@@ -706,8 +707,6 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
 		_testRecipientCount = 15;
 		
 		_showTestDialog = true;
-
-		 //await SendTestMail()  ;
 	}
 
 
@@ -730,21 +729,20 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
             _recipientData = await MailingService.GetDynamicRecipientsAsync( _currentRecipientQuery );
 
             await MailingService.SendTestMailAsync(
-                _selectedTemplatesList.TemplateSubject ?? string.Empty,
-                _selectedTemplatesList.TemplateContent ?? string.Empty,
+                _selectedTemplatesList,
                 _recipientData,
                 _testEmailAddress,
                 _testRecipientCount
             );
 
             // Eventueel feedback aan gebruiker
-            Console.WriteLine( $"Testmail(s) verzonden naar {_testEmailAddress}" );
+            Debug.WriteLine( $"Testmail(s) verzonden naar {_testEmailAddress}" );
         }
         catch ( Exception ex )
         {
-            Console.WriteLine( $"Fout bij verzenden testmail: {ex.Message}" );
+            Debug.WriteLine( $"Fout bij verzenden testmail: {ex.Message}" );
             // Als je IMailingLogger hebt, kun je hier ook loggen:
-            // _logger.LogError(ex, "Error sending test mail");
+            _logger.LogError(ex, "Error sending test mail");
         }
     }
 
@@ -758,16 +756,15 @@ public partial class Mailings_Templates : ComponentBase, IDisposable
             _recipientData = await MailingService.GetDynamicRecipientsAsync( _currentRecipientQuery );
 
             await MailingService.SendBulkMailAsync(
-                _selectedTemplatesList.TemplateSubject ?? string.Empty,
-                _selectedTemplatesList.TemplateContent ?? string.Empty,
+                _selectedTemplatesList,
                 _recipientData
             );
 
-            Console.WriteLine( "Bulkmailing verzonden." );
+            Debug.WriteLine( "Bulkmailing verzonden." );
         }
         catch ( Exception ex )
         {
-            Console.WriteLine( $"Fout bij verzenden bulkmailing: {ex.Message}" );
+            Debug.WriteLine( $"Fout bij verzenden bulkmailing: {ex.Message}" );
         }
     }
 

@@ -1,10 +1,11 @@
 ﻿using System;
-using Amusing.Interfaces;   
 namespace Amusing.Services;
 
 public class ConsoleMailingLogger : IMailingLogger
 {
-    public Task LogMailSentAsync( string recipient, string subject, bool success, string? errorMessage = null )
+	public void LogError( string message, Exception? ex = null ) => throw new NotImplementedException();
+
+	public Task LogMailSentAsync( string recipient, string subject, bool success, string? errorMessage = null )
     {
         if ( success )
             Console.WriteLine( $"[Mail Sent] {DateTime.Now}: To={recipient}, Subject={subject}" );
@@ -19,4 +20,6 @@ public class ConsoleMailingLogger : IMailingLogger
         Console.WriteLine( $"[Mail Preview] {DateTime.Now}: Recipient={recipient}, Subject={subject}" );
         return Task.CompletedTask;
     }
+
+	public void LogWarning( string message ) => throw new NotImplementedException();
 }

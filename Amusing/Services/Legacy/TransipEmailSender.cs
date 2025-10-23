@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 
-namespace Amusing.Services;
+namespace Amusing.Services.Legacy;
 
 // Handles identity-related emails using TransIP Mail API
 public class TransipEmailSender<TUser> : IEmailSender<TUser> where TUser : class

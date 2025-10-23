@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Diagnostics;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
@@ -17,28 +18,29 @@ public class TransipMailingService
 
     public TransipMailingService( HttpClient httpClient, EmailSettings settings, ILogger<TransipMailingService> logger )
     {
-        _httpClient = httpClient;
         _settings = settings;
         _logger = logger;
 
-        // Configure HttpClient base settings
-        _httpClient.BaseAddress = new Uri( _settings.SmtpHost ?? "https://api.transip.nl/v6/mail/" );
+        Debug.WriteLine( "TransipMailingService:" );
+        Debug.WriteLine( $"SMTP: {settings.SmtpHost}:{settings.SmtpPort}" );
+        Debug.WriteLine( $"User: {settings.SmtpUser}   PW: {settings.SmtpPass}" );
 
-        // If the API token is missing, log a clear error
-        if ( string.IsNullOrWhiteSpace( _settings.SmtpPass ) )
-        {
-            _logger.LogError( "TransIP API token is missing in EmailSettings.Password." );
-        }
-        else
-        {
-            _httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue( "Bearer", _settings.SmtpPass );
-        }
+        // Log errors if configuration seems incomplete
+        if ( string.IsNullOrWhiteSpace( _settings.SmtpHost ) )
+            _logger.LogError( "SMTP host is missing in EmailSettings.SmtpHost." );
+
+        if ( string.IsNullOrWhiteSpace( _settings.SmtpUser ) || string.IsNullOrWhiteSpace( _settings.SmtpPass ) )
+            _logger.LogError( "SMTP credentials are missing or incomplete." );
     }
 
     public async Task SendAsync( string to, string subject, string body )
     {
+
+        Debug.WriteLine( "SendAsync:" );
+        Debug.WriteLine( $"SMTP: {_settings.SmtpHost}:{_settings.SmtpPort}" );
+        Debug.WriteLine( $"User: {_settings.SmtpUser}" );
         if ( string.IsNullOrWhiteSpace( to ) )
+
         {
             _logger.LogWarning( "Email not sent: recipient address is empty." );
             return;
@@ -47,7 +49,7 @@ public class TransipMailingService
         var payload = new
         {
             to = new[] { to },
-            from = _settings.SenderAddress ?? "noreply@jouwdomein.nl",
+            from = _settings.SenderAddress ?? "noreply@amusing-hengelo.nl",
             subject,
             html = body
         };

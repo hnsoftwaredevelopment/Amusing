@@ -2,7 +2,6 @@ using System.Globalization;
 
 using Amusing.Components.Account;
 using Amusing.Data;
-using Amusing.Interfaces;
 using Amusing.Models;
 using Amusing.Security;
 using Amusing.Services;
@@ -18,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 using Syncfusion.Blazor;
+using Amusing.Services.Legacy;
 
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense( "Ngo9BigBOggjHTQxAR8/V1JFaF5cXGRCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWXZfeHRRR2ZeUEVyX0FWYEg=" );
 
@@ -27,8 +27,28 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Configuration
     .SetBasePath( Directory.GetCurrentDirectory() )
     .AddJsonFile( "appsettings.json", optional: false, reloadOnChange: true )
-    .AddJsonFile( $"appsettings.{builder.Environment.EnvironmentName}.json", optional: true )
+    .AddJsonFile( $"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true )
+    .AddUserSecrets<Program>( optional: true )
     .AddEnvironmentVariables();
+//.AddUserSecrets<Program>( optional: true )
+//.AddEnvironmentVariables();
+
+// Make sure TransipMailingService uses the same EmailSettings
+//builder.Services.AddSingleton<TransipMailingService>( sp =>
+//{
+//    var settings = sp.GetRequiredService<EmailSettings>(); // juiste settings
+//    var httpClient = sp.GetRequiredService<HttpClient>();
+//    var logger = sp.GetRequiredService<ILogger<TransipMailingService>>();
+//    return new TransipMailingService( httpClient, settings, logger );
+//} );
+
+// MailingService gets the same EmailSettings as TransipMailingService
+//builder.Services.AddSingleton<MailingService>();
+
+builder.Services.Configure<EmailSettings>( builder.Configuration.GetSection( "EmailSettings" ) );
+builder.Services.AddSingleton( sp => sp.GetRequiredService<IOptions<EmailSettings>>().Value );
+var testPass = builder.Configuration["EmailSettings:SmtpPass"];
+Console.WriteLine( $"Loaded SMTP password from configuration: {testPass}" );
 
 if ( builder.Environment.IsDevelopment() )
 {
@@ -55,7 +75,6 @@ builder.Services.AddScoped<FestivalService>();
 builder.Services.AddScoped<GenreService>();
 builder.Services.AddScoped<GitHubService>();
 builder.Services.AddScoped<GroupService>();
-builder.Services.AddScoped<MailingService>();
 builder.Services.AddScoped<PersonService>();
 builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<StageService>();
@@ -64,10 +83,21 @@ builder.Services.AddScoped<TaskService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<VolunteerService>();
-builder.Services.AddHttpClient<TransipMailingService>();
 builder.Services.AddScoped<FieldMappingService>();
+
+// TransipMailingService gebruikt HttpClientFactory -> altijd via AddHttpClient()
+builder.Services.AddHttpClient<TransipMailingService>();
+
+// MailingService werkt met databasegegevens en mail -> scoped
+builder.Services.AddScoped<MailingService>();
+
+// Logging hoeft geen per-request state -> singleton is goed
+builder.Services.AddSingleton<IMailingLogger, ConsoleMailingLogger>();
+
+// ASP.NET Identity helpers
 builder.Services.AddScoped<IEmailSender<ApplicationUser>, TransipEmailSender<ApplicationUser>>();
 builder.Services.AddScoped<IPasswordHasher<ApplicationUser>, LegacyPasswordHasher>();
+
 
 builder.Services.AddDbContext<ApplicationDbContext>( options =>
     options.UseMySql(
@@ -80,12 +110,6 @@ builder.Services.AddScoped<CustomAuthenticationService>();
 builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<ProtectedSessionStorage>();
-
-builder.Services.Configure<EmailSettings>( builder.Configuration.GetSection( "EmailSettings" ) );
-builder.Services.AddSingleton( sp =>
-    sp.GetRequiredService<IOptions<EmailSettings>>().Value );
-builder.Services.AddSingleton<IMailingLogger, ConsoleMailingLogger>();
-builder.Services.AddScoped<MailingService>();
 
 builder.Services.AddAuthorizationCore();
 

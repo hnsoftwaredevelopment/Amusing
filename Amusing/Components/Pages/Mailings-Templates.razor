@@ -246,15 +246,22 @@ else
 					</SfTextBox>
 				</SfTooltip>
 
-					<SfTooltip Content="Selecteer hoeveel e-mails uit de mailing ter test naar het testadres moeten worden verzonden" Position="Position.BottomCenter">
-						<SfComboBox TValue="int"
-									TItem="int"
-									@bind-Value="_testRecipientCount"
-									DataSource="new int[] {1,5,10,15,25}"
-									FloatLabelType="FloatLabelType.Always"
-									Placeholder="Aantal"
-									Width="95px" />
-					</SfTooltip>
+				<SfTooltip Content="Selecteer hoeveel e-mails uit de mailing ter test naar het testadres moeten worden verzonden" Position="Position.BottomCenter">
+					<SfComboBox TValue="int"
+								TItem="int"
+								@bind-Value="_testRecipientCount"
+								DataSource="new int[] {1,5,10,15,25}"
+								FloatLabelType="FloatLabelType.Always"
+								Placeholder="Aantal"
+								Width="95px" />
+				</SfTooltip>
+
+				<p>
+						@if ( !IsTestMailValid && !string.IsNullOrEmpty( _testEmailAddress ) )
+					{
+						<span style="color:red;">Ongeldig e-mailadres</span>
+					}
+				</p>
 				</div>
 			</Content>
 			<FooterTemplate>
