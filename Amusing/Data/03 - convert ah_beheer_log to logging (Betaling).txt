@@ -1,0 +1,42 @@
+-- Zet de MySQL session naar Nederlands voor maandnamen
+SET lc_time_names = 'nl_NL';
+
+INSERT INTO logging (
+    type,
+    date,
+    user_id,
+    ip_address,
+    area,
+    action,
+    status,
+    report
+)
+SELECT
+    'gebruiker' AS type,
+    b.date,
+    b.user_id,
+    b.ip_address,
+    'Finance' AS area,
+    'Betaling' AS action,
+    'success' AS status,
+    CASE
+        WHEN u.username IS NOT NULL THEN
+            CONCAT(
+                u.username,
+                ' heeft een betaling geregistreerd op ',
+                DATE_FORMAT(b.date, '%e %M %Y'),
+                ' om ',
+                DATE_FORMAT(b.date, '%H:%i:%s')
+            )
+        ELSE
+            CONCAT(
+                '[Verwijderde gebruiker] heeft een betaling geregistreerd op ',
+                DATE_FORMAT(b.date, '%e %M %Y'),
+                ' om ',
+                DATE_FORMAT(b.date, '%H:%i:%s')
+            )
+    END AS report
+FROM ah_beheer_log b
+LEFT JOIN ah_beheer u
+    ON u.user_id = b.user_id
+WHERE LOWER(b.action) LIKE '%betaling%';

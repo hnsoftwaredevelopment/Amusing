@@ -1,0 +1,28 @@
+html, body {
+    overflow-y: hidden;
+}
+
+.page-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.page-content {
+    flex: 1;
+    overflow: auto;
+}
+
+.log-footer {
+    position: sticky;
+    bottom: 0;
+    background-color: white;
+    border-top: 1px solid #ccc;
+    padding: 3px;
+    z-index: 5;
+}
+
+.main-content, .content, .page-container {
+    overflow-y: auto;
+}

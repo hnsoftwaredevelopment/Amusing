@@ -1,0 +1,120 @@
+INSERT INTO logging (
+    type,
+    date,
+    person_id,
+    ip_address,
+    area,
+    action,
+    status,
+    report,
+    group_id
+)
+SELECT
+    'persoon' AS type,
+    p.date,
+    
+    -- Safe person_id extraction with fallback to 0
+    CAST(
+      CASE
+        WHEN REGEXP_LIKE(
+               REPLACE(REPLACE(p.report, '\r', ''), '\n', ''),
+               'Persoon_id *= *[0-9]+'
+             )
+          THEN REGEXP_REPLACE(
+                 REPLACE(REPLACE(p.report, '\r', ' '), '\n', ' '),
+                 '.*Persoon_id *= *([0-9]+).*',
+                 '$1'
+               )
+        ELSE '0'
+      END AS UNSIGNED
+    ) AS person_id,
+    
+    p.ip_address,
+    'Toegang' AS area,
+    'Inloggen' AS action,
+    
+    -- Status: success / failed
+    CASE
+        WHEN LOWER(p.report) LIKE '%success%' THEN 'success'
+        WHEN LOWER(p.report) LIKE '%failed%'  THEN 'failed'
+        ELSE 'unknown'
+    END AS status,
+    
+    -- Readable report with fallbacks
+    CASE
+        -- failed + unknown user + no group
+        WHEN CAST(
+               CASE
+                 WHEN REGEXP_LIKE(
+                        REPLACE(REPLACE(p.report, '\r', ''), '\n', ''),
+                        'Persoon_id *= *[0-9]+'
+                      )
+                   THEN REGEXP_REPLACE(
+                          REPLACE(REPLACE(p.report, '\r', ' '), '\n', ' '),
+                          '.*Persoon_id *= *([0-9]+).*',
+                          '$1'
+                        )
+                 ELSE '0'
+               END AS UNSIGNED
+             ) = 0
+             AND LOWER(p.report) LIKE '%failed%'
+             AND p.zanggroep_id = 0
+          THEN 'Toegang geweigerd van een onbekende gebruiker'
+
+        -- failed + unknown user + known group
+        WHEN CAST(
+               CASE
+                 WHEN REGEXP_LIKE(
+                        REPLACE(REPLACE(p.report, '\r', ''), '\n', ''),
+                        'Persoon_id *= *[0-9]+'
+                      )
+                   THEN REGEXP_REPLACE(
+                          REPLACE(REPLACE(p.report, '\r', ' '), '\n', ' '),
+                          '.*Persoon_id *= *([0-9]+).*',
+                          '$1'
+                        )
+                 ELSE '0'
+               END AS UNSIGNED
+             ) = 0
+             AND LOWER(p.report) LIKE '%failed%'
+             AND p.zanggroep_id > 0
+          THEN CONCAT('Toegang geweigerd van een onbekende gebruiker van ', COALESCE(z.naam, '[onbekende groep]'))
+
+        -- success
+        WHEN LOWER(p.report) LIKE '%success%'
+          THEN CONCAT(
+                 TRIM(CONCAT(
+                     COALESCE(per.voornaam, '[verwijderde gebruiker]'), ' ',
+                     IFNULL(CONCAT(per.tussenvoegsel, ' '), ''),
+                     COALESCE(per.achternaam, '')
+                 )),
+                 ' van ',
+                 COALESCE(z.naam, '[verwijderde groep]'),
+                 ' is succesvol ingelogd'
+               )
+
+        -- fallback
+        ELSE 'Onbekende loginstatus'
+    END AS report,
+
+    p.zanggroep_id AS group_id
+
+FROM ah_profielbeheer_log p
+LEFT JOIN ah_personen per
+    ON per.persoon_id = CAST(
+         CASE
+           WHEN REGEXP_LIKE(
+                  REPLACE(REPLACE(p.report, '\r', ''), '\n', ''),
+                  'Persoon_id *= *[0-9]+'
+                )
+             THEN REGEXP_REPLACE(
+                    REPLACE(REPLACE(p.report, '\r', ' '), '\n', ' '),
+                    '.*Persoon_id *= *([0-9]+).*',
+                    '$1'
+                  )
+           ELSE '0'
+         END AS UNSIGNED
+       )
+LEFT JOIN ah_zanggroepen z
+    ON z.zanggroep_id = p.zanggroep_id
+WHERE LOWER(p.action) LIKE '%login%';

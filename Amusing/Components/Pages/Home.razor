@@ -1,15 +1,64 @@
 ﻿@page "/"
+@using Amusing.Models
+@using Amusing.Services
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+
+@inject LoggingService LoggingService;
 
 <PageTitle>Beheer</PageTitle>
 
 <h1>Beheer Amusing-Hengelo</h1>
 
 <AuthorizeView>
-    <Authorized>
-        <p class="text-xl-center">Welkom op de beheer pagina van Amusing Hengelo</p>
-        <p class="text-break"/>
-    </Authorized>
-    <NotAuthorized>
-        <p class="text-danger">Let op, je bent nog niet ingelogd</p>
-    </NotAuthorized>
+	<Authorized>
+		@if (_isLoading)
+		{
+			<div class="text-center p-2">
+				<SfSpinner CssClass="e-spin-center" />
+				<p>@FileName worden geladen...</p>
+			</div>
+		}
+		else
+		{
+			<div class="page-container">
+				<div class="page-content">
+					<p class="text-xl-center">Welkom op de beheer pagina van Amusing Hengelo</p>
+					<p class="text-break"/>
+				</div>
+
+				<div class="log-footer">
+					<SfToolbar>
+						<ToolbarItems>
+							<ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right" Width="120px">
+								<Template>
+									<SfTextBox @ref="@searchBox" Created="@AddSearchIcon" Placeholder="Zoek in de lijst" Input="OnInput"></SfTextBox>
+								</Template>
+							</ToolbarItem>
+						</ToolbarItems>
+					</SfToolbar>
+
+					<SfGrid  @ref="_gridLog"
+						TItem="LogModel"
+						DataSource="_loggingList"
+						AllowSorting="true" EnableVirtualization="true"
+						AllowResizing="true"
+						Height="180px">
+						<GridSearchSettings IgnoreAccent="true"/>
+						<GridColumns>
+							<GridColumn Field="LogDateOnly" HeaderText="Datum" Width="100" />
+							<GridColumn Field="LogTimeOnly" HeaderText="Tijdstip" Width="80" />
+							<GridColumn Field="LogArea" HeaderText="Onderdeel" Width="170" />
+							<GridColumn Field="LogAction" HeaderText="Aktie" Width="170"/>
+							<GridColumn Field="LogReport" HeaderText="Resultaat"/>
+						</GridColumns>
+					</SfGrid>
+				</div>
+			</div>
+		}
+	</Authorized>
+	<NotAuthorized>
+		<p class="text-danger">Let op, je bent nog niet ingelogd</p>
+	</NotAuthorized>
 </AuthorizeView>

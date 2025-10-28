@@ -1,0 +1,70 @@
+INSERT INTO logging (
+    type,
+    date,
+    user_id,
+    ip_address,
+    area,
+    action,
+    status,
+    report
+)
+SELECT
+    'gebruiker' AS type,
+    b.date,
+    b.user_id,
+    b.ip_address,
+    'Toegang' AS area,
+    'Inloggen' AS action,
+
+    -- status: success / failed
+    CASE
+        WHEN LOWER(b.report) LIKE '%success%' THEN 'success'
+        WHEN LOWER(b.report) LIKE '%failed%'  THEN 'failed'
+        ELSE 'unknown'
+    END AS status,
+
+    -- human readable report
+    CASE
+        -- success
+        WHEN LOWER(b.report) LIKE '%success%' THEN
+            CONCAT(
+                COALESCE(u.username, '[verwijderde gebruiker]'),
+                ' is succesvol ingelogd'
+            )
+
+        -- failed + user_id = 0
+        WHEN b.user_id = 0 AND LOWER(b.report) LIKE '%failed%' THEN
+            CONCAT(
+                'Toegang geweigerd voor ',
+                COALESCE(
+                    NULLIF(
+                        TRIM(
+                            REPLACE(
+                                REPLACE(
+                                    REPLACE(
+                                        REPLACE(b.report, '\r', ''), 
+                                    '\n', ' '),
+                                'π', ' '),
+                            '/login.php failed Username:', '')
+                        ),
+                        ''
+                    ),
+                    'onbekende gebruiker'
+                )
+            )
+
+        -- failed + user_id > 0
+        WHEN b.user_id > 0 AND LOWER(b.report) LIKE '%failed%' THEN
+            CONCAT(
+                'Toegang geweigerd voor gebruiker ',
+                COALESCE(u.username, '[verwijderde gebruiker]')
+            )
+
+        -- fallback
+        ELSE 'Onbekende loginstatus'
+    END AS report
+
+FROM ah_beheer_log b
+LEFT JOIN ah_beheer u
+    ON u.user_id = b.user_id
+WHERE LOWER(b.action) LIKE '%login%';

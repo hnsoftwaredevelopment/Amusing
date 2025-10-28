@@ -1,8 +1,12 @@
 ﻿@page "/login"
 @using Amusing.Services
+@using Amusing.Helpers
 @inject NavigationManager Navigation
 @inject CustomAuthenticationService AuthService
 @inject CustomAuthStateProvider AuthStateProvider
+@inject IHttpContextAccessor HttpContextAccessor
+@inject LoggingService LoggingService
+@inject UserContextHelper UserContextHelper
 
 <h3>Login</h3>
 
@@ -28,17 +32,28 @@
 
     private async Task HandleLogin()
     {
+        string _report = "";
+        string _status = "failed";
+
         var user = await AuthService.ValidateUserAsync(loginModel.Username, loginModel.Password);
+
         if ( user != null )
         {
             await AuthStateProvider.MarkUserAsAuthenticated( user );
-            //Navigation.NavigateTo( "/" );
+
+            UserContextHelper.SetUserContext( user.UserId, user.Username );
+
             Navigation.NavigateTo( $"/signin?username={user.Username}&role={user.Role}&userid={user.UserId}", true );
+			_report = $"{user.Username} is succesvol ingelogd";
+            _status = "success";
         }
         else
         {
             ErrorMessage = "Ongeldige gebruikersnaam of wachtwoord";
+            _report = $"Toegang geweigerd voor {loginModel.Username}";
         }
+
+        await LoggingService.WritUserLoginAttemptAsync ( _status, _report);
     }
 
     private class LoginModel

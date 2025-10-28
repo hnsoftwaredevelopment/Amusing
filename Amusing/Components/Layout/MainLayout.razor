@@ -7,26 +7,6 @@
     </div>
 
     <main class="main-content">
-        <CascadingAuthenticationState>
-            <AuthorizeView>
-                <Authorized>
-                    @{
-                        var hour = DateTime.Now.Hour;
-                        var greeting = hour switch
-                        {
-                            >= 5 and < 12 => "Goedemorgen",
-                            >= 12 and < 18 => "Goedemiddag",
-                            _ => "Goedenavond"
-                        };
-                    }
-
-                    <div class="top-row px-2 auth d-flex">
-                        <div class="greeting text-success">@greeting @context.User.Identity.Name</div>
-                    </div>
-                </Authorized>
-            </AuthorizeView>
-        </CascadingAuthenticationState>
-
         <article class="content px-4">
             @Body
         </article>
@@ -37,24 +17,3 @@
     <a href="" class="reload">Opnieuw laden</a>
     <a class="dismiss">🗙</a>
 </div>
-
-@code {
-    private string? greeting;
-
-    protected override async Task OnInitializedAsync()
-    {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if ( user.Identity?.IsAuthenticated == true )
-        {
-            var hour = DateTime.Now.Hour;
-            greeting = hour switch
-            {
-                >= 5 and < 12 => "Goedemorgen",
-                >= 12 and < 18 => "Goedemiddag",
-                _ => "Goedenavond"
-            } + $" {user.Identity.Name}";
-        }
-    }
-}

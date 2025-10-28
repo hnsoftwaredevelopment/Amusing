@@ -2,22 +2,23 @@ using System.Globalization;
 
 using Amusing.Components.Account;
 using Amusing.Data;
+using Amusing.Helpers;
 using Amusing.Models;
 using Amusing.Security;
 using Amusing.Services;
+using Amusing.Services.Legacy;
 
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 using Syncfusion.Blazor;
-using Amusing.Services.Legacy;
 
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense( "Ngo9BigBOggjHTQxAR8/V1JFaF5cXGRCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdmWXZfeHRRR2ZeUEVyX0FWYEg=" );
 
@@ -67,6 +68,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddScoped<LoggingService>();
 builder.Services.AddScoped<GenericDataService>();
 builder.Services.AddScoped<CountryService>();
 builder.Services.AddScoped<EditionService>();
@@ -84,6 +86,8 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<VolunteerService>();
 builder.Services.AddScoped<FieldMappingService>();
+builder.Services.AddScoped<UserContextHelper>();
+builder.Services.AddHttpContextAccessor();
 
 // TransipMailingService gebruikt HttpClientFactory -> altijd via AddHttpClient()
 builder.Services.AddHttpClient<TransipMailingService>();

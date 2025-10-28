@@ -74,543 +74,526 @@ a, .btn-link {
     min-width: 800px; /* kan aangepast worden */
 }
 
-.form-wrapper {
-    max-width: 400px;
-    width: 100%;
-    background-color: rgba(255, 255, 255, 0.95)
-}
-
-.excel-knop {
-    background-color: #1f6d42;
-    color: white;
-    border-radius: 4px;
-}
-
-.csv-knop {
-    background-color: #659a36;
-    color: white;
-    border-radius: 4px;
-}
-
-#blazor-error-ui {
-    background: lightyellow;
+.log-footer {
+    position: sticky;
     bottom: 0;
-    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
-    display: none;
-    left: 0;
-    padding: 0.6rem 1.25rem 0.7rem 1.25rem;
-    position: fixed;
-    width: 100%;
-    z-index: 1000;
+    background-color: white;
+    border-top: 1px solid #ccc;
+    padding: 3px;
+    z-index: 5;
 }
 
-    #blazor-error-ui .dismiss {
-        cursor: pointer;
-        position: absolute;
-        right: 0.75rem;
-        top: 0.5rem;
+    .form-wrapper {
+        max-width: 400px;
+        width: 100%;
+        background-color: rgba(255, 255, 255, 0.95)
     }
 
-.blazor-error-boundary {
-    background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iNDkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIG92ZXJmbG93PSJoaWRkZW4iPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcDAiPjxyZWN0IHg9IjIzNSIgeT0iNTEiIHdpZHRoPSI1NiIgaGVpZ2h0PSI0OSIvPjwvY2xpcFBhdGg+PC9kZWZzPjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMCkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzUgLTUxKSI+PHBhdGggZD0iTTI2My41MDYgNTFDMjY0LjcxNyA1MSAyNjUuODEzIDUxLjQ4MzcgMjY2LjYwNiA1Mi4yNjU4TDI2Ny4wNTIgNTIuNzk4NyAyNjcuNTM5IDUzLjYyODMgMjkwLjE4NSA5Mi4xODMxIDI5MC41NDUgOTIuNzk1IDI5MC42NTYgOTIuOTk2QzI5MC44NzcgOTMuNTEzIDI5MSA5NC4wODE1IDI5MSA5NC42NzgyIDI5MSA5Ny4wNjUxIDI4OS4wMzggOTkgMjg2LjYxNyA5OUwyNDAuMzgzIDk5QzIzNy45NjMgOTkgMjM2IDk3LjA2NTEgMjM2IDk0LjY3ODIgMjM2IDk0LjM3OTkgMjM2LjAzMSA5NC4wODg2IDIzNi4wODkgOTMuODA3MkwyMzYuMzM4IDkzLjAxNjIgMjM2Ljg1OCA5Mi4xMzE0IDI1OS40NzMgNTMuNjI5NCAyNTkuOTYxIDUyLjc5ODUgMjYwLjQwNyA1Mi4yNjU4QzI2MS4yIDUxLjQ4MzcgMjYyLjI5NiA1MSAyNjMuNTA2IDUxWk0yNjMuNTg2IDY2LjAxODNDMjYwLjczNyA2Ni4wMTgzIDI1OS4zMTMgNjcuMTI0NSAyNTkuMzEzIDY5LjMzNyAyNTkuMzEzIDY5LjYxMDIgMjU5LjMzMiA2OS44NjA4IDI1OS4zNzEgNzAuMDg4N0wyNjEuNzk1IDg0LjAxNjEgMjY1LjM4IDg0LjAxNjEgMjY3LjgyMSA2OS43NDc1QzI2Ny44NiA2OS43MzA5IDI2Ny44NzkgNjkuNTg3NyAyNjcuODc5IDY5LjMxNzkgMjY3Ljg3OSA2Ny4xMTgyIDI2Ni40NDggNjYuMDE4MyAyNjMuNTg2IDY2LjAxODNaTTI2My41NzYgODYuMDU0N0MyNjEuMDQ5IDg2LjA1NDcgMjU5Ljc4NiA4Ny4zMDA1IDI1OS43ODYgODkuNzkyMSAyNTkuNzg2IDkyLjI4MzcgMjYxLjA0OSA5My41Mjk1IDI2My41NzYgOTMuNTI5NSAyNjYuMTE2IDkzLjUyOTUgMjY3LjM4NyA5Mi4yODM3IDI2Ny4zODcgODkuNzkyMSAyNjcuMzg3IDg3LjMwMDUgMjY2LjExNiA4Ni4wNTQ3IDI2My41NzYgODYuMDU0N1oiIGZpbGw9IiNGRkU1MDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjwvZz48L3N2Zz4=) no-repeat 1rem/1.8rem, #b32121;
-    padding: 1rem 1rem 1rem 3.7rem;
-    color: white;
-}
-
-    .blazor-error-boundary::after {
-        content: "An error has occurred."
+    .excel-knop {
+        background-color: #1f6d42;
+        color: white;
+        border-radius: 4px;
     }
 
-.spacer-extrasmall {
-    height: 0.25rem;
-}
-
-.spacer-small {
-    height: 0.5rem;
-}
-
-.spacer-medium {
-    height: 1.5rem;
-}
-
-.spacer-large {
-    height: 2rem;
-}
-
-.spacer-extralarge {
-    height: 3rem;
-}
-
-.spacer-extraextralarge {
-    height: 5rem;
-}
-
-.spacer-left-small {
-    margin-left: 0.5rem;
-}
-
-.spacer-left-medium {
-    margin-left: 1rem;
-}
-
-.spacer-right-small {
-    margin-right: 0.5rem;
-}
-
-.spacer-right-medium {
-    margin-right: 1rem;
-}
-
-.countryImage {
-    margin: 4px 16px;
-    float: left;
-    width: 24px;
-    height: 18px;
-}
-
-.countryName {
-    display: block !important;
-    opacity: .87;
-    font-size: 14px;
-}
-
-.two-row-cel {
-    vertical-align: middle;
-    text-align: left;
-}
-
-.first-row {
-    font-size: 14px
-}
-
-.second-row {
-    font-size: 12px;
-    font-style: italic;
-}
-
-.one-row-cel {
-    font-size: 14px;
-    vertical-align: middle;
-}
-
-.row-count {
-    font-family: Courier New, Courier, monospace;
-    font-size: 14px;
-    font-style: italic;
-    font-weight: bold;
-    text-align: right;
-    vertical-align: middle;
-}
-
-.egrid .e-gridheader {
-    background-color: #062666;
-}
-
-/* Alternate rowcolor */
-.e-grid .e-altrow {
-    background-color: #E8EEFF;
-}
-
-/* Selected rowcolor */
-.e-selectionbackground {
-    background-color: yellow;
-}
-
-.e-grid .e-gridheader .e-headercell {
-    background-color: #062666 !important;
-    color: #ebebf1 !important;
-    accent-color: red;
-    font-weight: bold;
-    font-size: 12px;
-}
-
-    .e-grid .e-gridheader .e-headercell .e-headertext {
-        color: #ebebf1 !important;
+    .csv-knop {
+        background-color: #659a36;
+        color: white;
+        border-radius: 4px;
     }
 
-    /* Eventueel: ook bij hover/focus of sortering actief */
-    .e-grid .e-gridheader .e-headercell.e-active,
-    .e-grid .e-gridheader .e-headercell:focus,
-    .e-grid .e-gridheader .e-headercell:hover {
+    #blazor-error-ui {
+        background: lightyellow;
+        bottom: 0;
+        box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+        display: none;
+        left: 0;
+        padding: 0.6rem 1.25rem 0.7rem 1.25rem;
+        position: fixed;
+        width: 100%;
+        z-index: 1000;
+    }
+
+        #blazor-error-ui .dismiss {
+            cursor: pointer;
+            position: absolute;
+            right: 0.75rem;
+            top: 0.5rem;
+        }
+
+    .blazor-error-boundary {
+        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iNDkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIG92ZXJmbG93PSJoaWRkZW4iPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcDAiPjxyZWN0IHg9IjIzNSIgeT0iNTEiIHdpZHRoPSI1NiIgaGVpZ2h0PSI0OSIvPjwvY2xpcFBhdGg+PC9kZWZzPjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMCkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzUgLTUxKSI+PHBhdGggZD0iTTI2My41MDYgNTFDMjY0LjcxNyA1MSAyNjUuODEzIDUxLjQ4MzcgMjY2LjYwNiA1Mi4yNjU4TDI2Ny4wNTIgNTIuNzk4NyAyNjcuNTM5IDUzLjYyODMgMjkwLjE4NSA5Mi4xODMxIDI5MC41NDUgOTIuNzk1IDI5MC42NTYgOTIuOTk2QzI5MC44NzcgOTMuNTEzIDI5MSA5NC4wODE1IDI5MSA5NC42NzgyIDI5MSA5Ny4wNjUxIDI4OS4wMzggOTkgMjg2LjYxNyA5OUwyNDAuMzgzIDk5QzIzNy45NjMgOTkgMjM2IDk3LjA2NTEgMjM2IDk0LjY3ODIgMjM2IDk0LjM3OTkgMjM2LjAzMSA5NC4wODg2IDIzNi4wODkgOTMuODA3MkwyMzYuMzM4IDkzLjAxNjIgMjM2Ljg1OCA5Mi4xMzE0IDI1OS40NzMgNTMuNjI5NCAyNTkuOTYxIDUyLjc5ODUgMjYwLjQwNyA1Mi4yNjU4QzI2MS4yIDUxLjQ4MzcgMjYyLjI5NiA1MSAyNjMuNTA2IDUxWk0yNjMuNTg2IDY2LjAxODNDMjYwLjczNyA2Ni4wMTgzIDI1OS4zMTMgNjcuMTI0NSAyNTkuMzEzIDY5LjMzNyAyNTkuMzEzIDY5LjYxMDIgMjU5LjMzMiA2OS44NjA4IDI1OS4zNzEgNzAuMDg4N0wyNjEuNzk1IDg0LjAxNjEgMjY1LjM4IDg0LjAxNjEgMjY3LjgyMSA2OS43NDc1QzI2Ny44NiA2OS43MzA5IDI2Ny44NzkgNjkuNTg3NyAyNjcuODc5IDY5LjMxNzkgMjY3Ljg3OSA2Ny4xMTgyIDI2Ni40NDggNjYuMDE4MyAyNjMuNTg2IDY2LjAxODNaTTI2My41NzYgODYuMDU0N0MyNjEuMDQ5IDg2LjA1NDcgMjU5Ljc4NiA4Ny4zMDA1IDI1OS43ODYgODkuNzkyMSAyNTkuNzg2IDkyLjI4MzcgMjYxLjA0OSA5My41Mjk1IDI2My41NzYgOTMuNTI5NSAyNjYuMTE2IDkzLjUyOTUgMjY3LjM4NyA5Mi4yODM3IDI2Ny4zODcgODkuNzkyMSAyNjcuMzg3IDg3LjMwMDUgMjY2LjExNiA4Ni4wNTQ3IDI2My41NzYgODYuMDU0N1oiIGZpbGw9IiNGRkU1MDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjwvZz48L3N2Zz4=) no-repeat 1rem/1.8rem, #b32121;
+        padding: 1rem 1rem 1rem 3.7rem;
+        color: white;
+    }
+
+        .blazor-error-boundary::after {
+            content: "An error has occurred."
+        }
+
+    .spacer-extrasmall {
+        height: 0.25rem;
+    }
+
+    .spacer-small {
+        height: 0.5rem;
+    }
+
+    .spacer-medium {
+        height: 1.5rem;
+    }
+
+    .spacer-large {
+        height: 2rem;
+    }
+
+    .spacer-extralarge {
+        height: 3rem;
+    }
+
+    .spacer-extraextralarge {
+        height: 5rem;
+    }
+
+    .spacer-left-small {
+        margin-left: 0.5rem;
+    }
+
+    .spacer-left-medium {
+        margin-left: 1rem;
+    }
+
+    .spacer-right-small {
+        margin-right: 0.5rem;
+    }
+
+    .spacer-right-medium {
+        margin-right: 1rem;
+    }
+
+    .countryImage {
+        margin: 4px 16px;
+        float: left;
+        width: 24px;
+        height: 18px;
+    }
+
+    .countryName {
+        display: block !important;
+        opacity: .87;
+        font-size: 14px;
+    }
+
+    .two-row-cel {
+        vertical-align: middle;
+        text-align: left;
+    }
+
+    .first-row {
+        font-size: 14px
+    }
+
+    .second-row {
+        font-size: 12px;
+        font-style: italic;
+    }
+
+    .one-row-cel {
+        font-size: 14px;
+        vertical-align: middle;
+    }
+
+    .row-count {
+        font-family: Courier New, Courier, monospace;
+        font-size: 14px;
+        font-style: italic;
+        font-weight: bold;
+        text-align: right;
+        vertical-align: middle;
+    }
+
+    .egrid .e-gridheader {
+        background-color: #062666;
+    }
+    /* Alternate rowcolor */
+    .e-grid .e-altrow {
+        background-color: #E8EEFF;
+    }
+    /* Selected rowcolor */
+    .e-selectionbackground {
+        background-color: yellow;
+    }
+
+    .e-grid .e-gridheader .e-headercell {
         background-color: #062666 !important;
         color: #ebebf1 !important;
+        accent-color: red;
+        font-weight: bold;
+        font-size: 12px;
     }
 
-        .e-grid .e-gridheader .e-headercell.e-active .e-headertext,
-        .e-grid .e-gridheader .e-headercell:hover .e-headertext,
-        .e-grid .e-gridheader .e-headercell:focus .e-headertext {
+        .e-grid .e-gridheader .e-headercell .e-headertext {
+            color: #ebebf1 !important;
+        }
+        /* Eventueel: ook bij hover/focus of sortering actief */
+        .e-grid .e-gridheader .e-headercell.e-active,
+        .e-grid .e-gridheader .e-headercell:focus,
+        .e-grid .e-gridheader .e-headercell:hover {
+            background-color: #062666 !important;
             color: #ebebf1 !important;
         }
 
-/* Sorteericoon (pijltje omhoog/omlaag) in geel */
-.e-grid .e-gridheader .e-sortfilterdiv::before {
-    color: yellow !important;
-}
-
-/* Eventueel ook op hover of actief */
-.e-grid .e-gridheader .e-headercell:hover .e-sortfilterdiv::before,
-.e-grid .e-gridheader .e-headercell.e-active .e-sortfilterdiv::before {
-    color: yellow !important;
-}
-
-.e-grid .e-rowcell {
-    vertical-align: top !important;
-}
-
-.toolbar-count {
-    font-family: 13_Misa !important;
-    font-size: 18px !important;
-    font-weight: bold !important;
-    text-align: right !important;
-    vertical-align: middle !important;
-}
-
-/* Sf(Numeric)TextBox: Specify Label style */
-.e-control-wrapper.e-float-input.e-ntstyle.e-input-group .e-float-text {
-    font-size: small;
-    margin: -4px 0px 0px 3px;
-}
-
-/* SfNumericTextBox: Specify Input text */
-.e-numeric.e-ntstyle .e-control.e-numerictextbox {
-    font-size: medium;
-    border: 0px;
-    text-align: right;
-    outline: none;
-    margin-right: 6px;
-}
-
-.e-control-wrapper.e-float-input.e-ntstyle input.e-input {
-    font-size: medium;
-    border: none;
-    outline: none;
-    padding: 4px;
-}
-
-/* SfNumericTextBox::after Border Style */
-.e-input-group.e-ntstyle.e-control-wrapper:not(.e-success):not(.e-warning):not(.e-error):not(.e-float-icon-left), .e-float-input.e-control-wrapper:hover:not(.e-success):not(.e-warning):not(.e-error):not(.e-disabled):not(.e-float-icon-left) {
-    border-color: #062666;
-    border-radius: 5px;
-    border-left: none;
-    border-top: none;
-    border-right: none;
-    border-bottom: none;
-    margin-right: 10px;
-    outline: none;
-}
-
-.e-input-group.e-ntstyle.e-control-wrapper:not(.e-success):not(.e-warning):not(.e-error):not(.e-float-icon-left),
-.e-float-input.e-control-wrapper:not(.e-success):not(.e-warning):not(.e-error):not(.e-disabled):not(.e-float-icon-left) {
-    margin-right: 10px !important; /* Override Syncfusion hover style */
-}
-
-/* SfNumericTextBox: To specify font size and background color of the Up and Down arrow */
-.e-numeric.e-control-wrapper.e-input-group .e-input-group-icon {
-    font-size: 20px;
-    color: #ccc;
-    font-weight: bolder;
-    background-color: #062666;
-}
-
-.center-textbox .e-textbox {
-    margin-left: -6px;
-    text-align: center !important;
-    outline: none;
-}
-
-.custom-toolbar-btn {
-    border: none;
-    background: transparent; /* optioneel om ook achtergrondkleur weg te halen */
-    padding: 4px; /* optioneel, anders wordt de knop heel klein */
-    cursor: pointer; /* geeft visuele feedback van een klikbare knop */
-}
-
-    .custom-toolbar-btn:focus {
-        outline: none; /* voorkomt blauwe focusring op klik/tab */
+            .e-grid .e-gridheader .e-headercell.e-active .e-headertext,
+            .e-grid .e-gridheader .e-headercell:hover .e-headertext,
+            .e-grid .e-gridheader .e-headercell:focus .e-headertext {
+                color: #ebebf1 !important;
+            }
+    /* Sorteericoon (pijltje omhoog/omlaag) in geel */
+    .e-grid .e-gridheader .e-sortfilterdiv::before {
+        color: yellow !important;
+    }
+    /* Eventueel ook op hover of actief */
+    .e-grid .e-gridheader .e-headercell:hover .e-sortfilterdiv::before,
+    .e-grid .e-gridheader .e-headercell.e-active .e-sortfilterdiv::before {
+        color: yellow !important;
     }
 
-/*Bit.BlazorUI Toggle styles*/
-.custom-class:hover {
-    border-color: magenta;
-    background-color: magenta;
-}
+    .e-grid .e-rowcell {
+        vertical-align: top !important;
+    }
 
-.custom-class:active {
-    border-color: green;
-    background-color: green;
-}
+    .toolbar-count {
+        font-family: 13_Misa !important;
+        font-size: 18px !important;
+        font-weight: bold !important;
+        text-align: right !important;
+        vertical-align: middle !important;
+    }
+    /* Sf(Numeric)TextBox: Specify Label style */
+    .e-control-wrapper.e-float-input.e-ntstyle.e-input-group .e-float-text {
+        font-size: small;
+        margin: -4px 0px 0px 3px;
+    }
+    /* SfNumericTextBox: Specify Input text */
+    .e-numeric.e-ntstyle .e-control.e-numerictextbox {
+        font-size: medium;
+        border: 0px;
+        text-align: right;
+        outline: none;
+        margin-right: 6px;
+    }
 
-/* Make part of the screen static: Definition of the total screen*/
-.page-container {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 80px); /* 100vh is total screen height 80px is the height of the top area */
-}
+    .e-control-wrapper.e-float-input.e-ntstyle input.e-input {
+        font-size: medium;
+        border: none;
+        outline: none;
+        padding: 4px;
+    }
+    /* SfNumericTextBox::after Border Style */
+    .e-input-group.e-ntstyle.e-control-wrapper:not(.e-success):not(.e-warning):not(.e-error):not(.e-float-icon-left), .e-float-input.e-control-wrapper:hover:not(.e-success):not(.e-warning):not(.e-error):not(.e-disabled):not(.e-float-icon-left) {
+        border-color: #062666;
+        border-radius: 5px;
+        border-left: none;
+        border-top: none;
+        border-right: none;
+        border-bottom: none;
+        margin-right: 10px;
+        outline: none;
+    }
 
-/* Make part of the screen static: Definition of the static part of screen*/
-.fixed-header {
-    flex: 0 0 auto; /* Niet laten meegroeien */
-    background-color: #e9f0f6;
-    padding: 5px;
-    border-bottom: 1px solid #ccc;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    z-index: 10;
-}
+    .e-input-group.e-ntstyle.e-control-wrapper:not(.e-success):not(.e-warning):not(.e-error):not(.e-float-icon-left),
+    .e-float-input.e-control-wrapper:not(.e-success):not(.e-warning):not(.e-error):not(.e-disabled):not(.e-float-icon-left) {
+        margin-right: 10px !important; /* Override Syncfusion hover style */
+    }
+    /* SfNumericTextBox: To specify font size and background color of the Up and Down arrow */
+    .e-numeric.e-control-wrapper.e-input-group .e-input-group-icon {
+        font-size: 20px;
+        color: #ccc;
+        font-weight: bolder;
+        background-color: #062666;
+    }
 
-/* Make part of the screen static: Definition of the scrollable part of the screen*/
-.scrollable-content {
-    flex: 1 1 auto; /* Fill remaining height */
-    overflow-y: auto;
-    padding: 5px;
-    background-color: #f8f9fa;
-}
+    .center-textbox .e-textbox {
+        margin-left: -6px;
+        text-align: center !important;
+        outline: none;
+    }
 
-.custom-toolbar-btn.disabled {
-    opacity: 0.5;
-    cursor: default;
-    pointer-events: none; /* voorkomt klik */
-}
+    .custom-toolbar-btn {
+        border: none;
+        background: transparent; /* optioneel om ook achtergrondkleur weg te halen */
+        padding: 4px; /* optioneel, anders wordt de knop heel klein */
+        cursor: pointer; /* geeft visuele feedback van een klikbare knop */
+    }
 
-    .custom-toolbar-btn.disabled img {
+        .custom-toolbar-btn:focus {
+            outline: none; /* voorkomt blauwe focusring op klik/tab */
+        }
+    /*Bit.BlazorUI Toggle styles*/
+    .custom-class:hover {
+        border-color: magenta;
+        background-color: magenta;
+    }
+
+    .custom-class:active {
+        border-color: green;
+        background-color: green;
+    }
+    /* Make part of the screen static: Definition of the total screen*/
+    .page-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 80px); /* 100vh is total screen height 80px is the height of the top area */
+    }
+    /* Make part of the screen static: Definition of the static part of screen*/
+    .fixed-header {
+        flex: 0 0 auto; /* Niet laten meegroeien */
+        background-color: #e9f0f6;
+        padding: 5px;
+        border-bottom: 1px solid #ccc;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        z-index: 10;
+    }
+    /* Make part of the screen static: Definition of the scrollable part of the screen*/
+    .scrollable-content {
+        flex: 1 1 auto; /* Fill remaining height */
+        overflow-y: auto;
+        padding: 5px;
+        background-color: #f8f9fa;
+    }
+
+    .custom-toolbar-btn.disabled {
+        opacity: 0.5;
+        cursor: default;
+        pointer-events: none; /* voorkomt klik */
+    }
+
+        .custom-toolbar-btn.disabled img {
+            filter: grayscale(100%);
+        }
+
+    .non-saturday {
+        opacity: 0.6;
+        pointer-events: none;
         filter: grayscale(100%);
     }
-
-.non-saturday {
-    opacity: 0.6;
-    pointer-events: none;
-    filter: grayscale(100%);
-}
-
-/* Place item where tooltip is used inline with other objects */
-.CardNumberTooltip {
-    display: inline-block;
-    vertical-align: middle; /* zorgt dat alles mooi op 1 lijn staat */
-}
-
-.koor-details-container {
-    display: flow;
-    gap: 1rem;
-    align-items: start;
-}
-
-.form-row {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-}
-
-/* Dropzone styling */
-.drop-zone {
-    position: relative;
-    border: 2px dashed #0077cc;
-    background-color: #f5faff;
-    padding: 1rem;
-    text-align: center;
-    border-radius: 10px;
-    /* layout */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    /* optional hover effect */
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-    .drop-zone:hover {
-        background-color: #e9f4ff;
-        border-color: #0055aa;
+    /* Place item where tooltip is used inline with other objects */
+    .CardNumberTooltip {
+        display: inline-block;
+        vertical-align: middle; /* zorgt dat alles mooi op 1 lijn staat */
     }
 
-    /* Invisible overlay that captures CLICK and DROP over the whole zone */
-    .drop-zone .drop-input {
-        position: absolute;
-        inset: 0; /* top:0; right:0; bottom:0; left:0 */
-        opacity: 0; /* fully invisible */
-        width: 100%;
-        height: 100%;
+    .koor-details-container {
+        display: flow;
+        gap: 1rem;
+        align-items: start;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    /* Dropzone styling */
+    .drop-zone {
+        position: relative;
+        border: 2px dashed #0077cc;
+        background-color: #f5faff;
+        padding: 1rem;
+        text-align: center;
+        border-radius: 10px;
+        /* layout */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        /* optional hover effect */
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+        .drop-zone:hover {
+            background-color: #e9f4ff;
+            border-color: #0055aa;
+        }
+        /* Invisible overlay that captures CLICK and DROP over the whole zone */
+        .drop-zone .drop-input {
+            position: absolute;
+            inset: 0; /* top:0; right:0; bottom:0; left:0 */
+            opacity: 0; /* fully invisible */
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+    .preview-img {
+        max-height: 150px;
+        max-width: 100%;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .custom-upload-btn {
+        background-color: #003366; /* donkerblauw */
+        color: white;
+        padding: 0.5rem 1.5rem;
+        border-radius: 25px;
         cursor: pointer;
+        font-weight: bold;
+        display: inline-block;
+        user-select: none;
     }
 
-.preview-img {
-    max-height: 150px;
-    max-width: 100%;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
+        .custom-upload-btn:hover {
+            background-color: #0055aa;
+        }
 
-.custom-upload-btn {
-    background-color: #003366; /* donkerblauw */
-    color: white;
-    padding: 0.5rem 1.5rem;
-    border-radius: 25px;
-    cursor: pointer;
-    font-weight: bold;
-    display: inline-block;
-    user-select: none;
-}
-
-    .custom-upload-btn:hover {
-        background-color: #0055aa;
+    .file-name {
+        font-size: 0.9rem;
+        color: #333;
+        font-style: italic;
     }
 
-.file-name {
-    font-size: 0.9rem;
-    color: #333;
-    font-style: italic;
-}
-
-.drop-hint {
-    font-size: 0.8rem;
-    color: #555;
-}
-
-.dropzone-grid {
-    display: grid; /* Use grid layout */
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem; /* Space between the dropzones */
-}
-
-.drop-zone input[type="file"] {
-    position: absolute !important;
-    inset: 0 !important;
-    opacity: 0 !important;
-    padding: 1rem;
-    text-align: center;
-    cursor: pointer !important;
-}
-
-.e-custom-float-text {
-    display: inline-block;
-    font-size: 12px;
-    color: #212529;
-    margin-top: 5px;
-    margin-bottom: 4px !important;
-    font-weight: 500;
-}
-
-/* remove extra margin/padding from the RichTextEditor-container */
-.form-row .e-richtexteditor {
-    margin-top: 0 !important;
-}
-
-    /* Remove top padding from the editor toolbar */
-    .form-row .e-richtexteditor .e-rte-toolbar {
-        padding-top: 0 !important;
+    .drop-hint {
+        font-size: 0.8rem;
+        color: #555;
     }
 
-/* Wrapper for label + editor */
-.sf-float-group {
-    display: flex;
-    flex-direction: column;
-}
+    .dropzone-grid {
+        display: grid; /* Use grid layout */
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem; /* Space between the dropzones */
+    }
 
-/* Label looks like Syncfusion FloatLabel Always */
-.sf-float-label {
-    /* Prevent margin-collapsing and ensure tight spacing */
-    display: inline-block; /* important to avoid margin collapse */
-    font-size: 12px;
-    line-height: 1;
-    font-weight: 500;
-    color: #212529; /* similar to e-float-text */
-    margin: 5px 0 4px 0; /* small but consistent gap */
-}
+    .drop-zone input[type="file"] {
+        position: absolute !important;
+        inset: 0 !important;
+        opacity: 0 !important;
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer !important;
+    }
 
-/* Bootstrap labels have default bottom margin; this neutralizes it */
-label.sf-float-label {
-    margin-bottom: 4px !important;
-}
+    .e-custom-float-text {
+        display: inline-block;
+        font-size: 12px;
+        color: #212529;
+        margin-top: 5px;
+        margin-bottom: 4px !important;
+        font-weight: 500;
+    }
+    /* remove extra margin/padding from the RichTextEditor-container */
+    .form-row .e-richtexteditor {
+        margin-top: 0 !important;
+    }
+        /* Remove top padding from the editor toolbar */
+        .form-row .e-richtexteditor .e-rte-toolbar {
+            padding-top: 0 !important;
+        }
+    /* Wrapper for label + editor */
+    .sf-float-group {
+        display: flex;
+        flex-direction: column;
+    }
+    /* Label looks like Syncfusion FloatLabel Always */
+    .sf-float-label {
+        /* Prevent margin-collapsing and ensure tight spacing */
+        display: inline-block; /* important to avoid margin collapse */
+        font-size: 12px;
+        line-height: 1;
+        font-weight: 500;
+        color: #212529; /* similar to e-float-text */
+        margin: 5px 0 4px 0; /* small but consistent gap */
+    }
+    /* Bootstrap labels have default bottom margin; this neutralizes it */
+    label.sf-float-label {
+        margin-bottom: 4px !important;
+    }
+    /* Tighten the gap above the toolbar across themes */
+    .sf-float-group > .e-richtexteditor {
+        margin-top: 0 !important; /* remove any top margin on the wrapper */
+    }
 
-/* Tighten the gap above the toolbar across themes */
-.sf-float-group > .e-richtexteditor {
-    margin-top: 0 !important; /* remove any top margin on the wrapper */
-}
+    .sf-float-group .e-rte-toolbar {
+        padding-top: 0 !important; /* some themes add top padding */
+        margin-top: 0 !important;
+    }
+    /* Optional: make placeholder slightly lighter, like inputs */
+    .sf-float-group .e-richtexteditor .e-placeholder {
+        opacity: 0.75;
+    }
 
-.sf-float-group .e-rte-toolbar {
-    padding-top: 0 !important; /* some themes add top padding */
-    margin-top: 0 !important;
-}
-
-/* Optional: make placeholder slightly lighter, like inputs */
-.sf-float-group .e-richtexteditor .e-placeholder {
-    opacity: 0.75;
-}
-
-.persons-layout {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-auto-rows: auto;
-    gap: 15px 30px; /* 15px between rows, 30px between columns */
-    width: 100%;
-}
-
-.persons-col {
-    min-width: 0; /* voorkomt overflow van de grid */
-}
-
-.persons-full {
-    grid-column: 1 / span 2;
-}
-
-.persons-grid-label {
-    display: block;
-    font-weight: bold;
-    margin-top: 5px;
-    margin-bottom: 4px;
-}
-
-/* Responsive: onder elkaar bij smalle schermen */
-@media (max-width: 768px) {
     .persons-layout {
-        grid-template-columns: 1fr;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-auto-rows: auto;
+        gap: 15px 30px; /* 15px between rows, 30px between columns */
+        width: 100%;
+    }
+
+    .persons-col {
+        min-width: 0; /* voorkomt overflow van de grid */
     }
 
     .persons-full {
-        grid-column: auto;
+        grid-column: 1 / span 2;
     }
-}
 
-.form-group {
-    display: flex;
-    flex-direction: column; /* label boven input */
-    align-items: center; /* horizontaal centreren */
-}
+    .persons-grid-label {
+        display: block;
+        font-weight: bold;
+        margin-top: 5px;
+        margin-bottom: 4px;
+    }
+    /* Responsive: onder elkaar bij smalle schermen */
+    @media (max-width: 768px) {
+        .persons-layout {
+            grid-template-columns: 1fr;
+        }
 
-.checkbox-wrapper {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    width: 60px;
-    height: 60px;
-    margin: 0 2px;
-    box-sizing: border-box;
-}
+        .persons-full {
+            grid-column: auto;
+        }
+    }
 
-.custom-checkbox-label {
-    color: #6c757d;
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 4px;
-    text-align: center;
-}
+    .form-group {
+        display: flex;
+        flex-direction: column; /* label boven input */
+        align-items: center; /* horizontaal centreren */
+    }
 
-.big-checkbox .e-frame,
-.big-checkbox .e-icons {
-    transform: scale(1.3); /* iets groter maar niet breken */
-    margin: 0 auto;
-}
+    .checkbox-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        width: 60px;
+        height: 60px;
+        margin: 0 2px;
+        box-sizing: border-box;
+    }
 
-.big-checkbox {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 32px;
-    margin: 0;
-    padding: 0;
-}
+    .custom-checkbox-label {
+        color: #6c757d;
+        font-size: 12px;
+        font-weight: bold;
+        margin-bottom: 4px;
+        text-align: center;
+    }
 
-* Rode rand voor Syncfusion TextBox / ComboBox bij invalid */
-.e-input-group.e-control-wrapper.invalid input,
-.e-input-group.e-control-wrapper.invalid .e-control {
-    border: 1px solid red !important;
-}
+    .big-checkbox .e-frame,
+    .big-checkbox .e-icons {
+        transform: scale(1.3); /* iets groter maar niet breken */
+        margin: 0 auto;
+    }
+
+    .big-checkbox {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 32px;
+        margin: 0;
+        padding: 0;
+    }
+
+    * Rode rand voor Syncfusion TextBox / ComboBox bij invalid */ .e-input-group.e-control-wrapper.invalid input, .e-input-group.e-control-wrapper.invalid .e-control {
+        border: 1px solid red !important;
+    }

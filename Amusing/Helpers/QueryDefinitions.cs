@@ -1500,4 +1500,17 @@ public static class QueryDefinitions
         DELETE FROM amusing.ah_mailing_templates 
         WHERE id = @QueryId;";
 
+    #region Logging queries
+    public static readonly string LogUserLogin = @"
+        INSERT INTO amusing.user_log
+            (user_id, ip_address, area, action, status, report)
+        VALUES (@UserId, @UserIp, @Area, @Action, @Status, @Report);";
+
+    public static readonly string LogError = @"
+        INSERT INTO amusing.user_log
+            (ip_address, area, action, status, report)
+        VALUES (@Area, @Action, @Status, @Report);";
+
+    #endregion
+
 }

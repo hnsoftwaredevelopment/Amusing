@@ -1,3 +1,20 @@
+.greeting {
+    color: #ffee00;
+    font-weight: 600;
+    margin-top: 10px;
+    margin-left: 5px;
+    font-size: 1.0rem;
+    border-radius: 8px;
+    padding: 3px;
+}
+
+.nav-menu {
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+    flex-shrink: 0;
+}
+
 .navbar-toggler {
     appearance: none;
     cursor: pointer;
