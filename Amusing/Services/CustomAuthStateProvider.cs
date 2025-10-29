@@ -1,14 +1,17 @@
-﻿using System.Security.Claims;
+﻿using Blazored.SessionStorage;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Amusing.Models;
+
+namespace Amusing.Services;
 
 public class CustomAuthStateProvider : AuthenticationStateProvider
 {
-    private readonly ProtectedSessionStorage _sessionStorage;
-    private ClaimsPrincipal _anonymous = new ClaimsPrincipal(new ClaimsIdentity());
+    private readonly ISessionStorageService _sessionStorage;
+    private ClaimsPrincipal _anonymous = new(new ClaimsIdentity());
 
-    public CustomAuthStateProvider( ProtectedSessionStorage sessionStorage )
+    public CustomAuthStateProvider( ISessionStorageService sessionStorage )
     {
         _sessionStorage = sessionStorage;
     }
@@ -17,33 +20,34 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
     {
         try
         {
-            var storedUser = await _sessionStorage.GetAsync<LoginModel>("loggedUser");
-
-            if ( storedUser.Success && storedUser.Value != null )
+            var storedUser = await _sessionStorage.GetItemAsync<LoginModel>("loggedUser");
+            if ( storedUser != null )
             {
-                var user = CreateClaimsPrincipal(storedUser.Value);
+                var user = CreateClaimsPrincipal(storedUser);
                 return new AuthenticationState( user );
             }
         }
         catch
         {
-            // Session niet leesbaar of nog niet aangemaakt
+            // No session available or storage not readable
         }
 
         return new AuthenticationState( _anonymous );
     }
 
-    public async Task MarkUserAsAuthenticated( LoginModel loginUser )
+    public async Task MarkUserAsAuthenticated( LoginModel user )
     {
-        await _sessionStorage.SetAsync( "loggedUser", loginUser );
+        // Store user in session storage
+        await _sessionStorage.SetItemAsync( "loggedUser", user );
 
-        var user = CreateClaimsPrincipal(loginUser);
-        NotifyAuthenticationStateChanged( Task.FromResult( new AuthenticationState( user ) ) );
+        // Create claims
+        var authenticatedUser = CreateClaimsPrincipal(user);
+        NotifyAuthenticationStateChanged( Task.FromResult( new AuthenticationState( authenticatedUser ) ) );
     }
 
     public async Task MarkUserAsLoggedOut()
     {
-        await _sessionStorage.DeleteAsync( "loggedUser" );
+        await _sessionStorage.RemoveItemAsync( "loggedUser" );
         NotifyAuthenticationStateChanged( Task.FromResult( new AuthenticationState( _anonymous ) ) );
     }
 
@@ -51,11 +55,12 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, user.Username),
-            new Claim(ClaimTypes.Role, user.Role)
+            new(ClaimTypes.Name, user.Username),
+            new("UserId", user.UserId.ToString()),
+            new(ClaimTypes.Role, user.Role ?? "")
         };
 
-        var identity = new ClaimsIdentity(claims, "CustomAuth");
+        var identity = new ClaimsIdentity(claims, "apiauth");
         return new ClaimsPrincipal( identity );
     }
 }

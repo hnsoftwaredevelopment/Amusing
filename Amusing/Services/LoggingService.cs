@@ -74,7 +74,7 @@ public class LoggingService
         } );
     }
 
-    public async Task WritUserLoginAttemptAsync( string _status, string _report )
+    public async Task WriteUserLoginAttemptAsync( string _status, string _report )
     {
         if ( _report == "" )
         {
@@ -105,6 +105,49 @@ public class LoggingService
                 { "@UserIp", _userIp },
                 { "@Area", "Toegang" },
                 { "@Action", "Inloggen" },
+                { "@Status", "Fout" },
+                { "@Report", ex.Message }
+            };
+
+            await _dataService.ExecuteNonQueryAsync( QueryDefinitions.LogError, err_parameters );
+        }
+        return;
+    }
+
+    public async Task WriteUserLogoutAttemptAsync( string _status, string _report )
+    {
+        if ( _report == "" )
+        {
+            return;
+        }
+
+        var authState = await _authProvider.GetAuthenticationStateAsync();
+        var claimUser = authState.User;
+        string? _userId = claimUser.FindFirst("UserId")?.Value;
+        
+        string _userIp = _userContextHelper.GetUserIp();
+
+        Dictionary<string, object> parameters = new()
+        {
+            { "@UserId", _userId },
+            { "@UserIp", _userIp },
+            { "@Area", "Toegang" },
+            { "@Action", "Uitloggen" },
+            { "@Status", _status },
+            { "@Report", _report }
+        };
+
+        try
+        {
+            await _dataService.ExecuteNonQueryAsync( QueryDefinitions.LogUserLogin, parameters );
+        }
+        catch ( Exception ex )
+        {
+            Dictionary<string, object> err_parameters = new()
+            {
+                { "@UserIp", _userIp },
+                { "@Area", "Toegang" },
+                { "@Action", "Uitloggen" },
                 { "@Status", "Fout" },
                 { "@Report", ex.Message }
             };
@@ -146,4 +189,16 @@ public class LoggingService
     }
     #endregion
 
+    private ClaimsPrincipal CreateClaimsPrincipal( LoginModel user )
+    {
+        var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Name, user.Username),
+        new Claim(ClaimTypes.Role, user.Role ?? ""),
+        new Claim("UserId", user.UserId.ToString())
+    };
+
+        var identity = new ClaimsIdentity(claims, "apiauth");
+        return new ClaimsPrincipal( identity );
+    }
 }

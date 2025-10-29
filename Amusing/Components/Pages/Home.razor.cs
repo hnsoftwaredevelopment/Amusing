@@ -18,6 +18,9 @@ public partial class Home : ComponentBase
     private SfGrid<LogModel>? _gridLog;
     private List<LogModel> _loggingList = [];
 
+    [Inject]
+    private LoggingService _loggingService { get; set; } = default!;
+
     public List<string> ToolbarItems = ["Zoek"];
 
     SfTextBox searchBox { get; set; }
@@ -26,7 +29,7 @@ public partial class Home : ComponentBase
     {
         _isLoading = true;
 
-        _loggingList = await LoggingService.GetUserLoginsAsync();
+        _loggingList = await _loggingService.GetUserLoginsAsync();
 
         _isLoading = false;
 

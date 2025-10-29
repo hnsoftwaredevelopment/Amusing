@@ -8,6 +8,8 @@ using Amusing.Security;
 using Amusing.Services;
 using Amusing.Services.Legacy;
 
+using Blazored.SessionStorage;
+
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -115,6 +117,7 @@ builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<ProtectedSessionStorage>();
 
+builder.Services.AddBlazoredSessionStorage();
 builder.Services.AddAuthorizationCore();
 
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
