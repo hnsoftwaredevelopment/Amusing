@@ -1,0 +1,127 @@
+﻿@page "/Lists-Groups"
+@using Amusing.Models
+@using Amusing.Services
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+
+@inject RegistrationService RegistrationService
+
+@inherits ListGroups
+
+<h3>Overzicht van deelname per groep per festival</h3>
+<label for="FilterOutOldGroups" style="padding: 10px 10px 10px 0">Toon koren die voor @(FilterOnFestival) zijn aangemaakt maar na @(FilterOnFestival) niet meer hebben deelgenomen</label>
+
+<SfSwitch Checked="FilterOutOldGroups" CheckedChanged="@(async ( bool val ) => await OnFilterChanged( val ))" />
+
+@if (IsLoading)
+{
+    <div class="text-center p-2">
+        <SfSpinner CssClass="e-spin-center" />
+        <p>Gegevens worden geladen...</p>
+    </div>
+}
+else
+{
+    <div>
+		<label style="padding: 0 0 -20px 0; font-weight: 600">Vanaf welk jaar moet het overzicht worden</label>
+        <SfSlider 
+			@bind-Value="@slidervalue"
+            Min="@minslider" 
+            Max="@maxslider" >
+
+            <SliderTicks 
+                Placement="Placement.After" 
+                LargeStep="1">
+            </SliderTicks>
+        </SfSlider>
+    </div>
+
+    <div class="spacer-extralarge"></div>
+
+    <div style="overflow-x:auto; min-width: 800px; padding-right: 10px; margin-top: 10px;">
+        <SfGrid @ref="GridRef" 
+            DataSource="@Zanggroepen" 
+			AllowExcelExport="true" 
+            AllowResizing="true"
+            AllowPdfExport="true"
+            AllowMultiSorting=true 
+            AllowSorting=true >
+
+			<GridEvents TValue="FestivalParticipationDynamicViewModel"
+                DataBound="OnGridDataBound"
+                OnActionComplete="OnGridActionComplete" />
+ 
+            <SfToolbar>
+	            <ToolbarItems>
+		            <ToolbarItem Type="ItemType.Button">
+			            <Template>
+				            <button class="custom-toolbar-btn" @onclick="ExportToExcel" title="Exporteer naar een Excel bestand">
+					            <img src="icons/excel.svg" class="icon" alt="Excel"/>
+				            </button>
+			            </Template>
+		            </ToolbarItem>
+
+		            <ToolbarItem Type="ItemType.Button">
+			            <Template>
+				            <button class="custom-toolbar-btn" @onclick="ExportToCsv" title="Exporteer naar een CSV bestand">
+					            <img src="icons/csv.svg" class="icon" alt="CSV" />
+				            </button>
+			            </Template>
+		            </ToolbarItem>
+
+		            <ToolbarItem Type="ItemType.Button">
+			            <Template>
+				            <button class="custom-toolbar-btn" @onclick="ExportToPdf" title="Maak een PDF bestand">
+					            <img src="icons/pdf.svg" class="icon" alt="PDF" />
+				            </button>
+			            </Template>
+		            </ToolbarItem>
+
+
+		            <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+			            <Template>
+				            <span class="toolbar-count">Groepen: @VisibleRowCount</span>
+			            </Template>
+		            </ToolbarItem>
+
+		            <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+			            <Template>
+				            <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
+			            </Template>
+		            </ToolbarItem>
+	            </ToolbarItems>
+            </SfToolbar>
+            
+            <GridColumns>
+                <GridColumn Field="Naam" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" />
+                <GridColumn Field="Stad" HeaderText="Stad" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" />
+                <GridColumn Field="Aangemaakt" HeaderText="Aangemaakt" Format="dd-MM-yyyy" Width="100" TextAlign="TextAlign.Center" AllowSorting=false AllowResizing="true" />
+
+                @foreach ( var jaar in VisibleYearCollumns )
+                {
+                    <GridColumn HeaderText="@jaar.ToString()" Width="80" TextAlign="TextAlign.Center" AllowSorting=false AllowResizing="true">
+                        <Template Context="data">
+                            @{
+                                var typedData = data as FestivalParticipationDynamicViewModel;
+                                var datum = typedData?.DeelnamePerJaar.TryGetValue(jaar, out var value) == true
+                                        ? value
+                                        : null;
+                            }
+
+                            @if ( !string.IsNullOrWhiteSpace( datum ) )
+                            {
+                                <span>@datum</span>
+                            }
+                            else
+                            {
+                                <span style="color: gray;"></span>
+                            }
+                        </Template>
+                    </GridColumn>
+                }
+            </GridColumns>
+        </SfGrid>
+    </div>
+}
