@@ -23,4 +23,15 @@ public class FestivalModel
     public int MaximumMinutenTussenOptredens { get; set; }
     public int MaximumUrenVrijwilligers { get; set; }
     public decimal BoeteOnderbrekingOptredens { get; set; }
+
+    // --- Export-safe mirror properties ---
+    public DateTime FestivaldatumExport => Festivaldatum.ToDateTime( TimeOnly.MinValue );
+    public DateTime StartInschrijvingExport => StartInschrijving.ToDateTime( TimeOnly.MinValue );
+    public DateTime EindeInschrijvingExport => EindeInschrijving.ToDateTime( TimeOnly.MinValue );
+
+    public DateTime StartVrijwilligersTakenExport => DateTime.Today.Add( StartVrijwilligersTaken.ToTimeSpan() );
+    public DateTime EindeVrijwilligersTakenExport => DateTime.Today.Add( EindeVrijwilligersTaken.ToTimeSpan() );
+    public DateTime StartVrijwilligersPauzeExport => DateTime.Today.Add( StartVrijwilligersPauze.ToTimeSpan() );
+    public DateTime EindeVrijwilligersPauzeExport => DateTime.Today.Add( EindeVrijwilligersPauze.ToTimeSpan() );
+    public DateTime EindeVasteVrijwilligersTakenExport => DateTime.Today.Add( EindeVasteVrijwilligersTaken.ToTimeSpan() );
 }

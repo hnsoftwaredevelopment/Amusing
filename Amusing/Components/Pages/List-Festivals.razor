@@ -6,7 +6,7 @@
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
 
-@inject FestivalService FestivalService;
+@inherits ListFestivals;
 
 <h3>Overzicht @FileName</h3>
 @if ( IsLoading )
@@ -83,102 +83,10 @@ else
 
             <GridColumns>
                 <GridColumn Field="Festival" HeaderText="Festival" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="40px"/>
-                <GridColumn Field="Festivaldatum" HeaderText="Datum" Format="dd MMMM yyyy" Type="ColumnType.Date" Width="70px"/>
+                <GridColumn Field="FestivaldatumExport" HeaderText="Datum" Format="dd MMMM yyyy" Type="ColumnType.Date" Width="70px"/>
                 <GridColumn Field="Gepubliceerd" HeaderText="Gepubliceerd" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="70px"/>
             </GridColumns>
 
         </SfGrid>
     </div>
-}
-
-@code 
-{
-    private bool IsLoading = false;
-    private bool _initialLoadDone = false;
-    private SfGrid<FestivalModel> GridRef;
-    private int VisibleRowCount = 0;
-    private List<FestivalModel> Festivals = [];
-    private string FileName = "Festivals";
-
-    protected override async Task OnInitializedAsync()
-{
-    IsLoading = true;
-    Festivals = await FestivalService.GetFestivalOverviewAsync();
-    IsLoading = false;
-}
-
-// Manage direct search functionality
-public async void OnInput( InputEventArgs args )
-{
-    await GridRef.SearchAsync( args.Value );
-
-    await Task.Delay( 50 );
-    await UpdateVisibleRowCountAsync();
-}
-
-private async Task UpdateVisibleRowCountAsync()
-{
-    if ( GridRef is not null )
-    {
-        await GridRef.Refresh();
-        await Task.Delay( 50 );
-        var records = await GridRef.GetCurrentViewRecordsAsync();
-        await Task.Delay( 150 );
-        VisibleRowCount = records?.Count ?? 0;
-        StateHasChanged();
-    }
-}
-
-private async Task OnGridDataBound()
-{
-    if ( !_initialLoadDone )
-    {
-        _initialLoadDone = true;
-        await UpdateVisibleRowCountAsync();
-    }
-}
-
-private async Task OnGridActionComplete( ActionEventArgs<PersonOverviewModel> args )
-{
-    if ( args.RequestType == Syncfusion.Blazor.Grids.Action.Refresh ||
-    args.RequestType == Syncfusion.Blazor.Grids.Action.Filtering ||
-    args.RequestType == Syncfusion.Blazor.Grids.Action.Paging ||
-    args.RequestType == Syncfusion.Blazor.Grids.Action.Sorting )
-    {
-        await UpdateVisibleRowCountAsync();
-    }
-}
-
-// Export functions
-private async Task ExportToExcel()
-{
-    var exportProps = new ExcelExportProperties
-    {
-        FileName = $"{FileName}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx"
-    };
-
-    await GridRef!.ExportToExcelAsync( exportProps );
-}
-
-private async Task ExportToCsv()
-{
-    var exportProps = new ExcelExportProperties
-    {
-        FileName = $"{FileName}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv"
-    };
-
-    await GridRef!.ExportToCsvAsync( exportProps );
-}
-
-private async Task ExportToPdf()
-{
-    var exportProps = new PdfExportProperties
-    {
-        FileName = $"{FileName}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.pdf",
-        PageOrientation = PageOrientation.Landscape,
-        PageSize=PdfPageSize.A4,
-        AllowHorizontalOverflow = true
-    };
-    await GridRef!.ExportToPdfAsync( exportProps );
-}
 }
