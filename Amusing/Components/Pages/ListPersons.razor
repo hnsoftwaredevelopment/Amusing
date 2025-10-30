@@ -1,4 +1,4 @@
-﻿@page "/List-Festivals"
+﻿@page "/List-Persons"
 @using Amusing.Models
 @using Amusing.Services
 @using Syncfusion.Blazor.Buttons
@@ -6,14 +6,12 @@
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
 
-@inherits ListFestivals;
-
-<h3>Overzicht @FileName</h3>
+<h3>Personen</h3>
 @if ( IsLoading )
 {
     <div class="text-center p-2">
         <SfSpinner CssClass="e-spin-center" />
-        <p>@FileName gegevens worden geladen...</p>
+        <p>Gegevens worden geladen...</p>
     </div>
 }
 else
@@ -22,8 +20,8 @@ else
     <div style="overflow-x:auto; min-width: 800px; padding-right: 10px; margin-top: 10px;">
 	    <SfGrid 
             @ref="GridRef" 
-            TValue="FestivalModel"
-            DataSource="@Festivals" 
+            TValue="PersonOverviewModel"
+            DataSource="@Personen" 
             AllowExcelExport="true"  Width="100%"
             AllowResizing="true"
             AllowPdfExport="true"
@@ -31,14 +29,17 @@ else
             AllowSorting="true" 
             AllowTextWrap="true" >
 
-            <GridEvents TValue="FestivalModel"
+            <GridEvents TValue="PersonOverviewModel"
                         DataBound="OnGridDataBound" />
 
             <GridSortSettings>
                 <GridSortColumns>
-                    <GridSortColumn Field="Festival" Direction="SortDirection.Descending"></GridSortColumn>
+                    <GridSortColumn Field="Naam" Direction="SortDirection.Ascending"></GridSortColumn>
+                    <GridSortColumn Field="Email" Direction="SortDirection.Ascending"></GridSortColumn>
                 </GridSortColumns>
             </GridSortSettings>
+
+            <GridTextWrapSettings WrapMode=WrapMode.Content></GridTextWrapSettings>
 
             <SfToolbar>
                 <ToolbarItems>
@@ -82,9 +83,21 @@ else
             </SfToolbar>
 
             <GridColumns>
-                <GridColumn Field="Festival" HeaderText="Festival" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="40px"/>
-                <GridColumn Field="FestivaldatumExport" HeaderText="Datum" Format="dd MMMM yyyy" Type="ColumnType.Date" Width="70px"/>
-                <GridColumn Field="Gepubliceerd" HeaderText="Gepubliceerd" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="70px"/>
+                <GridColumn Field="Naam" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="20%"/>
+                <GridColumn Field="Email" HeaderText="E-Mail" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="30%"/>
+
+                <GridColumn HeaderText="Rollen" TextAlign="TextAlign.Left" AllowSorting="false" Width="25%">
+                    <Template Context="persoon">
+                        @string.Join( ", ", ( ( PersonOverviewModel ) persoon ).Rollen )
+                    </Template>
+                </GridColumn>
+
+                <GridColumn HeaderText="Vrijwilliger in" TextAlign="TextAlign.Left" AllowSorting="false" Width="25%">
+                    <Template Context="persoon">
+                        @string.Join( ", ", ( ( PersonOverviewModel ) persoon ).Vrijwilliger )
+                    </Template>
+                </GridColumn>
+
             </GridColumns>
 
         </SfGrid>

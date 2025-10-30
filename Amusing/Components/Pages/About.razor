@@ -2,8 +2,6 @@
 @using Amusing.Models
 @using Amusing.Services
 
-@inject GitHubService GitHubService
-
 <h3>Over Amusing - Beheer</h3>
 <div style="width: 650px; border:2px solid #ccc; border-radius:15px; padding:12px;">
     <div class="text-center">
@@ -25,18 +23,3 @@
         <GridColumn Field="Date" HeaderText="Datum" Format="d" Type="ColumnType.Date"></GridColumn>
     </GridColumns>
 </SfGrid>
-
-@code
-{
-    private List<CommitModel> commits = new();
-    private string? assemblyVersion = string.Empty;
-    private string? imageSource;
-
-    protected override async Task OnInitializedAsync()
-    {
-        imageSource = $"images/logo.svg";
-        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-        assemblyVersion = assembly.GetName().Version?.ToString() ?? "Onbekend";
-        commits = await GitHubService.GetCommitsAsync( "hnsoftwaredevelopment", "amusing" );
-    }
-}

@@ -1,4 +1,4 @@
-﻿@page "/List-Stages"
+﻿@page "/List-Tasks"
 @using Amusing.Models
 @using Amusing.Services
 @using Syncfusion.Blazor.Buttons
@@ -6,14 +6,12 @@
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
 
-@inherits ListStages;
-
-<h3>Active podia</h3>
+<h3>@FileNameActive</h3>
 @if (IsLoading)
 {
     <div class="text-center p-2">
         <SfSpinner CssClass="e-spin-center" />
-        <p>Gegevens worden geladen...</p>
+        <p>@FileNameActive worden geladen...</p>
     </div>
 }
 else
@@ -21,8 +19,8 @@ else
     <div class="spacer-small"></div>
     <div style="overflow-x:auto; min-width: 800px; padding-right: 10px; margin-top: 10px;">
         <SfGrid @ref="GridRefActive"
-                TValue="StageModel"
-                DataSource="@ActievePodia"
+                TValue="TaskModel"
+                DataSource="@ActieveTaken"
                 AllowExcelExport="true" Width="100%"
                 AllowResizing="true"
                 AllowPdfExport="true"
@@ -30,12 +28,12 @@ else
                 AllowSorting="true"
                 AllowTextWrap="true">
 
-            <GridEvents TValue="StageModel"
+            <GridEvents TValue="TaskModel"
                         DataBound="OnGridDataBoundActive" />
 
-            <GridSortSettings>
+             <GridSortSettings>
                 <GridSortColumns>
-                    <GridSortColumn Field="KaartId" Direction="SortDirection.Ascending"></GridSortColumn>
+                    <GridSortColumn Field="Naam" Direction="SortDirection.Ascending"></GridSortColumn>
                 </GridSortColumns>
             </GridSortSettings>
 
@@ -45,7 +43,7 @@ else
                 <ToolbarItems>
                     <ToolbarItem Type="ItemType.Button">
                         <Template>
-                            <button class="custom-toolbar-btn" @onclick="ExportToExcelActive" title="Exporteer naar een Excel bestand" disabled="@(!CanExportActive)">
+                            <button class="custom-toolbar-btn" @onclick="ExportToExcelActive" title="Exporteer naar een Excel bestand">
                                 <img src="icons/excel.svg" class="icon" alt="Excel" />
                             </button>
                         </Template>
@@ -53,7 +51,7 @@ else
 
                     <ToolbarItem Type="ItemType.Button">
                         <Template>
-                            <button class="custom-toolbar-btn" @onclick="ExportToCsvActive" title="Exporteer naar een CSV bestand" disabled="@(!CanExportActive)">
+                            <button class="custom-toolbar-btn" @onclick="ExportToCsvActive" title="Exporteer naar een CSV bestand">
                                 <img src="icons/csv.svg" class="icon" alt="CSV" />
                             </button>
                         </Template>
@@ -61,7 +59,7 @@ else
 
                     <ToolbarItem Type="ItemType.Button">
                         <Template>
-                            <button class="custom-toolbar-btn" @onclick="ExportToPdfActive" title="Maak een PDF bestand" disabled="@(!CanExportActive)">
+                            <button class="custom-toolbar-btn" @onclick="ExportToPdfActive" title="Maak een PDF bestand">
                                 <img src="icons/pdf.svg" class="icon" alt="PDF" />
                             </button>
                         </Template>
@@ -84,27 +82,16 @@ else
 
             <GridColumns>
                 <GridColumn Field="Naam" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" />
-                <GridColumn Field="Soort" HeaderText="Soort" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="65px" />
-                <GridColumn Field="Type" HeaderText="Type" TextAlign="TextAlign.Center" AllowSorting=false AllowResizing="true" Width="60px" />
-                <GridColumn Field="Kwaliteit" HeaderText="Kwaliteit" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="90px" />
-                <GridColumn Field="MaxZangers" HeaderText="Max.Zangers" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="100"/>
-                <GridColumn Field="Vrijwilligers" HeaderText="Vrijwilligers" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="110px" />
-                
-                <GridColumn HeaderText="Optredens" TextAlign="TextAlign.Center" Width="160px">
-                    <GridColumns>
-                        <GridColumn Field="Start" HeaderText="Start" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="80px" />
-                        <GridColumn Field="Eind" HeaderText="Eind" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="80px" />
-                    </GridColumns>
-                </GridColumn>
+                <GridColumn Field="MinimumDuur" HeaderText="Soort" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="65px" />
+                <GridColumn Field="Maximumduur" HeaderText="Type" TextAlign="TextAlign.Center" AllowSorting=false AllowResizing="true" Width="60px" />
 
                 <GridColumn HeaderText="Vrijwilligers" TextAlign="TextAlign.Center" Width="160px">
                     <GridColumns>
                         <GridColumn Field="Van" HeaderText="Van" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="80px" />
                         <GridColumn Field="Tot" HeaderText="Tot" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="80px" />
+                        <GridColumn Field="Aantal" HeaderText="Tot" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="80px" />
                     </GridColumns>
                 </GridColumn>
-
-                <GridColumn Field="KaartId" HeaderText="Kaart" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="80px" />
             </GridColumns>
         </SfGrid>
     </div>
@@ -112,12 +99,12 @@ else
 
 <div class="spacer-extraextralarge"></div>
 
-<h3>Inactive podia</h3>
+<h3>@FileNameInactive</h3>
 @if (IsLoading)
 {
     <div class="text-center p-2">
         <SfSpinner CssClass="e-spin-center" />
-        <p>Gegevens worden geladen...</p>
+        <p>@FileNameInactive worden geladen...</p>
     </div>
 }
 else
@@ -125,8 +112,8 @@ else
     <div class="spacer-small"></div>
     <div style="overflow-x:auto; min-width: 800px; padding-right: 10px; margin-top: 10px;">
         <SfGrid @ref="GridRefInactive"
-                TValue="StageModel"
-                DataSource="@InactievePodia"
+                TValue="TaskModel"
+                DataSource="@InactieveTaken"
                 AllowExcelExport="true" Width="100%"
                 AllowResizing="true"
                 AllowPdfExport="true"
@@ -134,7 +121,7 @@ else
                 AllowSorting="true"
                 AllowTextWrap="true">
 
-            <GridEvents TValue="StageModel"
+            <GridEvents TValue="TaskModel"
                         DataBound="OnGridDataBoundInactive" />
 
             <GridSortSettings>
@@ -149,7 +136,7 @@ else
                 <ToolbarItems>
                     <ToolbarItem Type="ItemType.Button">
                         <Template>
-                            <button class="custom-toolbar-btn" @onclick="ExportToExcelInactive" title="Exporteer naar een Excel bestand" disabled="@(!CanExportInactive)">
+                            <button class="custom-toolbar-btn" @onclick="ExportToExcelInactive" title="Exporteer naar een Excel bestand">
                                 <img src="icons/excel.svg" class="icon" alt="Excel" />
                             </button>
                         </Template>
@@ -157,7 +144,7 @@ else
 
                     <ToolbarItem Type="ItemType.Button">
                         <Template>
-                            <button class="custom-toolbar-btn" @onclick="ExportToCsvInactive" title="Exporteer naar een CSV bestand" disabled="@(!CanExportInactive)">
+                            <button class="custom-toolbar-btn" @onclick="ExportToCsvInactive" title="Exporteer naar een CSV bestand">
                                 <img src="icons/csv.svg" class="icon" alt="CSV" />
                             </button>
                         </Template>
@@ -165,7 +152,7 @@ else
 
                     <ToolbarItem Type="ItemType.Button">
                         <Template>
-                            <button class="custom-toolbar-btn" @onclick="ExportToPdfInactive" title="Maak een PDF bestand" disabled="@(!CanExportInactive)">
+                            <button class="custom-toolbar-btn" @onclick="ExportToPdfInactive" title="Maak een PDF bestand">
                                 <img src="icons/pdf.svg" class="icon" alt="PDF" />
                             </button>
                         </Template>
@@ -188,27 +175,17 @@ else
 
             <GridColumns>
                 <GridColumn Field="Naam" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" />
-                <GridColumn Field="Soort" HeaderText="Soort" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="65px" />
-                <GridColumn Field="Type" HeaderText="Type" TextAlign="TextAlign.Center" AllowSorting=false AllowResizing="true" Width="60px" />
-                <GridColumn Field="Kwaliteit" HeaderText="Kwaliteit" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="90px" />
-                <GridColumn Field="MaxZangers" HeaderText="Max.Zangers" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="100" />
-                <GridColumn Field="Vrijwilligers" HeaderText="Vrijwilligers" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="110px" />
-
-                <GridColumn HeaderText="Optredens" TextAlign="TextAlign.Center" Width="160px">
-                    <GridColumns>
-                        <GridColumn Field="Start" HeaderText="Start" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="80px" />
-                        <GridColumn Field="Eind" HeaderText="Eind" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="80px" />
-                    </GridColumns>
-                </GridColumn>
+                <GridColumn Field="MinimumDuur" HeaderText="Soort" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="65px" />
+                <GridColumn Field="Maximumduur" HeaderText="Type" TextAlign="TextAlign.Center" AllowSorting=false AllowResizing="true" Width="60px" />
 
                 <GridColumn HeaderText="Vrijwilligers" TextAlign="TextAlign.Center" Width="160px">
                     <GridColumns>
                         <GridColumn Field="Van" HeaderText="Van" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="80px" />
                         <GridColumn Field="Tot" HeaderText="Tot" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="80px" />
+                        <GridColumn Field="Aantal" HeaderText="Tot" TextAlign="TextAlign.Right" AllowSorting=false AllowResizing="true" Width="80px" />
                     </GridColumns>
                 </GridColumn>
             </GridColumns>
         </SfGrid>
     </div>
 }
-
