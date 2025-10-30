@@ -6,7 +6,7 @@
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
 
-@inject StageTypeService StageTypeService;
+@inherits ListStageTypes;
 
 <h3>Podium types</h3>
 @if (IsLoading)
@@ -57,50 +57,3 @@ else
 }
 
 
-@code {
-    private bool IsLoading = false;
-    private bool _initialLoadDone = false;
-    private SfGrid<StageTypeModel> GridRef;
-    private int VisibleRowCount = 0;
-    private List<StageTypeModel> StageTypes = [];
-    private string FileName = "Podium types";
-
-    protected override async Task OnInitializedAsync()
-    {
-        IsLoading = true;
-        StageTypes = await StageTypeService.GetStageTypesAsync();
-        IsLoading = false;
-    }
-
-    // Manage direct search functionality
-    public async void OnInput(InputEventArgs args)
-    {
-        await GridRef.SearchAsync(args.Value);
-
-        await Task.Delay(50);
-        await UpdateVisibleRowCountAsync();
-    }
-
-    private async Task UpdateVisibleRowCountAsync()
-    {
-        if (GridRef is not null)
-        {
-            await GridRef.Refresh();
-            await Task.Delay(50);
-            var records = await GridRef.GetCurrentViewRecordsAsync();
-            await Task.Delay(150);
-            VisibleRowCount = records?.Count ?? 0;
-            StateHasChanged();
-        }
-    }
-
-    private async Task OnGridDataBound()
-    {
-        if (!_initialLoadDone)
-        {
-            _initialLoadDone = true;
-            await UpdateVisibleRowCountAsync();
-        }
-    }
-
-}

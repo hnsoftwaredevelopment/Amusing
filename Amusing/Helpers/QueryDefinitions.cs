@@ -620,7 +620,7 @@ public static class QueryDefinitions
     public static readonly string GetStageTypes = @"
         SELECT 
             pt.type,
-            CONCAT('€ ', FORMAT(pt.prijs, 2, 'nl_NL')) AS prijs,
+            FORMAT(pt.prijs, 2, 'nl_NL') AS prijs,
             TRIM(TRAILING ', ' FROM 
                 CONCAT(
                     CASE 
