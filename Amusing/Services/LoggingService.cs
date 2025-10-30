@@ -8,6 +8,8 @@ using BootstrapBlazor.Components;
 
 using Microsoft.AspNetCore.Components.Authorization;
 
+using Syncfusion.Blazor.Data;
+
 namespace Amusing.Services;
 
 public class LoggingService
@@ -148,7 +150,54 @@ public class LoggingService
                 { "@UserIp", _userIp },
                 { "@Area", "Toegang" },
                 { "@Action", "Uitloggen" },
-                { "@Status", "Fout" },
+                { "@Status", "Error" },
+                { "@Report", ex.Message }
+            };
+
+            await _dataService.ExecuteNonQueryAsync( QueryDefinitions.LogError, err_parameters );
+        }
+        return;
+    }
+
+    public async Task WriteUserActionAsync( string _area, string _action, string _status, string _report )
+    {
+        if ( _report == "" )
+        {
+            return;
+        }
+
+        var authState = await _authProvider.GetAuthenticationStateAsync();
+        var claimUser = authState.User;
+        string? _userId = claimUser.FindFirst("UserId")?.Value;
+        string? userName = ((System.Security.Claims.ClaimsIdentity?)claimUser.Identity)?.Name;
+        userName = string.IsNullOrWhiteSpace( userName ) ? "Een onbekende gebruiker" : userName;
+        _report = ( _report ?? string.Empty ).Replace( "<_userName>", userName );
+
+
+        string _userIp = _userContextHelper.GetUserIp();
+
+        Dictionary<string, object> parameters = new()
+        {
+            { "@UserId", _userId },
+            { "@UserIp", _userIp },
+            { "@Area", _area },
+            { "@Action", _action },
+            { "@Status", _status },
+            { "@Report", _report }
+        };
+
+        try
+        {
+            await _dataService.ExecuteNonQueryAsync( QueryDefinitions.LogUserLogin, parameters );
+        }
+        catch ( Exception ex )
+        {
+            Dictionary<string, object> err_parameters = new()
+            {
+                { "@UserIp", _userIp },
+                { "@Area", _area },
+                { "@Action", _action },
+                { "@Status", "Error" },
                 { "@Report", ex.Message }
             };
 
