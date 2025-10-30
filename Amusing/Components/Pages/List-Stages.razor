@@ -6,7 +6,7 @@
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
 
-@inject StageService StageService;
+@inherits ListStages;
 
 <h3>Active podia</h3>
 @if (IsLoading)
@@ -45,7 +45,7 @@ else
                 <ToolbarItems>
                     <ToolbarItem Type="ItemType.Button">
                         <Template>
-                            <button class="custom-toolbar-btn" @onclick="ExportToExcelActive" title="Exporteer naar een Excel bestand">
+                            <button class="custom-toolbar-btn" @onclick="ExportToExcelActive" title="Exporteer naar een Excel bestand" disabled="@(!CanExportActive)">
                                 <img src="icons/excel.svg" class="icon" alt="Excel" />
                             </button>
                         </Template>
@@ -53,7 +53,7 @@ else
 
                     <ToolbarItem Type="ItemType.Button">
                         <Template>
-                            <button class="custom-toolbar-btn" @onclick="ExportToCsvActive" title="Exporteer naar een CSV bestand">
+                            <button class="custom-toolbar-btn" @onclick="ExportToCsvActive" title="Exporteer naar een CSV bestand" disabled="@(!CanExportActive)">
                                 <img src="icons/csv.svg" class="icon" alt="CSV" />
                             </button>
                         </Template>
@@ -61,7 +61,7 @@ else
 
                     <ToolbarItem Type="ItemType.Button">
                         <Template>
-                            <button class="custom-toolbar-btn" @onclick="ExportToPdfActive" title="Maak een PDF bestand">
+                            <button class="custom-toolbar-btn" @onclick="ExportToPdfActive" title="Maak een PDF bestand" disabled="@(!CanExportActive)">
                                 <img src="icons/pdf.svg" class="icon" alt="PDF" />
                             </button>
                         </Template>
@@ -149,7 +149,7 @@ else
                 <ToolbarItems>
                     <ToolbarItem Type="ItemType.Button">
                         <Template>
-                            <button class="custom-toolbar-btn" @onclick="ExportToExcelInactive" title="Exporteer naar een Excel bestand">
+                            <button class="custom-toolbar-btn" @onclick="ExportToExcelInactive" title="Exporteer naar een Excel bestand" disabled="@(!CanExportInactive)">
                                 <img src="icons/excel.svg" class="icon" alt="Excel" />
                             </button>
                         </Template>
@@ -157,7 +157,7 @@ else
 
                     <ToolbarItem Type="ItemType.Button">
                         <Template>
-                            <button class="custom-toolbar-btn" @onclick="ExportToCsvInactive" title="Exporteer naar een CSV bestand">
+                            <button class="custom-toolbar-btn" @onclick="ExportToCsvInactive" title="Exporteer naar een CSV bestand" disabled="@(!CanExportInactive)">
                                 <img src="icons/csv.svg" class="icon" alt="CSV" />
                             </button>
                         </Template>
@@ -165,7 +165,7 @@ else
 
                     <ToolbarItem Type="ItemType.Button">
                         <Template>
-                            <button class="custom-toolbar-btn" @onclick="ExportToPdfInactive" title="Maak een PDF bestand">
+                            <button class="custom-toolbar-btn" @onclick="ExportToPdfInactive" title="Maak een PDF bestand" disabled="@(!CanExportInactive)">
                                 <img src="icons/pdf.svg" class="icon" alt="PDF" />
                             </button>
                         </Template>
@@ -212,150 +212,3 @@ else
     </div>
 }
 
-@code {
-    private bool IsLoading = false;
-    private bool _initialLoadDoneActive = false;
-    private bool _initialLoadDoneInactive = false;
-    private SfGrid<StageModel> GridRefActive;
-    private SfGrid<StageModel> GridRefInactive;
-    private int VisibleRowCountActive = 0;
-    private int VisibleRowCountInactive = 0;
-    private List<StageModel> ActievePodia = [];
-    private List<StageModel> InactievePodia = [];
-    private string FileNameActive = "Actieve podia";
-    private string FileNameInactive = "Inactieve podia";
-
-    protected override async Task OnInitializedAsync()
-    {
-        IsLoading = true;
-        ActievePodia = await StageService.GetActiveStagesAsync();
-        InactievePodia = await StageService.GetInActiveStagesAsync();
-        IsLoading = false;
-    }
-
-    // Manage direct search functionality
-    public async void OnInputActive(InputEventArgs args)
-    {
-        await GridRefActive.SearchAsync(args.Value);
-
-        await Task.Delay(50);
-        await UpdateVisibleRowCountActiveAsync();
-    }
-
-    public async void OnInputInactive(InputEventArgs args)
-    {
-        await GridRefInactive.SearchAsync(args.Value);
-
-        await Task.Delay(50);
-        await UpdateVisibleRowCountInactiveAsync();
-    }
-
-    private async Task UpdateVisibleRowCountActiveAsync()
-    {
-        if (GridRefActive is not null)
-        {
-            await GridRefActive.Refresh();
-            await Task.Delay(50);
-            var records = await GridRefActive.GetCurrentViewRecordsAsync();
-            await Task.Delay(150);
-            VisibleRowCountActive = records?.Count ?? 0;
-            StateHasChanged();
-        }
-    }
-
-    private async Task UpdateVisibleRowCountInactiveAsync()
-    {
-        if (GridRefInactive is not null)
-        {
-            await GridRefInactive.Refresh();
-            await Task.Delay(50);
-            var records = await GridRefInactive.GetCurrentViewRecordsAsync();
-            await Task.Delay(150);
-            VisibleRowCountInactive = records?.Count ?? 0;
-            StateHasChanged();
-        }
-    }
-
-    private async Task OnGridDataBoundActive()
-    {
-        if (!_initialLoadDoneActive)
-        {
-            _initialLoadDoneActive = true;
-            await UpdateVisibleRowCountActiveAsync();
-        }
-    }
-
-    private async Task OnGridDataBoundInactive()
-    {
-        if (!_initialLoadDoneInactive)
-        {
-            _initialLoadDoneInactive = true;
-            await UpdateVisibleRowCountInactiveAsync();
-        }
-    }
-
-    // Export functions
-    private async Task ExportToExcelActive()
-    {
-        var exportProps = new ExcelExportProperties
-        {
-            FileName = $"{FileNameActive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx"
-        };
-
-        await GridRefActive!.ExportToExcelAsync(exportProps);
-    }
-
-    private async Task ExportToExcelInactive()
-    {
-        var exportProps = new ExcelExportProperties
-        {
-            FileName = $"{FileNameInactive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx"
-        };
-
-        await GridRefInactive!.ExportToExcelAsync(exportProps);
-    }
-
-    private async Task ExportToCsvActive()
-    {
-        var exportProps = new ExcelExportProperties
-        {
-            FileName = $"{FileNameActive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv"
-        };
-
-        await GridRefActive!.ExportToCsvAsync(exportProps);
-    }
-
-    private async Task ExportToCsvInactive()
-    {
-        var exportProps = new ExcelExportProperties
-        {
-            FileName = $"{FileNameInactive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv"
-        };
-
-        await GridRefInactive!.ExportToCsvAsync(exportProps);
-    }
-
-    private async Task ExportToPdfActive()
-    {
-        var exportProps = new PdfExportProperties
-        {
-            FileName = $"{FileNameActive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.pdf",
-            PageOrientation = PageOrientation.Landscape,
-            PageSize = PdfPageSize.A4,
-            AllowHorizontalOverflow = true
-        };
-        await GridRefActive!.ExportToPdfAsync(exportProps);
-    }
-
-    private async Task ExportToPdfInactive()
-    {
-        var exportProps = new PdfExportProperties
-        {
-            FileName = $"{FileNameInactive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.pdf",
-            PageOrientation = PageOrientation.Landscape,
-            PageSize = PdfPageSize.A4,
-            AllowHorizontalOverflow = true
-        };
-        await GridRefInactive!.ExportToPdfAsync(exportProps);
-    }
-}
