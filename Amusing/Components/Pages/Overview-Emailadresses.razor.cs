@@ -16,7 +16,6 @@ public partial class OverviewEmailAddresses : ComponentBase
 {
     [Inject] private EmailAddressesService EmailAddressesService { get; set; } = default!;
     [Inject] private LoggingService LoggingService { get; set; } = default!;
-    [Inject] private IJSRuntime JS { get; set; } = default!;
 
     protected string? SelectedCountry;
     protected bool IsInitialized;

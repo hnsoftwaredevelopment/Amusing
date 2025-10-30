@@ -15,11 +15,9 @@ namespace Amusing.Components.Pages;
 
 public partial class OverviewRegistrations : ComponentBase
 {
-    [Inject] protected EmailAddressesService EmailAddressesService { get; set; } = default!;
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected EditionService EditionService { get; set; } = default!;
     [Inject] protected RegistrationService RegistrationService { get; set; } = default!;
-    [Inject] protected IJSRuntime JS { get; set; } = default!;
 
     protected SfGrid<RegistrationModel> GridRef;
     protected List<Edition> Editions = new();
