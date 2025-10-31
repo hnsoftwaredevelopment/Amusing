@@ -1506,6 +1506,12 @@ public static class QueryDefinitions
             (user_id, ip_address, area, action, status, report)
         VALUES (@UserId, @UserIp, @Area, @Action, @Status, @Report);";
 
+    public static readonly string LogGroupActions = @"
+        INSERT INTO amusing.user_log
+            (group_id, user_id, ip_address, area, action, status, report)
+        VALUES (@GroupId, @UserId, @UserIp, @Area, @Action, @Status, @Report);";
+
+
     public static readonly string LogError = @"
         INSERT INTO amusing.user_log
             (ip_address, area, action, status, report)

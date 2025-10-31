@@ -24,7 +24,7 @@ using ChangeEventArgs = Syncfusion.Blazor.Navigations.ChangeEventArgs;
 
 namespace Amusing.Components.Pages;
 
-public partial class Mailings_Templates : ComponentBase, IDisposable
+public partial class MailingsTemplates : ComponentBase, IDisposable
 {
 	private bool _isLoading = false;
 	private bool _disposed = false;
