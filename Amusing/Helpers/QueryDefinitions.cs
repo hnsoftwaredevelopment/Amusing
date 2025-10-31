@@ -351,6 +351,7 @@ public static class QueryDefinitions
         SELECT  
              podium_id AS `Podium-Id`, 
              naam AS `Naam`, 
+             nfve AS `Nfve`, 
              soort AS `Bi/Bu`, 
              TYPE AS `Type`, 
              kwaliteit AS `Kwaliteit`, 
@@ -367,6 +368,7 @@ public static class QueryDefinitions
         SELECT  
 	        podium_id AS `Podium-Id`, 
 	        naam AS `Naam`, 
+            nfve AS `Nfve`, 
 	        soort AS `Bi/Bu`, 
 	        TYPE AS `Type`, 
 	        kwaliteit AS `Kwaliteit`, 
@@ -384,6 +386,7 @@ public static class QueryDefinitions
         SELECT  
          podium_id AS `Podium-Id`, 
          naam AS `Naam`, 
+         nfve AS `Nfve`, 
          soort AS `Bi/Bu`, 
          TYPE AS `Type`, 
          kwaliteit AS `Kwaliteit`, 
@@ -1515,6 +1518,11 @@ public static class QueryDefinitions
         INSERT INTO amusing.user_log
             (festival_id, user_id, ip_address, area, action, status, report)
         VALUES (@FestivalId, @UserId, @UserIp, @Area, @Action, @Status, @Report);";
+
+    public static readonly string LogStageActions = @"
+        INSERT INTO amusing.user_log
+            (stage_id, user_id, ip_address, area, action, status, report)
+        VALUES (@StageId, @UserId, @UserIp, @Area, @Action, @Status, @Report);";
 
     public static readonly string LogError = @"
         INSERT INTO amusing.user_log

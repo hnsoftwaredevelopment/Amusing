@@ -302,6 +302,54 @@ public class LoggingService
         return;
     }
 
+    public async Task WriteUserActionStageAsync( uint _stageId, string _area, string _action, string _status, string _report )
+    {
+        if ( _report == "" )
+        {
+            return;
+        }
+
+        var authState = await _authProvider.GetAuthenticationStateAsync();
+        var claimUser = authState.User;
+        string? _userId = claimUser.FindFirst("UserId")?.Value;
+        string? userName = ((System.Security.Claims.ClaimsIdentity?)claimUser.Identity)?.Name;
+        userName = string.IsNullOrWhiteSpace( userName ) ? "Een onbekende gebruiker" : userName;
+        _report = ( _report ?? string.Empty ).Replace( "<_userName>", userName );
+
+
+        string _userIp = _userContextHelper.GetUserIp();
+
+        Dictionary<string, object> parameters = new()
+        {
+            { "@UserId", _userId },
+            { "@UserIp", _userIp },
+            { "@StageId", _stageId },
+            { "@Area", _area },
+            { "@Action", _action },
+            { "@Status", _status },
+            { "@Report", _report }
+        };
+
+        try
+        {
+            await _dataService.ExecuteNonQueryAsync( QueryDefinitions.LogStageActions, parameters );
+        }
+        catch ( Exception ex )
+        {
+            Dictionary<string, object> err_parameters = new()
+            {
+                { "@UserIp", _userIp },
+                { "@Area", _area },
+                { "@Action", _action },
+                { "@Status", "Error" },
+                { "@Report", ex.Message }
+            };
+
+            await _dataService.ExecuteNonQueryAsync( QueryDefinitions.LogError, err_parameters );
+        }
+        return;
+    }
+
     public Task<List<LogModel>> GetPersonLoginsAsync()
     {
         return _dataService.ExecuteQueryAsync( SPDefinitions.RunGetPersonLoginsLog, reader =>

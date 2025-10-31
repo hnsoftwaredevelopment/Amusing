@@ -144,11 +144,7 @@ public partial class MaintenanceFestivals : ComponentBase
                 string logMessage =
                 $"<_userName> heeft {diff.PropertyName} van editie {festivalName} gewijzigd van '{diff.OldValue}' in '{diff.NewValue}'.";
 
-                await LoggingService.WriteUserActionAsync(
-                    "Beheer",
-                    "Festivals",
-                    "updated",
-                    logMessage );
+                await LoggingService.WriteUserActionFestivalAsync( SelectedFestival.FestivalId, "Beheer", "Festivals", "updated", logMessage );
             }
         }
 
@@ -208,8 +204,7 @@ public partial class MaintenanceFestivals : ComponentBase
         await FestivalService.DeleteFestivalAsync( SelectedFestival.FestivalId );
 
         var logMessage = $"<_userName> heeft een, nog niet gebruikte, festival editie ({deleteFestival}) verwijderd.";
-
-        await LoggingService.WriteUserActionFestivalAsync( SelectedFestival.FestivalId, "Beheer", "Festivals", "added", logMessage );
+        await LoggingService.WriteUserActionFestivalAsync( SelectedFestival.FestivalId, "Beheer", "Festivals", "deleted", logMessage );
 
         // refresh the table
         var festivalModels = await FestivalService.GetFestivalDataAsync();
