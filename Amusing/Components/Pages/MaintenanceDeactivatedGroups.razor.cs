@@ -27,7 +27,7 @@ public partial class MaintenanceDeactivatedGroups : ComponentBase
     protected string FileName = "Gedeactiveerde (verwijderde) koren";
     public List<Syncfusion.Blazor.Grids.ContextMenuItemModel>? ContextMenuItems = new()
         {
-            new ContextMenuItemModel { Text = "Verwijder alle niet relevante koor data", Id = "destroy" },
+            new ContextMenuItemModel { Text = "Verwijder alle, niet relevante, koor data", Id = "destroy" },
             new ContextMenuItemModel { Text = "Maak koor weer actief", Id = "reactivate" }
         };
 

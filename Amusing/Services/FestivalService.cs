@@ -48,11 +48,13 @@ public class FestivalService( GenericDataService dataService )
     } );
     }
 
-    public async Task<uint> InsertNewFestivalAsync( DateOnly festivalDatum )
+    public async Task<uint> InsertNewFestivalAsync( DateOnly festivalDatum, DateTime startSubscription, DateTime endSubscription )
     {
         Dictionary<string, object> parameters = new()
         {
-            { "@festivaldatum", festivalDatum }
+            { "@festivaldatum", festivalDatum },
+            { "@StartSubscriptionDate", startSubscription },
+            { "@EndSubscriptionDate", endSubscription }
         };
 
         return await _dataService.ExecuteScalarAsync<uint>(

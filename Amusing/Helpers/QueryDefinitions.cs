@@ -811,7 +811,7 @@ public static class QueryDefinitions
             BoeteOnderbrekingOptredens = @BoeteOnderbrekingOptredens
         WHERE festival_id = @festivalid";
     public static readonly string InsertNewFestival = @"
-        INSERT INTO ah_festivals (festivaldatum) VALUES (@festivaldatum);
+        INSERT INTO ah_festivals (festivaldatum, start_inschrijving, eind_inschrijving) VALUES (@festivaldatum, @StartSubscriptionDate, @EndSubscriptionDate);
         SELECT LAST_INSERT_ID();";
     public static readonly string InsertNewCondition = @"
         INSERT INTO amusing.planner_voorwaarden 
@@ -1511,6 +1511,10 @@ public static class QueryDefinitions
             (group_id, user_id, ip_address, area, action, status, report)
         VALUES (@GroupId, @UserId, @UserIp, @Area, @Action, @Status, @Report);";
 
+    public static readonly string LogFestivalActions = @"
+        INSERT INTO amusing.user_log
+            (festival_id, user_id, ip_address, area, action, status, report)
+        VALUES (@FestivalId, @UserId, @UserIp, @Area, @Action, @Status, @Report);";
 
     public static readonly string LogError = @"
         INSERT INTO amusing.user_log
