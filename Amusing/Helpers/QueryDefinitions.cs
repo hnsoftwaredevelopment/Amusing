@@ -1524,6 +1524,11 @@ public static class QueryDefinitions
             (stage_id, user_id, ip_address, area, action, status, report)
         VALUES (@StageId, @UserId, @UserIp, @Area, @Action, @Status, @Report);";
 
+    public static readonly string LogStageTypeActions = @"
+        INSERT INTO amusing.user_log
+            (stagetype, user_id, ip_address, area, action, status, report)
+        VALUES (@StageType, @UserId, @UserIp, @Area, @Action, @Status, @Report);";
+
     public static readonly string LogError = @"
         INSERT INTO amusing.user_log
             (ip_address, area, action, status, report)

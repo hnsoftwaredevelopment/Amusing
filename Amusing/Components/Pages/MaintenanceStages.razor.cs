@@ -189,7 +189,6 @@ public partial class MaintenanceStages : ComponentBase
         var logMessage = $"<_userName> heeft podium \"{SelectedStage.Naam}\" verwijderd.";
         await LoggingService.WriteUserActionStageAsync( SelectedStage.PodiumId, "Beheer", "Podia", "deleted", logMessage );
 
-
         // refresh the table
         var stageModels = await StageService.GetAllStagesAsync();
 
