@@ -6,18 +6,24 @@ namespace Amusing.Helpers;
 public static class ObjectDiffHelper
 {
     // Compare any two objects of the same type and return property changes
-    public static List<PropertyChange> GetDifferences<T>( T original, T modified )
+    public static List<PropertyChange> GetDifferences<T>( T original, T modified, DiffOptions? options = null )
     {
         var changes = new List<PropertyChange>();
 
         if ( original == null || modified == null )
             return changes;
 
+        options ??= new DiffOptions();
+
         var props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
         foreach ( var prop in props )
         {
             if ( !prop.CanRead || prop.GetIndexParameters().Length > 0 )
+                continue;
+
+            // Skip excluded properties
+            if ( options.ExcludedProperties.Contains( prop.Name ) )
                 continue;
 
             var oldValue = prop.GetValue(original);
@@ -29,6 +35,18 @@ public static class ObjectDiffHelper
             // Get friendly display name if available
             var displayAttr = prop.GetCustomAttribute<DisplayAttribute>();
             var displayName = displayAttr?.Name ?? prop.Name;
+
+            // Handle masked properties (like Password)
+            if ( options.MaskedProperties.Contains( prop.Name ) )
+            {
+                changes.Add( new PropertyChange
+                {
+                    PropertyName = displayName,
+                    OldValue = "********",
+                    NewValue = "********"
+                } );
+                continue;
+            }
 
             // Format some types nicely
             string oldStr = FormatValue(oldValue);
@@ -63,4 +81,13 @@ public class PropertyChange
     public string PropertyName { get; set; }
     public string OldValue { get; set; }
     public string NewValue { get; set; }
+}
+
+public class DiffOptions
+{
+    // Fields to completely ignore
+    public List<string> ExcludedProperties { get; set; } = new();
+
+    // Fields that can be logged as "changed" but without showing old/new values
+    public List<string> MaskedProperties { get; set; } = new();
 }
