@@ -122,6 +122,12 @@ else
 
 		<!-- Toolbar -->
 		<div style="flex:0 0 auto; margin-top:0.5rem;">
+			@if ( showSavedMessage )
+			{
+				<div class="toast-message">
+					Dit Sjabloon is succesvol opgeslagen!
+				</div>
+			}
 			<SfToolbar>
 				<ToolbarItems>
 					<ToolbarItem Type="ItemType.Button">

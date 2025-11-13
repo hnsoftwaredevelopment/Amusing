@@ -28,7 +28,8 @@ public partial class MailingsTemplates : ComponentBase, IDisposable
 {
 	private bool _isLoading = false;
 	private bool _disposed = false;
-	private SfTextBox _emailTextBox;
+    private bool showSavedMessage = false;
+    private SfTextBox _emailTextBox;
 	private SfComboBox<int, int> _countComboBox;
 	private string _testEmailAddress = "";
 	private int _testRecipientCount = 15;
@@ -233,8 +234,17 @@ public partial class MailingsTemplates : ComponentBase, IDisposable
 			}
 		}
 
-		// Restore the dutch fieldnames in the UI
-		_selectedTemplatesList.TemplateSubject = _tempSubject;
+        showSavedMessage = true;
+        
+		var _ = Task.Run(async () =>
+        {
+            await Task.Delay(3000);
+            showSavedMessage = false;
+            StateHasChanged();
+        });
+
+        // Restore the dutch fieldnames in the UI
+        _selectedTemplatesList.TemplateSubject = _tempSubject;
 		_selectedTemplatesList.TemplateContent = _tempContent;
 	}
 
@@ -351,11 +361,11 @@ public partial class MailingsTemplates : ComponentBase, IDisposable
 
 			// Register caret tracking for the AutoComplete input
 			await JSRuntime.InvokeVoidAsync( "rteHelpers.registerInput", "subjectAutoInput" );
-
-			// Initialize the right-click context menu for the subject input
-			//await JSRuntime.InvokeVoidAsync( "rteHelpers.updateContextMenu", "subjectAutoInput", AvailableFields.Select( x => new { text = x } ).ToList() );
 			await JSRuntime.InvokeVoidAsync( "rteHelpers.updateContextMenu", "subjectAutoInput", SlashMenuItems );
-		}
+
+            // Initialize the right-click context menu for the subject input
+            await JSRuntime.InvokeVoidAsync( "rteHelpers.updateContextMenu", "rteContent", SlashMenuItems );
+        }
 
 		try
 		{

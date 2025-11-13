@@ -148,20 +148,97 @@
     }
 
     function _insertTextAtCursor(rteId, text) {
-    const rteEl = document.getElementById(rteId);
-    if (!rteEl) return;
-    const rte = rteEl.ej2_instances?.[0];
-    if (!rte) return;
-
     try {
-        // Syncfusion manier
-        rte.executeCommand('insertText', text);
-    } catch {
-        try {
-            rte.editorManager?.execCommand('insertText', text);
-        } catch (e) {
-            console.warn('Fallback insertText failed:', e);
+        // start with the element the user passed
+        let rteEl = document.getElementById(rteId) || document.querySelector('#' + rteId);
+
+        // quick helper to get instance from an element
+        const getInstanceFromEl = (el) => {
+            try { return el?.ej2_instances?.[0] || null; } catch { return null; }
+        };
+
+        let inst = getInstanceFromEl(rteEl);
+
+        // If not found, search for any element that has ej2_instances and seems related to this id
+        if (!inst) {
+            const all = document.getElementsByTagName('*');
+            for (let i = 0; i < all.length && !inst; i++) {
+                const a = all[i];
+                try {
+                    if (a && a.ej2_instances && a.ej2_instances[0]) {
+                        const candidate = a.ej2_instances[0];
+                        // check several heuristics to match the requested rteId:
+                        // - instance.element.id equals the rteId
+                        // - instance.element.id contains the rteId (partial match)
+                        // - the element 'a' contains the original element with rteId (structure where ID is on child)
+                        const instElId = candidate.element?.id;
+                        if (instElId === rteId || (instElId && instElId.includes(rteId))) {
+                            inst = candidate;
+                            rteEl = a;
+                            break;
+                        }
+                        const providedEl = document.getElementById(rteId);
+                        if (providedEl && a.contains && a.contains(providedEl)) {
+                            inst = candidate;
+                            rteEl = a;
+                            break;
+                        }
+                    }
+                } catch (e) {
+                    // ignore DOM access errors on weird nodes
+                }
+            }
         }
+
+        if (!inst) {
+            // last resort: try to pick the first visible richtext instance on the page
+            const list = Array.from(document.querySelectorAll('.e-richtexteditor'));
+            for (let i = 0; i < list.length && !inst; i++) {
+                inst = getInstanceFromEl(list[i]);
+                if (inst) { rteEl = list[i]; break; }
+            }
+        }
+
+        if (!inst) {
+            console.debug(`rteHelpers._insertTextAtCursor: geen RTE instance gevonden voor id='${rteId}'`);
+            return false;
+        }
+
+        // Ensure focus is back in the editor before inserting (contextmenu stole it)
+        try {
+            // Try instance.element, fallback to rteEl or content area
+            if (inst.element && typeof inst.element.focus === 'function') {
+                inst.element.focus();
+            } else if (rteEl && typeof rteEl.focus === 'function') {
+                rteEl.focus();
+            } else {
+                const content = (rteEl && rteEl.querySelector) ? rteEl.querySelector('.e-content, .e-rte-content, [contenteditable]') : null;
+                if (content && typeof content.focus === 'function') content.focus();
+            }
+        } catch (e) { /* ignore focus failures */ }
+
+        // Give focus a moment (helps with some browsers / Syncfusion timing)
+        setTimeout(function () {
+            try {
+                if (typeof inst.executeCommand === 'function') {
+                    inst.executeCommand('insertText', text);
+                    return true;
+                }
+                if (inst.editorManager && typeof inst.editorManager.execCommand === 'function') {
+                    inst.editorManager.execCommand('insertText', text);
+                    return true;
+                }
+                try { document.execCommand('insertText', false, text); return true; } catch { return false; }
+            } catch (e) {
+                console.debug('rteHelpers._insertTextAtCursor insert error', e);
+                return false;
+            }
+        }, 30);
+
+        return true;
+    } catch (outer) {
+        console.debug('rteHelpers._insertTextAtCursor outer error', outer);
+        return false;
     }
 }
 
@@ -391,7 +468,8 @@
                 // nothing to insert into
                 return false;
             }
-
+            console.log('trying insert', rteId, 'initialEl=', document.getElementById(rteId), 'instFound=', !!inst);
+            console.log('instance object', inst);
             return _insertTextIntoRteInstance(instance, text);
         } catch (e) {
             console.debug('rteHelpers.insertTextAtCursor error', e);
@@ -452,9 +530,14 @@
 
                     // On click, insert text at caret position
                     li.onclick = function () {
-                        _insertTextAtCursor(rteId, it.text);
+                        // remove menu first so it doesn't steal focus afterwards
                         menu.remove();
-                    };
+
+                        // small delay so the click handling finishes and focus can be restored
+                        setTimeout(function() {
+                            _insertTextAtCursor(elementId, it.text);
+                        }, 20);
+};
 
                     menu.appendChild(li);
                 });

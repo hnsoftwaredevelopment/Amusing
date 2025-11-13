@@ -1,4 +1,6 @@
-﻿using Amusing.Helpers;
+﻿using System.Net.NetworkInformation;
+
+using Amusing.Helpers;
 using Amusing.Models;
 
 namespace Amusing.Services;
@@ -14,6 +16,7 @@ public class RegistrationService( GenericDataService dataService )
             reader => new RegistrationModel
             {
                 FestivalId = Convert.ToUInt32( reader [ "festival_id" ] ),
+                GroepId = Convert.ToUInt32( reader [ "zanggroep_id" ] ),
                 Datum = Convert.ToDateTime( reader [ "Datum" ] ),
                 Naam = reader [ "Naam" ].ToString(),
                 Stad = reader [ "Stad" ].ToString(),
@@ -25,7 +28,8 @@ public class RegistrationService( GenericDataService dataService )
                 Bevestigd = reader [ "Bevestigd" ].ToString(),
                 Kleedkamer = reader [ "Kleedkamer" ].ToString(),
                 Binnen = Convert.ToInt32( reader [ "Binnen" ] ),
-                Buiten = Convert.ToInt32( reader [ "Buiten" ] )
+                Buiten = Convert.ToInt32( reader [ "Buiten" ] ),
+                Afgehaakt = reader [ "Afgehaakt" ].ToString()
             },
             new Dictionary<string, object> { { "@festivalId", festivalId } }
             );
@@ -91,5 +95,26 @@ public class RegistrationService( GenericDataService dataService )
     );
 
         return result.FirstOrDefault();
+    }
+
+    public async Task UpdatePaymentStatusAsync( uint festivalId, uint groupId, DateTime? paymentDateTime )
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { "@FestivalId", festivalId },
+            { "@GroupId", groupId },
+            { "@Payed", paymentDateTime ?? (object)DBNull.Value }
+        };
+
+        try
+        {
+            await _dataService.ExecuteNonQueryAsync( QueryDefinitions.UpdatePaymentStatus, parameters );
+        }
+        catch ( Exception ex)
+        {
+            // Write error to db in the future
+            Console.WriteLine( $"[UpdatePaymentStatusAsync] Error updating payment status: {ex.Message}" );
+        }
+        return;
     }
 }

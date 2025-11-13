@@ -1,0 +1,17 @@
+.btn {
+    border: none;
+    padding: 5px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-blue {
+    background-color: #007bff; /* Blauw */
+    color: white;
+}
+
+.btn-red {
+    background-color: #dc3545; /* Rood */
+    color: yellow;
+}

@@ -224,6 +224,7 @@ public static class QueryDefinitions
     public static readonly string GetRegistrationsByFestifalId = @"
         SELECT
             i.festival_id AS festival_id,
+            i.zanggroep_id AS zanggroep_id,
             i.ingeschreven AS Datum,
             grp.naam AS Naam,
             grp.standplaats AS Stad,
@@ -246,7 +247,8 @@ public static class QueryDefinitions
             IF((i.bevestigd IS null), 'Nee', 'Ja') AS Bevestigd,
             i.nfve AS Kleedkamer,
             i.binnenoptredens AS Binnen,
-            i.buitenoptredens AS Buiten
+            i.buitenoptredens AS Buiten,
+            IF((i.afgehaakt IS null), 'Nee', 'Ja') AS Afgehaakt
         FROM
             amusing.ah_inschrijvingen i
             LEFT JOIN amusing.ah_zanggroepen grp on i.zanggroep_id = grp.zanggroep_id
@@ -1439,6 +1441,12 @@ public static class QueryDefinitions
           AND per.email IS NOT NULL
           AND per.email <> '';";
     #endregion
+
+    public static readonly string UpdatePaymentStatus = @"
+                    UPDATE amusing.ah_inschrijvingen 
+                    SET Betaald = @Payed 
+                    WHERE festival_id = @FestivalId
+                    AND zanggroep_id = @GroupId;";
 
     public static readonly string GetAllRecipientLists = @"
                     SELECT 

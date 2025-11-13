@@ -21,10 +21,6 @@ public class TransipMailingService
         _settings = settings;
         _logger = logger;
 
-        Debug.WriteLine( "TransipMailingService:" );
-        Debug.WriteLine( $"SMTP: {settings.SmtpHost}:{settings.SmtpPort}" );
-        Debug.WriteLine( $"User: {settings.SmtpUser}   PW: {settings.SmtpPass}" );
-
         // Log errors if configuration seems incomplete
         if ( string.IsNullOrWhiteSpace( _settings.SmtpHost ) )
             _logger.LogError( "SMTP host is missing in EmailSettings.SmtpHost." );
@@ -35,10 +31,6 @@ public class TransipMailingService
 
     public async Task SendAsync( string to, string subject, string body )
     {
-
-        Debug.WriteLine( "SendAsync:" );
-        Debug.WriteLine( $"SMTP: {_settings.SmtpHost}:{_settings.SmtpPort}" );
-        Debug.WriteLine( $"User: {_settings.SmtpUser}" );
         if ( string.IsNullOrWhiteSpace( to ) )
 
         {
