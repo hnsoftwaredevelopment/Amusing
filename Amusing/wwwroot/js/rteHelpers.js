@@ -1,4 +1,6 @@
-﻿(function () {
+﻿// @ts-nocheck
+
+(function () {
     window.rteHelpers = window.rteHelpers || {};
 
     // --- Internal caret storage ---
@@ -145,16 +147,23 @@
         return false;
     }
 
-    function insertTextAtCursor(rte, text) {
-        // Ensure editor and selection exist
-        if (!rte || !rte.editorManager) return;
+    function _insertTextAtCursor(rteId, text) {
+    const rteEl = document.getElementById(rteId);
+    if (!rteEl) return;
+    const rte = rteEl.ej2_instances?.[0];
+    if (!rte) return;
 
-        const editor = rte.editorManager;
-        const selection = rte.getSelection(); // get current selection
-        if (!selection) return;
-
-        editor.execCommand('insertText', text);
+    try {
+        // Syncfusion manier
+        rte.executeCommand('insertText', text);
+    } catch {
+        try {
+            rte.editorManager?.execCommand('insertText', text);
+        } catch (e) {
+            console.warn('Fallback insertText failed:', e);
+        }
     }
+}
 
     // --- Public functions ---
     window.rteHelpers.registerInput = function (id) {
@@ -443,12 +452,7 @@
 
                     // On click, insert text at caret position
                     li.onclick = function () {
-                        var pos = inputEl.selectionStart || 0;
-                        var value = inputEl.value;
-                        inputEl.value = value.substring(0, pos) + it.text + value.substring(pos);
-                        inputEl.focus();
-                        var newCaret = pos + it.text.length;
-                        inputEl.setSelectionRange(newCaret, newCaret);
+                        _insertTextAtCursor(rteId, it.text);
                         menu.remove();
                     };
 
