@@ -21,8 +21,11 @@ public partial class MaintenanceSubscriptions : ComponentBase
     protected string? SelectedEditionId;
     protected int VisibleRowCount = 0;
     private uint editingPaymentId;
+    private bool showPaymentDialog;
+
     private bool showDatePicker { get; set; }
     private DateTime? selectedDate { get; set; }
+    private RegistrationModel selectedRegistration;
 
     protected string SelectedEditionText => Editions.FirstOrDefault( e => e.ID == SelectedEditionId )?.Text ?? "Onbekende editie";
 
@@ -89,39 +92,78 @@ public partial class MaintenanceSubscriptions : ComponentBase
         VisibleRowCount = data?.Count ?? 0;
     }
 
+    // Open dialog for a specific registration
+    private void OpenPaymentDialog( RegistrationModel registration )
+    {
+        selectedRegistration = registration;
+        selectedDate = DateTime.Now; // Default to today
+        showPaymentDialog = true;
+    }
+
+    // Close dialog without saving
+    private void ClosePaymentDialog()
+    {
+        showPaymentDialog = false;
+        selectedRegistration = null;
+        selectedDate = null;
+    }
+
+    // Confirm payment and update in DB
+    private async Task ConfirmPaymentDateAsync()
+    {
+        if ( selectedRegistration != null )
+        {
+            await RegistrationService.UpdatePaymentStatusAsync(
+                selectedRegistration.FestivalId,
+                selectedRegistration.GroepId,
+                selectedDate
+            );
+
+            // Refresh local UI model
+            selectedRegistration.Betaald = "Ja";
+        }
+
+        ClosePaymentDialog();
+        StateHasChanged();
+    }
+
+    // Handle "Gestorneerd" button
     private async Task TogglePaymentAsync( RegistrationModel registration )
     {
-        // Als betaald = Ja → Gestorneerd
-        if ( registration.Betaald == "Ja" )
+        await RegistrationService.UpdatePaymentStatusAsync(
+            registration.FestivalId,
+            registration.GroepId,
+            null
+        );
+
+        registration.Betaald = "Nee";
+        StateHasChanged();
+    }
+
+    private async Task ToggleDropOutAsync( RegistrationModel registration )
+    {
+        DateOnly? newValue;
+
+        if ( registration.Afgehaakt == "Nee" )
         {
-            registration.Betaald = "Nee";
-            await RegistrationService.UpdatePaymentStatusAsync( registration.FestivalId, registration.GroepId, null );
+            // Koort haakt af → zet huidige datum
+            newValue = DateOnly.FromDateTime( DateTime.Now );
         }
         else
         {
-            // Toon datepicker
-            editingPaymentId = registration.FestivalId; // of reg.Id
-            selectedDate = DateTime.Now;
+            // Koort haakt aan → zet NULL
+            newValue = null;
         }
-    }
 
-    private async Task ConfirmPaymentDateAsync( RegistrationModel registration )
-    {
-        registration.Betaald = "Ja";
-        await RegistrationService.UpdatePaymentStatusAsync( registration.FestivalId, registration.GroepId, selectedDate );
-        editingPaymentId = registration.FestivalId;
-    }
+        // Update in DB
+        await RegistrationService.UpdateDropOutStatusAsync(
+            registration.FestivalId,
+            registration.GroepId,
+            newValue
+        );
 
-    private Task CancelPaymentEdit( RegistrationModel registration )
-    {
-        editingPaymentId = 0;
-        showDatePicker = false;
-        selectedDate = null;
-        return Task.CompletedTask;
-    }
-
-    private void OnHasPayedClicked()
-    {
-        showDatePicker = true;
+        // Update UI-model
+        registration.Afgehaakt = ( newValue == null ) ? "Nee" : "Ja";
+        StateHasChanged();
     }
 }

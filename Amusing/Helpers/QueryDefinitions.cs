@@ -1448,6 +1448,12 @@ public static class QueryDefinitions
                     WHERE festival_id = @FestivalId
                     AND zanggroep_id = @GroupId;";
 
+    public static readonly string UpdateDropOutStatus = @"
+                    UPDATE amusing.ah_inschrijvingen 
+                    SET afgehaakt = @DropOut 
+                    WHERE festival_id = @FestivalId
+                    AND zanggroep_id = @GroupId;";
+
     public static readonly string GetAllRecipientLists = @"
                     SELECT 
 	                    id 		AS ListId,

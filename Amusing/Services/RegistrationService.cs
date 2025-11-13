@@ -117,4 +117,26 @@ public class RegistrationService( GenericDataService dataService )
         }
         return;
     }
+
+    public async Task UpdateDropOutStatusAsync( uint festivalId, uint groupId, DateOnly? afgehaaktDate )
+    {
+        Dictionary<string, object> parameters = new()
+		{
+            { "@FestivalId", festivalId },
+            { "@GroupId", groupId },
+            { "@DropOut", afgehaaktDate ?? (object)DBNull.Value }
+        };
+
+        try
+        {
+            await _dataService.ExecuteNonQueryAsync( QueryDefinitions.UpdateDropOutStatus, parameters );
+        }
+        catch ( Exception ex )
+        {
+            // Write error to db in the future
+            Console.WriteLine( $"[UpdateDropOutStatusAsync] Error updating payment status: {ex.Message}" );
+        }
+        return;
+
+    }
 }

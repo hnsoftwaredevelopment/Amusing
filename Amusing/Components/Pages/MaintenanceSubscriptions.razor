@@ -8,6 +8,7 @@
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Popups
 @using System.ComponentModel.DataAnnotations
 
 <AuthorizeView>
@@ -70,39 +71,70 @@
 								<GridColumn Field="Stad" HeaderText="Stad" Width="180"></GridColumn>
 								<GridColumn Field="Podium" HeaderText="Podium" Width="70" TextAlign="TextAlign.Center"></GridColumn>
 								<GridColumn Field="Zangers" HeaderText="Zangers" TextAlign="TextAlign.Center" Width="70"></GridColumn>
-								<GridColumn Field="TeBetalen (€)" HeaderText="Te Betalen" Format="N2" Width="110" TextAlign="TextAlign.Right"></GridColumn>
 								<GridColumn HeaderText="Betaald" Width="180" TextAlign="TextAlign.Center">
+									<Template Context="regObj">
+									@{
+										var data = (RegistrationModel)regObj;
+
+										bool showPayButton = data.Betaald == "Nee" && data.Afgehaakt == "Nee";
+										bool showReverseButton = data.Betaald == "Ja"; // altijd tonen als er betaald is
+									}
+
+									@if (showPayButton)
+									{
+										<button class="btn btn-blue" @onclick="() => OpenPaymentDialog(data)">Betaling</button>
+									}
+									else if (showReverseButton)
+									{
+										<button class="btn btn-red" @onclick="() => TogglePaymentAsync(data)">Gestorneerd</button>
+									}
+									</Template>
+								</GridColumn>
+
+								<SfDialog Width="400px"
+									  IsModal="true"
+									  @bind-Visible="showPaymentDialog"
+									  ShowCloseIcon="true"
+									  Header="Betaling registreren">
+
+								<DialogContentTemplate>
+									<div class="p-3">
+										<p>Selecteer de betaaldatum:</p>
+										<SfDatePicker TValue="DateTime?" 
+													  @bind-Value="selectedDate" 
+													  Placeholder="Kies een datum...">
+										</SfDatePicker>
+									</div>
+								</DialogContentTemplate>
+
+								<DialogFooterTemplate>
+									<div class="flex justify-end gap-2">
+										<button class="btn btn-green" @onclick="ConfirmPaymentDateAsync">Opslaan</button>
+										<button class="btn btn-gray" @onclick="ClosePaymentDialog">Annuleren</button>
+									</div>
+								</DialogFooterTemplate>
+
+							</SfDialog>
+								<GridColumn Field="Bevestigd" HeaderText="Bevestigd" Width="80" TextAlign="TextAlign.Center"></GridColumn>
+								<GridColumn Field="Kleedkamer" HeaderText="Kleedkamer" Width="100" TextAlign="TextAlign.Center"></GridColumn>
+								<GridColumn Field="Binnen" HeaderText="Binnen" Width="70" TextAlign="TextAlign.Center"></GridColumn>
+								<GridColumn Field="Buiten" HeaderText="Buiten" Width="70" TextAlign="TextAlign.Center"></GridColumn>
+								<GridColumn HeaderText="Afgehaakt" Width="120" TextAlign="TextAlign.Center">
 									<Template Context="regObj">
 										@{
 											var data = (RegistrationModel)regObj;
 										}
 
-										@if (editingPaymentId == data.FestivalId)
+										@if ( data.Afgehaakt == "Nee" )
 										{
-											<div class="d-flex align-items-center gap-2">
-												@if (showDatePicker)
-												{
-													<SfDatePicker TValue="DateTime?" @bind-Value="selectedDate"></SfDatePicker>
-												}
-												<button class="btn btn-green" @onclick="() => ConfirmPaymentDateAsync( data )">Opslaan</button>
-												<button class="btn btn-gray" @onclick="() => CancelPaymentEdit( data )">X</button>
-											</div>
-										}
-										else if (data.Betaald == "Nee")
-										{
-											<button class="btn btn-blue" @onclick="() => TogglePaymentAsync(data)">Betaling</button>
+											<button class="btn btn-red" @onclick="() => ToggleDropOutAsync( data )">Haakt af</button>
 										}
 										else
 										{
-											<button class="btn btn-red" @onclick="() => TogglePaymentAsync(data)">Gestorneerd</button>
+											<button class="btn btn-blue" @onclick="() => ToggleDropOutAsync( data )">Haakt aan</button>
 										}
 									</Template>
 								</GridColumn>
-								<GridColumn Field="Bevestigd" HeaderText="Bevestigd" Width="80" TextAlign="TextAlign.Center"></GridColumn>
-								<GridColumn Field="Kleedkamer" HeaderText="Kleedkamer" Width="100" TextAlign="TextAlign.Center"></GridColumn>
-								<GridColumn Field="Binnen" HeaderText="Binnen" Width="70" TextAlign="TextAlign.Center"></GridColumn>
-								<GridColumn Field="Buiten" HeaderText="Buiten" Width="70" TextAlign="TextAlign.Center"></GridColumn>
-								<GridColumn Field="Afgehaakt" HeaderText="Afgehaakt" Width="80" TextAlign="TextAlign.Center"></GridColumn>
 							</GridColumns>
 						</SfGrid>
 					</div>
