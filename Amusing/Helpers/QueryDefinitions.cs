@@ -1517,6 +1517,62 @@ public static class QueryDefinitions
         DELETE FROM amusing.ah_mailing_templates 
         WHERE id = @QueryId;";
 
+    #region Dashboard queries
+    public static readonly string DashboardStatisticsTotal = @"
+        SELECT 
+            COUNT(*) AS Total,
+            SUM(CASE WHEN wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
+            SUM(CASE WHEN betaald IS NOT NULL THEN 1 ELSE 0 END) AS Payed,
+            SUM(CASE WHEN afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
+        FROM Amusing.ah_inschrijvingen
+        WHERE festival_id = @FestivalId;";
+
+    public static readonly string DashboardStatisticsGenre = @"
+        SELECT 
+	        g.nl AS Genre,
+            COUNT(*) AS Total,
+            SUM(CASE WHEN i.wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
+            SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paeyed,
+            SUM(CASE WHEN i.afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
+        FROM Amusing.ah_inschrijvingen i
+        JOIN Amusing.ah_zanggroepen zg 
+            ON i.zanggroep_id = zg.zanggroep_id
+        JOIN Amusing.ah_genres g
+            ON zg.genre_id = g.genre_id
+        WHERE i.festival_id = @festivalid
+        GROUP BY g.nl
+        ORDER BY g.nl;";
+
+    public static readonly string DashboardStatisticsCountry = @"
+        SELECT 
+	        l.naam AS Country,
+            COUNT(*) AS Total,
+            SUM(CASE WHEN i.wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
+            SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paeyed,
+            SUM(CASE WHEN i.afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
+        FROM Amusing.ah_inschrijvingen i
+        JOIN Amusing.ah_zanggroepen zg 
+            ON i.zanggroep_id = zg.zanggroep_id
+        JOIN Amusing.ah_landen l
+            ON zg.land COLLATE utf8mb3_unicode_ci = l.code 
+        WHERE i.festival_id = @FestivalId
+        GROUP BY l.naam 
+        ORDER BY l.naam;";
+
+    public static readonly string DashboardStatisticsStagetype = @"
+        SELECT 
+	        i.podiumsoort  AS Stagetype,
+            COUNT(*) AS Total,
+            SUM(CASE WHEN i.wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
+            SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paeyed,
+            SUM(CASE WHEN i.afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
+        FROM Amusing.ah_inschrijvingen i
+ 
+        WHERE i.festival_id = 20
+        GROUP BY i.podiumsoort 
+        ORDER BY i.podiumsoort;";
+    #endregion
+
     #region Logging queries
     public static readonly string LogUserLogin = @"
         INSERT INTO amusing.user_log
