@@ -229,7 +229,7 @@ public class MailingService
                 StageType = reader [ "StageType" ].ToString() ?? string.Empty,
                 Subscribed = Convert.ToBoolean( reader [ "Subscribed" ] ),
                 Canceled = Convert.ToBoolean( reader [ "Canceled" ] ),
-                Payed = Convert.ToBoolean( reader [ "Payed" ] ),
+                Paid = Convert.ToBoolean( reader [ "Paid" ] ),
                 Confirmed = Convert.ToBoolean( reader [ "Confirmed" ] ),
                 Singers = Convert.ToInt32( reader [ "Singers" ] )
             } );

@@ -18,7 +18,7 @@ public class RecipientListFilterModel
     public string StageType { get; set; } = string.Empty;
     public bool Subscribed { get; set; }
     public bool Canceled { get; set; }
-    public bool Payed { get; set; }
+    public bool Paid { get; set; }
     public bool Confirmed { get; set; }
     public int Singers { get; set; }
 }

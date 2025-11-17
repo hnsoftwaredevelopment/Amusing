@@ -26,6 +26,106 @@
 				<div class="page-content">
 					<p class="text-xl-center">Welkom op de beheer pagina van Amusing Hengelo</p>
 					<p class="text-break"/>
+					<SfTab OverflowMode="OverflowMode.Scrollable" Width="700px">
+						<TabItems>
+							<TabItem>
+								<ChildContent>
+									<TabHeader Text="Totalen" />
+								</ChildContent>
+								<ContentTemplate>
+									<div>
+										<SfGrid TItem="DashboardStatisticsTotal" DataSource="_totals" AllowResizing="true" AllowReordering="true">
+											<GridColumns>
+												<GridColumn Field="Total"		HeaderText="Inschrijvingen"		Width="80"/>
+												<GridColumn Field="InQueue"		HeaderText="In Wacht"	Width="80"/>
+												<GridColumn Field="Paid"		HeaderText="Betaald"	Width="80"/>
+												<GridColumn Field="DroppedOut"	HeaderText="Afgehaakt"	Width="100"/>
+											</GridColumns>
+										</SfGrid>
+									</div>
+								</ContentTemplate>
+							</TabItem>
+
+							<TabItem>
+								<ChildContent>
+									<TabHeader Text="Genre" />
+								</ChildContent>
+								<ContentTemplate>
+									<div>
+										<SfGrid TItem="DashboardStatisticsGenre" DataSource="_genre" AllowResizing="true" AllowReordering="true" Height="300px">
+											<GridColumns>
+												<GridColumn Field="Genre"		HeaderText="Genre"		Width="auto" />
+												<GridColumn Field="Total"		HeaderText="Inschrijvingen" Width="80" />
+												<GridColumn Field="InQueue"		HeaderText="In Wacht"	Width="80" />
+												<GridColumn Field="Paid"		HeaderText="Betaald"	Width="80" />
+												<GridColumn Field="DroppedOut"	HeaderText="Afgehaakt"	Width="100" />
+											</GridColumns>
+										</SfGrid>
+									</div>
+								</ContentTemplate>
+							</TabItem>
+
+							<TabItem>
+								<ChildContent>
+									<TabHeader Text="Country" />
+								</ChildContent>
+								<ContentTemplate>
+									<div>
+										<SfGrid TItem="DashboardStatisticsCountry" DataSource="_country" AllowResizing="true" AllowReordering="true">
+											<GridColumns>
+												<GridColumn Field="Country" HeaderText="Country" Width="auto" />
+												<GridColumn Field="Total" HeaderText="Inschrijvingen" Width="80" />
+												<GridColumn Field="InQueue" HeaderText="In Wacht" Width="80" />
+												<GridColumn Field="Paid" HeaderText="Betaald" Width="80" />
+												<GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100" />
+											</GridColumns>
+										</SfGrid>
+									</div>
+								</ContentTemplate>
+							</TabItem>
+
+							<TabItem>
+								<ChildContent>
+									<TabHeader Text="Podiumtype" />
+								</ChildContent>
+								<ContentTemplate>
+									<div>
+										<SfGrid TItem="DashboardStatisticsStage" DataSource="_stage" AllowResizing="true" AllowReordering="true">
+											<GridColumns>
+												<GridColumn Field="Stagetype" HeaderText="Podium" Width="auto" />
+												<GridColumn Field="Total" HeaderText="Inschrijvingen" Width="80" />
+												<GridColumn Field="InQueue" HeaderText="In Wacht" Width="80" />
+												<GridColumn Field="Paid" HeaderText="Betaald" Width="80" />
+												<GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100" />
+											</GridColumns>
+										</SfGrid>
+									</div>
+								</ContentTemplate>
+							</TabItem>
+
+							<TabItem>
+								<ChildContent>
+									<TabHeader Text="Zangersverdeling" />
+								</ChildContent>
+								<ContentTemplate>
+									<div>
+									<SfGrid TItem="DashboardSubscriptionsPivot" DataSource="_pivot" AllowResizing="true" AllowReordering="true">
+										<GridColumns>
+
+											<GridColumn Field="DeelnemersCategorie" HeaderText="Aantal" Width="120" />
+
+											@foreach ( var col in _pivotColumns )
+											{
+												<GridColumn Field="@($"Podia[{col}]")" HeaderText="@col" Width="80" />
+											}
+
+										</GridColumns>
+										</SfGrid>
+									</div>
+								</ContentTemplate>
+							</TabItem>
+						</TabItems>
+					</SfTab>
 				</div>
 
 				<div class="log-footer">
@@ -39,19 +139,19 @@
 						</ToolbarItems>
 					</SfToolbar>
 
-					<SfGrid  @ref="_gridLog"
-						TItem="LogModel"
-						DataSource="_loggingList"
-						AllowSorting="true" EnableVirtualization="true"
-						AllowResizing="true"
-						Height="180px">
-						<GridSearchSettings IgnoreAccent="true"/>
+					<SfGrid @ref="_gridLog"
+							TItem="LogModel"
+							DataSource="_loggingList"
+							AllowSorting="true" EnableVirtualization="true"
+							AllowResizing="true"
+							Height="180px">
+						<GridSearchSettings IgnoreAccent="true" />
 						<GridColumns>
 							<GridColumn Field="LogDateOnly" HeaderText="Datum" Width="100" />
 							<GridColumn Field="LogTimeOnly" HeaderText="Tijdstip" Width="80" />
 							<GridColumn Field="LogArea" HeaderText="Onderdeel" Width="170" />
-							<GridColumn Field="LogAction" HeaderText="Aktie" Width="170"/>
-							<GridColumn Field="LogReport" HeaderText="Resultaat"/>
+							<GridColumn Field="LogAction" HeaderText="Aktie" Width="170" />
+							<GridColumn Field="LogReport" HeaderText="Resultaat" />
 						</GridColumns>
 					</SfGrid>
 				</div>

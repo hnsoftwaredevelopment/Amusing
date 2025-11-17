@@ -1263,7 +1263,7 @@ public static class QueryDefinitions
 	        sub.podiumsoort AS StageType,
 	        IF(sub.ingeschreven IS NOT NULL, 1, 0) AS Subscribed,
 	        IF(sub.afgehaakt IS NOT NULL, 1, 0) AS Canceled,
-	        IF(sub.betaald IS NOT NULL, 1, 0) AS Payed,
+	        IF(sub.betaald IS NOT NULL, 1, 0) AS Paid,
 	        IF(sub.bevestigd IS NOT NULL, 1, 0) AS Confirmed,
 	        IF(sub.wens_1 = 'ja', 1, 0) AS Dressingroom,
 	        IF(sub.wens_2 = 'ja', 1, 0) AS SingAlong,
@@ -1291,7 +1291,7 @@ public static class QueryDefinitions
 	        sub.podiumsoort AS StageType,
 	        IF(sub.ingeschreven IS NOT NULL, 1, 0) AS Subscribed,
 	        IF(sub.afgehaakt IS NOT NULL, 1, 0) AS Canceled,
-	        IF(sub.betaald IS NOT NULL, 1, 0) AS Payed,
+	        IF(sub.betaald IS NOT NULL, 1, 0) AS Paid,
 	        IF(sub.bevestigd IS NOT NULL, 1, 0) AS Confirmed,
 	        IF(sub.wens_1 = 'ja', 1, 0) AS Dressingroom,
 	        IF(sub.wens_2 = 'ja', 1, 0) AS SingAlong,
@@ -1414,7 +1414,7 @@ public static class QueryDefinitions
             YEAR(fes.festivaldatum) AS Festival,
             IF(sub.ingeschreven IS NOT NULL, 'ja', 'nee') AS Subscribed,
             IF(sub.afgehaakt   IS NOT NULL, 'ja', 'nee') AS Canceled,
-            IF(sub.betaald     IS NOT NULL, 'ja', 'nee') AS Payed,
+            IF(sub.betaald     IS NOT NULL, 'ja', 'nee') AS Paid,
             IF(sub.bevestigd   IS NOT NULL, 'ja', 'nee') AS Confirmed,
             IF(sub.wens_1 = 'ja', 'ja', 'nee') AS Dressingroom,
             IF(sub.wens_2 = 'ja', 'ja', 'nee') AS SingAlong,
@@ -1444,7 +1444,7 @@ public static class QueryDefinitions
 
     public static readonly string UpdatePaymentStatus = @"
                     UPDATE amusing.ah_inschrijvingen 
-                    SET Betaald = @Payed 
+                    SET Betaald = @Paid 
                     WHERE festival_id = @FestivalId
                     AND zanggroep_id = @GroupId;";
 
@@ -1522,7 +1522,7 @@ public static class QueryDefinitions
         SELECT 
             COUNT(*) AS Total,
             SUM(CASE WHEN wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
-            SUM(CASE WHEN betaald IS NOT NULL THEN 1 ELSE 0 END) AS Payed,
+            SUM(CASE WHEN betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paid,
             SUM(CASE WHEN afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
         FROM Amusing.ah_inschrijvingen
         WHERE festival_id = @FestivalId;";
@@ -1532,7 +1532,7 @@ public static class QueryDefinitions
 	        g.nl AS Genre,
             COUNT(*) AS Total,
             SUM(CASE WHEN i.wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
-            SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paeyed,
+            SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paid,
             SUM(CASE WHEN i.afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
         FROM Amusing.ah_inschrijvingen i
         JOIN Amusing.ah_zanggroepen zg 
@@ -1548,7 +1548,7 @@ public static class QueryDefinitions
 	        l.naam AS Country,
             COUNT(*) AS Total,
             SUM(CASE WHEN i.wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
-            SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paeyed,
+            SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paid,
             SUM(CASE WHEN i.afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
         FROM Amusing.ah_inschrijvingen i
         JOIN Amusing.ah_zanggroepen zg 
@@ -1564,13 +1564,31 @@ public static class QueryDefinitions
 	        i.podiumsoort  AS Stagetype,
             COUNT(*) AS Total,
             SUM(CASE WHEN i.wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
-            SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paeyed,
+            SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paid,
             SUM(CASE WHEN i.afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
         FROM Amusing.ah_inschrijvingen i
  
         WHERE i.festival_id = 20
         GROUP BY i.podiumsoort 
         ORDER BY i.podiumsoort;";
+
+    public static readonly string DashboardStatistictsSubscritionsByNumber = @"
+        SELECT 
+            SUM(CASE WHEN i.aantal_deelnemers < 10 THEN 1 ELSE 0 END) AS Total_Lt10,
+            SUM(CASE WHEN i.aantal_deelnemers >= 10 AND i.aantal_deelnemers < 25 THEN 1 ELSE 0 END) AS Total_Gte10,
+            SUM(CASE WHEN i.aantal_deelnemers >= 25 AND i.aantal_deelnemers < 50 THEN 1 ELSE 0 END) AS Total_Gte25,
+            SUM(CASE WHEN i.aantal_deelnemers >= 50 THEN 1 ELSE 0 END) AS Total_Gte50
+        FROM Amusing.ah_inschrijvingen i
+        JOIN Amusing.ah_zanggroepen zg 
+            ON i.zanggroep_id = zg.zanggroep_id
+        JOIN Amusing.ah_landen l
+            ON zg.land COLLATE utf8mb3_unicode_ci = l.code 
+        WHERE i.festival_id = 20 AND i.afgehaakt IS null
+        GROUP BY l.naam 
+        ORDER BY l.naam;";
+
+    public static readonly string DashboardStatisticsSubscribtionsByNumberByStagetype = @"
+        CALL GetPivotSubscriptionsPerStage(@FestivalId);";
     #endregion
 
     #region Logging queries
@@ -1608,7 +1626,6 @@ public static class QueryDefinitions
         INSERT INTO amusing.user_log
             (ip_address, area, action, status, report)
         VALUES (@Area, @Action, @Status, @Report);";
-
     #endregion
 
 }

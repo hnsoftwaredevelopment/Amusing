@@ -73,6 +73,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<LoggingService>();
 builder.Services.AddScoped<GenericDataService>();
 builder.Services.AddScoped<CountryService>();
+builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<EditionService>();
 builder.Services.AddScoped<EmailAddressesService>();
 builder.Services.AddScoped<FestivalService>();

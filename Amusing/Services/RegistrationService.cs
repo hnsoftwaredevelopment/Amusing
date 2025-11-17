@@ -103,7 +103,7 @@ public class RegistrationService( GenericDataService dataService )
         {
             { "@FestivalId", festivalId },
             { "@GroupId", groupId },
-            { "@Payed", paymentDateTime ?? (object)DBNull.Value }
+            { "@Paid", paymentDateTime ?? (object)DBNull.Value }
         };
 
         try

@@ -824,7 +824,7 @@ public class MailingsRecipientsBase : ComponentBase
 
         HashSet<string> jaNeeVelden = new(
 		[
-			"Infomailing", "Active","Subscribed","Canceled","Payed","Confirmed",
+			"Infomailing", "Active","Subscribed","Canceled","Paid","Confirmed",
             "Dressingroom","SingAlong","Stand","Judgement","Volunteer"
         ], StringComparer.OrdinalIgnoreCase );
 
@@ -886,7 +886,7 @@ public class MailingsRecipientsBase : ComponentBase
             "Active" => "Aktief",
             "Subscribed" => "Ingeschreven",
             "Canceled" => "Afgehaakt",
-            "Payed" => "Betaald",
+            "Paid" => "Betaald",
             "Confirmed" => "Bevestigd",
             "Singers" => "Zangers",
             "PersonId" => "PersoonId",
