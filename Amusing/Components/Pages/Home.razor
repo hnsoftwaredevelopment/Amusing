@@ -23,9 +23,9 @@
 		else
 		{
 			<div class="page-container">
-				<div class="page-content">
-					<p class="text-xl-center">Welkom op de beheer pagina van Amusing Hengelo</p>
-					<p class="text-break"/>
+				<p class="text-xl-center">Welkom op de beheer pagina van Amusing Hengelo</p>
+				<p class="text-break"></p>
+				<div class="page-content-left">
 					<SfComboBox 
 						TValue="string"
 						TItem="Edition"
@@ -35,7 +35,7 @@
 						Width="150px">
 						<ComboBoxFieldSettings Value="ID" Text="Text"></ComboBoxFieldSettings>
 					</SfComboBox>
-					<p />
+					<p></p>
 
 					@if ( _hasData )
 					{
@@ -144,6 +144,38 @@
 					{
 						<p>Voor de geselecteerde editie zijn nog geen statistieken beschikbaar</p>
 					}
+				</div>
+				<div class="page-content-right">
+					<SfComboBox TValue="int"
+								TItem="int"
+								@bind-Value="SelectedYears"
+								DataSource="@Years"
+								Placeholder="Aantal jaren"
+								Width="150px">
+					</SfComboBox>
+					<p></p>
+					
+					<SfTab OverflowMode="OverflowMode.Scrollable" Width="600px">
+						<TabItems>
+							<TabItem>
+								<ChildContent>
+									<TabHeader Text="Grafiek 1" />
+								</ChildContent>
+								<ContentTemplate>
+									<!-- Grafiek 1 -->
+								</ContentTemplate>
+							</TabItem>
+
+							<TabItem>
+								<ChildContent>
+									<TabHeader Text="Grafiek 2" />
+								</ChildContent>
+								<ContentTemplate>
+									<!-- Grafiek 2 -->
+								</ContentTemplate>
+							</TabItem>
+						</TabItems>
+					</SfTab>
 				</div>
 
 				<div class="log-footer">

@@ -27,6 +27,8 @@ public partial class Home : ComponentBase
     private List<IDictionary<string, object>> _pivot = [];
     private List<string> _pivotColumns = [];
     protected List<Edition> Editions = [];
+    protected int SelectedYears = 10;
+    protected List<int> Years = [2, 5, 10 ];
     protected string? selectedEditionId;
     public string SelectedEditionId
     {

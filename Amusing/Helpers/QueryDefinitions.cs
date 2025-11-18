@@ -1592,6 +1592,8 @@ public static class QueryDefinitions
     
     public static readonly string DashboardStatisticsGetNubmerOfSubscribtions = @"
         CALL GetNumberOfFestivalSubscriptions(@FestivalId);";
+    public static readonly string DashboardStatisticsGetGraphData = @"
+        CALL GetGraphData(@Years);";
     #endregion
 
     #region Logging queries

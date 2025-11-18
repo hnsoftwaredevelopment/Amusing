@@ -119,4 +119,31 @@ public class DashboardService ( GenericDataService dataService )
         );
         return result;
     }
+
+    public async Task<List<DashboardStatisticsGraph>> GetGraphDataAsync( int years )
+    {
+        var result = new List<DashboardStatisticsGraph>();
+
+        await _dataService.ExecuteQueryAsync<DashboardStatisticsGraph>(
+            QueryDefinitions.DashboardStatisticsGetGraphData,
+            reader =>
+            {
+                var item = new DashboardStatisticsGraph
+            {
+                FestivalId = Convert.ToInt32(reader["FestivalId"]),
+                Festival = reader["Festival"]?.ToString() ?? string.Empty,
+                Month = reader["Month"]?.ToString() ?? string.Empty,
+                MonthOrder = Convert.ToInt32(reader["MonthOrder"]),
+                Number = Convert.ToInt32(reader["Number"])
+            };
+
+                result.Add( item );
+
+                return item; // Belangrijk!
+            },
+            new Dictionary<string, object> { { "@Years", years } }
+        );
+
+        return result.OrderBy( r => r.MonthOrder ).ToList();
+    }
 }
