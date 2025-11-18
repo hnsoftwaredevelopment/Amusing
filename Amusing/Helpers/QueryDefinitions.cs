@@ -1589,6 +1589,9 @@ public static class QueryDefinitions
 
     public static readonly string DashboardStatisticsSubscribtionsByNumberByStagetype = @"
         CALL GetPivotSubscriptionsPerStage(@FestivalId);";
+    
+    public static readonly string DashboardStatisticsGetNubmerOfSubscribtions = @"
+        CALL GetNumberOfFestivalSubscriptions(@FestivalId);";
     #endregion
 
     #region Logging queries

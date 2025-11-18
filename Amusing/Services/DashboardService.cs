@@ -1,4 +1,7 @@
-﻿using Amusing.Helpers;
+﻿using System.Diagnostics.Eventing.Reader;
+using System.Dynamic;
+
+using Amusing.Helpers;
 using Amusing.Models;
 
 namespace Amusing.Services;
@@ -69,34 +72,31 @@ public class DashboardService ( GenericDataService dataService )
             );
     }
 
-    public async Task<List<DashboardSubscriptionsPivot>> GetSubscriptionsPivotAsync( int festivalId )
+    public async Task<List<IDictionary<string, object>>> GetSubscriptionsPivotAsync( int festivalId )
     {
-        var list = new List<DashboardSubscriptionsPivot>();
+        var list = new List<IDictionary<string, object>>();
 
         await _dataService.ExecuteQueryAsync(
             QueryDefinitions.DashboardStatisticsSubscribtionsByNumberByStagetype,
             reader =>
             {
-				var row = new DashboardSubscriptionsPivot
-				{
-					// Fixed column
-					DeelnemersCategorie = reader [ "DeelnemersCategorie" ].ToString() ?? string.Empty
-				};
+                IDictionary<string, object> row = new ExpandoObject();
 
-				// Dynamic columns
-				for ( int i = 0; i < reader.FieldCount; i++ )
+                // Fixed column
+                row [ "DeelnemersCategorie" ] = reader [ "DeelnemersCategorie" ]?.ToString() ?? string.Empty;
+
+                // Dynamic columns    
+                for ( int i = 0; i < reader.FieldCount; i++ )
                 {
                     var colName = reader.GetName(i);
 
                     if ( colName != "DeelnemersCategorie" )
                     {
-                        int value = reader.IsDBNull(i) ? 0 : Convert.ToInt32(reader[i]);
-                        row.Podia [ colName ] = value;
+                        row [ colName ] = reader.IsDBNull( i ) ? 0 : Convert.ToInt32( reader [ i ] );
                     }
                 }
 
                 list.Add( row );
-
                 return row;
             },
             new Dictionary<string, object>
@@ -108,4 +108,15 @@ public class DashboardService ( GenericDataService dataService )
         return list;
     }
 
+    public async Task<int> GetNumberOfSubscriptions( int festivalId )
+    {
+        var result = await _dataService.ExecuteScalarAsync<int>(
+            QueryDefinitions.DashboardStatisticsGetNubmerOfSubscribtions,
+            new Dictionary<string, object>
+            {
+                { "@FestivalId", festivalId }
+            }
+        );
+        return result;
+    }
 }

@@ -26,106 +26,124 @@
 				<div class="page-content">
 					<p class="text-xl-center">Welkom op de beheer pagina van Amusing Hengelo</p>
 					<p class="text-break"/>
-					<SfTab OverflowMode="OverflowMode.Scrollable" Width="700px">
-						<TabItems>
-							<TabItem>
-								<ChildContent>
-									<TabHeader Text="Totalen" />
-								</ChildContent>
-								<ContentTemplate>
-									<div>
-										<SfGrid TItem="DashboardStatisticsTotal" DataSource="_totals" AllowResizing="true" AllowReordering="true">
-											<GridColumns>
-												<GridColumn Field="Total"		HeaderText="Inschrijvingen"		Width="80"/>
-												<GridColumn Field="InQueue"		HeaderText="In Wacht"	Width="80"/>
-												<GridColumn Field="Paid"		HeaderText="Betaald"	Width="80"/>
-												<GridColumn Field="DroppedOut"	HeaderText="Afgehaakt"	Width="100"/>
-											</GridColumns>
-										</SfGrid>
-									</div>
-								</ContentTemplate>
-							</TabItem>
+					<SfComboBox 
+						TValue="string"
+						TItem="Edition"					
+						Placeholder="Kies een editie"
+						ValueChanged="OnEditionChanged"
+						DataSource="@Editions"
+						Width="150px">
+						<ComboBoxFieldSettings Value="ID" Text="Text"></ComboBoxFieldSettings>
+					</SfComboBox>
+					<p />
 
-							<TabItem>
-								<ChildContent>
-									<TabHeader Text="Genre" />
-								</ChildContent>
-								<ContentTemplate>
-									<div>
-										<SfGrid TItem="DashboardStatisticsGenre" DataSource="_genre" AllowResizing="true" AllowReordering="true" Height="300px">
-											<GridColumns>
-												<GridColumn Field="Genre"		HeaderText="Genre"		Width="auto" />
-												<GridColumn Field="Total"		HeaderText="Inschrijvingen" Width="80" />
-												<GridColumn Field="InQueue"		HeaderText="In Wacht"	Width="80" />
-												<GridColumn Field="Paid"		HeaderText="Betaald"	Width="80" />
-												<GridColumn Field="DroppedOut"	HeaderText="Afgehaakt"	Width="100" />
-											</GridColumns>
-										</SfGrid>
-									</div>
-								</ContentTemplate>
-							</TabItem>
+					@if ( _hasData )
+					{
+						<SfTab OverflowMode="OverflowMode.Scrollable" Width="700px">
+							<TabItems>
+								<TabItem>
+									<ChildContent>
+										<TabHeader Text="Totalen" />
+									</ChildContent>
+									<ContentTemplate>
+										<div>
+											<SfGrid TItem="DashboardStatisticsTotal" DataSource="_totals" AllowResizing="true" AllowReordering="true">
+												<GridColumns>
+													<GridColumn Field="Total"		HeaderText="Inschrijvingen"		Width="80"/>
+													<GridColumn Field="InQueue"		HeaderText="In Wacht"	Width="80"/>
+													<GridColumn Field="Paid"		HeaderText="Betaald"	Width="80"/>
+													<GridColumn Field="DroppedOut"	HeaderText="Afgehaakt"	Width="100"/>
+												</GridColumns>
+											</SfGrid>
+										</div>
+									</ContentTemplate>
+								</TabItem>
 
-							<TabItem>
-								<ChildContent>
-									<TabHeader Text="Country" />
-								</ChildContent>
-								<ContentTemplate>
-									<div>
-										<SfGrid TItem="DashboardStatisticsCountry" DataSource="_country" AllowResizing="true" AllowReordering="true">
-											<GridColumns>
-												<GridColumn Field="Country" HeaderText="Country" Width="auto" />
-												<GridColumn Field="Total" HeaderText="Inschrijvingen" Width="80" />
-												<GridColumn Field="InQueue" HeaderText="In Wacht" Width="80" />
-												<GridColumn Field="Paid" HeaderText="Betaald" Width="80" />
-												<GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100" />
-											</GridColumns>
-										</SfGrid>
-									</div>
-								</ContentTemplate>
-							</TabItem>
+								<TabItem>
+									<ChildContent>
+										<TabHeader Text="Genre" />
+									</ChildContent>
+									<ContentTemplate>
+										<div>
+											<SfGrid TItem="DashboardStatisticsGenre" DataSource="_genre" AllowResizing="true" AllowReordering="true" Height="300px">
+												<GridColumns>
+													<GridColumn Field="Genre"		HeaderText="Genre"		Width="auto" />
+													<GridColumn Field="Total"		HeaderText="Inschrijvingen" Width="80" />
+													<GridColumn Field="InQueue"		HeaderText="In Wacht"	Width="80" />
+													<GridColumn Field="Paid"		HeaderText="Betaald"	Width="80" />
+													<GridColumn Field="DroppedOut"	HeaderText="Afgehaakt"	Width="100" />
+												</GridColumns>
+											</SfGrid>
+										</div>
+									</ContentTemplate>
+								</TabItem>
 
-							<TabItem>
-								<ChildContent>
-									<TabHeader Text="Podiumtype" />
-								</ChildContent>
-								<ContentTemplate>
-									<div>
-										<SfGrid TItem="DashboardStatisticsStage" DataSource="_stage" AllowResizing="true" AllowReordering="true">
-											<GridColumns>
-												<GridColumn Field="Stagetype" HeaderText="Podium" Width="auto" />
-												<GridColumn Field="Total" HeaderText="Inschrijvingen" Width="80" />
-												<GridColumn Field="InQueue" HeaderText="In Wacht" Width="80" />
-												<GridColumn Field="Paid" HeaderText="Betaald" Width="80" />
-												<GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100" />
-											</GridColumns>
-										</SfGrid>
-									</div>
-								</ContentTemplate>
-							</TabItem>
+								<TabItem>
+									<ChildContent>
+										<TabHeader Text="Country" />
+									</ChildContent>
+									<ContentTemplate>
+										<div>
+											<SfGrid TItem="DashboardStatisticsCountry" DataSource="_country" AllowResizing="true" AllowReordering="true">
+												<GridColumns>
+													<GridColumn Field="Country" HeaderText="Country" Width="auto" />
+													<GridColumn Field="Total" HeaderText="Inschrijvingen" Width="80" />
+													<GridColumn Field="InQueue" HeaderText="In Wacht" Width="80" />
+													<GridColumn Field="Paid" HeaderText="Betaald" Width="80" />
+													<GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100" />
+												</GridColumns>
+											</SfGrid>
+										</div>
+									</ContentTemplate>
+								</TabItem>
 
-							<TabItem>
-								<ChildContent>
-									<TabHeader Text="Zangersverdeling" />
-								</ChildContent>
-								<ContentTemplate>
-									<div>
-									<SfGrid TItem="DashboardSubscriptionsPivot" DataSource="_pivot" AllowResizing="true" AllowReordering="true">
-										<GridColumns>
+								<TabItem>
+									<ChildContent>
+										<TabHeader Text="Podiumtype" />
+									</ChildContent>
+									<ContentTemplate>
+										<div>
+											<SfGrid TItem="DashboardStatisticsStage" DataSource="_stage" AllowResizing="true" AllowReordering="true">
+												<GridColumns>
+													<GridColumn Field="Stagetype" HeaderText="Podium" Width="auto" />
+													<GridColumn Field="Total" HeaderText="Inschrijvingen" Width="80" />
+													<GridColumn Field="InQueue" HeaderText="In Wacht" Width="80" />
+													<GridColumn Field="Paid" HeaderText="Betaald" Width="80" />
+													<GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100" />
+												</GridColumns>
+											</SfGrid>
+										</div>
+									</ContentTemplate>
+								</TabItem>
 
-											<GridColumn Field="DeelnemersCategorie" HeaderText="Aantal" Width="120" />
+								<TabItem>
+									<ChildContent>
+										<TabHeader Text="Zangersverdeling" />
+									</ChildContent>
+									<ContentTemplate>
+										<div>
+											<SfGrid TItem="DashboardSubscriptionsPivot" DataSource="_pivot" AllowResizing="true" AllowReordering="true">
+												<GridColumns>
 
-											@foreach ( var col in _pivotColumns )
-											{
-												<GridColumn Field="@($"Podia[{col}]")" HeaderText="@col" Width="80" />
-											}
+													<GridColumn Field="DeelnemersCategorie" HeaderText="Aantal" Width="auto" />
 
-										</GridColumns>
-										</SfGrid>
-									</div>
-								</ContentTemplate>
-							</TabItem>
-						</TabItems>
-					</SfTab>
+													@foreach ( var col in _pivotColumns )
+													{
+														<GridColumn Field="@col" HeaderText="@col" Width="60" TextAlign="TextAlign.Center" />
+													}
+
+												</GridColumns>
+											</SfGrid>
+										</div>
+									</ContentTemplate>
+								</TabItem>
+							</TabItems>
+						</SfTab>
+					}
+					else
+					{
+						<p>Voor de geselecteerde editie zijn nog geen statistieken beschikbaar</p>
+					}
 				</div>
 
 				<div class="log-footer">

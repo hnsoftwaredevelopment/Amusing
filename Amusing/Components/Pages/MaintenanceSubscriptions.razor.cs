@@ -16,7 +16,7 @@ public partial class MaintenanceSubscriptions : ComponentBase
     [Inject] protected RegistrationService RegistrationService { get; set; } = default!;
 
     protected SfGrid<RegistrationModel> GridRef;
-    protected List<Edition> Editions = new();
+    protected List<Edition> Editions = [];
     protected List<RegistrationModel> RegistrationList = new();
     protected string? SelectedEditionId;
     protected int VisibleRowCount = 0;
