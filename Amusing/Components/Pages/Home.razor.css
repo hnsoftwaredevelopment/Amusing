@@ -4,27 +4,24 @@ html, body {
 
 .page-container {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Two equal columns */
-    gap: 20px;
-    padding: 10px;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    padding: 1px;
 }
 
 .page-content-left,
 .page-content-right {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 5px;
 }
 
 .log-footer {
+    grid-column: 1 / span 2;
     position: sticky;
     bottom: 0;
     background-color: white;
     border-top: 1px solid #ccc;
     padding: 3px;
     z-index: 5;
-}
-
-.main-content, .content, .page-container {
-    overflow-y: auto;
 }

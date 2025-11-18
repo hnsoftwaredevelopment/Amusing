@@ -136,14 +136,35 @@ public class DashboardService ( GenericDataService dataService )
                 MonthOrder = Convert.ToInt32(reader["MonthOrder"]),
                 Number = Convert.ToInt32(reader["Number"])
             };
-
                 result.Add( item );
-
-                return item; // Belangrijk!
+                return item;
             },
             new Dictionary<string, object> { { "@Years", years } }
         );
 
-        return result.OrderBy( r => r.MonthOrder ).ToList();
+        // Bereken cumulatieve waarden per festival
+        var cumulativeResult = result
+        .GroupBy(g => g.Festival)
+        .SelectMany(festivalGroup =>
+        {
+            int runningTotal = 0;
+            return festivalGroup
+                .OrderBy(g => g.MonthOrder)
+                .Select(g =>
+                {
+                    runningTotal += g.Number;
+                    return new DashboardStatisticsGraph
+                    {
+                        FestivalId = g.FestivalId,
+                        Festival = g.Festival,
+                        Month = g.Month,
+                        MonthOrder = g.MonthOrder,
+                        Number = runningTotal // cumulatief
+                    };
+                });
+        })
+        .ToList();
+
+        return cumulativeResult;
     }
 }

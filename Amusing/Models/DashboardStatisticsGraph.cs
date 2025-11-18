@@ -7,4 +7,5 @@ public class DashboardStatisticsGraph
     public string Month { get; set; } = string.Empty;
     public int MonthOrder { get; set; }
     public int Number { get; set; }
+    public string Type { get; set; }
 }

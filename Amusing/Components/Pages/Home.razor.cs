@@ -25,9 +25,22 @@ public partial class Home : ComponentBase
     private List<DashboardStatisticsCountry> _country = [];
     private List<DashboardStatisticsStage> _stage = [];
     private List<IDictionary<string, object>> _pivot = [];
+    private List<DashboardStatisticsGraph> _graph = [];
     private List<string> _pivotColumns = [];
     protected List<Edition> Editions = [];
-    protected int SelectedYears = 10;
+    protected int selectedYears = 5;
+    public int SelectedYears
+    {
+        get => selectedYears;
+        set
+        {
+            if ( selectedYears == value )
+                return;
+            selectedYears = value;
+            // Trigger synchronous wrapper that calls async loader
+            _ = OnYearsChangedAsync( value );
+        }
+    }
     protected List<int> Years = [2, 5, 10 ];
     protected string? selectedEditionId;
     public string SelectedEditionId
@@ -66,6 +79,8 @@ public partial class Home : ComponentBase
         _isLoading = false;
 
         Editions = await EditionService.GetEditionsAsync();
+
+        _graph = await DashboardService.GetGraphDataAsync( SelectedYears);
 
         if ( Editions.Any() )
         {
@@ -166,6 +181,12 @@ public partial class Home : ComponentBase
 
         _hasData = true;
 
+        await InvokeAsync( StateHasChanged );
+    }
+
+    protected async Task OnYearsChangedAsync( int years )
+    {
+        _graph = await DashboardService.GetGraphDataAsync( years );
         await InvokeAsync( StateHasChanged );
     }
 

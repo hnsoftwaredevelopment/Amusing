@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using Amusing.Models
 @using Amusing.Services
+@using Syncfusion.Blazor.Charts
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
@@ -12,203 +13,241 @@
 <h1>Beheer Amusing-Hengelo</h1>
 
 <AuthorizeView>
-	<Authorized>
-		@if (_isLoading)
-		{
-			<div class="text-center p-2">
-				<SfSpinner CssClass="e-spin-center" />
-				<p>@FileName worden geladen...</p>
-			</div>
-		}
-		else
-		{
-			<div class="page-container">
-				<p class="text-xl-center">Welkom op de beheer pagina van Amusing Hengelo</p>
-				<p class="text-break"></p>
-				<div class="page-content-left">
-					<SfComboBox 
-						TValue="string"
-						TItem="Edition"
-						@bind-Value="SelectedEditionId"
-						Placeholder="Kies een editie"
-						DataSource="@Editions"
-						Width="150px">
-						<ComboBoxFieldSettings Value="ID" Text="Text"></ComboBoxFieldSettings>
-					</SfComboBox>
-					<p></p>
+    <Authorized>
+        @if ( _isLoading )
+        {
+            <div class="text-center p-2">
+                <SfSpinner CssClass="e-spin-center" />
+                <p>@FileName worden geladen...</p>
+            </div>
+        }
+        else
+        {
+            <p class="text-xl-center">Welkom op de beheer pagina van Amusing Hengelo</p>
+            <div class="page-container">
+                <div class="page-content-left">
 
-					@if ( _hasData )
-					{
-						<SfTab OverflowMode="OverflowMode.Scrollable" Width="600px">
-							<TabItems>
-								<TabItem>
-									<ChildContent>
-										<TabHeader Text="Totalen" />
-									</ChildContent>
-									<ContentTemplate>
-										<div>
-											<SfGrid TItem="DashboardStatisticsTotal" DataSource="_totals" AllowResizing="true" AllowReordering="true">
-												<GridColumns>
-													<GridColumn Field="Total"		HeaderText="Inschrijvingen"		Width="100"/>
-													<GridColumn Field="InQueue"		HeaderText="In Wacht"	Width="80"/>
-													<GridColumn Field="Paid"		HeaderText="Betaald"	Width="80"/>
-													<GridColumn Field="DroppedOut"	HeaderText="Afgehaakt"	Width="100"/>
-												</GridColumns>
-											</SfGrid>
-										</div>
-									</ContentTemplate>
-								</TabItem>
+                    <SfComboBox TValue="string"
+                                TItem="Edition"
+                                @bind-Value="SelectedEditionId"
+                                Placeholder="Kies een editie"
+                                DataSource="@Editions"
+                                Width="150px">
+                        <ComboBoxFieldSettings Value="ID" Text="Text"></ComboBoxFieldSettings>
+                    </SfComboBox>
 
-								<TabItem>
-									<ChildContent>
-										<TabHeader Text="Genre" />
-									</ChildContent>
-									<ContentTemplate>
-										<div>
-											<SfGrid TItem="DashboardStatisticsGenre" DataSource="_genre" AllowResizing="true" AllowReordering="true" Height="300px">
-												<GridColumns>
-													<GridColumn Field="Genre"		HeaderText="Genre"		Width="auto" />
-													<GridColumn Field="Total"		HeaderText="Inschrijvingen" Width="100" />
-													<GridColumn Field="InQueue"		HeaderText="In Wacht"	Width="80" />
-													<GridColumn Field="Paid"		HeaderText="Betaald"	Width="80" />
-													<GridColumn Field="DroppedOut"	HeaderText="Afgehaakt"	Width="100" />
-												</GridColumns>
-											</SfGrid>
-										</div>
-									</ContentTemplate>
-								</TabItem>
+                    @if ( _hasData )
+                    {
+                        <SfTab OverflowMode="OverflowMode.Scrollable" Width="600px">
 
-								<TabItem>
-									<ChildContent>
-										<TabHeader Text="Country" />
-									</ChildContent>
-									<ContentTemplate>
-										<div>
-											<SfGrid TItem="DashboardStatisticsCountry" DataSource="_country" AllowResizing="true" AllowReordering="true">
-												<GridColumns>
-													<GridColumn Field="Country" HeaderText="Country" Width="auto" />
-													<GridColumn Field="Total" HeaderText="Inschrijvingen" Width="100" />
-													<GridColumn Field="InQueue" HeaderText="In Wacht" Width="80" />
-													<GridColumn Field="Paid" HeaderText="Betaald" Width="80" />
-													<GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100" />
-												</GridColumns>
-											</SfGrid>
-										</div>
-									</ContentTemplate>
-								</TabItem>
+                            <TabItems>
 
-								<TabItem>
-									<ChildContent>
-										<TabHeader Text="Podiumtype" />
-									</ChildContent>
-									<ContentTemplate>
-										<div>
-											<SfGrid TItem="DashboardStatisticsStage" DataSource="_stage" AllowResizing="true" AllowReordering="true">
-												<GridColumns>
-													<GridColumn Field="Stagetype" HeaderText="Podium" Width="auto" />
-													<GridColumn Field="Total" HeaderText="Inschrijvingen" Width="100" />
-													<GridColumn Field="InQueue" HeaderText="In Wacht" Width="80" />
-													<GridColumn Field="Paid" HeaderText="Betaald" Width="80" />
-													<GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100" />
-												</GridColumns>
-											</SfGrid>
-										</div>
-									</ContentTemplate>
-								</TabItem>
+                                <!-- TOTALEN -->
+                                <TabItem>
+                                    <ChildContent>
+                                        <TabHeader Text="Totalen" />
+                                    </ChildContent>
+                                    <ContentTemplate>
+                                        <SfGrid TItem="DashboardStatisticsTotal"
+                                                DataSource="_totals"
+                                                AllowResizing="true"
+                                                AllowReordering="true">
+                                            <GridColumns>
+                                                <GridColumn Field="Total" HeaderText="Inschrijvingen" Width="100" />
+                                                <GridColumn Field="InQueue" HeaderText="In Wacht" Width="80" />
+                                                <GridColumn Field="Paid" HeaderText="Betaald" Width="80" />
+                                                <GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100" />
+                                            </GridColumns>
+                                        </SfGrid>
+                                    </ContentTemplate>
+                                </TabItem>
 
-								<TabItem>
-									<ChildContent>
-										<TabHeader Text="Zangersverdeling" />
-									</ChildContent>
-									<ContentTemplate>
-										<div>
-											<SfGrid TItem="DashboardSubscriptionsPivot" DataSource="_pivot" AllowResizing="true" AllowReordering="true">
-												<GridColumns>
+                                <!-- GENRE -->
+                                <TabItem>
+                                    <ChildContent>
+                                        <TabHeader Text="Genre" />
+                                    </ChildContent>
+                                    <ContentTemplate>
+                                        <SfGrid TItem="DashboardStatisticsGenre"
+                                                DataSource="_genre"
+                                                AllowResizing="true"
+                                                AllowReordering="true"
+                                                Height="300px">
+                                            <GridColumns>
+                                                <GridColumn Field="Genre" HeaderText="Genre" Width="auto" />
+                                                <GridColumn Field="Total" HeaderText="Inschrijvingen" Width="100" />
+                                                <GridColumn Field="InQueue" HeaderText="In Wacht" Width="80" />
+                                                <GridColumn Field="Paid" HeaderText="Betaald" Width="80" />
+                                                <GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100" />
+                                            </GridColumns>
+                                        </SfGrid>
+                                    </ContentTemplate>
+                                </TabItem>
 
-													<GridColumn Field="DeelnemersCategorie" HeaderText="Aantal" Width="auto" />
+                                <!-- COUNTRY -->
+                                <TabItem>
+                                    <ChildContent>
+                                        <TabHeader Text="Country" />
+                                    </ChildContent>
+                                    <ContentTemplate>
+                                        <SfGrid TItem="DashboardStatisticsCountry"
+                                                DataSource="_country"
+                                                AllowResizing="true"
+                                                AllowReordering="true">
+                                            <GridColumns>
+                                                <GridColumn Field="Country" HeaderText="Country" Width="auto" />
+                                                <GridColumn Field="Total" HeaderText="Inschrijvingen" Width="100" />
+                                                <GridColumn Field="InQueue" HeaderText="In Wacht" Width="80" />
+                                                <GridColumn Field="Paid" HeaderText="Betaald" Width="80" />
+                                                <GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100" />
+                                            </GridColumns>
+                                        </SfGrid>
+                                    </ContentTemplate>
+                                </TabItem>
 
-													@foreach ( var col in _pivotColumns )
-													{
-														<GridColumn Field="@col" HeaderText="@col" Width="60" TextAlign="TextAlign.Center" />
-													}
+                                <!-- PODIUMTYPE -->
+                                <TabItem>
+                                    <ChildContent>
+                                        <TabHeader Text="Podiumtype" />
+                                    </ChildContent>
+                                    <ContentTemplate>
+                                        <SfGrid TItem="DashboardStatisticsStage"
+                                                DataSource="_stage"
+                                                AllowResizing="true"
+                                                AllowReordering="true">
+                                            <GridColumns>
+                                                <GridColumn Field="Stagetype" HeaderText="Podium" Width="auto" />
+                                                <GridColumn Field="Total" HeaderText="Inschrijvingen" Width="100" />
+                                                <GridColumn Field="InQueue" HeaderText="In Wacht" Width="80" />
+                                                <GridColumn Field="Paid" HeaderText="Betaald" Width="80" />
+                                                <GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100" />
+                                            </GridColumns>
+                                        </SfGrid>
+                                    </ContentTemplate>
+                                </TabItem>
 
-												</GridColumns>
-											</SfGrid>
-										</div>
-									</ContentTemplate>
-								</TabItem>
-							</TabItems>
-						</SfTab>
-					}
-					else
-					{
-						<p>Voor de geselecteerde editie zijn nog geen statistieken beschikbaar</p>
-					}
-				</div>
-				<div class="page-content-right">
-					<SfComboBox TValue="int"
-								TItem="int"
-								@bind-Value="SelectedYears"
-								DataSource="@Years"
-								Placeholder="Aantal jaren"
-								Width="150px">
-					</SfComboBox>
-					<p></p>
-					
-					<SfTab OverflowMode="OverflowMode.Scrollable" Width="600px">
-						<TabItems>
-							<TabItem>
-								<ChildContent>
-									<TabHeader Text="Grafiek 1" />
-								</ChildContent>
-								<ContentTemplate>
-									<!-- Grafiek 1 -->
-								</ContentTemplate>
-							</TabItem>
+                                <!-- PIVOT -->
+                                <TabItem>
+                                    <ChildContent>
+                                        <TabHeader Text="Zangersverdeling" />
+                                    </ChildContent>
+                                    <ContentTemplate>
+                                        <SfGrid TItem="DashboardSubscriptionsPivot"
+                                                DataSource="_pivot"
+                                                AllowResizing="true"
+                                                AllowReordering="true">
+                                            <GridColumns>
+                                                <GridColumn Field="DeelnemersCategorie" HeaderText="Categorie" Width="auto" />
 
-							<TabItem>
-								<ChildContent>
-									<TabHeader Text="Grafiek 2" />
-								</ChildContent>
-								<ContentTemplate>
-									<!-- Grafiek 2 -->
-								</ContentTemplate>
-							</TabItem>
-						</TabItems>
-					</SfTab>
-				</div>
+                                                @foreach ( var col in _pivotColumns )
+                                                {
+                                                    <GridColumn Field="@col" HeaderText="@col" Width="60" TextAlign="TextAlign.Center" />
+                                                }
+                                            </GridColumns>
+                                        </SfGrid>
+                                    </ContentTemplate>
+                                </TabItem>
 
-				<div class="log-footer">
-					<SfToolbar>
-						<ToolbarItems>
-							<ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right" Width="120px">
-								<Template>
-									<SfTextBox @ref="@searchBox" Created="@AddSearchIcon" Placeholder="Zoek in de lijst" Input="OnInput"></SfTextBox>
-								</Template>
-							</ToolbarItem>
-						</ToolbarItems>
-					</SfToolbar>
+                            </TabItems>
+                        </SfTab>
+                    }
+                    else
+                    {
+                        <p>Voor de geselecteerde editie zijn nog geen statistieken beschikbaar</p>
+                    }
+                </div>
 
-					<SfGrid @ref="_gridLog"
-							TItem="LogModel"
-							DataSource="_loggingList"
-							AllowSorting="true" EnableVirtualization="true"
-							AllowResizing="true"
-							Height="180px">
-						<GridSearchSettings IgnoreAccent="true" />
-						<GridColumns>
-							<GridColumn Field="LogDateOnly" HeaderText="Datum" Width="100" />
-							<GridColumn Field="LogTimeOnly" HeaderText="Tijdstip" Width="80" />
-							<GridColumn Field="LogArea" HeaderText="Onderdeel" Width="170" />
-							<GridColumn Field="LogAction" HeaderText="Aktie" Width="170" />
-							<GridColumn Field="LogReport" HeaderText="Resultaat" />
-						</GridColumns>
-					</SfGrid>
-				</div>
-			</div>
-		}
-	</Authorized>
-	<NotAuthorized>
-		<p class="text-danger">Let op, je bent nog niet ingelogd</p>
-	</NotAuthorized>
+                <div class="page-content-right">
+
+                    <SfComboBox TValue="int"
+                                TItem="int"
+                                @bind-Value="SelectedYears"
+                                DataSource="@Years"
+                                Placeholder="Aantal jaren"
+                                Width="150px">
+                    </SfComboBox>
+
+                    <SfTab OverflowMode="OverflowMode.Scrollable" Width="600px">
+                        <TabItems>
+                            <TabItem>
+                                <ChildContent>
+                                    <TabHeader Text="Grafiek 1" />
+                                </ChildContent>
+                                <ContentTemplate>
+                                    <!-- Grafiek 1  -->
+                                    <SfChart Title="Cumulatieve inschrijvingen per maand">
+                                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" Title="Maanden" />
+                                        <ChartPrimaryYAxis Title="Inschrijvingen" />
+
+                                        <ChartSeriesCollection>
+                                            @foreach ( var festivalGroup in _graph.GroupBy( g => g.Festival ) )
+                                            {
+                                                <ChartSeries DataSource="festivalGroup"
+                                                             XName="Month"
+                                                             YName="Number"
+                                                             Type="Syncfusion.Blazor.Charts.ChartSeriesType.Spline"
+                                                             Name="@festivalGroup.Key"
+                                                             MarkerVisible="true">
+                                                </ChartSeries>
+                                            }
+                                        </ChartSeriesCollection>
+                                    </SfChart>
+                                </ContentTemplate>
+                            </TabItem>
+
+                            <TabItem>
+                                <ChildContent>
+                                    <TabHeader Text="Grafiek 2" />
+                                </ChildContent>
+                                <ContentTemplate>
+                                    <!-- Grafiek 2 -->
+                                </ContentTemplate>
+                            </TabItem>
+                        </TabItems>
+                    </SfTab>
+
+                </div>
+
+                <!-- Log footer -->
+                <div class="log-footer">
+                    <SfToolbar>
+                        <ToolbarItems>
+                            <ToolbarItem Type="ItemType.Input"
+                                         Align="Syncfusion.Blazor.Navigations.ItemAlign.Right"
+                                         Width="120px">
+                                <Template>
+                                    <SfTextBox @ref="@searchBox"
+                                               Created="@AddSearchIcon"
+                                               Placeholder="Zoek in de lijst"
+                                               Input="OnInput" />
+                                </Template>
+                            </ToolbarItem>
+                        </ToolbarItems>
+                    </SfToolbar>
+
+                    <SfGrid @ref="_gridLog"
+                            TItem="LogModel"
+                            DataSource="_loggingList"
+                            AllowSorting="true"
+                            EnableVirtualization="true"
+                            AllowResizing="true"
+                            Height="180px">
+                        <GridSearchSettings IgnoreAccent="true" />
+                        <GridColumns>
+                            <GridColumn Field="LogDateOnly" HeaderText="Datum" Width="100" />
+                            <GridColumn Field="LogTimeOnly" HeaderText="Tijdstip" Width="80" />
+                            <GridColumn Field="LogArea" HeaderText="Onderdeel" Width="170" />
+                            <GridColumn Field="LogAction" HeaderText="Actie" Width="170" />
+                            <GridColumn Field="LogReport" HeaderText="Resultaat" />
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+
+            </div>
+        }
+    </Authorized>
+
+    <NotAuthorized>
+        <p class="text-danger">Let op, je bent nog niet ingelogd</p>
+    </NotAuthorized>
 </AuthorizeView>
