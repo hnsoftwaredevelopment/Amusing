@@ -28,9 +28,9 @@
 					<p class="text-break"/>
 					<SfComboBox 
 						TValue="string"
-						TItem="Edition"					
+						TItem="Edition"
+						@bind-Value="SelectedEditionId"
 						Placeholder="Kies een editie"
-						ValueChanged="OnEditionChanged"
 						DataSource="@Editions"
 						Width="150px">
 						<ComboBoxFieldSettings Value="ID" Text="Text"></ComboBoxFieldSettings>
@@ -39,7 +39,7 @@
 
 					@if ( _hasData )
 					{
-						<SfTab OverflowMode="OverflowMode.Scrollable" Width="700px">
+						<SfTab OverflowMode="OverflowMode.Scrollable" Width="600px">
 							<TabItems>
 								<TabItem>
 									<ChildContent>
@@ -49,7 +49,7 @@
 										<div>
 											<SfGrid TItem="DashboardStatisticsTotal" DataSource="_totals" AllowResizing="true" AllowReordering="true">
 												<GridColumns>
-													<GridColumn Field="Total"		HeaderText="Inschrijvingen"		Width="80"/>
+													<GridColumn Field="Total"		HeaderText="Inschrijvingen"		Width="100"/>
 													<GridColumn Field="InQueue"		HeaderText="In Wacht"	Width="80"/>
 													<GridColumn Field="Paid"		HeaderText="Betaald"	Width="80"/>
 													<GridColumn Field="DroppedOut"	HeaderText="Afgehaakt"	Width="100"/>
@@ -68,7 +68,7 @@
 											<SfGrid TItem="DashboardStatisticsGenre" DataSource="_genre" AllowResizing="true" AllowReordering="true" Height="300px">
 												<GridColumns>
 													<GridColumn Field="Genre"		HeaderText="Genre"		Width="auto" />
-													<GridColumn Field="Total"		HeaderText="Inschrijvingen" Width="80" />
+													<GridColumn Field="Total"		HeaderText="Inschrijvingen" Width="100" />
 													<GridColumn Field="InQueue"		HeaderText="In Wacht"	Width="80" />
 													<GridColumn Field="Paid"		HeaderText="Betaald"	Width="80" />
 													<GridColumn Field="DroppedOut"	HeaderText="Afgehaakt"	Width="100" />
@@ -87,7 +87,7 @@
 											<SfGrid TItem="DashboardStatisticsCountry" DataSource="_country" AllowResizing="true" AllowReordering="true">
 												<GridColumns>
 													<GridColumn Field="Country" HeaderText="Country" Width="auto" />
-													<GridColumn Field="Total" HeaderText="Inschrijvingen" Width="80" />
+													<GridColumn Field="Total" HeaderText="Inschrijvingen" Width="100" />
 													<GridColumn Field="InQueue" HeaderText="In Wacht" Width="80" />
 													<GridColumn Field="Paid" HeaderText="Betaald" Width="80" />
 													<GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100" />
@@ -106,7 +106,7 @@
 											<SfGrid TItem="DashboardStatisticsStage" DataSource="_stage" AllowResizing="true" AllowReordering="true">
 												<GridColumns>
 													<GridColumn Field="Stagetype" HeaderText="Podium" Width="auto" />
-													<GridColumn Field="Total" HeaderText="Inschrijvingen" Width="80" />
+													<GridColumn Field="Total" HeaderText="Inschrijvingen" Width="100" />
 													<GridColumn Field="InQueue" HeaderText="In Wacht" Width="80" />
 													<GridColumn Field="Paid" HeaderText="Betaald" Width="80" />
 													<GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100" />

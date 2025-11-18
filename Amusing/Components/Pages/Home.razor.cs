@@ -27,7 +27,20 @@ public partial class Home : ComponentBase
     private List<IDictionary<string, object>> _pivot = [];
     private List<string> _pivotColumns = [];
     protected List<Edition> Editions = [];
-    protected string? SelectedEditionId;
+    protected string? selectedEditionId;
+    public string SelectedEditionId
+    {
+        get => selectedEditionId;
+        set
+        {
+            if ( selectedEditionId == value )
+                return;
+            selectedEditionId = value;
+            // Trigger synchronous wrapper that calls async loader
+            _ = OnSelectedEditionChangedAsync( value );
+        }
+    }
+
 
     [Inject]
     private LoggingService _loggingService { get; set; } = default!;
@@ -41,7 +54,6 @@ public partial class Home : ComponentBase
     public List<string> ToolbarItems = ["Zoek"];
 
     SfTextBox searchBox { get; set; }
-    SfComboBox<string, Edition> selectEdition { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -59,7 +71,6 @@ public partial class Home : ComponentBase
             SelectedEditionId = Editions
                 .OrderByDescending( e => int.Parse( e.Text ) )
                 .First().ID;
-            selectEdition.Value = SelectedEditionId;
 
             if ( SelectedEditionId != null )
             {
@@ -113,6 +124,47 @@ public partial class Home : ComponentBase
         {
             await searchBox.AddIconAsync( "append", "fa fa-search" );
         }
+    }
+
+    private async Task OnSelectedEditionChangedAsync( string selectedId )
+    {
+        // Basic sanity check
+        if ( string.IsNullOrWhiteSpace( selectedId ) )
+        {
+            _hasData = false;
+            await InvokeAsync( StateHasChanged );
+            return;
+        }
+
+        var editionInt = int.Parse(selectedId);
+
+        // First check: does it have subscriptions?
+        var subs = await DashboardService.GetNumberOfSubscriptions(editionInt);
+        if ( subs <= 0 )
+        {
+            _hasData = false;
+            await InvokeAsync( StateHasChanged );
+            return;
+        }
+
+        // Load all datasets
+        _totals = await DashboardService.GetDashboardStatisticsTotalsAsync( editionInt );
+        _genre = await DashboardService.GetDashboardStatisticsGenreAsync( editionInt );
+        _country = await DashboardService.GetDashboardStatisticsCountryAsync( editionInt );
+        _stage = await DashboardService.GetDashboardStatisticsStageAsync( editionInt );
+        _pivot = await DashboardService.GetSubscriptionsPivotAsync( editionInt );
+
+        if ( _pivot.Any() )
+        {
+            _pivotColumns = _pivot.First()
+                .Keys
+                .Where( k => k != "DeelnemersCategorie" )
+                .ToList();
+        }
+
+        _hasData = true;
+
+        await InvokeAsync( StateHasChanged );
     }
 
     protected async Task OnEditionChanged( string selectedId )
