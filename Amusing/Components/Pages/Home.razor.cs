@@ -1,8 +1,11 @@
+using System.Globalization;
+
 using Amusing.Models;
 using Amusing.Services;
 
 using Microsoft.AspNetCore.Components;
 
+using Syncfusion.Blazor.Charts;
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Grids.Internal;
@@ -17,6 +20,20 @@ public partial class Home : ComponentBase
     private bool _hasData = false;
 
     protected string FileName = "Log bestanden";
+    private readonly string[] _dutchMonths = { "", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec", "Jan", "Feb", "Mrt", "Apr", "Mei" };
+    private readonly string[] _seriesColors =
+	[
+		"#FF0000",
+        "#8FB8DE",
+        "#B7D3A8",
+        "#E8C8A0",
+        "#D6A5C4",
+        "#FCF6BD",
+        "#D0F4DE",
+        "#F5EBE0",
+        "#FFE5D9",
+        "#C7C7C7",
+    ];
 
     private SfGrid<LogModel>? _gridLog;
     private List<LogModel> _loggingList = [];
@@ -41,6 +58,32 @@ public partial class Home : ComponentBase
             _ = OnYearsChangedAsync( value );
         }
     }
+
+    private double YAxisMax
+    {
+        get
+        {
+            if ( _graph == null || !_graph.Any() )
+                return 20;
+
+            var max = _graph.Max(x => x.Number);
+            return Math.Ceiling( max / 20.0 ) * 20;
+        }
+    }
+
+    private int MaxYear => _graph.Any() ? _graph.Max( x => x.FestivalId ) : 0; // of Festival als string -> int.Parse
+
+    private string GetSeriesColor( string festival )
+    {
+        // Highlight highest year
+        return festival == MaxYear.ToString() ? "red" : "lightblue"; // of andere pastel kleuren
+    }
+
+    private double GetSeriesWidth( string festival )
+    {
+        return festival == MaxYear.ToString() ? 3 : 1.5; // huidige jaar dikkere lijn
+    }
+
     protected List<int> Years = [2, 5, 10 ];
     protected string? selectedEditionId;
     public string SelectedEditionId
@@ -80,7 +123,7 @@ public partial class Home : ComponentBase
 
         Editions = await EditionService.GetEditionsAsync();
 
-        _graph = await DashboardService.GetGraphDataAsync( SelectedYears);
+        _graph = await DashboardService.GetGraphDataAsync( SelectedYears );
 
         if ( Editions.Any() )
         {
@@ -224,5 +267,22 @@ public partial class Home : ComponentBase
         }
         else
         { _hasData = false; }
+    }
+
+    private void OnXAxisLabelRender( AxisLabelRenderEventArgs args )
+    {
+        if ( string.IsNullOrWhiteSpace( args?.Text ) )
+            return;
+
+        // Parse the numeric label (the MonthOrder)
+        if ( int.TryParse( args.Text, out int monthOrder ) )
+        {
+            // Validate range and map to _dutchMonths
+            if ( monthOrder >= 1 && monthOrder < _dutchMonths.Length )
+            {
+                args.Text = _dutchMonths [ monthOrder ];
+                return;
+            }
+        }
     }
 }

@@ -167,45 +167,48 @@
                                 Width="150px">
                     </SfComboBox>
 
-                    <SfTab OverflowMode="OverflowMode.Scrollable" Width="600px">
-                        <TabItems>
-                            <TabItem>
-                                <ChildContent>
-                                    <TabHeader Text="Grafiek 1" />
-                                </ChildContent>
-                                <ContentTemplate>
-                                    <!-- Grafiek 1  -->
-                                    <SfChart Title="Cumulatieve inschrijvingen per maand">
-                                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" Title="Maanden" />
-                                        <ChartPrimaryYAxis Title="Inschrijvingen" />
+                    <SfChart Title="Inschrijvingen per maand" Height="350px">
+                        <ChartEvents OnAxisLabelRender="OnXAxisLabelRender"></ChartEvents>
 
-                                        <ChartSeriesCollection>
-                                            @foreach ( var festivalGroup in _graph.GroupBy( g => g.Festival ) )
-                                            {
-                                                <ChartSeries DataSource="festivalGroup"
-                                                             XName="Month"
-                                                             YName="Number"
-                                                             Type="Syncfusion.Blazor.Charts.ChartSeriesType.Spline"
-                                                             Name="@festivalGroup.Key"
-                                                             MarkerVisible="true">
-                                                </ChartSeries>
-                                            }
-                                        </ChartSeriesCollection>
-                                    </SfChart>
-                                </ContentTemplate>
-                            </TabItem>
+                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Double"
+                                            Interval="1"
+                                            LabelIntersectAction="LabelIntersectAction.Rotate45"
+                                            LabelPlacement="LabelPlacement.BetweenTicks"
+                                            EdgeLabelPlacement="EdgeLabelPlacement.Shift"
+                                            LabelStyle="@(new ChartAxisLabelStyle { Size = "12px" })">
+                        </ChartPrimaryXAxis>
 
-                            <TabItem>
-                                <ChildContent>
-                                    <TabHeader Text="Grafiek 2" />
-                                </ChildContent>
-                                <ContentTemplate>
-                                    <!-- Grafiek 2 -->
-                                </ContentTemplate>
-                            </TabItem>
-                        </TabItems>
-                    </SfTab>
+                        <ChartPrimaryYAxis LabelFormat="{value}"
+                                           Interval="20"
+                                           Minimum="0"
+                                           Maximum="@YAxisMax">
+                        </ChartPrimaryYAxis>
 
+                        @foreach ( var (festivalGroup, index) in _graph
+                                            .GroupBy( x => x.Festival )
+                                            .OrderByDescending( g => int.Parse( g.Key ) )
+                                            .Select( ( grp, idx ) => (grp, idx) ) )   // Pair with index
+                        {
+                            // Bepaal het hoogste jaar
+                            var isMostRecent = int.Parse(festivalGroup.Key) == _graph.Max(x => int.Parse(x.Festival));
+
+                            // Gebruik standaard kleur, behalve als het de meest recente is
+                            var color = isMostRecent ? "red" : _seriesColors[Math.Min(index, _seriesColors.Length - 1)];
+
+                            // Lijnbreedte iets dikker voor meest recente
+                            var width = isMostRecent ? 3 : 1.5;
+
+                            <ChartSeries DataSource="festivalGroup.OrderBy( x => x.MonthOrder )"
+                                         XName="MonthOrder"
+                                         YName="Number"
+                                         Name="@festivalGroup.Key"
+                                         Fill="@color"
+                                         Width="@width"
+                                         Type="ChartSeriesType.Spline">
+                                <ChartMarker Visible="true" Width="5" Height="5"></ChartMarker>
+                            </ChartSeries>
+                        }
+                    </SfChart>
                 </div>
 
                 <!-- Log footer -->
