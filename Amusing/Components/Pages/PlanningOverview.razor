@@ -1,0 +1,29 @@
+﻿@page "/Planning-Overview"
+@using Amusing.Models
+@using Amusing.Services
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Data
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+@using System.ComponentModel.DataAnnotations
+
+
+<AuthorizeView>
+	<Authorized>
+		<h3>Plannings overzicht</h3>
+		<p></p>
+		<button class="btn btn-primary" @onclick="ExportToXmlAsync">
+			Export to XML
+		</button>
+
+		<button class="btn btn-secondary" @onclick="ExportToExcelAsync">
+			Export to Excel
+		</button>
+
+	</Authorized>
+	<NotAuthorized>
+		<p class="text-danger">Je hebt alleen toegang tot deze pagina wanneer je bent ingelogt</p>
+	</NotAuthorized>
+</AuthorizeView>

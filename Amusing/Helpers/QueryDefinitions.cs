@@ -338,6 +338,8 @@ public static class QueryDefinitions
     ";
     public static string GetCurrentFestival = @"
         SELECT MAX(YEAR(festivaldatum)) AS Huidige FROM ah_festivals";
+    public static string GetCurrentFestivalId = @"
+        SELECT MAX(festival_id) AS Huidige FROM ah_festivals";
     public static readonly string GetFestivals = @"
         SELECT
             festival_Id, 
