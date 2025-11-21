@@ -90,8 +90,7 @@ builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<VolunteerService>();
 builder.Services.AddScoped<FieldMappingService>();
 builder.Services.AddScoped<UserContextHelper>();
-builder.Services.AddScoped<PerformanceService>();
-builder.Services.AddScoped<PlanningXmlExportService>();
+builder.Services.AddScoped<PlanningService>();
 builder.Services.AddHttpContextAccessor();
 
 // TransipMailingService gebruikt HttpClientFactory -> altijd via AddHttpClient()

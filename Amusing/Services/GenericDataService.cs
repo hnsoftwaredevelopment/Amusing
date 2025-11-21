@@ -85,4 +85,24 @@ public class GenericDataService
             ? ( T ) Convert.ChangeType( result, typeof( T ) )
             : default!;
     }
+
+    public T ExecuteScalarQuery<T>( string sql, Dictionary<string, object> parameters )
+    {
+        using var connection = new MySqlConnection(_connection.ConnectionString);
+        using var command = new MySqlCommand(sql, connection);
+
+        foreach ( var param in parameters )
+        {
+            command.Parameters.AddWithValue( param.Key, param.Value );
+        }
+
+        connection.Open();
+        object result = command.ExecuteScalar();
+        connection.Close();
+
+        if ( result == null || result == DBNull.Value )
+            return default;
+
+        return ( T ) Convert.ChangeType( result, typeof( T ) );
+    }
 }
