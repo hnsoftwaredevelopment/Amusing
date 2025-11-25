@@ -12,15 +12,52 @@
 
 <AuthorizeView>
 	<Authorized>
-		<h3>Plannings overzicht</h3>
-		<p></p>
-		<button class="btn btn-primary" @onclick="ExportToXmlAsync">
-			Export to XML
-		</button>
+		<div class="overview-grid">
+			<div class="row row1">
+				<h3>
+					Podiumplanning
+					@if ( !string.IsNullOrWhiteSpace( SelectedEditionId ) )
+					{
+						<span class="edition-label">@SelectedEditionText</span>
+					}
+				</h3>
+			</div>
 
-		<button class="btn btn-secondary" @onclick="ExportToExcelAsync">
-			Export to Excel
-		</button>
+			<div class="row row2">
+				<div class="col left">
+					<SfComboBox TValue="string"
+								TItem="Edition"
+								Placeholder="Kies een editie"
+								ValueChanged="OnEditionChanged"
+								DataSource="@Editions"
+								Width="150px">
+						<ComboBoxFieldSettings Value="ID" Text="Text"></ComboBoxFieldSettings>
+					</SfComboBox>
+				</div>
+				
+				<div class="col right">
+					<button class="xml-btn" @onclick="ExportToXmlAsync" title="XML Export">
+						<img src="icons/xml.svg" class="icon" alt="XML" />
+					</button>
+				</div>
+			</div>
+
+			<div class="row row3">
+				<div class="col left">3A</div>
+				<div class="col right">3B</div>
+			</div>
+
+			<div class="row row4">
+				<div class="col left">4A</div>
+				<div class="col right">4B</div>
+			</div>
+
+
+		</div>
+		@if ( !string.IsNullOrWhiteSpace( _message ) )
+		{
+			<div class="alert alert-success mt-2">@_message</div>
+		}
 
 	</Authorized>
 	<NotAuthorized>

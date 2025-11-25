@@ -1601,108 +1601,113 @@ public static class QueryDefinitions
     #region Planner queries
     public static readonly string GetPlanningConditions = @"
         SELECT 
-	        pv.WensTijdTussenOptredens AS WishTimeBetweenPerformances,
-	        pv.MaxTijdTussenOptredens AS MaxTimeBetweenPerformances,
-	        pv.MaxLengteVrijwilligerDienst AS MaxLentgVolunteersShift,
-	        pv.BoeteOnderbrekingOptredens AS PenaltyInteruptionPerformances
+	        pv.WensTijdTussenOptredens AS WensTijdTussenOptredens,
+	        pv.MaxTijdTussenOptredens AS MaxTijdTussenOptredens,
+	        pv.MaxLengteVrijwilligerDienst AS MaxLengteVrijwilligerDienst,
+	        pv.BoeteOnderbrekingOptredens AS BoeteOnderbrekingOptredens,
+            pv.TaakNamenZonderOverstapTijd AS TaakNamenZonderOverstapTijd,
+            pv.ReserveTaakNaam AS ReserveTaakNaam
         FROM amusing.planner_voorwaarden pv 
         WHERE pv.festival_id = @FestivalId;";
     public static readonly string GetPlanningFestivals = @"
         SELECT 
-	        f.festival_id AS FestivalId,
-	        YEAR(f.festivaldatum ) AS Festival,
-	        TIME_FORMAT(f.start_festivaldag, '%H:%i') AS StartFestivalday,
-	        TIME_FORMAT(f.einde_festivaldag, '%H:%i') AS EndFestivalday,
-	        TIME_FORMAT(f.begin_pauze, '%H:%i') AS StartPause,
-	        TIME_FORMAT(f.einde_pauze, '%H:%i') AS EndPause,
-	        TIME_FORMAT(f.einde_ervaren_reserve, '%H:%i') AS EndExperiencedSubstitude
+	        f.festival_id AS festival_id,
+	        CONCAT ('Amusing Hengelo ',YEAR(f.festivaldatum )) AS naam,
+            f.duuroptreden AS duuroptreden,
+	        TIME_FORMAT(f.start_festivaldag, '%H:%i') AS start_festivaldag,
+	        TIME_FORMAT(f.einde_festivaldag, '%H:%i') AS einde_festivaldag,
+	        TIME_FORMAT(f.begin_pauze, '%H:%i') AS begin_pauze,
+	        TIME_FORMAT(f.einde_pauze, '%H:%i') AS einde_pauze,
+	        TIME_FORMAT(f.einde_ervaren_reserve, '%H:%i') AS einde_ervaren_reserve
         FROM amusing.ah_festivals f
         WHERE f.festival_id = @FestivalId;";
     public static readonly string GetPlanningGenres = @"
         SELECT 
-	        g.genre_id AS GenreId,
-	        g.nl AS Name
+	        g.genre_id AS genre_id,
+	        g.nl AS nl
         FROM amusing.ah_genres g";
     public static readonly string GetPlanningGroups = @"
         SELECT 
-	        g.zanggroep_id AS GroupId,
-	        g.naam AS Name,
-	        g.genre_id AS GenreId,
-	        g.standplaats AS City,
-	        g.land AS Country
+	        g.zanggroep_id AS zanggroep_id,
+	        g.naam AS naam,
+	        g.genre_id AS genre_id,
+	        g.standplaats AS standplaats,
+	        g.land AS land
         FROM amusing.ah_zanggroepen g 
         WHERE g.actief = 1;";
     public static readonly string GetPlanningPerformances = @"
         SELECT 
-	        po.festival_id AS FestivalId,
-	        po.zanggroep_id AS GroupId,
-	        g.naam  AS GroupName,
-	        po.tijdvak AS TimeSlotId,
-	        po.podium_id AS StageId,
-	        p.naam AS StageName,
-	        TIME_FORMAT(t.`from`, '%H:%i') AS 'From',
-	        TIME_FORMAT(t.`to`, '%H:%i') AS 'To'
+            po.zanggroep_id AS zanggroep_id,
+            po.podium_id AS podium_id,
+            TIME_FORMAT(t.`from`, '%H:%i') AS 'van',
+            TIME_FORMAT(t.`to`, '%H:%i') AS 'tot',
+            'false' AS vastgezet,
+            CONCAT(p.naam, ', starttijd ',  TIME_FORMAT(t.`from`, '%H:%i'), ', zanggroep ', g.naam) AS beschrijving
         FROM amusing.planner_optredens po 
         JOIN amusing.ah_podia p ON po.podium_id = p.podium_id
         JOIN amusing.ah_zanggroepen g ON g.zanggroep_id = po.zanggroep_id  
         JOIN amusing.ah_timetable t ON po.tijdvak = t.timeslot_id
-        WHERE po.festival_id = 20;";
+        WHERE po.festival_id = @FestivalId
+        GROUP BY podium_id, po.tijdvak
+        ORDER BY podium_id, po.tijdvak;
+        ";
     public static readonly string GetPlanningPersonRoles = @"
         SELECT 
-	        r.persoon_id AS PersonId,
-	        CONCAT_WS(' ', p.voornaam, NULLIF(p.tussenvoegsel, ''), p.achternaam) AS PersonName,
-	        r.zanggroep_id AS GroupId,
-	        g.naam AS GroupName,
-	        r.rol AS Role
-        FROM amusing.ah_personen_rollen r
-        JOIN amusing.ah_zanggroepen g ON g.zanggroep_id = r.zanggroep_id
-        JOIN amusing.ah_personen p ON r.persoon_id = p.persoon_id;";
+	        r.persoon_id AS persoon_id,
+	        r.zanggroep_id AS zanggroep_id,
+	        r.rol AS rol
+        FROM amusing.ah_personen_rollen r;";
     public static readonly string GetPlanningPersons = @"
         SELECT 
-	        p.persoon_id AS PersonId,
-	        p.voornaam AS Firstname,
-	        p.tussenvoegsel AS Affix,
-	        p.achternaam AS Surname,
-	        CONCAT_WS(' ', p.voornaam, NULLIF(p.tussenvoegsel, ''), p.achternaam) AS Name
+	        p.persoon_id AS persoon_id,
+	        p.voornaam AS voornaam,
+	        p.tussenvoegsel AS tussenvoegsel,
+	        p.achternaam AS achternaam
         FROM amusing.ah_personen p;";
     public static readonly string GetPlanningRegistrations = @"
         SELECT 
-	        i.festival_id AS FestivalId,
-	        i.zanggroep_id AS GroupId,
-	        g.naam AS GroupName,
-	        i.wens_1 AS Wish1,
-	        i.wens_2 AS Wish2,
-	        i.wens_3 AS Wish3,
-	        i.wens_4 AS Wish4,
-	        i.aantal_deelnemers AS Singers,
-	        i.podiumsoort AS Stagetype,
-	        i.podiumkeuze_geforceerd AS ForcedStageChoice,
-	        i.ingeschreven AS Registered,
-	        TIME_FORMAT(i.beschikbaar_van, '%H:%i') AS AvailableFrom,
-	        TIME_FORMAT(i.beschikbaar_tot, '%H:%i') AS AvailableTill,
-	        i.wachtlijst AS Queue,
-	        i.binnenoptredens AS InsidePerformances,
-	        i.buitenoptredens AS OutsidePerformances,
-	        i.bevestigd AS Confirmed
+	        i.festival_id AS festival_id,
+	        i.zanggroep_id AS zanggroep_id,
+	        i.wens_1 AS wens_1,
+	        i.wens_2 AS wens_2,
+	        i.wens_3 AS wens_3,
+	        i.wens_4 AS wens_4,
+	        i.aantal_deelnemers AS aantal_deelnemers,
+	        i.podiumsoort AS podiumsoort,
+	        i.podiumkeuze_geforceerd AS podiumkeuze_geforceerd,
+	        i.ingeschreven AS ingeschreven,
+	        TIME_FORMAT(i.beschikbaar_van, '%H:%i') AS beschikbaar_van,
+	        TIME_FORMAT(i.beschikbaar_tot, '%H:%i') AS beschikbaar_tot,
+	        i.wachtlijst AS wachtlijst,
+	        i.binnenoptredens AS binnenoptredens,
+	        i.buitenoptredens AS buitenoptredens,
+	        i.bevestigd AS bevestigd
         FROM amusing.ah_inschrijvingen i
         JOIN amusing.ah_zanggroepen g ON g.zanggroep_id = i.zanggroep_id
         WHERE i.festival_id = @FestivalId;";
     public static readonly string GetPlanningStages = @"
         SELECT 
-	        p.podium_id AS PodiumId,
-	        p.naam AS Name,
-	        p.soort AS PerformanceLocation,
-	        p.`type` AS Type,
-	        p.kwaliteit AS Quality,
-	        p.max_zangers AS MaxSingers,
-	        p.aantal_vrijwilligers AS Volunteers,
-	        p.opening AS Opening,
-	        p.sluiting AS Closing,
-	        p.vrijwilligers_vanaf AS VolunteersFrom,
-	        p.vrijwilligers_tot AS VolunteersTill,
-	        p.kaart_nummer AS MapNumber
-        FROM amusing.ah_podia p;";
+	        p.podium_id AS podium_id,
+	        p.naam AS naam,
+	        p.soort AS soort,
+	        p.`type` AS type,
+	        p.kwaliteit AS kwaliteit,
+	        p.max_zangers AS max_zangers,
+	        p.aantal_vrijwilligers AS aantal_vrijwilligers,
+	        p.opening AS opening,
+	        p.sluiting AS sluiting,
+	        p.vrijwilligers_vanaf AS vrijwilligers_vanaf,
+	        p.vrijwilligers_tot AS vrijwilligers_tot,
+	        p.kaart_nummer AS kaart_nummer
+        FROM amusing.ah_podia p
+        WHERE p.kaart_nummer IS NOT null;";
     public static readonly string GetPlanningStageTypes = @"
+        SELECT 
+	        pt.type_id AS podium_type_id,
+	        pt.`type` AS naam
+        FROM amusing.ah_podia_typen pt 
+        WHERE pt.aktief = 1;";
+    public static readonly string GetPlanningStageTypeRelations = @"
         WITH RECURSIVE split AS (
           SELECT
             p.type_id AS parent_id,
@@ -1728,87 +1733,87 @@ public static class QueryDefinitions
           WHERE rest <> ''
         )
         SELECT
-          p.type_id AS TypeId,
-          p.type AS Type,
+          p.type_id AS podium_type_id,
           COALESCE(
             GROUP_CONCAT(DISTINCT t.type_id ORDER BY t.type_id SEPARATOR ', '),
             p.type_id
-          ) AS CompatibleWith
+          ) AS vervangt_podium_type_id
         FROM amusing.ah_podia_typen p
         LEFT JOIN split s
           ON s.parent_id = p.type_id
         LEFT JOIN amusing.ah_podia_typen t
           ON t.type = s.token AND t.aktief = 1
         WHERE p.aktief = 1
-        GROUP BY p.type_id, p.type
+        GROUP BY p.type_id
         ORDER BY p.type_id;";
+    public static readonly string GetPlanningStageGenreRelations = "";
+    public static readonly string GetPlanningStageGroupRelations = ""; 
     public static readonly string GetPlanningVolunteers = @"
         SELECT 
-	        v.id AS VolunteerId,
-	        v.datum AS 'Date',
-	        v.festival_id AS FestivalId,
-	        v.persoon_id AS PersonId,
-	        CONCAT_WS(' ', p.voornaam, NULLIF(p.tussenvoegsel, ''), p.achternaam) AS PersonName,
-	        v.beschikbaar_van AS AvailableFrom,
-	        v.beschikbaar_tot AS AvailableTill,
-	        v.uren_achtereen AS ChainedHours,
-	        v.lunch AS Lunch,
-	        v.vegetarisch AS Vegetarian,
-	        v.bijeenkomst AS Meeting,
-	        v.ervaring AS Experience,
-	        v.podiumdienst AS StageDuty,
-	        v.taken AS Tasks,
-	        v.samen_met AS TogetherWithId,
-	        CONCAT_WS(' ', s.voornaam, NULLIF (s.tussenvoegsel, ''), s.achternaam) AS TogetherWithName,
-	        v.podiumvoorkeur AS PreferedStage,
-	        v.podiumafkeur AS DisapprovedStage,
-	        v.koorvoorkeur AS PreferedGroup,
-	        v.koorafkeur AS DisapprovedGroup,
-	        v.taakvoorkeur AS PreferedTask,
-	        v.taakafkeur AS DisapprovedTask,
-	        v.opmerkingen AS Notes
+	        v.id AS id,
+	        v.datum AS 'datum',
+	        v.festival_id AS festival_id,
+	        v.persoon_id AS persoon_id,
+	        v.beschikbaar_van AS beschikbaar_van,
+	        v.beschikbaar_tot AS beschikbaar_tot,
+	        v.uren_achtereen AS uren_achtereen,
+	        v.lunch AS lunch,
+	        v.vegetarisch AS vegetarisch,
+	        v.bijeenkomst AS bijeenkomst,
+	        v.ervaring AS ervaring,
+	        v.podiumdienst AS podiumdienst,
+	        v.taken AS taken,
+	        v.samen_met AS samen_met,
+	        v.podiumvoorkeur AS podiumvoorkeur,
+	        v.podiumafkeur AS podiumafkeur,
+	        v.koorvoorkeur AS koorvoorkeur,
+	        v.koorafkeur AS koorafkeur,
+	        v.taakvoorkeur AS taakvoorkeur,
+	        v.taakafkeur AS taakafkeur,
+	        v.opmerkingen AS opmerkingen
         FROM amusing.ah_vrijwilligers v 
-        JOIN amusing.ah_personen p ON v.persoon_id = p.persoon_id
-        LEFT JOIN amusing.ah_personen s ON v.samen_met = s.persoon_id
         WHERE v.festival_id = @FestivalId;";
     public static readonly string GetPlanningVolunteerTaskOccupancy = @"
         SELECT 
-	        pv.taak AS TaskId,
-	        t.naam AS TaskName,
-	        pv.persoon_id AS PersonId,
-	        CONCAT_WS(' ', p.voornaam, NULLIF(p.tussenvoegsel, ''), p.achternaam) AS PersonName,
-	        pv.podium_id AS StageId,
-	        s.naam AS StageName,
-	        pv.van AS 'From',
-	        pv.tot AS Till,
-	        pv.vastgezet AS Pinned
-        FROM amusing.planner_vrijwilligersdiensten pv 
-        JOIN amusing.ah_personen p ON pv.persoon_id = p.persoon_id
-        LEFT JOIN amusing.ah_podia s ON pv.podium_id = s.podium_id 
-        LEFT JOIN amusing.ah_taken t ON pv.taak = t.taak_id 
-        WHERE pv.festival_id = @FestivalId;";
+            t.taak_id AS taak_id,
+            t.bezetting_tijdvak1_van AS van,
+            t.bezetting_tijdvak1_tot AS tot,
+            t.aantal_vrijwilligers_tijdvak1 AS aantal
+        FROM amusing.ah_taken t
+        WHERE t.actief = 1
+          AND t.bezetting_tijdvak1_van IS NOT NULL
+          AND t.bezetting_tijdvak1_tot IS NOT NULL
+
+        UNION ALL
+
+        SELECT 
+            t.taak_id AS taak_id,
+            t.bezetting_tijdvak2_van AS van,
+            t.bezetting_tijdvak2_tot AS tot,
+            t.aantal_vrijwilligers_tijdvak2 AS aantal
+        FROM amusing.ah_taken t
+        WHERE t.actief = 1
+          AND t.bezetting_tijdvak2_van IS NOT NULL
+          AND t.bezetting_tijdvak2_tot IS NOT NULL
+
+        ORDER BY taak_id, van;";
+    public static readonly string GetPlanningVolunteerShifts = "";
     public static readonly string GetPlanningVolunteerTasks = @"
         SELECT  
-	        t.taak_id AS TaskId,
-	        t.korte_naam AS ShortName,
-	        t.naam AS Name,
-	        t.maximumduur AS MaximumTime,
-	        t.minimumduur AS MinimumTime,
-	        TIME_FORMAT(t.bezetting_tijdvak1_van, '%H:%i') AS Timeslot1From,
-	        TIME_FORMAT(t.bezetting_tijdvak1_tot, '%H:%i') AS Timeslot1Till,
-	        TIME_FORMAT(t.bezetting_tijdvak2_van, '%H:%i') AS Timeslot2From,
-	        TIME_FORMAT(t.bezetting_tijdvak2_tot, '%H:%i') AS Timeslot2Till,
-	        t.aantal_vrijwilligers_tijdvak1  AS Timeslot1Volunteers,
-	        t.aantal_vrijwilligers_tijdvak2  AS Timeslot2Volunteers
-        FROM amusing.ah_taken t;";
-
+	        t.taak_id AS taak_id,
+	        t.korte_naam AS korte_naam,
+	        t.naam AS naaam,
+	        t.minimumduur AS minimumduur,
+	        t.maximumduur AS maximumduur
+        FROM amusing.ah_taken t
+        WHERE t.actief = 1;";
+  
     public static readonly string HasPlanningPerformances = @"
         SELECT EXISTS(
             SELECT 1
             FROM amusing.planner_optredens po
             WHERE po.festival_id = @FestivalId
         ) AS HasRows;";
-
     public static readonly string HasPlanningVolunteerTaskOccupancy = @"
         SELECT EXISTS(
             SELECT 1

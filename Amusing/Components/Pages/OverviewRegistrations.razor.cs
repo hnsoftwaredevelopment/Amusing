@@ -20,8 +20,8 @@ public partial class OverviewRegistrations : ComponentBase
     [Inject] protected RegistrationService RegistrationService { get; set; } = default!;
 
     protected SfGrid<RegistrationModel> GridRef;
-    protected List<Edition> Editions = new();
-    protected List<RegistrationModel> RegistrationList = new();
+    protected List<Edition> Editions = [];
+    protected List<RegistrationModel> RegistrationList = [];
     protected string? SelectedEditionId;
     protected int VisibleRowCount = 0;
 

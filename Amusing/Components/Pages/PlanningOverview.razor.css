@@ -1,0 +1,79 @@
+.overview-grid {
+    display: grid;
+    grid-template-rows: auto auto auto auto;
+    row-gap: 20px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+/* Row styling */
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 20px;
+}
+
+/* Row 1 has 1 column */
+.row1 {
+    grid-template-columns: 1fr;
+    text-align: center;
+}
+
+/* Title + selected edition */
+.row1 h3 {
+    margin: 0;
+}
+
+.edition-label {
+    font-weight: normal;
+    font-size: 0.9em;
+    color: #555;
+}
+
+/* Simple alignment helpers */
+.col.left {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.col.right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* XML button styling */
+.xml-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.xml-btn .icon {
+    width: 22px;
+    height: 22px;
+}
+
+.xml-btn {
+    width: 48px;
+    height: 48px;
+    background: transparent; /* no background */
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex; /* center icon */
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px; /* subtle round corners */
+    transition: background-color 0.2s ease;
+}
+
+.xml-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05); /* very light hover */
+}
+
+.xml-btn .icon {
+    width: 45px; /* nice size */
+    height: 45px;
+}

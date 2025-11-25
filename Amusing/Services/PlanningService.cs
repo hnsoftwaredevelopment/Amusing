@@ -1,5 +1,8 @@
-﻿using Amusing.Helpers;
+﻿using System.Xml.Linq;
+
+using Amusing.Helpers;
 using Amusing.Models;
+using Amusing.Services.Extensions;
 
 namespace Amusing.Services;
 
@@ -10,40 +13,40 @@ public class PlanningService ( GenericDataService dataService )
     #region Conditions
     public Task<List<PlanningConditionsModel>> GetPlanningConditionsAsync( int _festivalId )
     {
+        var parameters = new Dictionary<string, object> { { "@FestivalId", _festivalId } } ;
+
         return _dataService.ExecuteQueryAsync(
             QueryDefinitions.GetPlanningConditions,
            reader => new PlanningConditionsModel
            {
-                WishTimeBetweenPerformances = Convert.ToInt32( reader [ "WìshTimeBetweenPerformances" ] ),
-                MaxTimeBetweenPerformances = Convert.ToInt32( reader [ "MaxTimeBetweenPerformances" ] ),
-                MaxLentgVolunteersShift = Convert.ToInt32( reader [ "MaxLentgVolunteersShift" ] ),
-                PenaltyInteruptionPerformances = Convert.ToInt32( reader [ "PenaltyInteruptionPerformances" ] ),
-                TasknamesWithoutSwitchTime = reader [ "TasknamesWithoutSwitchTime" ].ToString() ?? "Vrijwilligersbalie;Garderobe",
-                SubstitudeTaskName = reader [ "SubstitudeTaskName" ].ToString() ?? "Reserve voor oproep"
-           },
-           new Dictionary<string, object> { { "@FestivalId", _festivalId } }
-            );
+                WishTimeBetweenPerformances = reader.GetInt( "WishTimeBetweenPerformances" ),
+                MaxTimeBetweenPerformances = reader.GetInt( "MaxTimeBetweenPerformances" ),
+                MaxLentgVolunteersShift = reader.GetInt( "MaxLentgVolunteersShift" ),
+                PenaltyInteruptionPerformances = reader.GetInt( "PenaltyInteruptionPerformances" ),
+                TasknamesWithoutSwitchTime = reader.GetString ("TasknamesWithoutSwitchTime" ) ?? "Vrijwilligersbalie;Garderobe",
+                SubstitudeTaskName = reader.GetString( "SubstitudeTaskName" ) ?? "Reserve voor oproep"
+           }, parameters );
     }
     #endregion
 
     #region Festivals
     public Task<List<PlanningFestivalsModel>> GetPlanningFestivalsAsync( int _festivalId )
     {
+        var parameters = new Dictionary<string, object> { { "@FestivalId", _festivalId } } ;
+
         return _dataService.ExecuteQueryAsync(
             QueryDefinitions.GetPlanningFestivals,
            reader => new PlanningFestivalsModel
            {
-               FestivalId = Convert.ToUInt32( reader [ "FestivalId" ] ),
-               Festival = $"Amusing Hengelo {reader [ "Festival" ]}",
+               FestivalId = reader.GetUInt( "FestivalId" ),
+               Festival = $"Amusing Hengelo {reader.GetString ( "Festival" )}",
                PerformanceLength = 30,
-               StartFestivalday = TimeOnly.Parse( reader [ "StartFestivalday" ].ToString() ?? "00:00" ),
-               EndFestivalday = TimeOnly.Parse( reader [ "EndFestivalday" ].ToString() ?? "00:00" ),
-               StartPause = TimeOnly.Parse( reader [ "StartPause" ].ToString() ?? "00:00" ),
-               EndPause = TimeOnly.Parse( reader [ "EndPause" ].ToString() ?? "00:00" ),
-               EndExperiencedSubstitude = TimeOnly.Parse( reader [ "EndExperiencedSubstitude" ].ToString() ?? "00:00" )
-           },
-           new Dictionary<string, object> { { "@FestivalId", _festivalId } }
-            );
+               StartFestivalday = reader.GetTime ( "StartFestivalday" ) ,
+               EndFestivalday = reader.GetTime ( "EndFestivalday" ),
+               StartPause = reader.GetTime ("StartPause" ),
+               EndPause = reader.GetTime ( "EndPause" ),
+               EndExperiencedSubstitude = reader.GetTime ( "EndExperiencedSubstitude" )
+           }, parameters );
     }
     #endregion
 
@@ -53,8 +56,8 @@ public class PlanningService ( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningGenres,
             reader => new PlanningGenresModel
             {
-                GenreId = Convert.ToInt32( reader [ "GenreId" ] ),
-                Name = reader [ "Name" ].ToString()
+                GenreId = reader.GetInt ( "GenreId" ),
+                Name = reader.GetString ("Name" )
             } );
     }
     #endregion
@@ -65,11 +68,11 @@ public class PlanningService ( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningGroups,
             reader => new PlanningGroupsModel
             {
-                GroupId = Convert.ToUInt32( reader [ "GroupId" ] ),
-                Name = reader [ "Name" ].ToString(),
-                GenreId = Convert.ToUInt32( reader [ "GenreId" ] ),
-                City = reader [ "City" ].ToString(),
-                Country = reader [ "Country" ].ToString()
+                GroupId = reader.GetUInt ( "GroupId" ),
+                Name = reader.GetString ( "Name" ),
+                GenreId = reader.GetUInt ( "GenreId" ),
+                City = reader.GetString ( "City" ),
+                Country = reader.GetString ( "Country" )
             } );
     }
     #endregion
@@ -78,11 +81,12 @@ public class PlanningService ( GenericDataService dataService )
     public async Task<bool> HasPerformances( int festivalId )
     {
         var parameters = new Dictionary<string, object> { { "@FestivalId", festivalId } };
+
         var result = await _dataService.ExecuteQueryAsync(QueryDefinitions.HasPlanningPerformances, 
             reader => reader.GetBoolean(reader.GetOrdinal("HasRows")),
         parameters);
 
-        return result.First();
+        return result.FirstOrDefault( false );
     }
 
     public Task<List<PlanningPerformancesModel>> GetPlanningPerformancesAsync()
@@ -90,20 +94,20 @@ public class PlanningService ( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningPerformances,
         reader =>
         {
-            var stageName = reader["StageName"].ToString() ?? string.Empty;
-            var fromTime = TimeOnly.Parse(reader["From"].ToString() ?? "00:00");
-            var groupName = reader["GroupName"].ToString() ?? string.Empty;
+            var stageName = reader.GetString ("StageName");
+            var fromTime = reader.GetTime ("From");
+            var groupName = reader.GetString ( "GroupName");
 
             return new PlanningPerformancesModel
             {
-                FestivalId = Convert.ToUInt32( reader [ "FestivalId" ] ),
-                GroupId = Convert.ToUInt32( reader [ "GroupId" ] ),
+                FestivalId = reader.GetUInt ( "FestivalId" ),
+                GroupId = reader.GetUInt( "GroupId" ),
                 GroupName = groupName,
-                TimeSlotId = Convert.ToUInt32( reader [ "TimeSlotId" ] ),
-                StageId = Convert.ToUInt32( reader [ "StageId" ] ),
+                TimeSlotId = reader.GetUInt( "TimeSlotId" ),
+                StageId = reader.GetUInt( "StageId" ),
                 StageName = stageName,
                 From = fromTime,
-                To = TimeOnly.Parse( reader [ "To" ].ToString() ?? "00:00" ),
+                To = reader.GetTime ( "To" ),
                 Pinned = false,
                 Description = $"{stageName}, starttijd: {fromTime:hh\\:mm}, zanggroep: {groupName}"
             };
@@ -117,11 +121,11 @@ public class PlanningService ( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningPersonRoles,
             reader => new PlanningPersonRolesModel
             {
-                PersonId = Convert.ToUInt32( reader [ "PersonId" ] ),
-                PersonName = reader [ "PersonName" ].ToString() ?? string.Empty,
-                GroupId = Convert.ToInt32( reader [ "GroupId" ] ),
-                GroupName = reader [ "GroupName" ].ToString() ?? string.Empty,
-                Role = reader [ "Role" ].ToString() ?? string.Empty
+                PersonId = reader.GetUInt ( "PersonId" ),
+                PersonName = reader.GetString ( "PersonName" ),
+                GroupId = reader.GetInt ( "GroupId" ),
+                GroupName = reader.GetString ( "GroupName" ),
+                Role = reader.GetString ( "Role" )
             } );
     }
     #endregion
@@ -132,11 +136,11 @@ public class PlanningService ( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningPersons,
             reader => new PlanningPersonsModel
             {
-                PersonId = Convert.ToUInt32( reader [ "PersonId" ] ),
-                FirstName = reader [ "FirstName" ].ToString() ?? string.Empty,
-                Affix = reader [ "Affix" ].ToString() ?? string.Empty,
-                Surname = reader [ "Surname" ].ToString() ?? string.Empty,
-                Name = reader [ "Name" ].ToString() ?? string.Empty
+                PersonId = reader.GetUInt ( "PersonId" ),
+                FirstName = reader.GetString ( "FirstName" ),
+                Affix = reader.GetString ( "Affix" ),
+                Surname = reader.GetString ( "Surname" ),
+                Name = reader.GetString ( "Name" )
             } );
     }
     #endregion
@@ -144,53 +148,54 @@ public class PlanningService ( GenericDataService dataService )
     #region Registrations
     public Task<List<PlanningRegistrationsModel>> GetPlanningRegistrationsAsync(int _festivalId)
     {
+        var parameters = new Dictionary<string, object> { { "@FestivalId", _festivalId } } ;
+
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningRegistrations,
             reader => new PlanningRegistrationsModel
             {
-                FestivalId = Convert.ToUInt32( reader [ "FestivalId" ] ),
-                GroupId = Convert.ToUInt32( reader [ "GroupId" ] ),
-                GroupName = reader [ "GroupName" ].ToString() ?? string.Empty,
-                Wish1 = reader [ "Wish1" ].ToString() ?? string.Empty,
-                Wish2 = reader [ "Wish2" ].ToString() ?? string.Empty,
-                Wish3 = reader [ "Wish3" ].ToString() ?? string.Empty,
-                Wish4 = reader [ "Wish4" ].ToString() ?? string.Empty,
-                Singers = Convert.ToUInt32( reader [ "Singers" ] ),
-                Stagetype = reader [ "Stagetype" ].ToString() ?? string.Empty,
-                ForcedStageChoice = Convert.ToInt32( reader [ "ForcedStageChoice" ] ),
-                Registered = Convert.ToDateTime( reader [ "Registered" ] ),
-                AvailableFrom = TimeOnly.Parse( reader [ "AvailableFrom" ].ToString() ?? "00:00" ),
-                AvailableTill = TimeOnly.Parse( reader [ "AvailableTill" ].ToString() ?? "00:00" ),
-                Queue = Convert.ToUInt32( reader [ "Queue" ] ),
-                InsidePerformances = Convert.ToUInt32( reader [ "InsidePerformance" ] ),
-                OutsidePerformances = Convert.ToUInt32( reader [ "OutsidePerformance" ] ),
-                Confirmed = Convert.ToDateTime( reader [ "Confirmed" ] )
-            },
-           new Dictionary<string, object> { { "@FestivalId", _festivalId } } );
+                FestivalId = reader.GetUInt ( "FestivalId" ),
+                GroupId = reader.GetUInt( "GroupId" ),
+                GroupName = reader.GetString ( "GroupName" ),
+                Wish1 = reader.GetString ( "Wish1" ),
+                Wish2 = reader.GetString ( "Wish2" ),
+                Wish3 = reader.GetString ( "Wish3" ),
+                Wish4 = reader.GetString ( "Wish4" ),
+                Singers = reader.GetUInt ( "Singers" ),
+                Stagetype = reader.GetString ( "Stagetype" ),
+                ForcedStageChoice = reader.GetInt ( "ForcedStageChoice" ),
+                Registered = reader.GetDateTime ( "Registered" ),
+                AvailableFrom = reader.GetTime ( "AvailableFrom" ),
+                AvailableTill = reader.GetTime ( "AvailableTill" ),
+                Queue = reader.GetUInt ( "Queue" ),
+                InsidePerformances =  reader.GetUInt ( "InsidePerformance" ),
+                OutsidePerformances = reader.GetUInt ( "OutsidePerformance" ),
+                Confirmed = reader.GetDateTime ( "Confirmed" )
+            }, parameters );
     }
     #endregion
 
     #region Stages
     public Task<List<PlanningStagesModel>> GetPlanningStagesAsync(int _festivalId)
     {
+        var parameters = new Dictionary<string, object> { { "@FestivalId", _festivalId } } ;
+
         return _dataService.ExecuteQueryAsync(
             QueryDefinitions.GetPlanningStages,
            reader => new PlanningStagesModel
            {
-                PodiumId = Convert.ToUInt32( reader [ "PodiumId" ] ),
-                Name = reader [ "Name" ].ToString() ?? string.Empty,
-                PerformanceLocation = reader [ "PerformanceLocation" ].ToString() ?? string.Empty,
-                Type = reader [ "Type" ].ToString() ?? string.Empty,
-                Quality = Convert.ToUInt32( reader [ "Quality" ] ),
-                MaxSingers = Convert.ToUInt32( reader [ "MaxSingers" ] ),
-                Volunteers = reader [ "Volunteers" ].ToString() ?? string.Empty,
-                Opening = TimeOnly.Parse( reader [ "Opening" ].ToString() ?? "00:00" ),
-                Closing = TimeOnly.Parse( reader [ "Closing" ].ToString() ?? "00:00" ),
-                VolunteersFrom = TimeOnly.Parse( reader [ "VolunteersFrom" ].ToString() ?? "00:00" ),
-                VolunteersTill = TimeOnly.Parse( reader [ "VolunteersTill" ].ToString() ?? "00:00" ),
-                MapNumber = Convert.ToUInt32( reader [ "MapNumber" ] )
-           },
-           new Dictionary<string, object> { { "@FestivalId", _festivalId } }
-            );
+                PodiumId = reader.GetUInt( "PodiumId" ),
+                Name = reader.GetString ( "Name" ),
+                PerformanceLocation = reader.GetString ( "PerformanceLocation" ),
+                Type = reader.GetString ( "Type" ),
+                Quality = reader.GetUInt( "Quality" ),
+                MaxSingers = reader.GetUInt( "MaxSingers" ),
+                Volunteers = reader.GetString ( "Volunteers" ),
+                Opening = reader.GetTime ( "Opening" ),
+                Closing = reader.GetTime ( "Closing" ),
+                VolunteersFrom = reader.GetTime ( "VolunteersFrom" ),
+                VolunteersTill = reader.GetTime ( "VolunteersTill" ),
+                MapNumber = reader.GetUInt( "MapNumber" )
+           }, parameters );
     }
     #endregion
 
@@ -200,9 +205,9 @@ public class PlanningService ( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningStageTypes,
             reader => new PlanningStageTypesModel
             {
-                TypeId = Convert.ToInt32( reader [ "TypeId" ] ),
-                Type = reader [ "Type" ].ToString(),
-                CompatibleWith = reader [ "CompatibleWith" ].ToString()
+                TypeId = reader.GetInt ( "TypeId" ),
+                Type = reader.GetString ( "Type" ),
+                CompatibleWith = reader.GetString ( "CompatibleWith" )
             } );
     }
     #endregion
@@ -210,34 +215,35 @@ public class PlanningService ( GenericDataService dataService )
     #region Volunteers
     public Task<List<PlanningVolunteersModel>> GetPlanningVolunteersAsync( int _festivalId )
     {
+        var parameters = new Dictionary<string, object> { { "@FestivalId", _festivalId } } ;
+
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningVolunteers,
             reader => new PlanningVolunteersModel
             {
-                VolunteerId = Convert.ToUInt32( reader [ "VolunteerId" ] ),
-                Date = Convert.ToDateTime( reader [ "Date" ] ),
-                FestivalId = Convert.ToUInt32( reader [ "FestivalId" ] ),
-                PersonId = Convert.ToUInt32( reader [ "PersonId" ] ),
-                PersonName = reader [ "PersonName" ].ToString() ?? string.Empty,
-                AvailableFrom = TimeOnly.Parse( reader [ "AvailableFrom" ].ToString() ?? "00:00" ),
-                AvailableTill = TimeOnly.Parse( reader [ "AvailableTill" ].ToString() ?? "00:00" ),
-                ChainedHours = Convert.ToUInt32( reader [ "ChainedHours" ] ),
-                Lunch = reader [ "Lunch" ].ToString() ?? string.Empty,
-                Vegetarian = reader [ "Vegetarian" ].ToString() ?? string.Empty,
-                Meeting = reader [ "Meeting" ].ToString() ?? string.Empty,
-                Experience = reader [ "Experience" ].ToString() ?? string.Empty,
-                StageDuty = reader [ "StageDuty" ].ToString() ?? string.Empty,
-                Tasks =  reader [ "Tasks" ].ToString() ?? string.Empty,
-                TogetherWithId = Convert.ToUInt32( reader [ "TogetherWithId" ] ),
-                TogetherWithName = reader [ "TogetherWithName" ].ToString() ?? string.Empty,
-                PreferedStage = Convert.ToUInt32( reader [ "PreferedStage" ] ),
-                DisapprovedStage = Convert.ToUInt32( reader [ "DisapprovedStage" ] ),
-                PreferedGroup = Convert.ToUInt32( reader [ "PreferedGroup" ] ),
-                DisapprovedGroup = Convert.ToUInt32( reader [ "DisapprovedGroup" ] ),
-                PreferedTask = reader [ "PreferedTask" ].ToString() ?? string.Empty,
+                VolunteerId = reader.GetUInt ( "VolunteerId" ),
+                Date = reader.GetDateTime ( "Date" ),
+                FestivalId = reader.GetUInt( "FestivalId" ),
+                PersonId = reader.GetUInt( "PersonId" ),
+                PersonName = reader.GetString ( "PersonName" ),
+                AvailableFrom = reader.GetTime ( "AvailableFrom" ),
+                AvailableTill = reader.GetTime ( "AvailableTill" ),
+                ChainedHours = reader.GetUInt( "ChainedHours" ),
+                Lunch = reader.GetString( "Lunch" ),
+                Vegetarian = reader.GetString( "Vegetarian" ),
+                Meeting = reader.GetString( "Meeting" ),
+                Experience = reader.GetString( "Experience" ),
+                StageDuty = reader.GetString( "StageDuty" ),
+                Tasks = reader.GetString( "Tasks" ),
+                TogetherWithId = reader.GetUInt( "TogetherWithId" ),
+                TogetherWithName = reader.GetString( "TogetherWithName" ),
+                PreferedStage =    reader.GetUInt ( "PreferedStage" ),
+                DisapprovedStage = reader.GetUInt ( "DisapprovedStage" ),
+                PreferedGroup =    reader.GetUInt ( "PreferedGroup" ),
+                DisapprovedGroup = reader.GetUInt( "DisapprovedGroup" ),
+                PreferedTask = reader.GetString ( "PreferedTask" ),
                 DisapprovedTask = reader [ "DisapprovedTask" ].ToString() ?? string.Empty,
-                Notes = reader [ "Notes" ].ToString() ?? string.Empty
-            },
-           new Dictionary<string, object> { { "@FestivalId", _festivalId } } );
+                Notes = reader.GetString ( "Notes" )
+            }, parameters );
     }
     #endregion
 
@@ -247,17 +253,17 @@ public class PlanningService ( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningVolunteerTasks,
             reader => new PlanningVolunteerTasksModel
             {
-                TaakId = Convert.ToUInt32( reader [ "TaakId" ] ),
-                ShortName = reader [ "ShortName" ].ToString() ?? string.Empty,
-                Name = reader [ "Name" ].ToString() ?? string.Empty,
-                MinimumTime = Convert.ToUInt32( reader [ "MinimumTime" ] ),
-                MaximumTime = Convert.ToUInt32( reader [ "MaximumTime" ] ),
-                Timeslot1From = TimeOnly.Parse( reader [ "Timeslot1From" ].ToString() ?? "00:00" ),
-                Timeslot1Till = TimeOnly.Parse( reader [ "Timeslot1Till" ].ToString() ?? "00:00" ),
-                Timeslot1Volunteers = Convert.ToInt32( reader [ "Timeslot1Volunteers" ] ),
-                Timeslot2From = TimeOnly.Parse( reader [ "Timeslot2From" ].ToString() ?? "00:00" ),
-                Timeslot2Till = TimeOnly.Parse( reader [ "Timeslot2Till" ].ToString() ?? "00:00" ),
-                Timeslot2Volunteers = Convert.ToInt32( reader [ "Timeslot2Volunteers" ] )
+                TaakId = reader.GetUInt( "TaakId" ),
+                ShortName = reader.GetString ( "ShortName" ),
+                Name = reader.GetString ( "Name" ),
+                MinimumTime = reader.GetUInt ( "MinimumTime" ),
+                MaximumTime = reader.GetUInt( "MaximumTime" ),
+                Timeslot1From = reader.GetTime ( "Timeslot1From" ),
+                Timeslot1Till = reader.GetTime ( "Timeslot1Till" ),
+                Timeslot1Volunteers = reader.GetInt( "Timeslot1Volunteers" ),
+                Timeslot2From = reader.GetTime ( "Timeslot2From" ),
+                Timeslot2Till = reader.GetTime ( "Timeslot2Till" ),
+                Timeslot2Volunteers = reader.GetInt( "Timeslot2Volunteers" )
             } );
     }
     #endregion
@@ -266,6 +272,7 @@ public class PlanningService ( GenericDataService dataService )
     public async Task<bool> HasPlanningVolunteerTaskOccupancy( int festivalId )
     {
         var parameters = new Dictionary<string, object> { { "@FestivalId", festivalId } };
+
         var result = await _dataService.ExecuteQueryAsync(QueryDefinitions.HasPlanningVolunteerTaskOccupancy,
             reader => reader.GetBoolean(reader.GetOrdinal("HasRows")),
         parameters);
@@ -275,20 +282,255 @@ public class PlanningService ( GenericDataService dataService )
 
     public Task<List<PlanningVolunteerTaskOccupancyModel>> GetPlanningVolunteerTaskOccupancyAsync( int _festivalId )
     {
+        var parameters = new Dictionary<string, object> { { "@FestivalId", _festivalId } } ;
+
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningVolunteerTaskOccupancy,
             reader => new PlanningVolunteerTaskOccupancyModel
             {
-                TaskId = Convert.ToUInt32( reader [ "TaskId" ] ),
-                TaskName = reader [ "TaskName" ].ToString() ?? string.Empty,
-                PersonId = Convert.ToUInt32( reader [ "PersonId" ] ),
-                PersonName = reader [ "PersonName" ].ToString() ?? string.Empty,
-                StageId = Convert.ToInt32( reader [ "StageId" ] ),
-                StageName = reader [ "StageName" ].ToString() ?? string.Empty,
-                From = TimeOnly.Parse( reader [ "From" ].ToString() ?? "00:00" ),
-                Till = TimeOnly.Parse( reader [ "Till" ].ToString() ?? "00:00" ),
-                Pinned = reader [ "Pinned" ].ToString() ?? string.Empty
-            },
-           new Dictionary<string, object> { { "@FestivalId", _festivalId } } );
+                TaskId = reader.GetUInt( "TaskId" ),
+                TaskName = reader.GetString ( "TaskName" ),
+                PersonId = reader.GetUInt( "PersonId" ),
+                PersonName = reader.GetString ( "PersonName" ),
+                StageId = reader.GetInt( "StageId" ),
+                StageName = reader.GetString ( "StageName" ),
+                From = reader.GetTime ( "From" ),
+                Till = reader.GetTime ( "Till" ),
+                Pinned = reader.GetString ( "Pinned" )
+            }, parameters );
     }
+    #endregion
+
+    #region XML Export
+    #region Export Full Planning To Xml
+    // -------------------------------------------------------
+    // MAIN: Full XML export in "<channel>/<table>/<row>" vorm
+    // -------------------------------------------------------
+    public async Task ExportFullPlanningToXmlAsync( int festivalId, string filePath )
+    {
+        var channel = new XElement("channel");
+
+        // Add tables in the order you want them exported
+        channel.Add( await BuildTableElementAsync(
+            "ah_podium_type_relaties",
+            QueryDefinitions.GetPlanningStageTypeRelations,
+            new() { { "@FestivalId", festivalId } },
+            ["vervangt_podium_type_id"] // Split this collumn in separate rows
+
+        ) );
+
+        channel.Add( await BuildTableElementAsync(
+            "ah_podium_genre_relaties",
+            QueryDefinitions.GetPlanningStageGenreRelations,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync(
+            "ah_podium_koor_relaties",
+            QueryDefinitions.GetPlanningStageGroupRelations,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync(
+            "ah_festivals",
+            QueryDefinitions.GetPlanningFestivals,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildKeyValueTableAsync(
+            "ah_voorwaarden",
+            QueryDefinitions.GetPlanningConditions,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync(
+            "ah_podium_types",
+            QueryDefinitions.GetPlanningStageTypes,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync(
+            "ah_genres",
+            QueryDefinitions.GetPlanningGenres,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync(
+            "ah_inschrijvingen",
+            QueryDefinitions.GetPlanningRegistrations,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync(
+            "ah_personen_rollen",
+            QueryDefinitions.GetPlanningPersonRoles,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync(
+            "ah_personen",
+            QueryDefinitions.GetPlanningPersons,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync(
+            "ah_podia",
+            QueryDefinitions.GetPlanningStages,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync(
+            "ah_zanggroepen",
+            QueryDefinitions.GetPlanningGroups,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync(
+                    "ah_vrijwilligers",
+                    QueryDefinitions.GetPlanningVolunteers,
+                    new() { { "@FestivalId", festivalId } }
+                ) );
+
+        channel.Add( await BuildTableElementAsync(
+            "ah_optredens",
+            QueryDefinitions.GetPlanningPerformances,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync(
+            "ah_vrijwilligersdiensten",
+            QueryDefinitions.GetPlanningVolunteerShifts,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync(
+            "ah_taken",
+            QueryDefinitions.GetPlanningVolunteerTasks,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync(
+            "ah_taken",
+            QueryDefinitions.GetPlanningVolunteerTaskOccupancy,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        var doc = new XDocument(channel);
+
+        Directory.CreateDirectory( Path.GetDirectoryName( filePath )! );
+
+        await using var writer = File.CreateText(filePath);
+        doc.Save( writer );
+    }
+    #endregion
+
+    #region Build Table Element
+    // -------------------------------------------------------
+    // Builds a <table>...</table> including its <row> items
+    // -------------------------------------------------------
+    private async Task<XElement> BuildTableElementAsync(
+    string tableName,
+    string sql,
+    Dictionary<string, object>? parameters = null,
+    IEnumerable<string>? splitColumns = null )
+    {
+        var tableEl = new XElement("table",
+        new XAttribute("name", tableName));
+
+        // If SQL is null or empty → return empty table element
+        if ( string.IsNullOrWhiteSpace( sql ) )
+            return tableEl;
+
+        await _dataService.ExecuteReaderAsync( sql, async reader =>
+        {
+            while ( await reader.ReadAsync() )
+            {
+                var rowEl = new XElement("row");
+
+                for ( int i = 0; i < reader.FieldCount; i++ )
+                {
+                    string field = reader.GetName(i);
+                    object? value = reader.IsDBNull(i) ? null : reader.GetValue(i);
+
+                    // Check if this column should be split
+                    if ( value != null && splitColumns != null && splitColumns.Contains( field ) )
+                    {
+                        var tokens = value.ToString()!
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                        foreach ( var token in tokens )
+                        {
+                            var col = new XElement(field, token);
+                            rowEl.Add( col );
+                        }
+                    }
+                    else
+                    {
+                        var col = new XElement(field);
+                        if ( value != null )
+                            col.Value = ConvertToString( value );
+                        rowEl.Add( col );
+                    }
+                }
+
+                tableEl.Add( rowEl );
+            }
+        }, parameters );
+
+        return tableEl;
+    }
+
+    // -------------------------------------------------------
+    // Builds a <table>...</table> including its <row> items
+    // When The table column and value shoul appear in seperate rows
+    // -------------------------------------------------------
+    private async Task<XElement> BuildKeyValueTableAsync(
+    string tableName,
+    string sql,
+    Dictionary<string, object> parameters )
+    {
+        var tableEl = new XElement("table", new XAttribute("name", tableName));
+
+        await _dataService.ExecuteReaderAsync( sql, async reader =>
+        {
+            if ( await reader.ReadAsync() )
+            {
+                for ( int i = 0; i < reader.FieldCount; i++ )
+                {
+                    var colName = reader.GetName(i);
+                    var colValue = reader.IsDBNull(i) ? "" : reader.GetValue(i).ToString();
+
+                    var rowEl = new XElement("row",
+                    new XElement("naam", colName),
+                    new XElement("waarde", colValue)
+                );
+
+                    tableEl.Add( rowEl );
+                }
+            }
+        }, parameters );
+
+        return tableEl;
+    }
+    #endregion
+
+    #region Converts database types to XML-safe string values
+    // -------------------------------------------------------
+    // Converts database types to XML-safe string values
+    // -------------------------------------------------------
+    public static string? ConvertToString( object value )
+    {
+        // Dates → ISO format
+        if ( value is DateTime dt )
+            return dt.ToString( "yyyy-MM-dd" );
+
+        if ( value is DateOnly d )
+            return d.ToString( "yyyy-MM-dd" );
+
+        if ( value is TimeSpan ts )
+            return ts.ToString( "c" );
+
+        return value?.ToString();
+    }
+    #endregion
     #endregion
 }
