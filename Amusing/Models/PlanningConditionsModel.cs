@@ -8,4 +8,5 @@ public class PlanningConditionsModel
     public int PenaltyInteruptionPerformances { get; set; }
     public string TasknamesWithoutSwitchTime { get; set; } = "Vrijwilligersbalie;Garderobe";
     public string SubstitudeTaskName { get; set; } = "Reserve voor oproep";
+    public int PerformanceTime { get; set; } = 30;
 }

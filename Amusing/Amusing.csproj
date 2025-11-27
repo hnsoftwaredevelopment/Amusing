@@ -5,8 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-Amusing-d4b4dda8-27a3-4a96-94e4-f605690b8606</UserSecretsId>
-    <AssemblyVersion>25.11.118.0</AssemblyVersion>
-    <FileVersion>25.11.118.0</FileVersion>
+    <AssemblyVersion>25.11.172.0</AssemblyVersion>
+    <FileVersion>25.11.172.0</FileVersion>
     <HotReloadAutoRestart>true</HotReloadAutoRestart>
   </PropertyGroup>
 
@@ -48,6 +48,7 @@
     <PackageReference Include="Syncfusion.Blazor.Charts" Version="31.2.4" />
     <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="31.2.4" />
     <PackageReference Include="Syncfusion.Blazor.Grid" Version="31.2.4" />
+    <PackageReference Include="Syncfusion.Blazor.PivotTable" Version="31.2.4" />
     <PackageReference Include="Syncfusion.Blazor.Popups" Version="31.2.4" />
     <PackageReference Include="Syncfusion.Blazor.QueryBuilder" Version="31.2.4" />
     <PackageReference Include="Syncfusion.Blazor.RichTextEditor" Version="31.2.4" />
@@ -58,5 +59,6 @@
 
   <ItemGroup>
     <Folder Include="Interfaces\" />
+    <Folder Include="Services\Extensions\" />
   </ItemGroup>
 </Project>

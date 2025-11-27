@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data.Common;
 
-namespace Amusing.Services.Extensions;
+namespace Amusing.DataReaderExtensions;
 
 public static class ReaderExtensions
 {
@@ -9,7 +9,7 @@ public static class ReaderExtensions
     //  String
     // --------------------------
     // Reads a string safely and returns empty string if value is null.
-    public static string GetString( this DbDataReader reader, string column )
+    public static string GetMyString( this DbDataReader reader, string column )
     {
         return reader [ column ] == DBNull.Value
             ? string.Empty
@@ -21,7 +21,7 @@ public static class ReaderExtensions
     //  Int32
     // --------------------------
     // Reads an int safely.
-    public static int GetInt( this DbDataReader reader, string column )
+    public static int GetMyInt( this DbDataReader reader, string column )
     {
         var value = reader[column];
         if ( value == DBNull.Value )
@@ -41,7 +41,7 @@ public static class ReaderExtensions
     //  UInt32
     // --------------------------
     // Reads an unsigned int safely.
-    public static uint GetUInt( this DbDataReader reader, string column )
+    public static uint GetMyUInt( this DbDataReader reader, string column )
     {
         var value = reader[column];
         if ( value == DBNull.Value )
@@ -62,7 +62,7 @@ public static class ReaderExtensions
     //  Boolean
     // --------------------------
     // Reads a boolean safely.
-    public static bool GetBool( this DbDataReader reader, string column )
+    public static bool GetMyBool( this DbDataReader reader, string column )
     {
         var value = reader[column];
         if ( value == DBNull.Value )
@@ -82,7 +82,7 @@ public static class ReaderExtensions
     //  DateTime
     // --------------------------
     // Reads a DateTime. Accepts DATE, DATETIME, string.
-    public static DateTime GetDateTime( this DbDataReader reader, string column )
+    public static DateTime GetMyDateTime( this DbDataReader reader, string column )
     {
         var value = reader[column];
         if ( value == DBNull.Value )
@@ -101,7 +101,7 @@ public static class ReaderExtensions
     //  DateOnly
     // --------------------------
     // Reads only the date part.
-    public static DateOnly GetDate( this DbDataReader reader, string column )
+    public static DateOnly GetMyDate( this DbDataReader reader, string column )
     {
         var value = reader[column];
         if ( value == DBNull.Value )
@@ -121,7 +121,7 @@ public static class ReaderExtensions
     //  TimeOnly
     // --------------------------
     // Reads only the time part.
-    public static TimeOnly GetTime( this DbDataReader reader, string column )
+    public static TimeOnly GetMyTime( this DbDataReader reader, string column )
     {
         var value = reader[column];
         if ( value == DBNull.Value )
@@ -144,7 +144,7 @@ public static class ReaderExtensions
     //  Decimal
     // --------------------------
     // Reads decimal safely from MySQL DECIMAL, DOUBLE, INT, string formats.
-    public static decimal GetDecimal( this DbDataReader reader, string column )
+    public static decimal GetMyDecimal( this DbDataReader reader, string column )
     {
         var value = reader[column];
         if ( value == DBNull.Value )
@@ -167,7 +167,7 @@ public static class ReaderExtensions
     //  Double
     // --------------------------
     // Reads double safely.
-    public static double GetDouble( this DbDataReader reader, string column )
+    public static double GetMyDouble( this DbDataReader reader, string column )
     {
         var value = reader[column];
         if ( value == DBNull.Value )
@@ -190,7 +190,7 @@ public static class ReaderExtensions
     //  Enum<T>
     // --------------------------
     // Reads an enum using name OR numeric value.
-    public static T GetEnum<T>( this DbDataReader reader, string column ) where T : struct, Enum
+    public static T GetMyEnum<T>( this DbDataReader reader, string column ) where T : struct, Enum
     {
         var value = reader[column];
         if ( value == DBNull.Value )

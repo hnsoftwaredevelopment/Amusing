@@ -24,6 +24,26 @@
     margin: 0;
 }
 
+.row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    justify-content: space-between; /* links en rechts uit elkaar duwen */
+    align-items: center;
+}
+
+    .row2 .col.left {
+        display: flex;
+        align-items: center;
+    }
+
+    .row2 .col.right {
+        text-align: right;
+        display: flex;
+        align-items: center;
+    }
+
+
+
 .edition-label {
     font-weight: normal;
     font-size: 0.9em;
@@ -32,15 +52,11 @@
 
 /* Simple alignment helpers */
 .col.left {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
+    display: block;
 }
 
 .col.right {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+    display: block;
 }
 
 /* XML button styling */
@@ -76,4 +92,179 @@
 .xml-btn .icon {
     width: 45px; /* nice size */
     height: 45px;
+}
+
+.conditions-wrapper {
+    position: relative;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    padding: 30px 20px 20px 20px; /* extra top-padding voor de button */
+    margin-top: 20px;
+    background-color: #fafafa;
+}
+
+/* Button floating in the top border */
+.conditions-wrapper .btn-edit {
+    position: absolute;
+    top: -16px; /* steekt een beetje boven de rand */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+    padding: 4px 12px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.conditions-wrapper .btn-edit:hover {
+    background-color: #f0f0f0;
+}
+
+.conditions-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 5px;
+}
+
+.conditions-editor .row {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 0;
+}
+
+.conditions-editor label {
+    font-weight: 300;
+}
+
+.conditions-editor input {
+    width: 100%;
+    padding: 2px 4px;
+}
+
+.btn-edit {
+    width: 50px;
+    margin-bottom: 14px;
+}
+
+.edit-icon {
+    width: 20px;
+    height: 20px;
+    pointer-events: none; /* Ensures clicking the icon triggers the button */
+}
+
+.conditions-container {
+    margin-bottom: 12px;
+}
+
+.titles-container {
+    margin-bottom: 12px;
+}
+
+.title {
+    text-align-last: center;
+    font-weight: 500;
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+}
+
+    * --- Main grid layout tweaks --- */ .amusing-grid .e-gridheader, .amusing-grid .e-headercontent {
+    font-weight: 600;
+    background-color: #fafafa;
+}
+
+/* Row height for a clean look */
+.amusing-grid .e-rowcell {
+    padding-top: 6px;
+    padding-bottom: 6px;
+    font-size: 14px;
+}
+
+/* --- Podium group styling --- */
+/* Add spacing before a new podium block */
+.amusing-grid .podium-start {
+    border-top: 2px solid #ddd !important;
+    padding-top: 8px !important;
+}
+
+/* Make podium names slightly stronger */
+.amusing-grid .podium-name {
+    font-weight: 600;
+    color: #333;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+/* --- Volunteer name column --- */
+.amusing-grid .volunteer-name {
+    color: #1f4e8c;
+    font-weight: 500;
+}
+
+/* --- Time columns --- */
+.amusing-grid .time-cell {
+    font-family: "Segoe UI", sans-serif;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Align header text center for time columns */
+.amusing-grid th[aria-colindex="3"],
+.amusing-grid th[aria-colindex="4"] {
+    text-align: center;
+}
+
+.schedule-wrapper {
+    margin-top: 20px;
+}
+
+.e-grid {
+    font-size: 14px;
+}
+
+.e-grid .e-headercell {
+    text-align: center;
+}
+
+/* Grid wrapper */
+.schedule-grid .e-gridheader,
+.schedule-grid .e-gridcontent {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 0.9rem;
+}
+
+/* Podiumkolom: vetgedrukt */
+.stage-column {
+    font-weight: bold;
+    background-color: #f5f5f5;
+}
+
+/* Tijdslot kolommen: lichte achtergrond */
+.slot-column {
+    text-align: center;
+}
+
+/* Lege slots */
+.empty-slot {
+    background-color: #f0f0f0;
+    color: #aaa;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 4px;
+}
+
+/* Bezet slots */
+.filled-slot {
+    background-color: #d0ebff;
+    color: #000;
+    font-weight: 500;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 4px;
 }

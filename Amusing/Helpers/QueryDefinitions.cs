@@ -1599,6 +1599,7 @@ public static class QueryDefinitions
     #endregion
 
     #region Planner queries
+    #region Queries for XML im-/Export
     public static readonly string GetPlanningConditions = @"
         SELECT 
 	        pv.WensTijdTussenOptredens AS WensTijdTussenOptredens,
@@ -1820,6 +1821,66 @@ public static class QueryDefinitions
             FROM amusing.planner_vrijwilligersdiensten po
             WHERE po.festival_id = @FestivalId
         ) AS HasRows;";
+    #endregion
+
+    #region queries for overview page
+    public static readonly string GetPlanningConditionsOverview = @"
+        SELECT 
+            pv.WensTijdTussenOptredens AS WishTimeBetweenPerformances,
+            pv.MaxTijdTussenOptredens AS MaxTimeBetweenPerformances,
+            pv.MaxLengteVrijwilligerDienst AS MaxLentgVolunteersShift,
+            pv.BoeteOnderbrekingOptredens AS PenaltyInteruptionPerformances,
+            pv.TaakNamenZonderOverstapTijd AS TasknamesWithoutSwitchTime,
+            pv.ReserveTaakNaam AS SubstitudeTaskName,
+            f.duuroptreden  AS PerformanceTime
+        FROM amusing.planner_voorwaarden pv
+        JOIN amusing.ah_festivals f ON pv.festival_id = f.festival_id  
+        WHERE pv.festival_id = @FestivalId;";
+    public static readonly string GetPlanningVolunteersPerStageOverview = @"
+        SELECT
+            p.kaart_nummer AS StageNumber,
+            p.podium_id AS StageId,
+            p.naam AS StageName,
+            CONCAT_WS(' ', v.voornaam, NULLIF(v.tussenvoegsel, ''), v.achternaam) AS Volunteer,
+            vd.van AS StartTime,
+            vd.tot AS EndTime
+        FROM amusing.ah_podia p
+        LEFT JOIN amusing.planner_vrijwilligersdiensten vd 
+               ON vd.podium_id = p.podium_id 
+              AND vd.festival_id = @FestivalId
+        LEFT JOIN amusing.ah_personen v 
+               ON vd.persoon_id = v.persoon_id
+        WHERE p.kaart_nummer > 0
+        ORDER BY p.kaart_nummer, vd.van;";
+    public static readonly string GetPlanningOtherVolunteerTasksOverview = @"
+        SELECT
+	        t.naam AS Task,
+	        CONCAT_WS(' ', v.voornaam, NULLIF(v.tussenvoegsel, ''), v.achternaam) AS Volunteer,
+	        vd.van AS StartTime,
+            vd.tot AS EndTime
+        FROM amusing.ah_taken t 
+        LEFT JOIN amusing.planner_vrijwilligersdiensten vd 
+                       ON vd.taak = t.taak_id 
+                      AND vd.festival_id = @FestivalId
+          LEFT JOIN amusing.ah_personen v 
+                       ON vd.persoon_id = v.persoon_id
+        WHERE t.actief = ""ja""
+	        AND vd.van IS NOT NULL
+        ORDER BY t.taak_id";
+    public static readonly string GetPlanningPerformancesOverview = @"
+        SELECT 
+            s.podium_id AS StageId,
+            s.naam AS StageName,
+            p.tijdvak AS Timeslot,
+            g.naam AS GroupName
+        FROM amusing.planner_optredens p
+        INNER JOIN amusing.ah_podia s 
+            ON p.podium_id = s.podium_id
+        INNER JOIN amusing.ah_zanggroepen g 
+            ON p.zanggroep_id = g.zanggroep_id
+        WHERE p.festival_id = @FestivalId
+        ORDER BY s.kaart_nummer, p.tijdvak;";
+    #endregion
     #endregion
 
     #region Logging queries

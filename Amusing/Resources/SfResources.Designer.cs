@@ -1123,7 +1123,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Build table of contents From.
+        ///   Looks up a localized string similar to Build table of contents StartTime.
         /// </summary>
         internal static string DocumentEditor_BuildTableOfContentsFrom {
             get {
@@ -2167,7 +2167,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to From edge.
+        ///   Looks up a localized string similar to StartTime edge.
         /// </summary>
         internal static string DocumentEditor_FromEdge {
             get {
@@ -2374,7 +2374,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Indent From left.
+        ///   Looks up a localized string similar to Indent StartTime left.
         /// </summary>
         internal static string DocumentEditor_IndentFromLeft {
             get {
@@ -2383,7 +2383,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Indent From right.
+        ///   Looks up a localized string similar to Indent StartTime right.
         /// </summary>
         internal static string DocumentEditor_IndentFromRight {
             get {
@@ -2959,7 +2959,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Move From.
+        ///   Looks up a localized string similar to Move StartTime.
         /// </summary>
         internal static string DocumentEditor_MoveFrom {
             get {
@@ -3409,7 +3409,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Due to browser’s security policy, paste From system clipboard is restricted. Alternatively use the keyboard shortcut.
+        ///   Looks up a localized string similar to Due to browser’s security policy, paste StartTime system clipboard is restricted. Alternatively use the keyboard shortcut.
         /// </summary>
         internal static string DocumentEditor_PasteContentDialog {
             get {
@@ -3517,7 +3517,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This document is protected From unintentional editing..
+        ///   Looks up a localized string similar to This document is protected StartTime unintentional editing..
         /// </summary>
         internal static string DocumentEditor_ProtectedDocument {
             get {
@@ -5272,7 +5272,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Distance From bottom of the page to bottom of the footer..
+        ///   Looks up a localized string similar to Distance StartTime bottom of the page to bottom of the footer..
         /// </summary>
         internal static string DocumentEditorContainer_DistanceFromBottomOfThePageToBottomOfTheFooter {
             get {
@@ -5281,7 +5281,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Distance From top of the page to top of the header..
+        ///   Looks up a localized string similar to Distance StartTime top of the page to top of the header..
         /// </summary>
         internal static string DocumentEditorContainer_DistanceFromTopOfThePageToTopOfTheHeader {
             get {
@@ -5425,7 +5425,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Footer From Bottom.
+        ///   Looks up a localized string similar to Footer StartTime Bottom.
         /// </summary>
         internal static string DocumentEditorContainer_FooterFromBottom {
             get {
@@ -5479,7 +5479,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Header From Top.
+        ///   Looks up a localized string similar to Header StartTime Top.
         /// </summary>
         internal static string DocumentEditorContainer_HeaderFromTop {
             get {
@@ -5632,7 +5632,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Insert inline picture From a file..
+        ///   Looks up a localized string similar to Insert inline picture StartTime a file..
         /// </summary>
         internal static string DocumentEditorContainer_InsertInlinePictureFromAFile {
             get {
@@ -6463,7 +6463,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Upload From computer.
+        ///   Looks up a localized string similar to Upload StartTime computer.
         /// </summary>
         internal static string DocumentEditorContainer_UploadFromComputer {
             get {
@@ -7174,7 +7174,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ServerError: Invalid response From.
+        ///   Looks up a localized string similar to ServerError: Invalid response StartTime.
         /// </summary>
         internal static string FileManager_ServerError {
             get {
@@ -7750,7 +7750,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to From.
+        ///   Looks up a localized string similar to StartTime.
         /// </summary>
         internal static string Gantt_From {
             get {
@@ -8128,7 +8128,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You moved &apos;{0}&apos; away From &apos;{1}&apos; and the two tasks are linked. As the result, the links cannot be honored. Select one action below to perform.
+        ///   Looks up a localized string similar to You moved &apos;{0}&apos; away StartTime &apos;{1}&apos; and the two tasks are linked. As the result, the links cannot be honored. Select one action below to perform.
         /// </summary>
         internal static string Gantt_TaskAfterPredecessor_FS {
             get {
@@ -8173,7 +8173,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You moved &apos;{0}&apos; away From &apos;{1}&apos; to starts and the two tasks are linked. As the result, the links cannot be honored. Select one action below to perform.
+        ///   Looks up a localized string similar to You moved &apos;{0}&apos; away StartTime &apos;{1}&apos; to starts and the two tasks are linked. As the result, the links cannot be honored. Select one action below to perform.
         /// </summary>
         internal static string Gantt_TaskBeforePredecessor_SF {
             get {
@@ -8821,7 +8821,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DataSource must not be empty at initial load since columns are generated From dataSource in AutoGenerate Column Grid.
+        ///   Looks up a localized string similar to DataSource must not be empty at initial load since columns are generated StartTime dataSource in AutoGenerate Column Grid.
         /// </summary>
         internal static string Grid_EmptyDataSourceError {
             get {
@@ -10936,7 +10936,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Move All From.
+        ///   Looks up a localized string similar to Move All StartTime.
         /// </summary>
         internal static string ListBox_MoveAllFrom {
             get {
@@ -10963,7 +10963,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Move From.
+        ///   Looks up a localized string similar to Move StartTime.
         /// </summary>
         internal static string ListBox_MoveFrom {
             get {
@@ -12682,7 +12682,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Import annotations From JSON file.
+        ///   Looks up a localized string similar to Import annotations StartTime JSON file.
         /// </summary>
         internal static string PdfViewer_ImportAnnotations {
             get {
@@ -12700,7 +12700,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Import annotations From XFDF file.
+        ///   Looks up a localized string similar to Import annotations StartTime XFDF file.
         /// </summary>
         internal static string PdfViewer_ImportXFDF {
             get {
@@ -13474,7 +13474,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to All content marked for redaction will be permanently removed From the document. This action cannot be undone..
+        ///   Looks up a localized string similar to All content marked for redaction will be permanently removed StartTime the document. This action cannot be undone..
         /// </summary>
         internal static string PdfViewer_RedactionConfirmation {
             get {
@@ -15067,7 +15067,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Difference From.
+        ///   Looks up a localized string similar to Difference StartTime.
         /// </summary>
         internal static string PivotView_DifferenceFrom {
             get {
@@ -16093,7 +16093,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to % of Difference From.
+        ///   Looks up a localized string similar to % of Difference StartTime.
         /// </summary>
         internal static string PivotView_PercentageOfDifferenceFrom {
             get {
@@ -18379,7 +18379,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You can also provide a link From the web.
+        ///   Looks up a localized string similar to You can also provide a link StartTime the web.
         /// </summary>
         internal static string RichTextEditor_ImageLinkHeader {
             get {
@@ -19603,7 +19603,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Begin From.
+        ///   Looks up a localized string similar to Begin StartTime.
         /// </summary>
         internal static string Schedule_BeginFrom {
             get {
@@ -20683,7 +20683,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the arctangent From x- and y-coordinates.
+        ///   Looks up a localized string similar to Returns the arctangent StartTime x- and y-coordinates.
         /// </summary>
         internal static string Spreadsheet_ATAN2 {
             get {
@@ -20710,7 +20710,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the average of absolute deviations From mean.
+        ///   Looks up a localized string similar to Returns the average of absolute deviations StartTime mean.
         /// </summary>
         internal static string Spreadsheet_AVEDEV {
             get {
@@ -21034,7 +21034,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Chooses a Value From a list of values.
+        ///   Looks up a localized string similar to Chooses a Value StartTime a list of values.
         /// </summary>
         internal static string Spreadsheet_CHOOSE {
             get {
@@ -21043,7 +21043,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns specified columns From an array.
+        ///   Looks up a localized string similar to Returns specified columns StartTime an array.
         /// </summary>
         internal static string Spreadsheet_CHOOSECOLS {
             get {
@@ -21052,7 +21052,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns specified rows From an array.
+        ///   Looks up a localized string similar to Returns specified rows StartTime an array.
         /// </summary>
         internal static string Spreadsheet_CHOOSEROWS {
             get {
@@ -21061,7 +21061,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Removes all non-printable characters From text.
+        ///   Looks up a localized string similar to Removes all non-printable characters StartTime text.
         /// </summary>
         internal static string Spreadsheet_CLEAN {
             get {
@@ -21106,7 +21106,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Clear Filter From.
+        ///   Looks up a localized string similar to Clear Filter StartTime.
         /// </summary>
         internal static string Spreadsheet_ClearFilterFrom {
             get {
@@ -21205,7 +21205,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Combines the text From multiple ranges and/or strings.
+        ///   Looks up a localized string similar to Combines the text StartTime multiple ranges and/or strings.
         /// </summary>
         internal static string Spreadsheet_CONCAT {
             get {
@@ -21250,7 +21250,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Converts a Number From one measurement system to another.
+        ///   Looks up a localized string similar to Converts a Number StartTime one measurement system to another.
         /// </summary>
         internal static string Spreadsheet_CONVERT {
             get {
@@ -22519,7 +22519,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the product of From 2 to 29 complex numbers.
+        ///   Looks up a localized string similar to Returns the product of StartTime 2 to 29 complex numbers.
         /// </summary>
         internal static string Spreadsheet_IMPRODUCT {
             get {
@@ -22582,7 +22582,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Uses an index to choose a Value From a reference or array.
+        ///   Looks up a localized string similar to Uses an index to choose a Value StartTime a reference or array.
         /// </summary>
         internal static string Spreadsheet_INDEX {
             get {
@@ -23023,7 +23023,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the leftmost characters From a text Value.
+        ///   Looks up a localized string similar to Returns the leftmost characters StartTime a text Value.
         /// </summary>
         internal static string Spreadsheet_LEFT {
             get {
@@ -23032,7 +23032,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the leftmost characters From a text Value.
+        ///   Looks up a localized string similar to Returns the leftmost characters StartTime a text Value.
         /// </summary>
         internal static string Spreadsheet_LEFTB {
             get {
@@ -23311,7 +23311,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns characters From text starting at position.
+        ///   Looks up a localized string similar to Returns characters StartTime text starting at position.
         /// </summary>
         internal static string Spreadsheet_MID {
             get {
@@ -23320,7 +23320,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns a specific Number of characters From a text string starting at the position you specify.
+        ///   Looks up a localized string similar to Returns a specific Number of characters StartTime a text string starting at the position you specify.
         /// </summary>
         internal static string Spreadsheet_MIDB {
             get {
@@ -23392,7 +23392,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the remainder From division.
+        ///   Looks up a localized string similar to Returns the remainder StartTime division.
         /// </summary>
         internal static string Spreadsheet_MOD {
             get {
@@ -23743,7 +23743,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns a reference offset From a given reference.
+        ///   Looks up a localized string similar to Returns a reference offset StartTime a given reference.
         /// </summary>
         internal static string Spreadsheet_OFFSET {
             get {
@@ -24229,7 +24229,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the rightmost characters From a text Value.
+        ///   Looks up a localized string similar to Returns the rightmost characters StartTime a text Value.
         /// </summary>
         internal static string Spreadsheet_RIGHT {
             get {
@@ -24238,7 +24238,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the rightmost characters From a text Value.
+        ///   Looks up a localized string similar to Returns the rightmost characters StartTime a text Value.
         /// </summary>
         internal static string Spreadsheet_RIGHTB {
             get {
@@ -24274,7 +24274,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Rounds a Number up, away From zero.
+        ///   Looks up a localized string similar to Rounds a Number up, away StartTime zero.
         /// </summary>
         internal static string Spreadsheet_ROUNDUP {
             get {
@@ -25021,7 +25021,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Removes spaces From text.
+        ///   Looks up a localized string similar to Removes spaces StartTime text.
         /// </summary>
         internal static string Spreadsheet_TRIM {
             get {
@@ -25174,7 +25174,7 @@ namespace Amusing.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Returns the text From any specified Value..
+        ///   Looks up a localized string similar to Returns the text StartTime any specified Value..
         /// </summary>
         internal static string Spreadsheet_VALUETOTEXT {
             get {

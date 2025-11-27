@@ -1,6 +1,7 @@
 ﻿@page "/Planning-Overview"
 @using Amusing.Models
 @using Amusing.Services
+@using Blazorise
 @using Syncfusion.Blazor
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Data
@@ -8,6 +9,7 @@
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
 @using System.ComponentModel.DataAnnotations
+@using Syncfusion.Blazor.PivotView
 
 
 <AuthorizeView>
@@ -43,13 +45,207 @@
 			</div>
 
 			<div class="row row3">
-				<div class="col left">3A</div>
-				<div class="col right">3B</div>
+				<div class="col left">
+					@if ( SelectedEditionId != null )
+					{
+						<div class="conditions-container">
+							<div class="title">Voorwaarden</div>
+							<div class="conditions-wrapper">
+								<button class="btn-edit"
+										@onclick="ToggleEditConditions"
+										title="@(IsEditingConditions
+											? "Gewijzigde voorwaarden bewaren"
+											: "Voorwaarden bewerken")">
+
+									<img src="@(IsEditingConditions ? "icons/button-save.svg" : "icons/button-edit.svg")"
+										 class="edit-icon" />
+								</button>
+
+								<div class="conditions-editor">
+									<div class="row">
+										<label>Gewenste tijd tussen optredens</label>
+										<input type="number" width="50"
+												@bind="SelectedCondition.WishTimeBetweenPerformances"
+												disabled="@( !IsEditingConditions )" /> 
+									</div>
+
+									<div class="row">
+										<label>Maximale tijd tussen optredens</label>
+										<input type="number" width="50"
+												@bind="SelectedCondition.MaxTimeBetweenPerformances"
+												disabled="@( !IsEditingConditions )" />
+									</div>
+
+									<div class="row">
+											<label>Maximale lengte vrijwilligers dienst</label>
+											<input type="number"
+												   @bind="SelectedCondition.MaxLentgVolunteersShift"
+												   disabled="@( !IsEditingConditions )" />
+										</div>
+
+									<div class="row">
+										<label>Boete bij onderbreking</label>
+										<input type="number"
+											   @bind="SelectedCondition.PenaltyInteruptionPerformances"
+											   disabled="@( !IsEditingConditions )" />
+									</div>
+
+									<div class="row">
+										<label>Taken zonder wisseltijd</label>
+										<input type="text"
+											   @bind="SelectedCondition.TasknamesWithoutSwitchTime"
+											   disabled = "disabled" />
+									</div>
+
+									<div class="row">
+										<label>Reserve taaknaam</label>
+										<input type="text"
+												   @bind="SelectedCondition.SubstitudeTaskName" 
+												   disabled="disabled" />
+									</div>
+
+									<div class="row">
+										<label>Duur optreden (min)</label>
+										<input type="number"
+											   @bind="SelectedCondition.PerformanceTime"
+											   disabled="@( !IsEditingConditions )" />
+									</div>
+								</div>
+							</div>
+						</div>
+					}
+				</div>
 			</div>
 
 			<div class="row row4">
-				<div class="col left">4A</div>
-				<div class="col right">4B</div>
+				<div class="row row2">
+					@if ( !string.IsNullOrWhiteSpace( SelectedEditionId ) )
+					{
+						<SfGrid DataSource="@StageRows"
+								AllowSorting="false"
+								AllowFiltering="false"
+								AllowPaging="false"
+								GridLines="GridLine.Both"
+								Width="100%"
+								CssClass="schedule-grid">
+							<GridColumns>
+								<!-- First column: Stage name -->
+								<GridColumn Field="StageName"
+											HeaderText="Podium"
+											Width="250"
+											CssClass="stage-column">
+								</GridColumn>
+
+								@foreach ( var slot in TimeSlots )
+								{
+									<GridColumn Field="@slot"
+												HeaderText="@slot"
+												Width="90"
+												CssClass="slot-column">
+									</GridColumn>
+								}
+							</GridColumns>
+						</SfGrid>
+					}
+				</div>
+			</div>
+
+			<div class="row row5">
+				<div class="col left">
+					@if ( SelectedEditionId != null )
+					{
+						<div Class="titles-container">
+							<div class="title">Podiumdienst</div>
+							<SfGrid DataSource="@StageDuty"
+							AllowSorting="false"
+							AllowSelection="false"
+							AllowResizing="true"
+							AllowPaging="false"
+							CssClass="amusing-grid"
+							@ref="StageDutyGridRef">
+
+						<GridColumns>
+							<GridColumn HeaderText="Nr" Width="45" TextAlign="TextAlign.Right">
+								<Template Context="item">
+									@if ( item is PlanningStageVolunteersModel row )
+									{
+										var previous = GetPreviousItem(row);
+										bool showPodium = previous == null || previous.StageNumber != row.StageNumber;
+
+										var css = showPodium ? "podium-name podium-start" : "";
+
+										if ( showPodium )
+										{
+											<div class="@css">@row.StageNumber</div>
+										}
+									}
+								</Template>
+							</GridColumn>
+
+							<GridColumn HeaderText="Podium" Width="390">
+								<Template Context="item">
+									@if ( item is PlanningStageVolunteersModel row )
+									{
+										var previous = GetPreviousItem(row);
+										bool showPodium = previous == null || previous.StageName != row.StageName;
+
+										var css = showPodium ? "podium-name podium-start" : "";
+
+										if ( showPodium )
+										{
+											<div class="@css">@row.StageName</div>
+										}
+									}
+								</Template>
+							</GridColumn>
+
+							<GridColumn Field="Volunteer" HeaderText="Vrijwilliger" Width="200"></GridColumn>
+							<GridColumn Field="StartTime" HeaderText="Van" Width="60" Format="t"></GridColumn>
+							<GridColumn Field="EndTime" HeaderText="Tot" Width="60" Format="t"></GridColumn>
+
+						</GridColumns>
+					</SfGrid>
+						</div>
+					}
+				</div>
+				<div class="col right">
+					@if ( SelectedEditionId != null )
+					{
+						<div Class="titles-container">
+							<div class="title">Overige taken</div>
+							<SfGrid DataSource="@OtherTasks"
+									AllowSorting="false"
+									AllowSelection="false"
+									AllowResizing="true"
+									AllowPaging="false"
+									CssClass="amusing-grid"
+									@ref="OtherTasksGridRef">
+								<GridColumns>
+									<GridColumn HeaderText="Taak" Width="300">
+										<Template Context="item">
+											@if ( item is PlanningOtherVolunteerTasksModel row )
+											{
+												var previous = GetPreviousTaskItem(row);
+												bool showPodium = previous == null || previous.TaskName != row.TaskName;
+
+												var css = showPodium ? "podium-name podium-start" : "";
+
+												if ( showPodium )
+												{
+													<div class="@css">@row.TaskName</div>
+												}
+											}
+										</Template>
+									</GridColumn>
+									<GridColumn Field="Volunteer" HeaderText="Vrijwilliger" Width="200"></GridColumn>
+									<GridColumn Field="StartTime" HeaderText="Van" Width="60" Format="t"></GridColumn>
+									<GridColumn Field="EndTime" HeaderText="Tot" Width="60" Format="t"></GridColumn>
+								</GridColumns>
+							</SfGrid>
+						</div>
+					}
+
+				</div>
 			</div>
 
 

@@ -1,33 +1,16 @@
-﻿using System.Xml.Linq;
+﻿using System.Data;
+using System.Xml.Linq;
 
+using Amusing.DataReaderExtensions;
+using GetMyString = Amusing.DataReaderExtensions.ReaderExtensions;
 using Amusing.Helpers;
 using Amusing.Models;
-using Amusing.Services.Extensions;
 
 namespace Amusing.Services;
 
 public class PlanningService ( GenericDataService dataService )
 {
     private readonly GenericDataService _dataService = dataService;
-
-    #region Conditions
-    public Task<List<PlanningConditionsModel>> GetPlanningConditionsAsync( int _festivalId )
-    {
-        var parameters = new Dictionary<string, object> { { "@FestivalId", _festivalId } } ;
-
-        return _dataService.ExecuteQueryAsync(
-            QueryDefinitions.GetPlanningConditions,
-           reader => new PlanningConditionsModel
-           {
-                WishTimeBetweenPerformances = reader.GetInt( "WishTimeBetweenPerformances" ),
-                MaxTimeBetweenPerformances = reader.GetInt( "MaxTimeBetweenPerformances" ),
-                MaxLentgVolunteersShift = reader.GetInt( "MaxLentgVolunteersShift" ),
-                PenaltyInteruptionPerformances = reader.GetInt( "PenaltyInteruptionPerformances" ),
-                TasknamesWithoutSwitchTime = reader.GetString ("TasknamesWithoutSwitchTime" ) ?? "Vrijwilligersbalie;Garderobe",
-                SubstitudeTaskName = reader.GetString( "SubstitudeTaskName" ) ?? "Reserve voor oproep"
-           }, parameters );
-    }
-    #endregion
 
     #region Festivals
     public Task<List<PlanningFestivalsModel>> GetPlanningFestivalsAsync( int _festivalId )
@@ -38,14 +21,14 @@ public class PlanningService ( GenericDataService dataService )
             QueryDefinitions.GetPlanningFestivals,
            reader => new PlanningFestivalsModel
            {
-               FestivalId = reader.GetUInt( "FestivalId" ),
-               Festival = $"Amusing Hengelo {reader.GetString ( "Festival" )}",
+               FestivalId = reader.GetMyUInt( "FestivalId" ),
+               Festival = $"Amusing Hengelo {reader.GetMyString ( "Festival" )}",
                PerformanceLength = 30,
-               StartFestivalday = reader.GetTime ( "StartFestivalday" ) ,
-               EndFestivalday = reader.GetTime ( "EndFestivalday" ),
-               StartPause = reader.GetTime ("StartPause" ),
-               EndPause = reader.GetTime ( "EndPause" ),
-               EndExperiencedSubstitude = reader.GetTime ( "EndExperiencedSubstitude" )
+               StartFestivalday = reader.GetMyTime ( "StartFestivalday" ) ,
+               EndFestivalday = reader.GetMyTime ( "EndFestivalday" ),
+               StartPause = reader.GetMyTime ("StartPause" ),
+               EndPause = reader.GetMyTime ( "EndPause" ),
+               EndExperiencedSubstitude = reader.GetMyTime ( "EndExperiencedSubstitude" )
            }, parameters );
     }
     #endregion
@@ -56,8 +39,8 @@ public class PlanningService ( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningGenres,
             reader => new PlanningGenresModel
             {
-                GenreId = reader.GetInt ( "GenreId" ),
-                Name = reader.GetString ("Name" )
+                GenreId = reader.GetMyInt ( "GenreId" ),
+                Name = reader.GetMyString ("Name" )
             } );
     }
     #endregion
@@ -68,11 +51,11 @@ public class PlanningService ( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningGroups,
             reader => new PlanningGroupsModel
             {
-                GroupId = reader.GetUInt ( "GroupId" ),
-                Name = reader.GetString ( "Name" ),
-                GenreId = reader.GetUInt ( "GenreId" ),
-                City = reader.GetString ( "City" ),
-                Country = reader.GetString ( "Country" )
+                GroupId = reader.GetMyUInt ( "GroupId" ),
+                Name = reader.GetMyString ( "Name" ),
+                GenreId = reader.GetMyUInt ( "GenreId" ),
+                City = reader.GetMyString ( "City" ),
+                Country = reader.GetMyString ( "Country" )
             } );
     }
     #endregion
@@ -94,20 +77,20 @@ public class PlanningService ( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningPerformances,
         reader =>
         {
-            var stageName = reader.GetString ("StageName");
-            var fromTime = reader.GetTime ("From");
-            var groupName = reader.GetString ( "GroupName");
+            var stageName = reader.GetMyString ("StageName");
+            var fromTime = reader.GetMyTime ("From");
+            var groupName = reader.GetMyString ( "GroupName");
 
             return new PlanningPerformancesModel
             {
-                FestivalId = reader.GetUInt ( "FestivalId" ),
-                GroupId = reader.GetUInt( "GroupId" ),
+                FestivalId = reader.GetMyUInt ( "FestivalId" ),
+                GroupId = reader.GetMyUInt( "GroupId" ),
                 GroupName = groupName,
-                TimeSlotId = reader.GetUInt( "TimeSlotId" ),
-                StageId = reader.GetUInt( "StageId" ),
+                TimeSlotId = reader.GetMyUInt( "TimeSlotId" ),
+                StageId = reader.GetMyUInt( "StageId" ),
                 StageName = stageName,
                 From = fromTime,
-                To = reader.GetTime ( "To" ),
+                To = reader.GetMyTime ( "To" ),
                 Pinned = false,
                 Description = $"{stageName}, starttijd: {fromTime:hh\\:mm}, zanggroep: {groupName}"
             };
@@ -121,11 +104,11 @@ public class PlanningService ( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningPersonRoles,
             reader => new PlanningPersonRolesModel
             {
-                PersonId = reader.GetUInt ( "PersonId" ),
-                PersonName = reader.GetString ( "PersonName" ),
-                GroupId = reader.GetInt ( "GroupId" ),
-                GroupName = reader.GetString ( "GroupName" ),
-                Role = reader.GetString ( "Role" )
+                PersonId = reader.GetMyUInt ( "PersonId" ),
+                PersonName = reader.GetMyString ( "PersonName" ),
+                GroupId = reader.GetMyInt ( "GroupId" ),
+                GroupName = reader.GetMyString ( "GroupName" ),
+                Role = reader.GetMyString ( "Role" )
             } );
     }
     #endregion
@@ -136,11 +119,11 @@ public class PlanningService ( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningPersons,
             reader => new PlanningPersonsModel
             {
-                PersonId = reader.GetUInt ( "PersonId" ),
-                FirstName = reader.GetString ( "FirstName" ),
-                Affix = reader.GetString ( "Affix" ),
-                Surname = reader.GetString ( "Surname" ),
-                Name = reader.GetString ( "Name" )
+                PersonId = reader.GetMyUInt ( "PersonId" ),
+                FirstName = reader.GetMyString ( "FirstName" ),
+                Affix = reader.GetMyString ( "Affix" ),
+                Surname = reader.GetMyString ( "Surname" ),
+                Name = reader.GetMyString ( "Name" )
             } );
     }
     #endregion
@@ -153,23 +136,23 @@ public class PlanningService ( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningRegistrations,
             reader => new PlanningRegistrationsModel
             {
-                FestivalId = reader.GetUInt ( "FestivalId" ),
-                GroupId = reader.GetUInt( "GroupId" ),
-                GroupName = reader.GetString ( "GroupName" ),
-                Wish1 = reader.GetString ( "Wish1" ),
-                Wish2 = reader.GetString ( "Wish2" ),
-                Wish3 = reader.GetString ( "Wish3" ),
-                Wish4 = reader.GetString ( "Wish4" ),
-                Singers = reader.GetUInt ( "Singers" ),
-                Stagetype = reader.GetString ( "Stagetype" ),
-                ForcedStageChoice = reader.GetInt ( "ForcedStageChoice" ),
-                Registered = reader.GetDateTime ( "Registered" ),
-                AvailableFrom = reader.GetTime ( "AvailableFrom" ),
-                AvailableTill = reader.GetTime ( "AvailableTill" ),
-                Queue = reader.GetUInt ( "Queue" ),
-                InsidePerformances =  reader.GetUInt ( "InsidePerformance" ),
-                OutsidePerformances = reader.GetUInt ( "OutsidePerformance" ),
-                Confirmed = reader.GetDateTime ( "Confirmed" )
+                FestivalId = reader.GetMyUInt ( "FestivalId" ),
+                GroupId = reader.GetMyUInt( "GroupId" ),
+                GroupName = reader.GetMyString ( "GroupName" ),
+                Wish1 = reader.GetMyString ( "Wish1" ),
+                Wish2 = reader.GetMyString ( "Wish2" ),
+                Wish3 = reader.GetMyString ( "Wish3" ),
+                Wish4 = reader.GetMyString ( "Wish4" ),
+                Singers = reader.GetMyUInt ( "Singers" ),
+                Stagetype = reader.GetMyString ( "Stagetype" ),
+                ForcedStageChoice = reader.GetMyInt ( "ForcedStageChoice" ),
+                Registered = reader.GetMyDateTime ( "Registered" ),
+                AvailableFrom = reader.GetMyTime ( "AvailableFrom" ),
+                AvailableTill = reader.GetMyTime ( "AvailableTill" ),
+                Queue = reader.GetMyUInt ( "Queue" ),
+                InsidePerformances =  reader.GetMyUInt ( "InsidePerformance" ),
+                OutsidePerformances = reader.GetMyUInt ( "OutsidePerformance" ),
+                Confirmed = reader.GetMyDateTime ( "Confirmed" )
             }, parameters );
     }
     #endregion
@@ -183,18 +166,18 @@ public class PlanningService ( GenericDataService dataService )
             QueryDefinitions.GetPlanningStages,
            reader => new PlanningStagesModel
            {
-                PodiumId = reader.GetUInt( "PodiumId" ),
-                Name = reader.GetString ( "Name" ),
-                PerformanceLocation = reader.GetString ( "PerformanceLocation" ),
-                Type = reader.GetString ( "Type" ),
-                Quality = reader.GetUInt( "Quality" ),
-                MaxSingers = reader.GetUInt( "MaxSingers" ),
-                Volunteers = reader.GetString ( "Volunteers" ),
-                Opening = reader.GetTime ( "Opening" ),
-                Closing = reader.GetTime ( "Closing" ),
-                VolunteersFrom = reader.GetTime ( "VolunteersFrom" ),
-                VolunteersTill = reader.GetTime ( "VolunteersTill" ),
-                MapNumber = reader.GetUInt( "MapNumber" )
+                PodiumId = reader.GetMyUInt( "PodiumId" ),
+                Name = reader.GetMyString ( "Name" ),
+                PerformanceLocation = reader.GetMyString ( "PerformanceLocation" ),
+                Type = reader.GetMyString ( "Type" ),
+                Quality = reader.GetMyUInt( "Quality" ),
+                MaxSingers = reader.GetMyUInt( "MaxSingers" ),
+                Volunteers = reader.GetMyString ( "Volunteers" ),
+                Opening = reader.GetMyTime ( "Opening" ),
+                Closing = reader.GetMyTime ( "Closing" ),
+                VolunteersFrom = reader.GetMyTime ( "VolunteersFrom" ),
+                VolunteersTill = reader.GetMyTime ( "VolunteersTill" ),
+                MapNumber = reader.GetMyUInt( "MapNumber" )
            }, parameters );
     }
     #endregion
@@ -205,9 +188,9 @@ public class PlanningService ( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningStageTypes,
             reader => new PlanningStageTypesModel
             {
-                TypeId = reader.GetInt ( "TypeId" ),
-                Type = reader.GetString ( "Type" ),
-                CompatibleWith = reader.GetString ( "CompatibleWith" )
+                TypeId = reader.GetMyInt ( "TypeId" ),
+                Type = reader.GetMyString ( "Type" ),
+                CompatibleWith = reader.GetMyString ( "CompatibleWith" )
             } );
     }
     #endregion
@@ -220,29 +203,29 @@ public class PlanningService ( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningVolunteers,
             reader => new PlanningVolunteersModel
             {
-                VolunteerId = reader.GetUInt ( "VolunteerId" ),
-                Date = reader.GetDateTime ( "Date" ),
-                FestivalId = reader.GetUInt( "FestivalId" ),
-                PersonId = reader.GetUInt( "PersonId" ),
-                PersonName = reader.GetString ( "PersonName" ),
-                AvailableFrom = reader.GetTime ( "AvailableFrom" ),
-                AvailableTill = reader.GetTime ( "AvailableTill" ),
-                ChainedHours = reader.GetUInt( "ChainedHours" ),
-                Lunch = reader.GetString( "Lunch" ),
-                Vegetarian = reader.GetString( "Vegetarian" ),
-                Meeting = reader.GetString( "Meeting" ),
-                Experience = reader.GetString( "Experience" ),
-                StageDuty = reader.GetString( "StageDuty" ),
-                Tasks = reader.GetString( "Tasks" ),
-                TogetherWithId = reader.GetUInt( "TogetherWithId" ),
-                TogetherWithName = reader.GetString( "TogetherWithName" ),
-                PreferedStage =    reader.GetUInt ( "PreferedStage" ),
-                DisapprovedStage = reader.GetUInt ( "DisapprovedStage" ),
-                PreferedGroup =    reader.GetUInt ( "PreferedGroup" ),
-                DisapprovedGroup = reader.GetUInt( "DisapprovedGroup" ),
-                PreferedTask = reader.GetString ( "PreferedTask" ),
+                VolunteerId = reader.GetMyUInt ( "VolunteerId" ),
+                Date = reader.GetMyDateTime ( "Date" ),
+                FestivalId = reader.GetMyUInt( "FestivalId" ),
+                PersonId = reader.GetMyUInt( "PersonId" ),
+                PersonName = reader.GetMyString ( "PersonName" ),
+                AvailableFrom = reader.GetMyTime ( "AvailableFrom" ),
+                AvailableTill = reader.GetMyTime ( "AvailableTill" ),
+                ChainedHours = reader.GetMyUInt( "ChainedHours" ),
+                Lunch = reader.GetMyString( "Lunch" ),
+                Vegetarian = reader.GetMyString( "Vegetarian" ),
+                Meeting = reader.GetMyString( "Meeting" ),
+                Experience = reader.GetMyString( "Experience" ),
+                StageDuty = reader.GetMyString( "StageDuty" ),
+                Tasks = reader.GetMyString( "Tasks" ),
+                TogetherWithId = reader.GetMyUInt( "TogetherWithId" ),
+                TogetherWithName = reader.GetMyString( "TogetherWithName" ),
+                PreferedStage =    reader.GetMyUInt ( "PreferedStage" ),
+                DisapprovedStage = reader.GetMyUInt ( "DisapprovedStage" ),
+                PreferedGroup =    reader.GetMyUInt ( "PreferedGroup" ),
+                DisapprovedGroup = reader.GetMyUInt( "DisapprovedGroup" ),
+                PreferedTask = reader.GetMyString ( "PreferedTask" ),
                 DisapprovedTask = reader [ "DisapprovedTask" ].ToString() ?? string.Empty,
-                Notes = reader.GetString ( "Notes" )
+                Notes = reader.GetMyString ( "Notes" )
             }, parameters );
     }
     #endregion
@@ -253,17 +236,17 @@ public class PlanningService ( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningVolunteerTasks,
             reader => new PlanningVolunteerTasksModel
             {
-                TaakId = reader.GetUInt( "TaakId" ),
-                ShortName = reader.GetString ( "ShortName" ),
-                Name = reader.GetString ( "Name" ),
-                MinimumTime = reader.GetUInt ( "MinimumTime" ),
-                MaximumTime = reader.GetUInt( "MaximumTime" ),
-                Timeslot1From = reader.GetTime ( "Timeslot1From" ),
-                Timeslot1Till = reader.GetTime ( "Timeslot1Till" ),
-                Timeslot1Volunteers = reader.GetInt( "Timeslot1Volunteers" ),
-                Timeslot2From = reader.GetTime ( "Timeslot2From" ),
-                Timeslot2Till = reader.GetTime ( "Timeslot2Till" ),
-                Timeslot2Volunteers = reader.GetInt( "Timeslot2Volunteers" )
+                TaakId = reader.GetMyUInt( "TaakId" ),
+                ShortName = reader.GetMyString ( "ShortName" ),
+                Name = reader.GetMyString ( "Name" ),
+                MinimumTime = reader.GetMyUInt ( "MinimumTime" ),
+                MaximumTime = reader.GetMyUInt( "MaximumTime" ),
+                Timeslot1From = reader.GetMyTime ( "Timeslot1From" ),
+                Timeslot1Till = reader.GetMyTime ( "Timeslot1Till" ),
+                Timeslot1Volunteers = reader.GetMyInt( "Timeslot1Volunteers" ),
+                Timeslot2From = reader.GetMyTime ( "Timeslot2From" ),
+                Timeslot2Till = reader.GetMyTime ( "Timeslot2Till" ),
+                Timeslot2Volunteers = reader.GetMyInt( "Timeslot2Volunteers" )
             } );
     }
     #endregion
@@ -287,19 +270,97 @@ public class PlanningService ( GenericDataService dataService )
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPlanningVolunteerTaskOccupancy,
             reader => new PlanningVolunteerTaskOccupancyModel
             {
-                TaskId = reader.GetUInt( "TaskId" ),
-                TaskName = reader.GetString ( "TaskName" ),
-                PersonId = reader.GetUInt( "PersonId" ),
-                PersonName = reader.GetString ( "PersonName" ),
-                StageId = reader.GetInt( "StageId" ),
-                StageName = reader.GetString ( "StageName" ),
-                From = reader.GetTime ( "From" ),
-                Till = reader.GetTime ( "Till" ),
-                Pinned = reader.GetString ( "Pinned" )
+                TaskId = reader.GetMyUInt( "TaskId" ),
+                TaskName = reader.GetMyString ( "TaskName" ),
+                PersonId = reader.GetMyUInt( "PersonId" ),
+                PersonName = reader.GetMyString ( "PersonName" ),
+                StageId = reader.GetMyInt( "StageId" ),
+                StageName = reader.GetMyString ( "StageName" ),
+                From = reader.GetMyTime ( "From" ),
+                Till = reader.GetMyTime ( "Till" ),
+                Pinned = reader.GetMyString ( "Pinned" )
             }, parameters );
     }
     #endregion
 
+    #region Planning
+    #region Conditions
+    public Task<List<PlanningConditionsModel>> GetPlanningConditionsAsync( int _festivalId )
+    {
+        var parameters = new Dictionary<string, object> { { "@FestivalId", _festivalId } } ;
+
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetPlanningConditionsOverview,
+           reader => new PlanningConditionsModel
+           {
+               WishTimeBetweenPerformances = reader.GetMyInt( "WishTimeBetweenPerformances" ),
+               MaxTimeBetweenPerformances = reader.GetMyInt( "MaxTimeBetweenPerformances" ),
+               MaxLentgVolunteersShift = reader.GetMyInt( "MaxLentgVolunteersShift" ),
+               PenaltyInteruptionPerformances = reader.GetMyInt( "PenaltyInteruptionPerformances" ),
+               TasknamesWithoutSwitchTime = reader.GetMyString( "TasknamesWithoutSwitchTime" ),
+               SubstitudeTaskName = reader.GetMyString( "SubstitudeTaskName" ),
+               PerformanceTime = reader.GetMyInt( "PerformanceTime" )
+           }, parameters );
+    }
+    #endregion
+
+    #region Stageduty
+    public Task<List<PlanningStageVolunteersModel>> GetPlanningVolunteersPerStageOverview( int _festivalId )
+    {
+        var parameters = new Dictionary<string, object> { { "@FestivalId", _festivalId } } ;
+
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetPlanningVolunteersPerStageOverview,
+           reader => new PlanningStageVolunteersModel
+           {
+               StageNumber = reader.GetMyInt( "StageNumber" ),
+               StageId = reader.GetMyInt( "StageId" ),
+               StageName = reader.GetMyString( "StageName" ),
+               Volunteer = reader.GetMyString( "Volunteer" ),
+               StartTime = reader.IsDBNull( "StartTime" ) ? null : reader.GetMyTime( "StartTime" ),
+               EndTime = reader.IsDBNull( "EndTime" ) ? null : reader.GetMyTime( "EndTime" )
+           }, parameters );
+    }
+    #endregion
+
+    #region Other duty
+    public Task<List<PlanningOtherVolunteerTasksModel>> GetPlanningOtherVolunteerTasksOverview( int _festivalId )
+    {
+        var parameters = new Dictionary<string, object> { { "@FestivalId", _festivalId } } ;
+
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetPlanningOtherVolunteerTasksOverview,
+           reader => new PlanningOtherVolunteerTasksModel
+           {
+               TaskName = reader.GetMyString( "Task" ),
+               Volunteer = reader.GetMyString( "Volunteer" ),
+               StartTime = reader.IsDBNull( "StartTime" ) ? null : reader.GetMyTime( "StartTime" ),
+               EndTime = reader.IsDBNull( "EndTime" ) ? null : reader.GetMyTime( "EndTime" )
+           }, parameters );
+    }
+    #endregion
+
+    #region Planned Performances
+    public Task<List<StagePerformanceModel>> GetStagePerformancesAsync (int _festivalId )
+    {
+        var parameters = new Dictionary<string, object>
+    {
+        { "@FestivalId", _festivalId }
+    };
+
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetPlanningPerformancesOverview,
+            reader => new StagePerformanceModel
+            {
+                StageId = reader.GetInt32( "StageId" ),
+                StageName = reader.GetMyString( "StageName" ),
+                Timeslot = reader.GetInt32( "Timeslot" ),
+                GroupName = reader.GetMyString( "GroupName" )
+            },
+            parameters
+        );
+    }
+    #endregion
     #region XML Export
     #region Export Full Planning To Xml
     // -------------------------------------------------------
@@ -531,6 +592,7 @@ public class PlanningService ( GenericDataService dataService )
 
         return value?.ToString();
     }
+    #endregion
     #endregion
     #endregion
 }
