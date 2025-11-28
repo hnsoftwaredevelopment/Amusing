@@ -1,5 +1,12 @@
+using System.Xml.Linq;
+
+using Amusing.Helpers;
 using Amusing.Models;
 using Amusing.Services;
+
+using BootstrapBlazor.Components;
+
+using ClosedXML.Excel;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +16,7 @@ using Microsoft.JSInterop;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Grids.Internal;
 
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using static Mysqlx.Expect.Open.Types;
 
 namespace Amusing.Components.Pages;
@@ -126,6 +134,10 @@ public partial class PlanningOverview
         await LoadStageDutyAsync();
         await LoadOtherTasksAsync();
 
+        TimeSlots = GenerateTimeSlots(); // optioneel opnieuw genereren
+        var raw = await PlanningService.GetStagePerformancesAsync(int.Parse(SelectedEditionId));
+        StageRows = BuildScheduleRows( raw );
+
         StateHasChanged();
 
     }
@@ -144,13 +156,24 @@ public partial class PlanningOverview
 
     private async Task ExportToXmlAsync()
     {
-        var _editionId = 20;
+        var _editionId = int.Parse( SelectedEditionId );
         // Trigger XML export for the selected edition
         await PlanningService.ExportFullPlanningToXmlAsync(
             _editionId,
             "C:\\Temp\\Planning.xml"
         );
-        _message = "Planning export completed.";
+        _message = "Planning naar XML export completed.";
+    }
+
+    private async Task ExportToExcelAsync()
+    {
+        var _editionId = int.Parse( SelectedEditionId );
+        // Trigger Excel export for the selected edition
+        await PlanningService.ExportFullPlanningToExcelAsync(
+            _editionId,
+            "C:\\Temp\\Planning.xlsx"
+        );
+        _message = "Planning naar Excel export completed.";
     }
 
     private PlanningStageVolunteersModel GetPreviousItem( PlanningStageVolunteersModel current )
@@ -206,39 +229,36 @@ public partial class PlanningOverview
     }
 
     // Pivot transformation
-    private List<StageScheduleRow> BuildScheduleRows( List<StagePerformanceModel> data )
-    {
+    private List<StageScheduleRow> BuildScheduleRows(List<StagePerformanceModel> data)
+{
         var rows = data
-            .GroupBy(x => new { x.StageId, x.StageName })
-            .Select(g =>
+        .GroupBy(x => new { x.StageId, x.StageName })
+        .Select(g =>
+        {
+            var firstPerf = g.First(); // pak eerste performance om SortOrder te halen
+            var row = new StageScheduleRow
             {
-                var row = new StageScheduleRow
-                {
-                    StageId = g.Key.StageId,
-                    StageName = g.Key.StageName
-                };
+                StageId = g.Key.StageId,
+                StageName = g.Key.StageName,
+                SortOrder = firstPerf.SortOrder // <-- hier het nummer instellen
+            };
 
-                // Initialize all slots as empty
-                foreach (var slot in TimeSlots)
-                    row[slot] = "";
+            // Initialize all slots as empty
+            foreach (var slot in TimeSlots)
+                row[slot] = "";
 
-                // Fill slots with group names
-                foreach (var perf in g)
-                {
-                    var key = SlotToStartTime(perf.Timeslot).ToString("HH:mm");
-                    row.SetSlot(key, perf.GroupName);
-                }
+            // Fill slots with group names
+            foreach (var perf in g)
+            {
+                var key = SlotToStartTime(perf.Timeslot).ToString("HH:mm");
+                row.SetSlot(key, perf.GroupName);
+            }
 
-                return row;
-            })
-            .OrderBy(x => x.StageName)
-            .ToList();
+            return row;
+        })
+        .OrderBy(x => x.SortOrder) // sorteren op het nieuwe Nr
+        .ToList();
 
         return rows;
-    }
-    private async Task ExportToExcelAsync()
-    {
-    //    // LEGE placeholder – vullen we zodra de XML werkt
-    await Task.CompletedTask;
     }
 }

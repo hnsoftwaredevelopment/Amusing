@@ -1869,6 +1869,7 @@ public static class QueryDefinitions
         ORDER BY t.taak_id";
     public static readonly string GetPlanningPerformancesOverview = @"
         SELECT 
+            s.kaart_nummer AS SortOrder,
             s.podium_id AS StageId,
             s.naam AS StageName,
             p.tijdvak AS Timeslot,
@@ -1878,8 +1879,8 @@ public static class QueryDefinitions
             ON p.podium_id = s.podium_id
         INNER JOIN amusing.ah_zanggroepen g 
             ON p.zanggroep_id = g.zanggroep_id
-        WHERE p.festival_id = @FestivalId
-        ORDER BY s.kaart_nummer, p.tijdvak;";
+        WHERE p.festival_id = @FestivalId AND s.kaart_nummer IS NOT NULL AND s.kaart_nummer > 0
+        ORDER BY s.kaart_nummer, s.podium_id, p.tijdvak;";
     #endregion
     #endregion
 

@@ -4,6 +4,7 @@ namespace Amusing.Models;
 
 public class StageScheduleRow : DynamicObject
 {
+    public int SortOrder { get; set; } = 0;
     public int StageId { get; set; }
 
     // Echte property voor SfGrid binding

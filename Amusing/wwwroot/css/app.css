@@ -634,3 +634,9 @@ a, .btn-link {
     line-height: 20px;
     border-radius: 4px;
 }
+
+.scroll-container {
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+}

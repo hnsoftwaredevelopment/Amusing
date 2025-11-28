@@ -41,6 +41,10 @@
 					<button class="xml-btn" @onclick="ExportToXmlAsync" title="XML Export">
 						<img src="icons/xml.svg" class="icon" alt="XML" />
 					</button>
+
+					<button class="xml-btn" @onclick="ExportToExcelAsync" title="Excel Export">
+						<img src="icons/excel.svg" class="icon" alt="XML" />
+					</button>
 				</div>
 			</div>
 
@@ -120,18 +124,51 @@
 			<div class="row row4">
 				@if ( !string.IsNullOrWhiteSpace( SelectedEditionId ) )
 				{
-					<div class="schedule-grid">
-						<SfGrid DataSource="@StageRows" AllowSorting="false" AllowFiltering="false" AllowPaging="false" GridLines="GridLine.Both" Width="100%">
+					<div class="schedule-grid scroll-container">
+						<div class="title">Podiumplanning</div>
+						<SfGrid 
+							DataSource="@StageRows" 
+							AllowSorting="false" 
+							AllowFiltering="false" 
+							AllowPaging="false" 
+							GridLines="GridLine.Both" 
+							Width="100%">
 							<GridColumns>
-								<GridColumn Field="StageName" HeaderText="Podium" Width="250">
-									<!-- Gebruik een unieke contextnaam voor deze template -->
-									<Template Context="row">
-										<div style="font-weight:bold; background-color:#f5f5f5;">
-											@(( row as StageScheduleRow ).StageName)
+								<GridColumn Field="SortOrder"
+											HeaderText="Nr"
+											Width="50"
+											TextAlign="TextAlign.Right"
+											IsFrozen="true">
+
+									<Template Context="rowObj">
+										@{
+											var row = rowObj as StageScheduleRow;
+										}
+										<div style="font-weight:bold;" title="@row?.SortOrder">
+											@row?.SortOrder
 										</div>
 									</Template>
 
-									<!-- HeaderTemplate moet ook een unieke context hebben -->
+									<HeaderTemplate Context="headerRow">
+										<div style="font-weight:bold;">Nr</div>
+									</HeaderTemplate>
+								</GridColumn>
+
+								<GridColumn 
+									Field="StageName" 
+									HeaderText="Podium" 
+									Width="350" 
+									IsFrozen="true">
+									<Template Context="rowObj">
+										@{
+											var row = rowObj as StageScheduleRow;
+										}
+										<div style="font-weight:bold;"
+											 title="@row?.StageName">
+											@row?.StageName
+										</div>
+									</Template>
+
 									<HeaderTemplate Context="headerRow">
 										<div style="font-weight:bold;">Podium</div>
 									</HeaderTemplate>
@@ -139,13 +176,17 @@
 
 								@foreach ( var slot in TimeSlots )
 								{
-									<GridColumn Field="@slot" HeaderText="@slot" Width="90">
-										<Template Context="rowSlot">
+									<GridColumn Field="@slot" HeaderText="@slot" Width="120">
+										<Template Context="rowObj">
 											@{
-												var value = (rowSlot as StageScheduleRow)?[slot];
+												var row = rowObj as StageScheduleRow;
+												var value = row?[slot];
 												var cssClass = string.IsNullOrEmpty(value) ? "empty-slot" : "filled-slot";
 											}
-											<div class="@cssClass">@value</div>
+											<div class="@cssClass"
+												 title="@value">
+												@value
+											</div>
 										</Template>
 									</GridColumn>
 								}

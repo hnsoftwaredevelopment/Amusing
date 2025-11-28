@@ -2,9 +2,12 @@
 using System.Xml.Linq;
 
 using Amusing.DataReaderExtensions;
-using GetMyString = Amusing.DataReaderExtensions.ReaderExtensions;
 using Amusing.Helpers;
 using Amusing.Models;
+
+using ClosedXML.Excel;
+
+using GetMyString = Amusing.DataReaderExtensions.ReaderExtensions;
 
 namespace Amusing.Services;
 
@@ -352,6 +355,7 @@ public class PlanningService ( GenericDataService dataService )
             QueryDefinitions.GetPlanningPerformancesOverview,
             reader => new StagePerformanceModel
             {
+                SortOrder = reader.GetInt32( "SortOrder" ),
                 StageId = reader.GetInt32( "StageId" ),
                 StageName = reader.GetMyString( "StageName" ),
                 Timeslot = reader.GetInt32( "Timeslot" ),
@@ -481,6 +485,153 @@ public class PlanningService ( GenericDataService dataService )
 
         await using var writer = File.CreateText(filePath);
         doc.Save( writer );
+    }
+    #endregion
+
+    #region Export Full Planning To Excel
+    public async Task ExportFullPlanningToExcelAsync( int festivalId, string filePath )
+    {
+        // Build the same channel structure as your XML export
+        var channel = new XElement("channel");
+
+        channel.Add( await BuildTableElementAsync( "ah_podium_type_relaties",
+            QueryDefinitions.GetPlanningStageTypeRelations,
+            new() { { "@FestivalId", festivalId } },
+            [ "vervangt_podium_type_id" ]
+        ) );
+
+        channel.Add( await BuildTableElementAsync( "ah_podium_genre_relaties",
+            QueryDefinitions.GetPlanningStageGenreRelations,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync( "ah_podium_koor_relaties",
+            QueryDefinitions.GetPlanningStageGroupRelations,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync( "ah_festivals",
+            QueryDefinitions.GetPlanningFestivals,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildKeyValueTableAsync( "ah_voorwaarden",
+            QueryDefinitions.GetPlanningConditions,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync( "ah_podium_types",
+            QueryDefinitions.GetPlanningStageTypes,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync( "ah_genres",
+            QueryDefinitions.GetPlanningGenres,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync( "ah_inschrijvingen",
+            QueryDefinitions.GetPlanningRegistrations,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync( "ah_personen_rollen",
+            QueryDefinitions.GetPlanningPersonRoles,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync( "ah_personen",
+            QueryDefinitions.GetPlanningPersons,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync( "ah_podia",
+            QueryDefinitions.GetPlanningStages,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync( "ah_zanggroepen",
+            QueryDefinitions.GetPlanningGroups,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync( "ah_vrijwilligers",
+            QueryDefinitions.GetPlanningVolunteers,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync( "ah_optredens",
+            QueryDefinitions.GetPlanningPerformances,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync( "ah_vrijwilligersdiensten",
+            QueryDefinitions.GetPlanningVolunteerShifts,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync( "ah_taken",
+            QueryDefinitions.GetPlanningVolunteerTasks,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        channel.Add( await BuildTableElementAsync( "ah_taken_bezetting",
+            QueryDefinitions.GetPlanningVolunteerTaskOccupancy,
+            new() { { "@FestivalId", festivalId } }
+        ) );
+
+        // --- Build Excel ---
+        using var workbook = new XLWorkbook();
+
+        foreach ( var table in channel.Elements( "table" ) )
+        {
+            string tableName = table.Attribute("name")?.Value ?? "Unknown";
+
+            var ws = workbook.Worksheets.Add(tableName);
+
+            // Extract all rows
+            var rows = table.Elements("row").ToList();
+            if ( !rows.Any() )
+                continue; // Empty tab
+
+            // Determine all column names from the first row
+            var firstRow = rows.First();
+            var columns = firstRow.Elements().Select(e => e.Name.LocalName).ToList();
+
+            // Write header
+            for ( int c = 0; c < columns.Count; c++ )
+            {
+                ws.Cell( 1, c + 1 ).Value = columns [ c ];
+                ws.Cell( 1, c + 1 ).Style.Font.Bold = true;
+            }
+
+            // Write data rows
+            int r = 2;
+            foreach ( var row in rows )
+            {
+                for ( int c = 0; c < columns.Count; c++ )
+                {
+                    var colName = columns[c];
+                    var el = row.Element(colName);
+                    ws.Cell( r, c + 1 ).Value = el?.Value ?? "";
+                }
+                r++;
+            }
+
+            // Make it a table (with filters & sorting enabled)
+            var rng = ws.Range(1, 1, r - 1, columns.Count);
+            rng.CreateTable();
+
+            ws.Columns().AdjustToContents();
+        }
+
+        Directory.CreateDirectory( Path.GetDirectoryName( filePath )! );
+        workbook.SaveAs( filePath );
+    }
+    private async Task ExportToExcelAsync()
+    {
+        //    // LEGE placeholder – vullen we zodra de XML werkt
+        await Task.CompletedTask;
     }
     #endregion
 
