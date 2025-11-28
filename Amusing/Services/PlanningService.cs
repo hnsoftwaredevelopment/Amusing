@@ -15,6 +15,18 @@ public class PlanningService ( GenericDataService dataService )
 {
     private readonly GenericDataService _dataService = dataService;
 
+    #region Export FileName
+    public async Task<string> GetFileName( int festivalId )
+    {
+        var parameters = new Dictionary<string, object> { { "@FestivalId", festivalId } };
+
+        var result = await _dataService.ExecuteQueryAsync(QueryDefinitions.PlanningExportFilename,
+            reader => reader.GetString("FileName"),
+        parameters);
+
+        return result.ToString();
+    }    #endregion
+
     #region Festivals
     public Task<List<PlanningFestivalsModel>> GetPlanningFestivalsAsync( int _festivalId )
     {

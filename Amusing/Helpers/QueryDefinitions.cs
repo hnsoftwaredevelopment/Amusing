@@ -1821,6 +1821,14 @@ public static class QueryDefinitions
             FROM amusing.planner_vrijwilligersdiensten po
             WHERE po.festival_id = @FestivalId
         ) AS HasRows;";
+
+    public static readonly string PlanningExportFilename = @"
+        SELECT 
+	        CONCAT('Planning-' , DATE_FORMAT(f.festivaldatum , '%Y') , '-' , DATE_FORMAT(CURRENT_TIMESTAMP() , '%Y%m%d-%H%i%S')),
+	        CURDATE(),
+	        CURRENT_TIMESTAMP()
+        FROM amusing.ah_festivals f
+        WHERE f.festival_id = @FestivalId";
     #endregion
 
     #region queries for overview page
