@@ -43,11 +43,15 @@ public partial class PlanningOverview
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadAllAsync();
+    }
+
+    private async Task LoadAllAsync()
+    {
         await LoadEditionsAsync();
         await LoadConditionsAsync();
         await LoadStageDutyAsync();
         await LoadOtherTasksAsync();
-        await OnParametersSetAsync();
     }
 
     private async Task LoadEditionsAsync()
@@ -121,7 +125,6 @@ public partial class PlanningOverview
         await LoadConditionsAsync();
         await LoadStageDutyAsync();
         await LoadOtherTasksAsync();
-        await OnParametersSetAsync();
 
         StateHasChanged();
 

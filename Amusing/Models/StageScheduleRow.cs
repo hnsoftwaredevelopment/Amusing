@@ -28,6 +28,14 @@ public class StageScheduleRow : DynamicObject
     // Voor dynamic binding van de tijdslot-kolommen
     public override bool TryGetMember( GetMemberBinder binder, out object? result )
     {
+        // Prevent dynamic override for actual properties
+        if ( binder.Name == nameof( StageName ) || binder.Name == nameof( StageId ) )
+        {
+            result = GetType().GetProperty( binder.Name )?.GetValue( this );
+            return true;
+        }
+
+        // Dynamic slot values
         result = _slots.ContainsKey( binder.Name ) ? _slots [ binder.Name ] : "";
         return true;
     }

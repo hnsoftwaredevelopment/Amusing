@@ -1526,7 +1526,7 @@ public static class QueryDefinitions
             SUM(CASE WHEN wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
             SUM(CASE WHEN betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paid,
             SUM(CASE WHEN afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
-        FROM Amusing.ah_inschrijvingen
+        FROM amusing.ah_inschrijvingen
         WHERE festival_id = @FestivalId;";
 
     public static readonly string DashboardStatisticsGenre = @"
@@ -1536,10 +1536,10 @@ public static class QueryDefinitions
             SUM(CASE WHEN i.wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
             SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paid,
             SUM(CASE WHEN i.afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
-        FROM Amusing.ah_inschrijvingen i
-        JOIN Amusing.ah_zanggroepen zg 
+        FROM amusing.ah_inschrijvingen i
+        JOIN amusing.ah_zanggroepen zg 
             ON i.zanggroep_id = zg.zanggroep_id
-        JOIN Amusing.ah_genres g
+        JOIN amusing.ah_genres g
             ON zg.genre_id = g.genre_id
         WHERE i.festival_id = @festivalid
         GROUP BY g.nl
@@ -1552,10 +1552,10 @@ public static class QueryDefinitions
             SUM(CASE WHEN i.wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
             SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paid,
             SUM(CASE WHEN i.afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
-        FROM Amusing.ah_inschrijvingen i
-        JOIN Amusing.ah_zanggroepen zg 
+        FROM amusing.ah_inschrijvingen i
+        JOIN amusing.ah_zanggroepen zg 
             ON i.zanggroep_id = zg.zanggroep_id
-        JOIN Amusing.ah_landen l
+        JOIN amusing.ah_landen l
             ON zg.land COLLATE utf8mb3_unicode_ci = l.code 
         WHERE i.festival_id = @FestivalId
         GROUP BY l.naam 
@@ -1568,7 +1568,7 @@ public static class QueryDefinitions
             SUM(CASE WHEN i.wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
             SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paid,
             SUM(CASE WHEN i.afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
-        FROM Amusing.ah_inschrijvingen i
+        FROM amusing.ah_inschrijvingen i
  
         WHERE i.festival_id = 20
         GROUP BY i.podiumsoort 
@@ -1580,10 +1580,10 @@ public static class QueryDefinitions
             SUM(CASE WHEN i.aantal_deelnemers >= 10 AND i.aantal_deelnemers < 25 THEN 1 ELSE 0 END) AS Total_Gte10,
             SUM(CASE WHEN i.aantal_deelnemers >= 25 AND i.aantal_deelnemers < 50 THEN 1 ELSE 0 END) AS Total_Gte25,
             SUM(CASE WHEN i.aantal_deelnemers >= 50 THEN 1 ELSE 0 END) AS Total_Gte50
-        FROM Amusing.ah_inschrijvingen i
-        JOIN Amusing.ah_zanggroepen zg 
+        FROM amusing.ah_inschrijvingen i
+        JOIN amusing.ah_zanggroepen zg 
             ON i.zanggroep_id = zg.zanggroep_id
-        JOIN Amusing.ah_landen l
+        JOIN amusing.ah_landen l
             ON zg.land COLLATE utf8mb3_unicode_ci = l.code 
         WHERE i.festival_id = 20 AND i.afgehaakt IS null
         GROUP BY l.naam 

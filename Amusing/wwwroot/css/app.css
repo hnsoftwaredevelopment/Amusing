@@ -597,3 +597,40 @@ a, .btn-link {
     * Rode rand voor Syncfusion TextBox / ComboBox bij invalid */ .e-input-group.e-control-wrapper.invalid input, .e-input-group.e-control-wrapper.invalid .e-control {
         border: 1px solid red !important;
     }
+
+/* --- SfGrid StageRows styling --- */
+.schedule-grid .e-gridheader,
+.schedule-grid .e-gridcontent {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 0.9rem;
+}
+
+/* Podiumkolom vetgedrukt */
+.schedule-grid th[data-field="StageName"],
+.schedule-grid td[data-field="StageName"] {
+    font-weight: bold;
+    font-size: 14px;
+    font-style: italic;
+    background-color: transparent !important;
+}
+
+/* Tijdslot kolommen */
+.schedule-grid td:not([data-field="StageName"]) {
+    text-align: center;
+}
+
+/* Lege en bezette slots */
+.empty-slot {
+    color: #aaa;
+    height: 20px;
+    line-height: 20px;
+    border-radius: 4px;
+}
+
+.filled-slot {
+    color: #000;
+    font-weight: 500;
+    height: 20px;
+    line-height: 20px;
+    border-radius: 4px;
+}
