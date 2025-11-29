@@ -154,9 +154,9 @@ public partial class PlanningOverview
         IsEditingConditions = !IsEditingConditions;
     }
 
-    private string ExportFilename (int _editionId, string fileType)
+    private async Task<string> ExportFilename (int _editionId, string fileType)
     {
-        var ExportFileName = PlanningService.GetExportFileName(_editionId);
+        var ExportFileName = await PlanningService.GetExportFileName(_editionId);
 
         string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         string downloadsPath = Path.Combine(userProfile, "Downloads");
@@ -170,17 +170,18 @@ public partial class PlanningOverview
     private async Task ExportToXmlAsync()
     {
         var _editionId = int.Parse( SelectedEditionId );
-        var ExportFileName = ExportFilename(_editionId, "xlxs");
+        var ExportFileName = ExportFilename(_editionId, "xml");
         // Trigger XML export for the selected edition
-        await PlanningService.ExportFullPlanningToXmlAsync( _editionId, ExportFilename(_editionId, "xml") );
+        await PlanningService.ExportFullPlanningToXmlAsync( _editionId, ExportFileName.ToString() );
         _message = "Planning naar XML export completed.";
     }
 
     private async Task ExportToExcelAsync()
     {
         var _editionId = int.Parse( SelectedEditionId );
+        var ExportFileName = ExportFilename(_editionId, "xlxs");
         // Trigger Excel export for the selected edition
-        await PlanningService.ExportFullPlanningToExcelAsync( _editionId, ExportFilename(_editionId, "xlxs") );
+        await PlanningService.ExportFullPlanningToExcelAsync( _editionId, ExportFileName.ToString() );
         _message = "Planning naar Excel export completed.";
     }
 

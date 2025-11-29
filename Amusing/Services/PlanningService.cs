@@ -16,14 +16,20 @@ public class PlanningService ( GenericDataService dataService )
     private readonly GenericDataService _dataService = dataService;
 
     #region Export FileName
-    public async Task<string> GetExportFileName( int festivalId )
+    public async Task<string> GetExportFileName(int festivalId)
     {
-        var parameters = new Dictionary<string, object> { { "@FestivalId", festivalId } };
+        var parameters = new Dictionary<string, object>
+    {
+        { "@FestivalId", festivalId }
+    };
 
-        var result = await _dataService.ExecuteScalarAsync<string>( QueryDefinitions.PlanningExportFilename, parameters);
+        // Use ExecuteScalar for single value
+        var result = await _dataService.ExecuteScalarAsync<string>(
+            QueryDefinitions.PlanningExportFilename,
+            parameters).ConfigureAwait(false);
 
         return result;
-    }    
+    }
     #endregion
 
     #region Festivals
