@@ -1823,12 +1823,7 @@ public static class QueryDefinitions
         ) AS HasRows;";
 
     public static readonly string PlanningExportFilename = @"
-        SELECT 
-	        CONCAT('Planning-' , DATE_FORMAT(f.festivaldatum , '%Y') , '-' , DATE_FORMAT(CURRENT_TIMESTAMP() , '%Y%m%d-%H%i%S')),
-	        CURDATE(),
-	        CURRENT_TIMESTAMP()
-        FROM amusing.ah_festivals f
-        WHERE f.festival_id = @FestivalId";
+        CALL GetExportFilename(@FestivalId);";
     #endregion
 
     #region queries for overview page
