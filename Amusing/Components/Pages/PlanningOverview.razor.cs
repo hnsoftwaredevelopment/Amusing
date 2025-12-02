@@ -154,25 +154,34 @@ public partial class PlanningOverview
         IsEditingConditions = !IsEditingConditions;
     }
 
+    private async Task<string> ExportFilename (int _editionId, string fileType)
+    {
+        var ExportFileName = await PlanningService.GetExportFileName(_editionId);
+
+        string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        string downloadsPath = Path.Combine(userProfile, "Downloads");
+
+        string _fileName = Path.Combine(
+            downloadsPath,
+            $"{ExportFileName}.{fileType}"
+        );
+        return _fileName;
+    }
     private async Task ExportToXmlAsync()
     {
         var _editionId = int.Parse( SelectedEditionId );
+        var ExportFileName = ExportFilename(_editionId, "xml");
         // Trigger XML export for the selected edition
-        await PlanningService.ExportFullPlanningToXmlAsync(
-            _editionId,
-            "C:\\Temp\\Planning.xml"
-        );
+        await PlanningService.ExportFullPlanningToXmlAsync( _editionId, ExportFileName.ToString() );
         _message = "Planning naar XML export completed.";
     }
 
     private async Task ExportToExcelAsync()
     {
         var _editionId = int.Parse( SelectedEditionId );
+        var ExportFileName = ExportFilename(_editionId, "xlxs");
         // Trigger Excel export for the selected edition
-        await PlanningService.ExportFullPlanningToExcelAsync(
-            _editionId,
-            "C:\\Temp\\Planning.xlsx"
-        );
+        await PlanningService.ExportFullPlanningToExcelAsync( _editionId, ExportFileName.ToString() );
         _message = "Planning naar Excel export completed.";
     }
 
