@@ -8,6 +8,7 @@
     <AssemblyVersion>25.11.196.0</AssemblyVersion>
     <FileVersion>25.11.196.0</FileVersion>
     <HotReloadAutoRestart>true</HotReloadAutoRestart>
+    <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
