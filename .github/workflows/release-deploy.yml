@@ -36,7 +36,7 @@ jobs:
           printf "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 
       - name: Deploy to VPS via rsync
-        uses: burnett01/rsync-deployments@v8
+        uses: burnett01/rsync-deployments@v7.1.0
         with:
           switches: -avzr --delete --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r
           path: published/
