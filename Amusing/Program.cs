@@ -54,14 +54,14 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 
 // Dump na laden
-Debug.WriteLine( "=== CONFIG DUMP ===" );
-Debug.WriteLine( "ENV: " + builder.Environment.EnvironmentName );
-Debug.WriteLine( "ConnectionString: " + builder.Configuration.GetConnectionString( "DefaultConnection" ) );
-Debug.WriteLine( "====================" );
+Console.WriteLine( "=== CONFIG DUMP ===" );
+Console.WriteLine( "ENV: " + builder.Environment.EnvironmentName );
+Console.WriteLine( "ConnectionString: " + builder.Configuration.GetConnectionString( "DefaultConnection" ) );
+Console.WriteLine( "====================" );
 
 // Debug output
-Debug.WriteLine( $"Environment: {builder.Environment.EnvironmentName}" );
-Debug.WriteLine( $"DB Connection: {( string.IsNullOrWhiteSpace( connectionString ) ? "NOT FOUND" : "FOUND" )}" );
+Console.WriteLine( $"Environment: {builder.Environment.EnvironmentName}" );
+Console.WriteLine( $"DB Connection: {( string.IsNullOrWhiteSpace( connectionString ) ? "NOT FOUND" : "FOUND" )}" );
 
 // ---------------------------------------------------------
 // 2. Email settings configuration
