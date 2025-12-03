@@ -9,32 +9,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # --- Checkout the repo ---
       - name: Checkout
         uses: actions/checkout@v4
 
+      # --- Setup .NET 9 ---
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
-          cache: true
+          dotnet-version: 9.0.x
 
+      # --- Restore dependencies (lock file) ---
       - name: Restore dependencies
         run: dotnet restore --use-lock-file
 
+      # --- Build the project ---
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build --configuration Release
 
+      # --- Publish the project ---
       - name: Publish
-        run: dotnet publish --configuration Release --no-build -o published
+        run: dotnet publish --configuration Release -o published
 
-      # === Prepare SSH private key ===
+      # --- Prepare SSH key ---
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          printf "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 
+      # --- Deploy using rsync ---
       - name: Deploy to VPS via rsync
         uses: burnett01/rsync-deployments@7.1.0
         with:
