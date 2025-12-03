@@ -33,7 +33,7 @@ var builder = WebApplication.CreateBuilder(args);
 var root = (IConfigurationRoot)builder.Configuration;
 foreach ( var provider in root.Providers )
 {
-    Debug.WriteLine( "Provider: " + provider );
+    Console.WriteLine( "Provider: " + provider );
 }
 
 // ---------------------------------------------------------
