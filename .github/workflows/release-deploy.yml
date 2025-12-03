@@ -16,10 +16,10 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
-          cache: true   # <--- Snellere builds
+          cache: true
 
-      - name: Restore
-        run: dotnet restore
+      - name: Restore dependencies
+        run: dotnet restore --use-lock-file
 
       - name: Build
         run: dotnet build --configuration Release --no-restore
