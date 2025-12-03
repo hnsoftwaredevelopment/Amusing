@@ -35,12 +35,13 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           printf "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 
-      # === Rsync Deploy (modern action) ===
       - name: Deploy to VPS via rsync
-        uses: nwtgck/actions-rsync@v3
+        uses: burnett01/rsync-deployments@v8
         with:
-          src: "published/"
-          dest: "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/groups/svp/dev.beheer.amusing-hengelo.nl/www/"
-          ssh_key: ${{ secrets.SSH_KEY }}
-          ssh_port: ${{ secrets.SSH_PORT }}
-          options: "-avzr --delete --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r"
+          switches: -avzr --delete --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r
+          path: published/
+          remote_path: /home/groups/svp/dev.beheer.amusing-hengelo.nl/www/Amusing
+          remote_host: ${{ secrets.SSH_HOST }}
+          remote_user: ${{ secrets.SSH_USER }}
+          remote_key: ${{ secrets.SSH_KEY }}
+          remote_port: ${{ secrets.SSH_PORT }}
