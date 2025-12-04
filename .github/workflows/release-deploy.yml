@@ -1,4 +1,4 @@
-clname: Publish & Deploy on Release
+name: Publish & Deploy on Release
 
 on:
   release:
