@@ -30,7 +30,7 @@ jobs:
       # --- Publish the project ---
       - name: Publish
         run: |
-          dotnet publish MyProject.csproj \
+          dotnet publish Amusing.csproj \
             --configuration Release \
             --runtime linux-x64 \
             --self-contained true \
