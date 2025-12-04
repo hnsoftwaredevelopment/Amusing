@@ -36,6 +36,15 @@ foreach ( var provider in root.Providers )
     Console.WriteLine( "Provider: " + provider );
 }
 
+using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+var logger = loggerFactory.CreateLogger<Program>();
+
+logger.LogInformation( "=== ENVIRONMENT VARIABLES CHECK ===" );
+logger.LogInformation( $"DOTNET_ENVIRONMENT: {Environment.GetEnvironmentVariable( "DOTNET_ENVIRONMENT" )}" );
+logger.LogInformation( $"ConnectionStrings__DefaultConnection: {Environment.GetEnvironmentVariable( "ConnectionStrings__DefaultConnection" )}" );
+logger.LogInformation( $"DefaultConnection: {Environment.GetEnvironmentVariable( "DefaultConnection" )}" );
+logger.LogInformation( "====================================" );
+
 // ---------------------------------------------------------
 // 1. Configuration loading (correct load order)
 // ---------------------------------------------------------
@@ -51,7 +60,12 @@ builder.Configuration
 // -------------------------------
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-
+var config = builder.Configuration;
+logger.LogInformation( "=== CONFIGURATION CHECK ===" );
+logger.LogInformation( $"GetConnectionString('DefaultConnection'): {config.GetConnectionString( "DefaultConnection" )}" );
+logger.LogInformation( $"Direct ['DefaultConnection']: {config [ "DefaultConnection" ]}" );
+logger.LogInformation( $"Full path ['ConnectionStrings:DefaultConnection']: {config [ "ConnectionStrings:DefaultConnection" ]}" );
+logger.LogInformation( "===========================" );
 
 // Dump na laden
 Console.WriteLine( "=== CONFIG DUMP ===" );
