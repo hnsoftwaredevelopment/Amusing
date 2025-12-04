@@ -9,25 +9,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # --- Checkout the repo ---
       - name: Checkout
         uses: actions/checkout@v4
 
+      # --- Setup .NET 9 ---
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
-          cache: true   # <--- Snellere builds
+          dotnet-version: 9.0.x
 
-      - name: Restore
-        run: dotnet restore
+      # --- Restore dependencies (lock file) ---
+      - name: Restore dependencies
+        run: dotnet restore --use-lock-file
 
+      # --- Build the project ---
       - name: Build
-        run: dotnet build --configuration Release --no-restore
+        run: dotnet build --configuration Release
 
+      # --- Publish the project ---
       - name: Publish
-        run: dotnet publish --configuration Release --no-build -o published
+        run: |
+          dotnet publish Amusing/Amusing.csproj \
+            --configuration Release \
+            --runtime linux-x64 \
+            --self-contained true \
+            -o published
 
-      # === Prepare SSH private key ===
+      # --- Prepare SSH key ---
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -35,14 +44,18 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           printf "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 
-      # === Rsync Deploy (modern action) ===
+      # --- Deploy using rsync ---
       - name: Deploy to VPS via rsync
-        uses: burnett01/rsync-deployments@v8
+        uses: burnett01/rsync-deployments@7.1.0
         with:
-          switches: -avzr --delete --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r
+          switches: -avzr --delete --exclude=start.sh --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r
           path: published/
           remote_path: /home/groups/svp/dev.beheer.amusing-hengelo.nl/www/Amusing
           remote_host: ${{ secrets.SSH_HOST }}
           remote_user: ${{ secrets.SSH_USER }}
           remote_key: ${{ secrets.SSH_KEY }}
           remote_port: ${{ secrets.SSH_PORT }}
+
+      # --- Make ik executable ---
+      - name: Make executable
+        run: chmod +x /home/groups/svp/dev.beheer.amusing-hengelo.nl/www/Amusing/Amusing
