@@ -41,10 +41,13 @@ foreach ( var provider in root.Providers )
 // ---------------------------------------------------------
 builder.Configuration
     .SetBasePath( Directory.GetCurrentDirectory() )
-    .AddJsonFile( "appsettings.json", optional: false, reloadOnChange: true )
+    .AddJsonFile( "appsettings.json", optional: true, reloadOnChange: true )
     .AddJsonFile( $"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true )
     .AddUserSecrets<Program>( optional: true )
     .AddEnvironmentVariables();
+
+var defaultConn = builder.Configuration.GetValue<string>("DefaultConnection");
+Console.WriteLine($"DefaultConnection={defaultConn}");
 
 // -------------------------------
 // 2. Retrieve connectionstring (sanity check)
