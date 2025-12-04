@@ -1,4 +1,4 @@
-name: Publish & Deploy on Release
+clname: Publish & Deploy on Release
 
 on:
   release:
@@ -47,7 +47,7 @@ jobs:
       - name: Deploy to VPS via rsync
         uses: burnett01/rsync-deployments@7.1.0
         with:
-          switches: -avzr --delete --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r
+          switches: -avzr --delete --exclude=start.sh --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r
           path: published/
           remote_path: /home/groups/svp/dev.beheer.amusing-hengelo.nl/www/Amusing
           remote_host: ${{ secrets.SSH_HOST }}
