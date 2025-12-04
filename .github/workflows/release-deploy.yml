@@ -29,7 +29,12 @@ jobs:
 
       # --- Publish the project ---
       - name: Publish
-        run: dotnet publish --configuration Release -o published
+        run: |
+          dotnet publish MyProject.csproj \
+            --configuration Release \
+            --runtime linux-x64 \
+            --self-contained true \
+            -o published
 
       # --- Prepare SSH key ---
       - name: Setup SSH
