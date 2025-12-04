@@ -55,6 +55,6 @@ jobs:
           remote_key: ${{ secrets.SSH_KEY }}
           remote_port: ${{ secrets.SSH_PORT }}
 
-        # --- Make ik executable ---
-        - name: Make executable
+      # --- Make ik executable ---
+      - name: Make executable
         run: chmod +x /home/groups/svp/dev.beheer.amusing-hengelo.nl/www/Amusing/Amusing
