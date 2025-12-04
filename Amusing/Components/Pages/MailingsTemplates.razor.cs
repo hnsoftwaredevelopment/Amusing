@@ -771,6 +771,7 @@ public partial class MailingsTemplates : ComponentBase, IDisposable
 
     protected async Task MailSend()
 	{
+		Console.WriteLine("Test");
 		// Send mail from selected template to recipients of the selected recipientlist
         try
         {

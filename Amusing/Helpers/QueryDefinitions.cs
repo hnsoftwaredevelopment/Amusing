@@ -1570,7 +1570,7 @@ public static class QueryDefinitions
             SUM(CASE WHEN i.afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
         FROM amusing.ah_inschrijvingen i
  
-        WHERE i.festival_id = 20
+        WHERE i.festival_id = @FestivalId
         GROUP BY i.podiumsoort 
         ORDER BY i.podiumsoort;";
 

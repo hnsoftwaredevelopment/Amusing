@@ -51,7 +51,7 @@ public class TransipMailingService
 
         try
         {
-            _logger.LogInformation( "Sending mail to {Recipient} via {BaseUrl}", to, _httpClient.BaseAddress );
+            _logger.LogInformation( $"Sending mail to {to} via {_httpClient.BaseAddress}");
             var response = await _httpClient.PostAsync("send", content);
 
             if ( !response.IsSuccessStatusCode )
