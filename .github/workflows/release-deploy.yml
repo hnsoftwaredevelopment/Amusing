@@ -1,11 +1,14 @@
-name: Publish & Deploy on Release
+name: Publish & Deploy on Auto Release
 
 on:
-  release:
-    types: [published]
+  workflow_run:
+    workflows: ["Auto Release from Main"]
+    types: 
+      - completed
 
 jobs:
   build-and-deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -55,7 +58,3 @@ jobs:
           remote_user: ${{ secrets.SSH_USER }}
           remote_key: ${{ secrets.SSH_KEY }}
           remote_port: ${{ secrets.SSH_PORT }}
-
-      # --- Make ik executable ---
-      - name: Make executable
-        run: chmod +x /home/groups/svp/dev.beheer.amusing-hengelo.nl/www/Amusing/Amusing
