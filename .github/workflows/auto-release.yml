@@ -1,0 +1,31 @@
+name: Auto Release from Main
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read AssemblyVersion from csproj
+        id: version
+        run: |
+          VERSION=$(grep -oPm1 "(?<=<AssemblyVersion>)[^<]+" ./Amusing/Amusing.csproj)
+          # Strip last .0 → 1.3.5
+          SHORT_VERSION=$(echo $VERSION | sed 's/\.[0-9]\+$//')
+          echo "version=$SHORT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "v${{ steps.version.outputs.version }}"
+          name: "Release v${{ steps.version.outputs.version }}"
+          body: "Automated release from main branch."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
