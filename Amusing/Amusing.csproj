@@ -65,6 +65,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Database\migrations\" />
+    <Folder Include="Database\tables\" />
+    <Folder Include="Database\procedures\" />
+    <Folder Include="Database\schema\" />
     <Folder Include="Interfaces\" />
     <Folder Include="Services\Extensions\" />
   </ItemGroup>
