@@ -16,20 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `__efmigrationshistory`
---
-
-DROP TABLE IF EXISTS `__efmigrationshistory`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `__efmigrationshistory` (
-  `MigrationId` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `ProductVersion` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  PRIMARY KEY (`MigrationId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
 -- Table structure for table `ah_beheer`
 --
 
@@ -770,8 +756,10 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GetNumberOfFestivalSubscriptions`(IN festival INT)
-BEGIN
-	SELECT COUNT(*) AS Total FROM Amusing.ah_inschrijvingen WHERE festival_id = festival;
+BEGIN
+
+	SELECT COUNT(*) AS Total FROM Amusing.ah_inschrijvingen WHERE festival_id = festival;
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -789,15 +777,24 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getpayments`()
-BEGIN
-	SELECT 
-		l.date, 
-		l.area, 
-		`l`.`action`, 
-		l.report 
-	FROM amusing.user_log l 
-	WHERE l.area="Finance" 
-	ORDER BY l.date DESC;
+BEGIN
+
+	SELECT 
+
+		l.date, 
+
+		l.area, 
+
+		`l`.`action`, 
+
+		l.report 
+
+	FROM amusing.user_log l 
+
+	WHERE l.area="Finance" 
+
+	ORDER BY l.date DESC;
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -815,16 +812,24 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getpersonlogins`(IN days_back INT)
-BEGIN
-	SELECT 
-		l.date, 
-		l.area, 
-		`l`.`action`, 
-		l.report 
-	FROM amusing.person_log l 
+BEGIN
+
+	SELECT 
+
+		l.date, 
+
+		l.area, 
+
+		`l`.`action`, 
+
+		l.report 
+
+	FROM amusing.person_log l 
+
 	WHERE l.area="Toegang" 
 		AND (days_back IS NULL OR l.date >= DATE_SUB(CURDATE(), INTERVAL days_back DAY))
-	ORDER BY l.date DESC;
+	ORDER BY l.date DESC;
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -842,14 +847,22 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getpersonslog`()
-BEGIN
-		SELECT 
-		l.date, 
-		l.area, 
-		`l`.`action`, 
-		l.report 
-	FROM amusing.person_log l 
-	ORDER BY l.date DESC;
+BEGIN
+
+		SELECT 
+
+		l.date, 
+
+		l.area, 
+
+		`l`.`action`, 
+
+		l.report 
+
+	FROM amusing.person_log l 
+
+	ORDER BY l.date DESC;
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -867,67 +880,128 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GetPivotSubscriptionsPerStage`(IN festival INT)
-BEGIN
-    DECLARE cols TEXT;
-    DECLARE sqlquery TEXT;
-
-    -- prevent GROUP_CONCAT truncation for many distinct podiumsoorten
-    SET SESSION group_concat_max_len = 1000000;
-
-    /* Build dynamic SUM(CASE...) expressions for each distinct podiumsoort */
-    SELECT GROUP_CONCAT(col_expr ORDER BY podiumsoort SEPARATOR ', ')
-    INTO cols
-    FROM (
-        SELECT 
-            podiumsoort,
-            CONCAT(
-                'SUM(CASE WHEN i.podiumsoort = ',
-                QUOTE(podiumsoort),
-                ' THEN 1 ELSE 0 END) AS `',
-                REPLACE(podiumsoort, '`', '``'),
-                '`'
-            ) AS col_expr
-        FROM (
-            SELECT DISTINCT podiumsoort
-            FROM Amusing.ah_inschrijvingen
-            WHERE festival_id = festival
-              AND afgehaakt IS NULL
-        ) AS t
-    ) AS x;
-
-    /* If no podiumsoorten exist, provide a harmless zero-column */
-    IF cols IS NULL OR cols = '' THEN
-        SET cols = 'SUM(0) AS `No_Podiumsoorten`';
-    END IF;
-
-    /* Build the full SQL (note: use zg.aantal_deelnemers as in your schema) */
-    SET sqlquery = CONCAT(
-        'SELECT 
-            CASE 
-                WHEN i.aantal_deelnemers < 10 THEN ''<10''
-                WHEN i.aantal_deelnemers >= 10 AND i.aantal_deelnemers < 25 THEN ''>=10''
-                WHEN i.aantal_deelnemers >= 25 AND i.aantal_deelnemers < 50 THEN ''>=25''
-                WHEN i.aantal_deelnemers >= 50 THEN ''>=50''
-            END AS DeelnemersCategorie, ',
-            cols, '
-        FROM Amusing.ah_inschrijvingen i
-        JOIN Amusing.ah_zanggroepen zg 
-            ON i.zanggroep_id = zg.zanggroep_id
-        WHERE i.festival_id = ', festival, '
-          AND i.afgehaakt IS NULL
-        GROUP BY DeelnemersCategorie
-        ORDER BY FIELD(DeelnemersCategorie, ''<10'',''>=10'',''>=25'',''>=50'');'
-    );
-
-    /* Debugging tip: uncomment next line to inspect generated SQL before executing */
-    -- SELECT sqlquery;
-
-    /* MySQL PREPARE requires a user/session variable for the SQL text */
-    SET @sqlquery := sqlquery;
-
-    PREPARE stmt FROM @sqlquery;
-    EXECUTE stmt;
-    DEALLOCATE PREPARE stmt;
+BEGIN
+
+    DECLARE cols TEXT;
+
+    DECLARE sqlquery TEXT;
+
+
+
+    -- prevent GROUP_CONCAT truncation for many distinct podiumsoorten
+
+    SET SESSION group_concat_max_len = 1000000;
+
+
+
+    /* Build dynamic SUM(CASE...) expressions for each distinct podiumsoort */
+
+    SELECT GROUP_CONCAT(col_expr ORDER BY podiumsoort SEPARATOR ', ')
+
+    INTO cols
+
+    FROM (
+
+        SELECT 
+
+            podiumsoort,
+
+            CONCAT(
+
+                'SUM(CASE WHEN i.podiumsoort = ',
+
+                QUOTE(podiumsoort),
+
+                ' THEN 1 ELSE 0 END) AS `',
+
+                REPLACE(podiumsoort, '`', '``'),
+
+                '`'
+
+            ) AS col_expr
+
+        FROM (
+
+            SELECT DISTINCT podiumsoort
+
+            FROM Amusing.ah_inschrijvingen
+
+            WHERE festival_id = festival
+
+              AND afgehaakt IS NULL
+
+        ) AS t
+
+    ) AS x;
+
+
+
+    /* If no podiumsoorten exist, provide a harmless zero-column */
+
+    IF cols IS NULL OR cols = '' THEN
+
+        SET cols = 'SUM(0) AS `No_Podiumsoorten`';
+
+    END IF;
+
+
+
+    /* Build the full SQL (note: use zg.aantal_deelnemers as in your schema) */
+
+    SET sqlquery = CONCAT(
+
+        'SELECT 
+
+            CASE 
+
+                WHEN i.aantal_deelnemers < 10 THEN ''<10''
+
+                WHEN i.aantal_deelnemers >= 10 AND i.aantal_deelnemers < 25 THEN ''>=10''
+
+                WHEN i.aantal_deelnemers >= 25 AND i.aantal_deelnemers < 50 THEN ''>=25''
+
+                WHEN i.aantal_deelnemers >= 50 THEN ''>=50''
+
+            END AS DeelnemersCategorie, ',
+
+            cols, '
+
+        FROM Amusing.ah_inschrijvingen i
+
+        JOIN Amusing.ah_zanggroepen zg 
+
+            ON i.zanggroep_id = zg.zanggroep_id
+
+        WHERE i.festival_id = ', festival, '
+
+          AND i.afgehaakt IS NULL
+
+        GROUP BY DeelnemersCategorie
+
+        ORDER BY FIELD(DeelnemersCategorie, ''<10'',''>=10'',''>=25'',''>=50'');'
+
+    );
+
+
+
+    /* Debugging tip: uncomment next line to inspect generated SQL before executing */
+
+    -- SELECT sqlquery;
+
+
+
+    /* MySQL PREPARE requires a user/session variable for the SQL text */
+
+    SET @sqlquery := sqlquery;
+
+
+
+    PREPARE stmt FROM @sqlquery;
+
+    EXECUTE stmt;
+
+    DEALLOCATE PREPARE stmt;
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -972,14 +1046,22 @@ DELIMITER ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `getuserslog`()
-BEGIN
-	SELECT 
-		l.date, 
-		l.area, 
-		`l`.`action`, 
-		l.report 
-	FROM amusing.user_log l 
-	ORDER BY l.date DESC;
+BEGIN
+
+	SELECT 
+
+		l.date, 
+
+		l.area, 
+
+		`l`.`action`, 
+
+		l.report 
+
+	FROM amusing.user_log l 
+
+	ORDER BY l.date DESC;
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -995,67 +1077,5 @@ DELIMITER ;
 /*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `Test`(IN Years INT)
-BEGIN
-    -- Bereken huidig festivaljaar (seizoen). Registraties mei..dec behoren tot volgende kalenderjaar.
-    SET @currentSeason := CASE
-        WHEN MONTH(CURDATE()) >= 5 THEN YEAR(CURDATE()) + 1
-        ELSE YEAR(CURDATE())
-    END;
-
-    SET @minSeason := @currentSeason - Years + 1;
-
-    SELECT 
-        i.festival_id AS FestivalId,
-        -- Het festivaljaar (season) waar deze inschrijving bij hoort
-        (CASE WHEN MONTH(i.ingeschreven) >= 5 THEN YEAR(i.ingeschreven) + 1 ELSE YEAR(i.ingeschreven) END) AS SeasonYear,
-
-        -- Maandnaam (Nederlands; pas aan indien gewenst)
-        CASE 
-            WHEN MONTH(i.ingeschreven) = 5 THEN 'Mei'
-            WHEN MONTH(i.ingeschreven) = 6 THEN 'Jun'
-            WHEN MONTH(i.ingeschreven) = 7 THEN 'Jul'
-            WHEN MONTH(i.ingeschreven) = 8 THEN 'Aug'
-            WHEN MONTH(i.ingeschreven) = 9 THEN 'Sep'
-            WHEN MONTH(i.ingeschreven) = 10 THEN 'Okt'
-            WHEN MONTH(i.ingeschreven) = 11 THEN 'Nov'
-            WHEN MONTH(i.ingeschreven) = 12 THEN 'Dec'
-            WHEN MONTH(i.ingeschreven) = 1 THEN 'Jan'
-            WHEN MONTH(i.ingeschreven) = 2 THEN 'Feb'
-            WHEN MONTH(i.ingeschreven) = 3 THEN 'Mrt'
-            WHEN MONTH(i.ingeschreven) = 4 THEN 'Apr'
-        END AS Month,
-
-        -- Maandvolgorde binnen het festivaljaar (Mei=1 ... Apr=12)
-        (CASE 
-            WHEN MONTH(i.ingeschreven) >= 5 THEN MONTH(i.ingeschreven) - 4
-            ELSE MONTH(i.ingeschreven) + 8
-         END) AS MonthOrder,
-
-        COUNT(*) AS Number
-    FROM ah_inschrijvingen i
-    JOIN amusing.ah_festivals f ON i.festival_id = f.festival_id
-    WHERE 
-        -- Filter op berekend festivaljaar (SeasonYear) binnen de gewenste range
-        (CASE WHEN MONTH(i.ingeschreven) >= 5 THEN YEAR(i.ingeschreven) + 1 ELSE YEAR(i.ingeschreven) END)
-            BETWEEN @minSeason AND @currentSeason
-    GROUP BY i.festival_id, SeasonYear, MonthOrder, Month
-    ORDER BY SeasonYear DESC, MonthOrder;
-END ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-12-09 10:26:14
