@@ -22,6 +22,7 @@ public partial class MaintenanceSubscriptions : ComponentBase
     protected int VisibleRowCount = 0;
     private uint editingPaymentId;
     private bool showPaymentDialog;
+    private bool _hasRendered = false;
 
     private bool showDatePicker { get; set; }
     private DateTime? selectedDate { get; set; }
@@ -43,6 +44,19 @@ public partial class MaintenanceSubscriptions : ComponentBase
             // Get the registrations for the selected edition
             RegistrationList = await RegistrationService.GetRegistrationsByFestivalIdAsync( Convert.ToUInt32( SelectedEditionId ) );
             if ( SelectedEditionId != null && RegistrationList.Count > 0 )
+            {
+                await UpdateVisibleRowCount();
+            }
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _hasRendered = true;
+
+            if (Editions?.Count > 0)
             {
                 await UpdateVisibleRowCount();
             }
@@ -88,6 +102,9 @@ public partial class MaintenanceSubscriptions : ComponentBase
 
     protected async Task UpdateVisibleRowCount()
     {
+        if (GridRef == null)
+            return;
+
         var data = await GridRef.GetCurrentViewRecordsAsync();
         VisibleRowCount = data?.Count ?? 0;
     }
