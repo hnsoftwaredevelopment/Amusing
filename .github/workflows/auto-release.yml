@@ -1,4 +1,4 @@
-name: Auto Release from Main
+name: Auto Release & Deploy from Main
 
 on:
   push:
@@ -7,14 +7,19 @@ on:
   workflow_dispatch:
 
 jobs:
-  create-release:
+  release-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Belangrijk voor tag counting
+          fetch-depth: 0   
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
 
       - name: Generate version
         id: version
@@ -23,13 +28,56 @@ jobs:
           COUNT=$(git tag -l "$DATE.*" | wc -l)
           BUILD=$(printf "%02d" $((COUNT + 1)))
           VERSION="$DATE.$BUILD"
+          echo "Generated version: $VERSION"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Restore dependencies
+        run: dotnet restore Amusing/Amusing.csproj --use-lock-file
+
+      - name: Inject version into csproj
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          echo "Injecting version $VERSION into csproj"
+          sed -i "s|<AssemblyVersion>.*</AssemblyVersion>|<AssemblyVersion>${VERSION}</AssemblyVersion>|" Amusing/Amusing.csproj
+          sed -i "s|<FileVersion>.*</FileVersion>|<FileVersion>${VERSION}</FileVersion>|" Amusing/Amusing.csproj
+
+      - name: Show csproj
+        run: cat Amusing/Amusing.csproj
+
+      - name: Build
+        run: dotnet build Amusing/Amusing.csproj --configuration Release /t:Clean
+
+      - name: Publish
+        run: |
+          dotnet publish Amusing/Amusing.csproj \
+            --configuration Release \
+            --runtime linux-x64 \
+            --self-contained true \
+            -o published
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "v${{ steps.version.outputs.version }}"
           name: "Release v${{ steps.version.outputs.version }}"
-          body: "Automated release based on push to master."
+          body: "Automated release and deploy from main branch."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+
+      - name: Deploy to VPS via rsync
+        uses: burnett01/rsync-deployments@7.1.0
+        with:
+          switches: -avzr --delete --exclude=start.sh --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r
+          path: published/
+          remote_path: /home/groups/svp/dev.beheer.amusing-hengelo.nl/www/Amusing
+          remote_host: ${{ secrets.SSH_HOST }}
+          remote_user: ${{ secrets.SSH_USER }}
+          remote_key: ${{ secrets.SSH_KEY }}
+          remote_port: ${{ secrets.SSH_PORT }}
