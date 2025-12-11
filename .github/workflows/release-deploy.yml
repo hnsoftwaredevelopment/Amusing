@@ -24,10 +24,11 @@ jobs:
 
       - name: Inject version into csproj
         run: |
-          VERSION=${{ github.event.workflow_run.head_commit.id }}
-          VERSION=${{ needs.get-version.outputs.version }}
-          sed -i "s|<AssemblyVersion>.*</AssemblyVersion>|<AssemblyVersion>${{ needs.get-version.outputs.version }}</AssemblyVersion>|" Amusing/Amusing.csproj
-
+          VERSION="${{ steps.get-version.outputs.version }}"
+          echo "Injecting version $VERSION into csproj"
+          sed -i "s|<AssemblyVersion>.*</AssemblyVersion>|<AssemblyVersion>${VERSION}</AssemblyVersion>|" Amusing/Amusing.csproj
+          sed -i "s|<FileVersion>.*</FileVersion>|<FileVersion>${VERSION}</FileVersion>|" Amusing/Amusing.csproj
+      
       - name: Debug csproj
         run: cat Amusing/Amusing.csproj
           
