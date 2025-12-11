@@ -5,8 +5,6 @@ on:
     workflows: ["Auto Release from Main"]
     types: 
       - completed
-  workflow_dispatch:
-
 jobs:
   build-and-deploy:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
