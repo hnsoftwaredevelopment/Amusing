@@ -5,6 +5,7 @@ on:
     workflows: ["Auto Release from Main"]
     types: 
       - completed
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
