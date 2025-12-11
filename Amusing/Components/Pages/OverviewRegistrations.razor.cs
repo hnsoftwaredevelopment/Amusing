@@ -24,6 +24,7 @@ public partial class OverviewRegistrations : ComponentBase
     protected List<RegistrationModel> RegistrationList = [];
     protected string? SelectedEditionId;
     protected int VisibleRowCount = 0;
+    private bool _hasRendered = false;
 
     protected string SelectedEditionText => Editions.FirstOrDefault( e => e.ID == SelectedEditionId )?.Text ?? "Onbekende editie";
 
@@ -41,6 +42,19 @@ public partial class OverviewRegistrations : ComponentBase
             // Get the registrations for the selected edition
             RegistrationList = await RegistrationService.GetRegistrationsByFestivalIdAsync( Convert.ToUInt32( SelectedEditionId ) );
             if ( SelectedEditionId != null && RegistrationList.Count > 0 )
+            {
+                await UpdateVisibleRowCount();
+            }
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _hasRendered = true;
+
+            if (RegistrationList?.Count > 0)
             {
                 await UpdateVisibleRowCount();
             }
@@ -127,6 +141,9 @@ public partial class OverviewRegistrations : ComponentBase
     // Visible row count (Number of records on screen)
     protected async Task UpdateVisibleRowCount()
     {
+        if (GridRef == null)
+            return;
+        
         var data = await GridRef.GetCurrentViewRecordsAsync();
         VisibleRowCount = data?.Count ?? 0;
     }
