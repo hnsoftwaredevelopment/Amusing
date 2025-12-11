@@ -28,6 +28,9 @@ jobs:
           VERSION=${{ needs.get-version.outputs.version }}
           sed -i "s|<AssemblyVersion>.*</AssemblyVersion>|<AssemblyVersion>${{ needs.get-version.outputs.version }}</AssemblyVersion>|" Amusing/Amusing.csproj
 
+      - name: Debug csproj
+        run: cat Amusing/Amusing.csproj
+          
       - name: Build
         run: dotnet build --configuration Release
 
