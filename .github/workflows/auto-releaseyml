@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
 
 jobs:
   create-release:
@@ -12,20 +13,23 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Belangrijk voor tag counting
 
-      - name: Read AssemblyVersion from csproj
+      - name: Generate version
         id: version
         run: |
-          VERSION=$(grep -oPm1 "(?<=<AssemblyVersion>)[^<]+" ./Amusing/Amusing.csproj)
-          # Strip last .0 → 1.3.5
-          SHORT_VERSION=$(echo $VERSION | sed 's/\.[0-9]\+$//')
-          echo "version=$SHORT_VERSION" >> $GITHUB_OUTPUT
+          DATE=$(date +"%y.%m.%d")
+          COUNT=$(git tag -l "$DATE.*" | wc -l)
+          BUILD=$(printf "%02d" $((COUNT + 1)))
+          VERSION="$DATE.$BUILD"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: "v${{ steps.version.outputs.version }}"
           name: "Release v${{ steps.version.outputs.version }}"
-          body: "Automated release from main branch."
+          body: "Automated release based on push to master."
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

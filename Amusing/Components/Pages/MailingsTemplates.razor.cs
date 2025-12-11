@@ -29,8 +29,6 @@ public partial class MailingsTemplates : ComponentBase, IDisposable
 	private bool _isLoading = false;
 	private bool _disposed = false;
     private bool showSavedMessage = false;
-    private SfTextBox _emailTextBox;
-	private SfComboBox<int, int> _countComboBox;
 	private string _testEmailAddress = "";
 	private int _testRecipientCount = 15;
 	private bool _showRTE = true;
@@ -62,8 +60,6 @@ public partial class MailingsTemplates : ComponentBase, IDisposable
     private List<string> _testRecipients = [];
     private List<string> _mailRecipients = [];
     private int _currentPreviewIndex = 0;
-    private int _currentTestIndex = 0;
-    private int _currentSendIndex = 0;
     private int _currentRecipientIndex = 0;
 	private string _selectedPreviewRecipient = string.Empty;
     private string _selectedTestRecipient = string.Empty;
@@ -91,8 +87,6 @@ public partial class MailingsTemplates : ComponentBase, IDisposable
 		}
 	}
 
-	private string _rawSubjectTemplate = "";
-	private string _rawBodyTemplate = "";
     private readonly ILogger<TransipMailingService> _logger;
 
     private bool IsValidEmail( string email )

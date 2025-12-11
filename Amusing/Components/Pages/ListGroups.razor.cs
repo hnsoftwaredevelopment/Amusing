@@ -28,6 +28,7 @@ public partial class ListGroups : ComponentBase
     protected int VisibleRowCount = 0;
     protected List<FestivalParticipationDynamicViewModel> Zanggroepen = [];
     protected List<int> YearColumns = [];
+    private bool _hasRendered = false;
 
     protected int FilterOnFestival;
 
@@ -77,6 +78,19 @@ public partial class ListGroups : ComponentBase
         FilterOnFestival = await RegistrationService.GetCurrentFestivalYearAsync() - 3; // This Value should be equal to NumberOfYearsForExclusion in QueryDefinitions.GetFestivalOverviewQuery
 
         await LoadDataAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _hasRendered = true;
+
+            if (Zanggroepen?.Count > 0)
+            {
+                await UpdateVisibleRowCountAsync();
+            }
+        }
     }
 
     protected async Task LoadDataAsync()
@@ -189,6 +203,9 @@ public partial class ListGroups : ComponentBase
 
     protected async Task UpdateVisibleRowCountAsync()
     {
+        if (GridRef == null)
+            return;
+
         var records = await GridRef.GetCurrentViewRecordsAsync();
         VisibleRowCount = records?.Count ?? 0;
         StateHasChanged();

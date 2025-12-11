@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 8.0.19, for Win64 (x86_64)
 --
--- Host: localhost    Database: amusing
+-- Host: amusing-vps.amusing-hengelo.nl    Database: amusing
 -- ------------------------------------------------------
--- Server version	8.3.0
+-- Server version	5.5.5-10.11.6-MariaDB-0+deb12u1-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -23,13 +23,13 @@ DROP TABLE IF EXISTS `ah_beheer`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_beheer` (
-  `user_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `username` varchar(100) NOT NULL DEFAULT '',
   `password` varchar(32) NOT NULL DEFAULT '',
   `role` set('admin','penningmeester','contactpersoon','vrijwilligers','pr','algemeen') NOT NULL,
-  `PasswordHash` longtext,
+  `PasswordHash` longtext DEFAULT NULL,
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,14 +40,14 @@ DROP TABLE IF EXISTS `ah_beheer_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_beheer_log` (
-  `log_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `log_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `date` datetime DEFAULT NULL,
   `action` varchar(255) NOT NULL DEFAULT '',
-  `user_id` int unsigned NOT NULL DEFAULT '0',
+  `user_id` int(10) unsigned NOT NULL DEFAULT 0,
   `ip_address` varchar(40) NOT NULL DEFAULT '',
-  `report` text,
+  `report` text DEFAULT NULL,
   PRIMARY KEY (`log_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=54160 DEFAULT CHARSET=utf8mb3 COMMENT='autoinc was 3048';
+) ENGINE=InnoDB AUTO_INCREMENT=54588 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='autoinc was 3048';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -58,7 +58,7 @@ DROP TABLE IF EXISTS `ah_contactgegevens`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_contactgegevens` (
-  `persoon_id` int unsigned NOT NULL DEFAULT '0',
+  `persoon_id` int(11) unsigned NOT NULL DEFAULT 0,
   `postcode` varchar(10) DEFAULT '',
   `straatnaam` varchar(50) DEFAULT '',
   `huisnummer` varchar(10) DEFAULT '',
@@ -68,7 +68,7 @@ CREATE TABLE `ah_contactgegevens` (
   `telefoon_mobiel` varchar(15) DEFAULT '',
   PRIMARY KEY (`persoon_id`),
   CONSTRAINT `ah_contactgegevens_ibfk_1` FOREIGN KEY (`persoon_id`) REFERENCES `ah_personen` (`persoon_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -79,20 +79,20 @@ DROP TABLE IF EXISTS `ah_festivals`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_festivals` (
-  `festival_id` int unsigned NOT NULL AUTO_INCREMENT,
-  `festivaldatum` date NOT NULL,
-  `start_inschrijving` datetime NOT NULL,
-  `eind_inschrijving` datetime NOT NULL,
-  `wachtlijst` tinyint unsigned NOT NULL DEFAULT '0',
-  `planning_publiceren` tinyint NOT NULL DEFAULT '0',
+  `festival_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `festivaldatum` date NOT NULL DEFAULT '0000-00-00',
+  `start_inschrijving` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `eind_inschrijving` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `wachtlijst` tinyint(2) unsigned NOT NULL DEFAULT 0,
+  `planning_publiceren` tinyint(2) NOT NULL DEFAULT 0,
   `start_festivaldag` time NOT NULL DEFAULT '07:30:00',
   `einde_festivaldag` time NOT NULL DEFAULT '19:30:00',
   `begin_pauze` time NOT NULL DEFAULT '12:00:00',
   `einde_pauze` time NOT NULL DEFAULT '14:00:00',
   `einde_ervaren_reserve` time NOT NULL DEFAULT '12:30:00',
-  `duuroptreden` int DEFAULT '30',
+  `duuroptreden` int(11) NOT NULL DEFAULT 30,
   PRIMARY KEY (`festival_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=37 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -103,12 +103,12 @@ DROP TABLE IF EXISTS `ah_genres`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_genres` (
-  `genre_id` int NOT NULL AUTO_INCREMENT,
+  `genre_id` int(2) NOT NULL AUTO_INCREMENT,
   `nl` varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   `de` varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   `en` varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   PRIMARY KEY (`genre_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -119,31 +119,31 @@ DROP TABLE IF EXISTS `ah_inschrijvingen`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_inschrijvingen` (
-  `festival_id` int unsigned NOT NULL DEFAULT '0',
-  `zanggroep_id` int unsigned NOT NULL DEFAULT '0',
+  `festival_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `zanggroep_id` int(10) unsigned NOT NULL DEFAULT 0,
   `wens_1` enum('ja','nee') NOT NULL DEFAULT 'nee' COMMENT 'kleedruimte',
   `wens_2` enum('ja','nee') NOT NULL DEFAULT 'nee' COMMENT 'singalong',
   `wens_3` enum('ja','nee') NOT NULL DEFAULT 'nee' COMMENT 'stand',
   `wens_4` enum('ja','nee') NOT NULL DEFAULT 'nee' COMMENT 'beoordeling',
   `nfve` enum('ja','nee') NOT NULL DEFAULT 'nee',
   `afactor` enum('ja','nee') NOT NULL DEFAULT 'nee',
-  `aantal_deelnemers` int unsigned NOT NULL DEFAULT '0',
+  `aantal_deelnemers` int(10) unsigned NOT NULL DEFAULT 0,
   `podiumsoort` char(3) NOT NULL DEFAULT '',
-  `podiumkeuze_geforceerd` tinyint unsigned NOT NULL DEFAULT '0',
+  `podiumkeuze_geforceerd` tinyint(1) unsigned NOT NULL DEFAULT 0,
   `ingeschreven` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   `betaald` datetime DEFAULT NULL,
   `afgehaakt` date DEFAULT NULL,
   `beschikbaar_van` time NOT NULL DEFAULT '11:00:00',
   `beschikbaar_tot` time NOT NULL DEFAULT '17:00:00',
-  `wachtlijst` tinyint unsigned NOT NULL DEFAULT '0',
-  `binnenoptredens` tinyint unsigned NOT NULL DEFAULT '1',
-  `buitenoptredens` tinyint unsigned NOT NULL DEFAULT '1',
+  `wachtlijst` tinyint(1) unsigned NOT NULL DEFAULT 0,
+  `binnenoptredens` tinyint(1) unsigned NOT NULL DEFAULT 1,
+  `buitenoptredens` tinyint(1) unsigned NOT NULL DEFAULT 1,
   `bevestigd` datetime DEFAULT NULL,
   PRIMARY KEY (`festival_id`,`zanggroep_id`),
   KEY `zanggroep_id` (`zanggroep_id`),
   CONSTRAINT `ah_inschrijvingen_ibfk_1` FOREIGN KEY (`festival_id`) REFERENCES `ah_festivals` (`festival_id`),
   CONSTRAINT `ah_inschrijvingen_ibfk_2` FOREIGN KEY (`zanggroep_id`) REFERENCES `ah_zanggroepen` (`zanggroep_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -156,9 +156,9 @@ DROP TABLE IF EXISTS `ah_landen`;
 CREATE TABLE `ah_landen` (
   `code` varchar(3) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   `naam` varchar(255) NOT NULL DEFAULT '',
-  `zichtbaar` tinyint unsigned NOT NULL DEFAULT '0',
+  `zichtbaar` tinyint(3) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -169,19 +169,19 @@ DROP TABLE IF EXISTS `ah_mailing_templates`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_mailing_templates` (
-  `id` int unsigned NOT NULL AUTO_INCREMENT,
-  `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `changed` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `recipientlist` int unsigned DEFAULT NULL,
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `created` datetime NOT NULL DEFAULT current_timestamp(),
+  `changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `recipientlist` int(10) unsigned DEFAULT NULL,
   `name` varchar(80) NOT NULL,
   `subject` varchar(80) NOT NULL,
-  `content` text,
-  `templatesubject` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
-  `templatecontent` text,
+  `content` text DEFAULT '',
+  `templatesubject` varchar(100) DEFAULT NULL,
+  `templatecontent` text DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `recipientlist` (`recipientlist`),
   CONSTRAINT `ah_mailing_templates_ibfk_1` FOREIGN KEY (`recipientlist`) REFERENCES `ah_recipient_lists` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -192,19 +192,19 @@ DROP TABLE IF EXISTS `ah_personen`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_personen` (
-  `persoon_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `persoon_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `voornaam` varchar(40) NOT NULL,
   `tussenvoegsel` varchar(20) DEFAULT '',
   `achternaam` varchar(50) NOT NULL,
   `email` varchar(80) DEFAULT NULL,
-  `actief` tinyint(1) NOT NULL DEFAULT '1',
-  `infomailing` tinyint unsigned NOT NULL DEFAULT '0',
+  `actief` tinyint(1) NOT NULL DEFAULT 1,
+  `infomailing` tinyint(3) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`persoon_id`),
   UNIQUE KEY `ah_personen_email` (`email`),
   KEY `ah_personen_voornaam` (`voornaam`),
   KEY `ah_personen_achternaam` (`achternaam`),
   KEY `ah_personen_actief` (`actief`)
-) ENGINE=InnoDB AUTO_INCREMENT=6424 DEFAULT CHARSET=utf8mb3 COMMENT='autoinc was 1566';
+) ENGINE=InnoDB AUTO_INCREMENT=6441 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='autoinc was 1566';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -215,12 +215,12 @@ DROP TABLE IF EXISTS `ah_personen_rollen`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_personen_rollen` (
-  `persoon_id` int unsigned NOT NULL DEFAULT '0',
-  `zanggroep_id` int NOT NULL DEFAULT '0',
+  `persoon_id` int(11) unsigned NOT NULL DEFAULT 0,
+  `zanggroep_id` int(11) NOT NULL DEFAULT 0,
   `rol` enum('contactpersoon1','contactpersoon2','dirigent','penningmeester','muzikant','zanger','vrijwilliger') NOT NULL DEFAULT 'contactpersoon1',
   PRIMARY KEY (`persoon_id`,`zanggroep_id`,`rol`),
   CONSTRAINT `ah_personen_rollen_ibfk_1` FOREIGN KEY (`persoon_id`) REFERENCES `ah_personen` (`persoon_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -231,11 +231,11 @@ DROP TABLE IF EXISTS `ah_personen_wachtwoorden`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_personen_wachtwoorden` (
-  `id` int unsigned NOT NULL,
+  `id` int(10) unsigned NOT NULL,
   `hash` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   CONSTRAINT `ah_personen_wachtwoorden_ibfk_1` FOREIGN KEY (`id`) REFERENCES `ah_personen` (`persoon_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -246,21 +246,21 @@ DROP TABLE IF EXISTS `ah_podia`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_podia` (
-  `podium_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `podium_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `naam` varchar(255) NOT NULL DEFAULT '',
   `soort` enum('binnen','buiten') NOT NULL DEFAULT 'binnen',
   `nfve` enum('ja','nee') NOT NULL DEFAULT 'nee',
   `type` enum('A','B','C','D','E') NOT NULL,
-  `kwaliteit` tinyint unsigned NOT NULL DEFAULT '10',
-  `max_zangers` tinyint unsigned NOT NULL DEFAULT '0',
+  `kwaliteit` tinyint(2) unsigned NOT NULL DEFAULT 10,
+  `max_zangers` tinyint(3) unsigned NOT NULL DEFAULT 0,
   `aantal_vrijwilligers` enum('geen','1','2','3','4') NOT NULL DEFAULT '1',
   `opening` time NOT NULL DEFAULT '11:00:00',
   `sluiting` time NOT NULL DEFAULT '17:00:00',
   `vrijwilligers_vanaf` time NOT NULL DEFAULT '10:00:00',
   `vrijwilligers_tot` time NOT NULL DEFAULT '18:00:00',
-  `kaart_nummer` tinyint unsigned DEFAULT NULL,
+  `kaart_nummer` tinyint(3) unsigned DEFAULT NULL,
   PRIMARY KEY (`podium_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=66 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -272,27 +272,27 @@ DROP TABLE IF EXISTS `ah_podia_typen`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_podia_typen` (
   `type` char(1) NOT NULL,
-  `type_id` int DEFAULT NULL,
-  `prijs` tinyint unsigned NOT NULL,
-  `piano` tinyint unsigned NOT NULL,
-  `lessenaar` tinyint NOT NULL DEFAULT '0',
-  `electra` tinyint unsigned NOT NULL,
-  `drum` tinyint unsigned NOT NULL,
-  `gitaarversterkers` tinyint unsigned NOT NULL,
-  `basversterkers` tinyint unsigned NOT NULL DEFAULT '0',
-  `koorversterking` tinyint unsigned NOT NULL DEFAULT '0',
-  `microfoons` tinyint unsigned NOT NULL,
-  `monitoren` tinyint unsigned NOT NULL DEFAULT '0',
-  `speakers` tinyint unsigned NOT NULL DEFAULT '0',
-  `mengpaneel` tinyint unsigned NOT NULL DEFAULT '0',
-  `md_mp3` tinyint unsigned NOT NULL DEFAULT '0',
+  `type_id` int(11) DEFAULT NULL,
+  `prijs` tinyint(3) unsigned NOT NULL,
+  `piano` tinyint(3) unsigned NOT NULL,
+  `lessenaar` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  `electra` tinyint(3) unsigned NOT NULL,
+  `drum` tinyint(3) unsigned NOT NULL,
+  `gitaarversterkers` tinyint(3) unsigned NOT NULL,
+  `basversterkers` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  `koorversterking` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  `microfoons` tinyint(3) unsigned NOT NULL,
+  `monitoren` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  `speakers` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  `mengpaneel` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  `md/mp3` tinyint(3) unsigned NOT NULL DEFAULT 0,
   `beschrijving` text NOT NULL,
   `description` text NOT NULL,
   `compatibel_met` varchar(20) NOT NULL,
-  `versie` int NOT NULL COMMENT 'oudste festival_id waarop podiumtype geldig was',
-  `aktief` tinyint NOT NULL DEFAULT '0',
+  `versie` int(11) NOT NULL COMMENT 'oudste festival_id waarop podiumtype geldig was',
+  `Aktief` tinyint(4) NOT NULL DEFAULT 0,
   PRIMARY KEY (`type`,`versie`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -303,14 +303,14 @@ DROP TABLE IF EXISTS `ah_profielbeheer_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_profielbeheer_log` (
-  `log_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `log_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `date` datetime DEFAULT NULL,
   `action` varchar(255) NOT NULL DEFAULT '',
-  `zanggroep_id` int unsigned NOT NULL DEFAULT '0',
+  `zanggroep_id` int(10) unsigned NOT NULL DEFAULT 0,
   `ip_address` varchar(40) NOT NULL DEFAULT '',
-  `report` text,
+  `report` text DEFAULT NULL,
   PRIMARY KEY (`log_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=26188 DEFAULT CHARSET=utf8mb3 COMMENT='autoinc was 4049';
+) ENGINE=InnoDB AUTO_INCREMENT=26188 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='autoinc was 4049';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -321,9 +321,9 @@ DROP TABLE IF EXISTS `ah_profielen`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_profielen` (
-  `zanggroep_id` int unsigned NOT NULL DEFAULT '0',
+  `zanggroep_id` int(10) unsigned NOT NULL DEFAULT 0,
   `wachtwoord` varchar(32) NOT NULL DEFAULT '',
-  `persoon_id` int unsigned DEFAULT NULL,
+  `persoon_id` int(10) unsigned DEFAULT NULL,
   `datecreate` datetime NOT NULL,
   `inschrijving_gesloten_override` datetime DEFAULT NULL,
   PRIMARY KEY (`zanggroep_id`,`wachtwoord`),
@@ -331,7 +331,7 @@ CREATE TABLE `ah_profielen` (
   KEY `persoon_id` (`persoon_id`),
   CONSTRAINT `ah_profielen_ibfk_1` FOREIGN KEY (`zanggroep_id`) REFERENCES `ah_zanggroepen` (`zanggroep_id`),
   CONSTRAINT `ah_profielen_ibfk_2` FOREIGN KEY (`persoon_id`) REFERENCES `ah_personen` (`persoon_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -342,15 +342,15 @@ DROP TABLE IF EXISTS `ah_recipient_lists`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_recipient_lists` (
-  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(40) NOT NULL,
-  `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `changed` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created` datetime NOT NULL DEFAULT current_timestamp(),
+  `changed` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `source` enum('groups','persons') NOT NULL,
   `filter` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
-  `query` longtext,
+  `query` longtext DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -361,22 +361,22 @@ DROP TABLE IF EXISTS `ah_taken`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_taken` (
-  `taak_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `taak_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `korte_naam` varchar(20) NOT NULL,
   `naam` varchar(255) NOT NULL,
-  `minimumduur` int unsigned NOT NULL,
-  `maximumduur` int unsigned NOT NULL,
+  `minimumduur` int(10) unsigned NOT NULL,
+  `maximumduur` int(10) unsigned NOT NULL,
   `bezetting` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `bezetting_tijdvak1_van` time DEFAULT NULL,
   `bezetting_tijdvak1_tot` time DEFAULT NULL,
-  `aantal_vrijwilligers_tijdvak1` tinyint unsigned DEFAULT '0',
+  `aantal_vrijwilligers_tijdvak1` int(10) unsigned DEFAULT 0,
   `bezetting_tijdvak2_van` time DEFAULT NULL,
   `bezetting_tijdvak2_tot` time DEFAULT NULL,
-  `aantal_vrijwilligers_tijdvak2` tinyint unsigned DEFAULT '0',
+  `aantal_vrijwilligers_tijdvak2` int(10) unsigned DEFAULT 0,
   `actief` enum('ja','nee') DEFAULT 'ja',
   `omschrijving` text NOT NULL,
   PRIMARY KEY (`taak_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -387,11 +387,12 @@ DROP TABLE IF EXISTS `ah_timetable`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_timetable` (
-  `timeslot_id` tinyint unsigned NOT NULL AUTO_INCREMENT,
-  `from` time DEFAULT NULL,
-  `to` time DEFAULT NULL,
-  PRIMARY KEY (`timeslot_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb3;
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `timeslot_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `from` time NOT NULL,
+  `to` time NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -402,13 +403,13 @@ DROP TABLE IF EXISTS `ah_vrijwilligers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_vrijwilligers` (
-  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `datum` datetime NOT NULL,
-  `festival_id` int unsigned NOT NULL,
-  `persoon_id` int unsigned NOT NULL,
+  `festival_id` int(10) unsigned NOT NULL,
+  `persoon_id` int(10) unsigned NOT NULL,
   `beschikbaar_van` time NOT NULL,
   `beschikbaar_tot` time NOT NULL,
-  `uren_achtereen` tinyint unsigned NOT NULL DEFAULT '0',
+  `uren_achtereen` tinyint(3) unsigned NOT NULL DEFAULT 0,
   `lunch` enum('ja','nee') NOT NULL DEFAULT 'nee',
   `vegetarisch` enum('ja','nee') NOT NULL DEFAULT 'nee',
   `bijeenkomst` enum('ja','nee') NOT NULL,
@@ -416,11 +417,11 @@ CREATE TABLE `ah_vrijwilligers` (
   `podiumdienst` enum('ja','nee') NOT NULL DEFAULT 'ja',
   `nietpodiumdienst` enum('ja','nee') NOT NULL DEFAULT 'nee',
   `taken` varchar(20) NOT NULL DEFAULT '',
-  `samen_met` int unsigned DEFAULT NULL,
-  `podiumvoorkeur` int unsigned DEFAULT NULL,
-  `podiumafkeur` int unsigned DEFAULT NULL,
-  `koorvoorkeur` int unsigned DEFAULT NULL,
-  `koorafkeur` int unsigned DEFAULT NULL,
+  `samen_met` int(10) unsigned DEFAULT NULL,
+  `podiumvoorkeur` int(10) unsigned DEFAULT NULL,
+  `podiumafkeur` int(10) unsigned DEFAULT NULL,
+  `koorvoorkeur` int(10) unsigned DEFAULT NULL,
+  `koorafkeur` int(10) unsigned DEFAULT NULL,
   `taakvoorkeur` varchar(60) NOT NULL DEFAULT '',
   `taakafkeur` varchar(60) NOT NULL DEFAULT '',
   `opmerkingen` text NOT NULL,
@@ -430,7 +431,7 @@ CREATE TABLE `ah_vrijwilligers` (
   KEY `persoon_id` (`persoon_id`),
   CONSTRAINT `ah_vrijwilligers_ibfk_1` FOREIGN KEY (`festival_id`) REFERENCES `ah_festivals` (`festival_id`),
   CONSTRAINT `ah_vrijwilligers_ibfk_2` FOREIGN KEY (`persoon_id`) REFERENCES `ah_personen` (`persoon_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1241 DEFAULT CHARSET=utf8mb3 COMMENT='autoinc was 131';
+) ENGINE=InnoDB AUTO_INCREMENT=1241 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='autoinc was 131';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -441,16 +442,16 @@ DROP TABLE IF EXISTS `ah_wenssoorten`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_wenssoorten` (
-  `wenssoort_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `wenssoort_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `kort_nl` varchar(40) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   `kort_de` varchar(40) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   `kort_en` varchar(40) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   `lang_nl` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   `lang_de` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
   `lang_en` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
-  `zichtbaar` tinyint NOT NULL DEFAULT '1',
+  `zichtbaar` tinyint(4) NOT NULL DEFAULT 1,
   PRIMARY KEY (`wenssoort_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -461,11 +462,11 @@ DROP TABLE IF EXISTS `ah_zanggroep_details`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_zanggroep_details` (
-  `id` int unsigned NOT NULL,
+  `id` int(10) unsigned NOT NULL,
   `email` varchar(80) NOT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `ah_zanggroep_details_ibfk_1` FOREIGN KEY (`id`) REFERENCES `ah_zanggroepen` (`zanggroep_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -476,85 +477,22 @@ DROP TABLE IF EXISTS `ah_zanggroepen`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `ah_zanggroepen` (
-  `zanggroep_id` int unsigned NOT NULL AUTO_INCREMENT,
+  `zanggroep_id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `naam` varchar(80) NOT NULL,
-  `genre_id` tinyint unsigned NOT NULL DEFAULT '0',
+  `genre_id` tinyint(3) unsigned NOT NULL DEFAULT 0,
   `standplaats` varchar(50) NOT NULL,
   `land` varchar(3) NOT NULL DEFAULT 'nl',
   `website` varchar(255) DEFAULT NULL,
-  `foto` mediumblob,
-  `logo` mediumblob,
+  `foto` mediumblob DEFAULT NULL,
+  `logo` mediumblob DEFAULT NULL,
   `beschrijving` text NOT NULL,
   `rekeningnr` varchar(50) DEFAULT '',
-  `actief` tinyint(1) NOT NULL DEFAULT '1',
+  `actief` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`zanggroep_id`),
   KEY `ah_zanggroepen_naam` (`naam`),
   KEY `ah_zanggroepen_genre_id` (`genre_id`),
   KEY `ah_zanggroepen_actief` (`actief`)
-) ENGINE=InnoDB AUTO_INCREMENT=1522 DEFAULT CHARSET=utf8mb3;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `logging`
---
-
-DROP TABLE IF EXISTS `logging`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `logging` (
-  `Id` int unsigned NOT NULL AUTO_INCREMENT,
-  `type` varchar(10) DEFAULT NULL COMMENT 'Is it a user or person action',
-  `date` datetime DEFAULT CURRENT_TIMESTAMP,
-  `user_id` int unsigned DEFAULT NULL,
-  `person_id` int unsigned DEFAULT NULL,
-  `ip_address` varchar(100) DEFAULT NULL,
-  `area` varchar(100) DEFAULT NULL COMMENT 'From where was the action initiated Mantenace, Lists, etc',
-  `action` varchar(100) DEFAULT NULL COMMENT 'What was done Export CSV, changed address, etc',
-  `status` varchar(100) DEFAULT NULL,
-  `report` text COMMENT 'What was done',
-  `festival_id` int unsigned DEFAULT NULL,
-  `group_id` int unsigned DEFAULT NULL,
-  `template_id` int unsigned DEFAULT NULL,
-  `recipientlist_id` int unsigned DEFAULT NULL,
-  `podium_id` int unsigned DEFAULT NULL,
-  `podiumtype` varchar(1) DEFAULT NULL,
-  `volunteer_id` int unsigned DEFAULT NULL,
-  `genre_id` int unsigned DEFAULT NULL,
-  `task_id` int unsigned DEFAULT NULL,
-  `wishtype_id` int unsigned DEFAULT NULL,
-  PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=33663 DEFAULT CHARSET=utf8mb3 COMMENT='Logging of all user andperson activity';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `person_log`
---
-
-DROP TABLE IF EXISTS `person_log`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `person_log` (
-  `Id` int unsigned NOT NULL AUTO_INCREMENT,
-  `date` datetime DEFAULT CURRENT_TIMESTAMP,
-  `user_id` int unsigned DEFAULT NULL,
-  `person_id` int unsigned DEFAULT NULL,
-  `ip_address` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
-  `area` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL COMMENT 'From where was the action initiated Mantenace, Lists, etc',
-  `action` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL COMMENT 'What was done Export CSV, changed address, etc',
-  `status` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
-  `report` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci COMMENT 'What was done',
-  `festival_id` int unsigned DEFAULT NULL,
-  `group_id` int unsigned DEFAULT NULL,
-  `template_id` int unsigned DEFAULT NULL,
-  `recipientlist_id` int unsigned DEFAULT NULL,
-  `podium_id` int unsigned DEFAULT NULL,
-  `podiumtype` varchar(1) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
-  `volunteer_id` int unsigned DEFAULT NULL,
-  `genre_id` int unsigned DEFAULT NULL,
-  `task_id` int unsigned DEFAULT NULL,
-  `wishtype_id` int unsigned DEFAULT NULL,
-  PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16384 DEFAULT CHARSET=utf8mb3 COMMENT='Logging of person activity';
+) ENGINE=InnoDB AUTO_INCREMENT=1532 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -565,10 +503,10 @@ DROP TABLE IF EXISTS `planner_optredens`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `planner_optredens` (
-  `festival_id` int unsigned NOT NULL,
-  `zanggroep_id` int unsigned NOT NULL,
-  `tijdvak` tinyint unsigned NOT NULL,
-  `podium_id` int unsigned NOT NULL,
+  `festival_id` int(11) unsigned NOT NULL,
+  `zanggroep_id` int(11) unsigned NOT NULL,
+  `tijdvak` tinyint(4) unsigned NOT NULL,
+  `podium_id` int(11) unsigned NOT NULL,
   PRIMARY KEY (`zanggroep_id`,`tijdvak`,`festival_id`),
   UNIQUE KEY `tijdvak` (`tijdvak`,`podium_id`,`festival_id`),
   KEY `festival_id` (`festival_id`),
@@ -576,7 +514,7 @@ CREATE TABLE `planner_optredens` (
   CONSTRAINT `planner_optredens_ibfk_1` FOREIGN KEY (`festival_id`) REFERENCES `ah_festivals` (`festival_id`),
   CONSTRAINT `planner_optredens_ibfk_2` FOREIGN KEY (`zanggroep_id`) REFERENCES `ah_zanggroepen` (`zanggroep_id`),
   CONSTRAINT `planner_optredens_ibfk_3` FOREIGN KEY (`podium_id`) REFERENCES `ah_podia` (`podium_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -587,16 +525,16 @@ DROP TABLE IF EXISTS `planner_voorwaarden`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `planner_voorwaarden` (
-  `festival_id` int unsigned NOT NULL,
-  `WensTijdTussenOptredens` tinyint NOT NULL,
-  `MaxTijdTussenOptredens` tinyint NOT NULL,
-  `MaxLengteVrijwilligerDienst` tinyint NOT NULL,
-  `BoeteOnderbrekingOptredens` tinyint NOT NULL,
+  `festival_id` int(11) unsigned NOT NULL,
+  `WensTijdTussenOptredens` tinyint(4) NOT NULL,
+  `MaxTijdTussenOptredens` tinyint(4) NOT NULL,
+  `MaxLengteVrijwilligerDienst` tinyint(4) NOT NULL,
+  `BoeteOnderbrekingOptredens` tinyint(4) NOT NULL,
   `TaakNamenZonderOverstapTijd` varchar(100) DEFAULT 'Vrijwilligersbalie;Garderobe',
   `ReserveTaakNaam` varchar(100) DEFAULT 'Reserve voor oproep',
   PRIMARY KEY (`festival_id`),
   CONSTRAINT `planner_voorwaarden_ibfk_1` FOREIGN KEY (`festival_id`) REFERENCES `ah_festivals` (`festival_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -607,12 +545,12 @@ DROP TABLE IF EXISTS `planner_vrijwilligersdiensten`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `planner_vrijwilligersdiensten` (
-  `festival_id` int unsigned NOT NULL,
-  `persoon_id` int unsigned NOT NULL,
-  `podium_id` int NOT NULL,
+  `festival_id` int(11) unsigned NOT NULL,
+  `persoon_id` int(11) unsigned NOT NULL,
+  `podium_id` int(11) NOT NULL,
   `van` time NOT NULL,
   `tot` time NOT NULL,
-  `taak` int unsigned DEFAULT NULL,
+  `taak` int(11) unsigned DEFAULT NULL,
   `vastgezet` enum('ja','nee') DEFAULT 'nee',
   PRIMARY KEY (`festival_id`,`persoon_id`,`van`),
   KEY `persoon_id` (`persoon_id`),
@@ -620,7 +558,7 @@ CREATE TABLE `planner_vrijwilligersdiensten` (
   CONSTRAINT `planner_vrijwilligersdiensten_ibfk_1` FOREIGN KEY (`festival_id`) REFERENCES `ah_festivals` (`festival_id`),
   CONSTRAINT `planner_vrijwilligersdiensten_ibfk_2` FOREIGN KEY (`persoon_id`) REFERENCES `ah_personen` (`persoon_id`),
   CONSTRAINT `planner_vrijwilligersdiensten_ibfk_3` FOREIGN KEY (`taak`) REFERENCES `ah_taken` (`taak_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -631,9 +569,9 @@ DROP TABLE IF EXISTS `temp`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `temp` (
-  `persoon_id` int NOT NULL,
-  `zanggroep_id` int NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+  `persoon_id` int(11) NOT NULL,
+  `zanggroep_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -648,10 +586,10 @@ CREATE TABLE `tokens` (
   `object` varchar(15) DEFAULT '',
   `type` varchar(15) DEFAULT NULL,
   `expires` datetime NOT NULL,
-  `details` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `details` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `object` (`object`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -662,83 +600,142 @@ DROP TABLE IF EXISTS `user_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `user_log` (
-  `Id` int unsigned NOT NULL AUTO_INCREMENT,
-  `date` datetime DEFAULT CURRENT_TIMESTAMP,
-  `user_id` int unsigned DEFAULT NULL,
-  `person_id` int unsigned DEFAULT NULL,
-  `ip_address` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
-  `area` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL COMMENT 'From where was the action initiated Mantenace, Lists, etc',
-  `action` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL COMMENT 'What was done Export CSV, changed address, etc',
-  `status` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
-  `report` text CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci COMMENT 'What was done',
-  `festival_id` int unsigned DEFAULT NULL,
-  `group_id` int unsigned DEFAULT NULL,
-  `template_id` int unsigned DEFAULT NULL,
-  `recipientlist_id` int unsigned DEFAULT NULL,
-  `stage_id` int unsigned DEFAULT NULL,
-  `stagetype` varchar(1) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
-  `volunteer_id` int unsigned DEFAULT NULL,
-  `genre_id` int unsigned DEFAULT NULL,
-  `task_id` int unsigned DEFAULT NULL,
-  `wishtype_id` int unsigned DEFAULT NULL,
+  `Id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `date` datetime DEFAULT current_timestamp(),
+  `user_id` int(10) unsigned DEFAULT NULL,
+  `person_id` int(10) unsigned DEFAULT NULL,
+  `ip_address` varchar(100) DEFAULT NULL,
+  `area` varchar(100) DEFAULT NULL COMMENT 'From where was the action initiated Mantenace, Lists, etc',
+  `action` varchar(100) DEFAULT NULL COMMENT 'What was done Export CSV, changed address, etc',
+  `status` varchar(100) DEFAULT NULL,
+  `report` text DEFAULT NULL COMMENT 'What was done',
+  `festival_id` int(10) unsigned DEFAULT NULL,
+  `group_id` int(10) unsigned DEFAULT NULL,
+  `template_id` int(10) unsigned DEFAULT NULL,
+  `recipientlist_id` int(10) unsigned DEFAULT NULL,
+  `stage_id` int(10) unsigned DEFAULT NULL,
+  `stagetype` varchar(1) DEFAULT NULL,
+  `volunteer_id` int(10) unsigned DEFAULT NULL,
+  `genre_id` int(10) unsigned DEFAULT NULL,
+  `task_id` int(10) unsigned DEFAULT NULL,
+  `wishtype_id` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16764 DEFAULT CHARSET=utf8mb3 COMMENT='Logging of all user activity';
+) ENGINE=InnoDB AUTO_INCREMENT=16649 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci COMMENT='Logging of all user activity';
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping events for database 'amusing'
---
 
 --
 -- Dumping routines for database 'amusing'
 --
+/*!50003 DROP PROCEDURE IF EXISTS `GetExportFilename` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`herbert`@`87.210.244.108` PROCEDURE `GetExportFilename`(IN _festival INT)
+BEGIN
+
+	SELECT 
+
+	    CONCAT('Planning-' , DATE_FORMAT(f.festivaldatum , '%Y') , '-' , DATE_FORMAT(CURRENT_TIMESTAMP() , '%Y%m%d-%H%i%S')) AS FileName
+
+	FROM amusing.ah_festivals f
+
+	WHERE f.festival_id = _festival;
+
+END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 DROP PROCEDURE IF EXISTS `GetGraphData` */;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GetGraphData`(IN Years INT)
 BEGIN
+
     -- Bepaal het huidige festivaljaar direct uit het meest recente festivalrecord
+
     SELECT MAX(YEAR(festivaldatum)) INTO @currentSeason FROM ah_festivals;
+
+
 
     SET @minSeason := @currentSeason - Years + 1;
 
+
+
     SELECT 
+
         i.festival_id AS FestivalId,
+
         YEAR(f.festivaldatum) AS Festival,
 
+
+
         CASE 
+
             WHEN MONTH(i.ingeschreven) = 5 THEN 'Mei'
+
             WHEN MONTH(i.ingeschreven) = 6 THEN 'Jun'
+
             WHEN MONTH(i.ingeschreven) = 7 THEN 'Jul'
+
             WHEN MONTH(i.ingeschreven) = 8 THEN 'Aug'
+
             WHEN MONTH(i.ingeschreven) = 9 THEN 'Sep'
+
             WHEN MONTH(i.ingeschreven) = 10 THEN 'Okt'
+
             WHEN MONTH(i.ingeschreven) = 11 THEN 'Nov'
+
             WHEN MONTH(i.ingeschreven) = 12 THEN 'Dec'
+
             WHEN MONTH(i.ingeschreven) = 1 THEN 'Jan'
+
             WHEN MONTH(i.ingeschreven) = 2 THEN 'Feb'
+
             WHEN MONTH(i.ingeschreven) = 3 THEN 'Mrt'
+
             WHEN MONTH(i.ingeschreven) = 4 THEN 'Apr'
+
         END AS Month,
 
+
+
         CASE 
+
             WHEN MONTH(i.ingeschreven) >= 5 THEN MONTH(i.ingeschreven) - 4
+
             ELSE MONTH(i.ingeschreven) + 8
+
         END AS MonthOrder,
 
+
+
         COUNT(*) AS Number
+
     FROM ah_inschrijvingen i
+
     JOIN ah_festivals f ON i.festival_id = f.festival_id
+
     WHERE YEAR(f.festivaldatum) BETWEEN @minSeason AND @currentSeason
+
     GROUP BY i.festival_id, Festival, MonthOrder, Month
+
     ORDER BY Festival DESC, MonthOrder;
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -751,14 +748,14 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GetNumberOfFestivalSubscriptions`(IN festival INT)
 BEGIN
 
-	SELECT COUNT(*) AS Total FROM Amusing.ah_inschrijvingen WHERE festival_id = festival;
+	SELECT COUNT(*) AS Total FROM ah_inschrijvingen WHERE festival_id = festival;
 
 END ;;
 DELIMITER ;
@@ -772,11 +769,11 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getpayments`()
+CREATE DEFINER=`herbert`@`%` PROCEDURE `getpayments`()
 BEGIN
 
 	SELECT 
@@ -807,11 +804,11 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getpersonlogins`(IN days_back INT)
+CREATE DEFINER=`herbert`@`%` PROCEDURE `getpersonlogins`(IN days_back INT)
 BEGIN
 
 	SELECT 
@@ -827,7 +824,9 @@ BEGIN
 	FROM amusing.person_log l 
 
 	WHERE l.area="Toegang" 
+
 		AND (days_back IS NULL OR l.date >= DATE_SUB(CURDATE(), INTERVAL days_back DAY))
+
 	ORDER BY l.date DESC;
 
 END ;;
@@ -842,11 +841,11 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getpersonslog`()
+CREATE DEFINER=`herbert`@`%` PROCEDURE `getpersonslog`()
 BEGIN
 
 		SELECT 
@@ -875,9 +874,9 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
 CREATE DEFINER=`root`@`localhost` PROCEDURE `GetPivotSubscriptionsPerStage`(IN festival INT)
 BEGIN
@@ -924,7 +923,7 @@ BEGIN
 
             SELECT DISTINCT podiumsoort
 
-            FROM Amusing.ah_inschrijvingen
+            FROM ah_inschrijvingen
 
             WHERE festival_id = festival
 
@@ -966,9 +965,9 @@ BEGIN
 
             cols, '
 
-        FROM Amusing.ah_inschrijvingen i
+        FROM ah_inschrijvingen i
 
-        JOIN Amusing.ah_zanggroepen zg 
+        JOIN ah_zanggroepen zg 
 
             ON i.zanggroep_id = zg.zanggroep_id
 
@@ -1014,21 +1013,31 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getuserlogins`(IN days_back INT)
+CREATE DEFINER=`herbert`@`%` PROCEDURE `getuserlogins`(IN days_back INT)
 BEGIN
+
     SELECT 
+
         l.date, 
+
         l.area, 
+
         l.action, 
+
         l.report
+
     FROM amusing.user_log l
+
     WHERE l.area = 'Toegang'
+
       AND (days_back IS NULL OR l.date >= DATE_SUB(CURDATE(), INTERVAL days_back DAY))
+
     ORDER BY l.date DESC;
+
 END ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
@@ -1041,11 +1050,11 @@ DELIMITER ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
 /*!50003 SET character_set_client  = utf8mb4 */ ;
 /*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET collation_connection  = utf8mb4_general_ci */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+/*!50003 SET sql_mode              = 'STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `getuserslog`()
+CREATE DEFINER=`herbert`@`%` PROCEDURE `getuserslog`()
 BEGIN
 
 	SELECT 
@@ -1068,14 +1077,14 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `Test` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
--- Dump completed on 2025-12-09 10:26:14
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-12-09 22:20:28

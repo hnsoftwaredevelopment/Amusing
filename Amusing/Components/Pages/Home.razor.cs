@@ -86,7 +86,7 @@ public partial class Home : ComponentBase
 
     protected List<int> Years = [2, 5, 10 ];
     protected string? selectedEditionId;
-    public string SelectedEditionId
+    public string? SelectedEditionId
     {
         get => selectedEditionId;
         set
