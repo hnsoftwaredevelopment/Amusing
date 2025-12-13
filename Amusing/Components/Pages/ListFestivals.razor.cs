@@ -24,12 +24,26 @@ public partial class ListFestivals : ComponentBase
     protected int VisibleRowCount = 0;
     protected List<FestivalModel> Festivals = [];
     protected string FileName = "Festivals";
+    private bool _hasRendered = false;
 
     protected override async Task OnInitializedAsync()
     {
         IsLoading = true;
         Festivals = await FestivalService.GetFestivalOverviewAsync();
         IsLoading = false;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _hasRendered = true;
+
+            if (Festivals?.Count > 0)
+            {
+                await UpdateVisibleRowCountAsync();
+            }
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -51,15 +65,15 @@ public partial class ListFestivals : ComponentBase
 
     protected async Task UpdateVisibleRowCountAsync()
     {
-        if ( GridRef is not null )
-        {
-            await GridRef.Refresh();
-            await Task.Delay( 50 );
-            var records = await GridRef.GetCurrentViewRecordsAsync();
-            await Task.Delay( 150 );
-            VisibleRowCount = records?.Count ?? 0;
-            StateHasChanged();
-        }
+        if (GridRef == null)
+            return;
+
+        await GridRef.Refresh();
+        await Task.Delay( 50 );
+        var records = await GridRef.GetCurrentViewRecordsAsync();
+        await Task.Delay( 150 );
+        VisibleRowCount = records?.Count ?? 0;
+        StateHasChanged();
     }
 
     protected async Task OnGridDataBound()

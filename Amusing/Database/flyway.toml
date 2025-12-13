@@ -1,0 +1,29 @@
+databaseType = "MySql"
+id = "c3b982c0-dcd2-4fad-93d8-a3435cad8c18"
+name = "Amusing"
+
+[flyway]
+callbackLocations = [ "filesystem:callbacks" ]
+locations = [ "filesystem:migrations" ]
+mixed = true
+outOfOrder = true
+schemaModelLocation = "schema-model"
+validateMigrationNaming = true
+
+  [flyway.check]
+  majorTolerance = 0
+
+[flywayDesktop]
+developmentEnvironment = "development"
+shadowEnvironment = "shadow"
+
+[redgateCompare]
+filterFile = "filter.rgf"
+
+[redgateCompare.mysql.options.ignores]
+ignoreNewlinesInTextObjects = "off"
+
+[environments.production]
+url = "jdbc:mysql://amusing-vps.amusing-hengelo.nl:3306"
+schemas = [ "amusing" ]
+displayName = "Production database"

@@ -1,11 +1,13 @@
+using System.Reflection;
+
 using Amusing.Models;
 using Amusing.Services;
 
-using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Inputs;
-
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+
+using Syncfusion.Blazor.Grids;
+using Syncfusion.Blazor.Inputs;
 
 namespace Amusing.Components.Pages;
 
@@ -22,8 +24,11 @@ public partial class About : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         imageSource = $"images/logo.svg";
-        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-        assemblyVersion = assembly.GetName().Version?.ToString() ?? "Onbekend";
+        var assembly = Assembly.GetExecutingAssembly();
+
+        var fileVersionAttribute = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
+        assemblyVersion = fileVersionAttribute?.Version ?? "Onbekend";
+
         commits = await GitHubService.GetCommitsAsync( "hnsoftwaredevelopment", "amusing" );
     }
 }

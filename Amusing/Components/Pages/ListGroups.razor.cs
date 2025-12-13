@@ -28,6 +28,7 @@ public partial class ListGroups : ComponentBase
     protected int VisibleRowCount = 0;
     protected List<FestivalParticipationDynamicViewModel> Zanggroepen = [];
     protected List<int> YearColumns = [];
+    private bool _hasRendered = false;
 
     protected int FilterOnFestival;
 
@@ -200,6 +201,9 @@ public partial class ListGroups : ComponentBase
 
     protected async Task UpdateVisibleRowCountAsync()
     {
+        if (GridRef == null)
+            return;
+
         var records = await GridRef.GetCurrentViewRecordsAsync();
         VisibleRowCount = records?.Count ?? 0;
         StateHasChanged();

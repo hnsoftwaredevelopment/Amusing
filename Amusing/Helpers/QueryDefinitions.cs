@@ -1585,7 +1585,7 @@ public static class QueryDefinitions
             ON i.zanggroep_id = zg.zanggroep_id
         JOIN amusing.ah_landen l
             ON zg.land COLLATE utf8mb3_unicode_ci = l.code 
-        WHERE i.festival_id = 20 AND i.afgehaakt IS null
+        WHERE i.festival_id = @FestivalId AND i.afgehaakt IS null
         GROUP BY l.naam 
         ORDER BY l.naam;";
 
