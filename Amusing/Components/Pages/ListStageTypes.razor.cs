@@ -24,12 +24,26 @@ public partial class ListStageTypes : ComponentBase
     protected int VisibleRowCount = 0;
     protected List<StageTypeModel> StageTypes = [];
     protected string FileName = "Podium types";
+    private bool _hasRendered = false;
 
     protected override async Task OnInitializedAsync()
     {
         IsLoading = true;
         StageTypes = await StageTypeService.GetStageTypesAsync();
         IsLoading = false;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _hasRendered = true;
+
+            if (StageTypes?.Count > 0)
+            {
+                await UpdateVisibleRowCountAsync();
+            }
+        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -54,15 +68,15 @@ public partial class ListStageTypes : ComponentBase
 
     protected async Task UpdateVisibleRowCountAsync()
     {
-        if ( GridRef is not null )
-        {
-            await GridRef.Refresh();
+        if (GridRef == null)
+            return;
+
+        await GridRef.Refresh();
             await Task.Delay( 50 );
             var records = await GridRef.GetCurrentViewRecordsAsync();
             await Task.Delay( 150 );
             VisibleRowCount = records?.Count ?? 0;
             StateHasChanged();
-        }
     }
 
     protected async Task OnGridDataBound()
