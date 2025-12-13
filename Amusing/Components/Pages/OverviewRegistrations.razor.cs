@@ -47,6 +47,17 @@ public partial class OverviewRegistrations : ComponentBase
         }
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (RegistrationList?.Count > 0)
+            {
+                await UpdateVisibleRowCount();
+            }
+        }
+    }
+
     // Whenever the selected edition changes the datagrid has to be updated
     protected async Task OnEditionChanged( string selectedId )
     {

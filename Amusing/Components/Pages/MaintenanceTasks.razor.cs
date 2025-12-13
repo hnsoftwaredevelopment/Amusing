@@ -39,6 +39,74 @@ public partial class MaintenanceTasks : ComponentBase
     protected string FileName = "Taken";
     protected SfRichTextEditor? Rte;
 
+    // Text wrappers
+    public string TaskShortName
+    {
+        get => SelectedTask?.ShortName ?? string.Empty;
+        set { if (SelectedTask != null) SelectedTask.ShortName = value; }
+    }
+
+    public string TaskName
+    {
+        get => SelectedTask?.Name ?? string.Empty;
+        set { if (SelectedTask != null) SelectedTask.Name = value; }
+    }
+
+    public string TaskDescription
+    {
+        get => SelectedTask?.Description ?? string.Empty;
+        set { if (SelectedTask != null) SelectedTask.Description = value; }
+    }
+
+    // Numeric wrappers
+    public int TaskMinTimeSpan
+    {
+        get => SelectedTask?.MinTimeSpan ?? 0;
+        set { if (SelectedTask != null) SelectedTask.MinTimeSpan = value; }
+    }
+
+    public int TaskMaxTimeSpan
+    {
+        get => SelectedTask?.MaxTimeSpan ?? 0;
+        set { if (SelectedTask != null) SelectedTask.MaxTimeSpan = value; }
+    }
+
+    public int TaskTimeBlock1Volunteers
+    {
+        get => SelectedTask?.TimeBlock1Volunteers ?? 0;
+        set { if (SelectedTask != null) SelectedTask.TimeBlock1Volunteers = value; }
+    }
+
+    public int TaskTimeBlock2Volunteers
+    {
+        get => SelectedTask?.TimeBlock2Volunteers ?? 0;
+        set { if (SelectedTask != null) SelectedTask.TimeBlock2Volunteers = value; }
+    }
+
+    // TimeOnly? wrappers
+    public TimeOnly? TaskTimeBlock1From
+    {
+        get => SelectedTask?.TimeBlock1From;
+        set { if (SelectedTask != null && value.HasValue) SelectedTask.TimeBlock1From = value.Value; }
+    }
+
+    public TimeOnly? TaskTimeBlock1Until
+    {
+        get => SelectedTask?.TimeBlock1Until ?? TimeOnly.MinValue;
+        set { if (SelectedTask != null) SelectedTask.TimeBlock1Until = value; }
+    }
+
+    public TimeOnly? TaskTimeBlock2From
+    {
+        get => SelectedTask?.TimeBlock2From ?? TimeOnly.MinValue;
+        set { if (SelectedTask != null) SelectedTask.TimeBlock2From = value; }
+    }
+
+    public TimeOnly? TaskTimeBlock2Until
+    {
+        get => SelectedTask?.TimeBlock2Until ?? TimeOnly.MinValue;
+        set { if (SelectedTask != null) SelectedTask.TimeBlock2Until = value; }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -145,59 +213,64 @@ public partial class MaintenanceTasks : ComponentBase
 
     protected async Task Save()
     {
-        if ( SelectedTask is null )
+        // Absolute guard: nothing to save
+        if (SelectedTask is null)
             return;
 
-        if ( SelectedTask.TaskId != 0 )
+        // Keep local non-null references for the compiler
+        TaskModel currentTask = SelectedTask;
+        TaskModel? originalTask = SelectedTaskOriginal;
+
+        if (currentTask.TaskId != 0)
         {
-            await TaskService.UpdateTaskAsync( SelectedTask );
-            // Check the differences between the original and changed version
-            var differences = ObjectDiffHelper.GetDifferences(SelectedTaskOriginal, SelectedTask);
-
-            if ( differences.Count > 0 )
-            {
-                string taskName = SelectedTask.Name;
-
-                foreach ( var diff in differences )
-                {
-                    string logMessage = $"<_userName> heeft {diff.PropertyName} van \"{taskName}\" gewijzigd van '{diff.OldValue}' in '{diff.NewValue}'.";
-                    await LoggingService.WriteUserActionTaskAsync( SelectedTask.TaskId, "Beheer", "Taken", "updated", logMessage );
-                }
-            }
+            await TaskService.UpdateTaskAsync(currentTask);
         }
         else
         {
-            // Save the new Person and get the new Person Id
-            var savedId = await TaskService.AddTaskAsync(SelectedTask);
-            // Check the differences between the original and changed version
-            var differences = ObjectDiffHelper.GetDifferences(SelectedTaskOriginal, SelectedTask);
-
-            if ( differences.Count > 0 )
-            {
-                string taskName = SelectedTask.Name;
-
-                foreach ( var diff in differences )
-                {
-                    string logMessage = $"<_userName> heeft {diff.PropertyName} van \"{taskName}\" gewijzigd van '{diff.OldValue}' in '{diff.NewValue}'.";
-                    await LoggingService.WriteUserActionTaskAsync( SelectedTask.TaskId, "Beheer", "Taken", "updated", logMessage );
-                }
-            }
+            var savedId = await TaskService.AddTaskAsync(currentTask);
 
             // Refresh the list
             Tasks = await TaskService.GetAllTasksAsync();
-            await Task.Delay( 50 );
+            await Task.Delay(50);
             await GridRef.Refresh();
 
-            // Search the modified record
             var index = Tasks.FindIndex(s => s.TaskId == savedId);
-            if ( index >= 0 )
+            if (index >= 0)
             {
-                SelectedTask = Tasks [ index ];
-                await GridRef.SelectRowAsync( index );
+                SelectedTask = Tasks[index];
+                currentTask = SelectedTask;
+                await GridRef.SelectRowAsync(index);
             }
         }
 
-        
+        // Log changes only when an original version exists
+        if (originalTask is null)
+            return;
+
+        var differences = ObjectDiffHelper.GetDifferences(
+            originalTask,
+            currentTask
+        );
+
+        if (differences.Count == 0)
+            return;
+
+        string taskName = currentTask.Name;
+
+        foreach (var diff in differences)
+        {
+            string logMessage =
+                $"<_userName> heeft {diff.PropertyName} van \"{taskName}\" gewijzigd " +
+                $"van '{diff.OldValue}' in '{diff.NewValue}'.";
+
+            await LoggingService.WriteUserActionTaskAsync(
+                currentTask.TaskId,
+                "Beheer",
+                "Taken",
+                "updated",
+                logMessage
+            );
+        }
     }
 
     protected async Task AddNew()

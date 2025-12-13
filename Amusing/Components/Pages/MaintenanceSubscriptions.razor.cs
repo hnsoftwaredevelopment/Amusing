@@ -20,12 +20,11 @@ public partial class MaintenanceSubscriptions : ComponentBase
     protected List<RegistrationModel> RegistrationList = new();
     protected string? SelectedEditionId;
     protected int VisibleRowCount = 0;
-    private uint editingPaymentId;
     private bool showPaymentDialog;
 
     private bool showDatePicker { get; set; }
     private DateTime? selectedDate { get; set; }
-    private RegistrationModel selectedRegistration;
+    private RegistrationModel? selectedRegistration;
 
     protected string SelectedEditionText => Editions.FirstOrDefault( e => e.ID == SelectedEditionId )?.Text ?? "Onbekende editie";
 

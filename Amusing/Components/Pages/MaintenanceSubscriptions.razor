@@ -97,22 +97,27 @@
 									  ShowCloseIcon="true"
 									  Header="Betaling registreren">
 
-								<DialogContentTemplate>
-									<div class="p-3">
-										<p>Selecteer de betaaldatum:</p>
-										<SfDatePicker TValue="DateTime?" 
-													  @bind-Value="selectedDate" 
-													  Placeholder="Kies een datum...">
-										</SfDatePicker>
-									</div>
-								</DialogContentTemplate>
+								<DialogTemplates>
+									<Content>
+										<div class="p-3">
+											<p>Selecteer de betaaldatum:</p>
+											<SfDatePicker TValue="DateTime?"
+														  @bind-Value="selectedDate"
+														  Placeholder="Kies een datum..." />
+										</div>
+									</Content>
 
-								<DialogFooterTemplate>
-									<div class="flex justify-end gap-2">
-										<button class="btn btn-green" @onclick="ConfirmPaymentDateAsync">Opslaan</button>
-										<button class="btn btn-gray" @onclick="ClosePaymentDialog">Annuleren</button>
-									</div>
-								</DialogFooterTemplate>
+									<FooterTemplate>
+										<div class="flex justify-end gap-2">
+											<button class="btn btn-green" @onclick="ConfirmPaymentDateAsync">
+												Opslaan
+											</button>
+											<button class="btn btn-gray" @onclick="ClosePaymentDialog">
+												Annuleren
+											</button>
+										</div>
+									</FooterTemplate>
+								</DialogTemplates>
 
 							</SfDialog>
 								<GridColumn Field="Bevestigd" HeaderText="Bevestigd" Width="80" TextAlign="TextAlign.Center"></GridColumn>

@@ -191,20 +191,21 @@ public class MailingService
 
     public async Task<List<ExpandoObject>> GetDynamicRecipientsAsync( string query )
     {
-        var rawList = await _dataService.ExecuteQueryAsync(query, reader =>
-        {
-            var dict = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-            for (int i = 0; i < reader.FieldCount; i++)
-                dict[reader.GetName(i)] = reader.IsDBNull(i) ? null! : reader.GetValue(i);
-            return dict;
-        });
+        List<Dictionary<string, object?>> rawList = await _dataService.ExecuteQueryAsync(query, reader =>
+    {
+        var dict = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase);
+        for (int i = 0; i < reader.FieldCount; i++)
+            dict[reader.GetName(i)] = reader.IsDBNull(i) ? null : reader.GetValue(i);
+        return dict;
+    }
+);
 
-        return rawList.Select( ToExpando ).ToList();
+        return [.. rawList.Select( ToExpando )];
     }
 
-    private static ExpandoObject ToExpando( Dictionary<string, object> dict )
+    private static ExpandoObject ToExpando( Dictionary<string, object?> dict )
     {
-        var expando = new ExpandoObject() as IDictionary<string, object>;
+        var expando = new ExpandoObject() as IDictionary<string, object?>;
         foreach ( var kvp in dict )
             expando [ kvp.Key ] = kvp.Value;
         return ( ExpandoObject ) expando;

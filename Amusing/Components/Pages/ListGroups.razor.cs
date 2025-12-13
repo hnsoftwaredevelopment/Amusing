@@ -79,6 +79,17 @@ public partial class ListGroups : ComponentBase
         await LoadDataAsync();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (Zanggroepen?.Count > 0)
+            {
+                await UpdateVisibleRowCountAsync();
+            }
+        }
+    }
+
     protected async Task LoadDataAsync()
     {
         IsLoading = true;

@@ -26,34 +26,6 @@ public class CustomAuthenticationService
     {
         var user = await ValidateUserAsync(username, password);
         return user != null;
-        //if ( user == null )
-        //    return false;
-
-        // Build claims
-    //    var claims = new List<Claim>
-    //{
-    //    new Claim(ClaimTypes.Name, user.Username),
-    //    new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-    //    new Claim(ClaimTypes.Role, user.Role)
-    //};
-
-    //    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-    //    var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-
-    //    // Create cookie
-    //    var authProperties = new AuthenticationProperties
-    //    {
-    //        IsPersistent = true,
-    //        ExpiresUtc = DateTime.UtcNow.AddHours(12)
-    //    };
-
-        //var httpContext = _httpContextAccessor.HttpContext;
-        //await httpContext.SignInAsync(
-        //    CookieAuthenticationDefaults.AuthenticationScheme,
-        //    claimsPrincipal,
-        //    authProperties );
-
-        return true;
     }
 
     public async Task<LoginModel?> ValidateUserAsync( string username, string password, bool updateOldMd5 = false )

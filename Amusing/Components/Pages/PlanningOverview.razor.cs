@@ -49,6 +49,47 @@ public partial class PlanningOverview
     public List<StageScheduleRow> StageRows = [];
     public List<string> TimeSlots = [];
 
+    public int WishTimeBetweenPerformances
+    {
+        get => SelectedCondition?.WishTimeBetweenPerformances ?? 0;
+        set { if (SelectedCondition != null) SelectedCondition.WishTimeBetweenPerformances = value; }
+    }
+
+    public int MaxTimeBetweenPerformances
+    {
+        get => SelectedCondition?.MaxTimeBetweenPerformances ?? 0;
+        set { if (SelectedCondition != null) SelectedCondition.MaxTimeBetweenPerformances = value; }
+    }
+
+    public int MaxLentgVolunteersShift
+    {
+        get => SelectedCondition?.MaxLentgVolunteersShift ?? 0;
+        set { if (SelectedCondition != null) SelectedCondition.MaxLentgVolunteersShift = value; }
+    }
+
+    public int PenaltyInteruptionPerformances
+    {
+        get => SelectedCondition?.PenaltyInteruptionPerformances ?? 0;
+        set { if (SelectedCondition != null) SelectedCondition.PenaltyInteruptionPerformances = value; }
+    }
+
+    public int PerformanceTime
+    {
+        get => SelectedCondition?.PerformanceTime ?? 0;
+        set { if (SelectedCondition != null) SelectedCondition.PerformanceTime = value; }
+    }
+
+    public string TasknamesWithoutSwitchTime
+    {
+        get => SelectedCondition?.TasknamesWithoutSwitchTime ?? string.Empty;
+        set { if (SelectedCondition != null) SelectedCondition.TasknamesWithoutSwitchTime = value; }
+    }
+
+    public string SubstitudeTaskName
+    {
+        get => SelectedCondition?.SubstitudeTaskName ?? string.Empty;
+        set { if (SelectedCondition != null) SelectedCondition.SubstitudeTaskName = value; }
+    }
     protected override async Task OnInitializedAsync()
     {
         await LoadAllAsync();
@@ -185,7 +226,7 @@ public partial class PlanningOverview
         _message = "Planning naar Excel export completed.";
     }
 
-    private PlanningStageVolunteersModel GetPreviousItem( PlanningStageVolunteersModel current )
+    private PlanningStageVolunteersModel? GetPreviousItem( PlanningStageVolunteersModel current )
     {
         var index = StageDuty.IndexOf(current);
         if ( index <= 0 )
@@ -194,7 +235,7 @@ public partial class PlanningOverview
         return StageDuty [ index - 1 ];
     }
 
-    private PlanningOtherVolunteerTasksModel GetPreviousTaskItem( PlanningOtherVolunteerTasksModel current )
+    private PlanningOtherVolunteerTasksModel? GetPreviousTaskItem( PlanningOtherVolunteerTasksModel current )
     {
         var index = OtherTasks.IndexOf(current);
         if ( index <= 0 )

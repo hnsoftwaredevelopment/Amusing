@@ -35,7 +35,7 @@ else
             <SfRadioButton Label="Personen" Name="source" Value="persons" TChecked="string" @onchange="OnSourceChange" @bind-Checked="SourceChecked"></SfRadioButton>
 
             <div class="spacer-small"></div>
-            <SfTextBox Placeholder="Lijstnaam" FloatLabelType="FloatLabelType.Always" Width="300px" @bind-Value="SelectedRecipientsList.ListName" />
+            <SfTextBox Placeholder="Lijstnaam" FloatLabelType="FloatLabelType.Always" Width="300px" @bind-Value="SelectedRecipientsListName" />
 
 
             @if (SourceChecked == "groups")
@@ -277,7 +277,7 @@ else
         <GridColumns>
             @if ( DynamicRecipients.Any() )
             {
-                var firstRow = (IDictionary<string, object>)DynamicRecipients.First();
+                var firstRow = (IDictionary<string, object?>)DynamicRecipients.First();
                 foreach ( var key in firstRow.Keys )
                 {
                     <GridColumn Field="@key" HeaderText="@TranslateToDutch( key )" TextAlign="TextAlign.Left"></GridColumn>

@@ -659,7 +659,7 @@ public class PlanningService ( GenericDataService dataService )
     private async Task<XElement> BuildTableElementAsync(
     string tableName,
     string sql,
-    Dictionary<string, object>? parameters = null,
+    Dictionary<string, object?>? parameters = null,
     IEnumerable<string>? splitColumns = null )
     {
         var tableEl = new XElement("table",
@@ -715,7 +715,7 @@ public class PlanningService ( GenericDataService dataService )
     private async Task<XElement> BuildKeyValueTableAsync(
     string tableName,
     string sql,
-    Dictionary<string, object> parameters )
+    Dictionary<string, object?>? parameters )
     {
         var tableEl = new XElement("table", new XAttribute("name", tableName));
 

@@ -32,6 +32,17 @@ public partial class ListStageTypes : ComponentBase
         IsLoading = false;
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (StageTypes?.Count > 0)
+            {
+                await UpdateVisibleRowCountAsync();
+            }
+        }
+    }
+
     // Manage direct search functionality
     public async void OnInput( InputEventArgs args )
     {

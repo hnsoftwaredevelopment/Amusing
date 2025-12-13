@@ -35,9 +35,9 @@ else
                 <div class="form-grid"> 
                     <div class="form-left"> 
                         <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
-                            <SfTextBox Placeholder="Gebruikersnaam" FloatLabelType="FloatLabelType.Always" Width="120px" @bind-Value="SelectedUser.Username" />
+                            <SfTextBox Placeholder="Gebruikersnaam" FloatLabelType="FloatLabelType.Always" Width="120px" @bind-Value="UserUsername" />
                             <SfComboBox TValue="string" TItem="UserRoles" FloatLabelType="FloatLabelType.Always"
-                                        Placeholder="Rol" DataSource="@Roles" Width="170px" @bind-Value="SelectedUser.Role" >
+                                        Placeholder="Rol" DataSource="@Roles" Width="170px" @bind-Value="UserRole" >
                                 <ComboBoxFieldSettings Value="Role" Text="Role"></ComboBoxFieldSettings>
                             </SfComboBox>
                             <div> 
@@ -48,8 +48,8 @@ else
                             <SfToast @ref="ToastObj" Title="Wachtwoord gewijzigd" Content="Gewijzigde wachtwoord opgeslagen" Timeout="3000" ShowProgressBar="true" >
                                 <ToastPosition X="300" Y="150"></ToastPosition>
                             </SfToast>
-                            <SfTextBox Placeholder="Wachtwoord" FloatLabelType="FloatLabelType.Always" Width="200px" @bind-Value="SelectedUser.Password"/>
-                            @if (SelectedUser.UserId != 0)
+                            <SfTextBox Placeholder="Wachtwoord" FloatLabelType="FloatLabelType.Always" Width="200px" @bind-Value="UserPassword"/>
+                            @if (UserId != 0)
                             {
                                 <button class="custom-toolbar-btn" @onclick="SavePassword" title="Sla het wachtwoord op">
                                     <img src="icons/button-savepassword.svg" class="icon" alt="PW" />
@@ -57,19 +57,19 @@ else
                             }
                         </div>
                     </div>
-                    @if ( SelectedUser.Username == "" || SelectedUser.Role == "" || ( SelectedUser.Password == "" && SelectedUser.UserId == 0 ) )
+                    @if ( UserUsername == "" || UserRole == "" || ( UserPassword == "" && UserId == 0 ) )
                     {
                         <div class="form-middle">
                                 <ul>
-                                    @if ( SelectedUser.Username == "" )
+                                    @if ( UserUsername == "" )
                                     {
                                         <li class="text-danger">Gebruikersnaam mag niet leeg zijn</li>
                                     }
-                                    @if ( SelectedUser.Role == "" )
+                                    @if ( UserRole == "" )
                                     {
                                         <li class="text-danger">Rol mag niet leeg zijn</li>
                                     }
-                                    @if ( SelectedUser.Password == "" && SelectedUser.UserId == 0 )
+                                    @if ( UserPassword == "" && UserId == 0 )
                                     {
                                         <li class="text-danger">Wachtwoord mag niet leeg zijn voor een nieuwe gebruiker</li>
                                     }

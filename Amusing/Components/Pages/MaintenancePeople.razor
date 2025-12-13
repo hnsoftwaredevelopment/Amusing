@@ -31,9 +31,9 @@ else
                 <DataAnnotationsValidator />
                 <ValidationSummary />
                 <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
-                    <SfTextBox Placeholder="Voornaam" FloatLabelType="FloatLabelType.Always" Width="200px" @bind-Value="SelectedPerson.FirstName" />
-                    <SfTextBox Placeholder="Tussenvoegsel" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedPerson.NameInfix" />
-                    <SfTextBox Placeholder="Achternaam" FloatLabelType="FloatLabelType.Always" Width="250px" @bind-Value="SelectedPerson.LastName" />
+                    <SfTextBox Placeholder="Voornaam" FloatLabelType="FloatLabelType.Always" Width="200px" @bind-Value="SelectedPersonFirstName" />
+                    <SfTextBox Placeholder="Tussenvoegsel" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedPersonNameInfix" />
+                    <SfTextBox Placeholder="Achternaam" FloatLabelType="FloatLabelType.Always" Width="250px" @bind-Value="SelectedPersonLastName" />
                     <BitTooltip Text="@(IsActive ? "Deze persoon is actief, klik om te deactiveren" : "Deze persoon is niet actief, klik om te activeren")" HideDelay="200" ShowOnHover="true">
                         <BitToggleButton 
                             @bind-IsChecked="IsActive" OnClick="PersonActivation"
@@ -43,26 +43,26 @@ else
                 </div>
 
                 <div class="form-row">
-                    <SfTextBox Placeholder="Straat" FloatLabelType="FloatLabelType.Always" Width="350px" @bind-Value="SelectedPerson.Street" />
-                    <SfTextBox Placeholder="Huisnummer" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedPerson.HomeNr" />
-                    <SfTextBox Placeholder="Toevoeging" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedPerson.HomeNrAddition" />
+                    <SfTextBox Placeholder="Straat" FloatLabelType="FloatLabelType.Always" Width="350px" @bind-Value="SelectedPersonStreet" />
+                    <SfTextBox Placeholder="Huisnummer" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedPersonHomeNr" />
+                    <SfTextBox Placeholder="Toevoeging" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedPersonHomeNrAddition" />
                 </div>
 
                 <div class="form-row">
-                    <SfTextBox Placeholder="Postcode" FloatLabelType="FloatLabelType.Always" Width="80px" @bind-Value="SelectedPerson.Zip" />
-                    <SfTextBox Placeholder="Woonplaats" FloatLabelType="FloatLabelType.Always" Width="230px" @bind-Value="SelectedPerson.City" />
+                    <SfTextBox Placeholder="Postcode" FloatLabelType="FloatLabelType.Always" Width="80px" @bind-Value="SelectedPersonZip" />
+                    <SfTextBox Placeholder="Woonplaats" FloatLabelType="FloatLabelType.Always" Width="230px" @bind-Value="SelectedPersonCity" />
                 </div>
 
                 <div class="form-row">
-                    <SfTextBox Placeholder="E-mail" FloatLabelType="FloatLabelType.Always" Width="250px" @bind-Value="SelectedPerson.PersonsEmail" />
+                    <SfTextBox Placeholder="E-mail" FloatLabelType="FloatLabelType.Always" Width="250px" @bind-Value="SelectedPersonEmail" />
                     
                     <div class="form-group col-md-2">
                         <label class="custom-checkbox-label">Info mailing</label>
-                        <SfCheckBox CssClass="big-checkbox" @bind-Checked="SelectedPerson.InfoMailingBool" />
+                        <SfCheckBox CssClass="big-checkbox" @bind-Checked="SelectedPersonInfoMailing" />
                     </div>
                     
-                    <SfTextBox Placeholder="Mobiel" FloatLabelType="FloatLabelType.Always" Width="130px" @bind-Value="SelectedPerson.Mobile" />
-                    <SfTextBox Placeholder="Telefoon" FloatLabelType="FloatLabelType.Always" Width="130px" @bind-Value="SelectedPerson.Phone" />
+                    <SfTextBox Placeholder="Mobiel" FloatLabelType="FloatLabelType.Always" Width="130px" @bind-Value="SelectedPersonMobile" />
+                    <SfTextBox Placeholder="Telefoon" FloatLabelType="FloatLabelType.Always" Width="130px" @bind-Value="SelectedPersonPhone" />
                 </div>
             </EditForm>
 

@@ -28,10 +28,10 @@ else
             <h3>Onderhoud @FileName</h3>
             <EditForm Model="SelectedTask">
                 <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
-                    <SfTextBox Placeholder="Korte naam" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.ShortName" />
-                    <SfTextBox Placeholder="Naam" FloatLabelType="FloatLabelType.Always" Width="200px" @bind-Value="SelectedTask.Name" />
-                    <SfNumericTextBox Placeholder="Minimumduur" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedTask.MinTimeSpan" Min=0 Max=600 ShowSpinButton=false />
-                    <SfNumericTextBox Placeholder="Maximumduur" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedTask.MaxTimeSpan" Min=0 Max=600 ShowSpinButton=false />
+                    <SfTextBox Placeholder="Korte naam" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="TaskShortName" />
+                    <SfTextBox Placeholder="Naam" FloatLabelType="FloatLabelType.Always" Width="200px" @bind-Value="TaskName" />
+                    <SfNumericTextBox Placeholder="Minimumduur" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="TaskMinTimeSpan" Min=0 Max=600 ShowSpinButton=false />
+                    <SfNumericTextBox Placeholder="Maximumduur" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="TaskMaxTimeSpan" Min=0 Max=600 ShowSpinButton=false />
                     <BitTooltip Text="@(IsActive ? "Deze taak is actief, klik om te deactiveren" : "Deze taak is niet actief, klik om te activeren")" HideDelay="200" ShowOnHover="true">
                         <BitToggleButton @bind-IsChecked="IsActive" OnClick="TaskActivation"
                                          Text="@(IsActive ? "Aktief" : "Niet aktief")"
@@ -47,9 +47,9 @@ else
                             <div class="tijdvak">
                                 <div class="tijdvak-header">Tijdvak 1</div>
                                 <div class="tijdvak-content">
-                                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Van" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock1From" />
-                                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Tot" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock1Until" />
-                                    <SfNumericTextBox Placeholder="Aantal" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock1Volunteers" ShowSpinButton=false />
+                                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Van" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="TaskTimeBlock1From" />
+                                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Tot" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="TaskTimeBlock1Until" />
+                                    <SfNumericTextBox Placeholder="Aantal" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="TaskTimeBlock1Volunteers" ShowSpinButton=false />
                                 </div>
                             </div>
                         </div>
@@ -58,9 +58,9 @@ else
                             <div class="tijdvak">
                                 <div class="tijdvak-header">Tijdvak 2</div>
                                 <div class="tijdvak-content">
-                                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Van" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock2From" />
-                                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Tot" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock2Until" />
-                                    <SfNumericTextBox Placeholder="Aantal" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="SelectedTask.TimeBlock2Volunteers" ShowSpinButton=false />
+                                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Van" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="TaskTimeBlock2From" />
+                                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly?" Format="HH:mm" Placeholder="Tot" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="TaskTimeBlock2Until" />
+                                    <SfNumericTextBox Placeholder="Aantal" FloatLabelType="FloatLabelType.Always" Width="90px" @bind-Value="TaskTimeBlock2Volunteers" ShowSpinButton=false />
                                 </div>
                             </div>
                         </div>
@@ -77,7 +77,7 @@ else
                         Width="680px" SaveInterval="500"
                         Placeholder="Beschrijving"
                         Height="150px"
-                        @bind-Value="@SelectedTask.Description"/>
+                        @bind-Value="@TaskDescription" />
                 </div>
 
                 <div class="spacer-medium"/>

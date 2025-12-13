@@ -72,15 +72,15 @@ public class DashboardService ( GenericDataService dataService )
             );
     }
 
-    public async Task<List<IDictionary<string, object>>> GetSubscriptionsPivotAsync( int festivalId )
+    public async Task<List<IDictionary<string, object?>>> GetSubscriptionsPivotAsync( int festivalId )
     {
-        var list = new List<IDictionary<string, object>>();
+        var list = new List<IDictionary<string, object?>>();
 
         await _dataService.ExecuteQueryAsync(
             QueryDefinitions.DashboardStatisticsSubscribtionsByNumberByStagetype,
             reader =>
             {
-                IDictionary<string, object> row = new ExpandoObject();
+                IDictionary<string, object?> row = new ExpandoObject();
 
                 // Fixed column
                 row [ "DeelnemersCategorie" ] = reader [ "DeelnemersCategorie" ]?.ToString() ?? string.Empty;

@@ -32,6 +32,14 @@ public partial class ListFestivals : ComponentBase
         IsLoading = false;
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Festivals?.Count > 0)
+        {
+            await UpdateVisibleRowCountAsync();
+        }
+    }
+
     // Manage direct search functionality
     public async void OnInput( InputEventArgs args )
     {

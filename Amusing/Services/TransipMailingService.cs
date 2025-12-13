@@ -16,6 +16,14 @@ public class TransipMailingService
     private readonly EmailSettings _settings;
     private readonly ILogger<TransipMailingService> _logger;
 
+    public TransipMailingService(
+        HttpClient httpClient,
+        ILogger<TransipMailingService> logger)
+    {
+        _httpClient = httpClient;
+        _logger = logger;
+    }
+
     public TransipMailingService( HttpClient httpClient, EmailSettings settings, ILogger<TransipMailingService> logger )
     {
         _settings = settings;

@@ -7,6 +7,8 @@ using Amusing.Services;
 using Bit.BlazorUI;
 using Bit.BlazorUI.Extras;
 
+using Blazorise;
+
 using Microsoft.AspNetCore.Components;
 
 using Syncfusion.Blazor.Buttons;
@@ -29,7 +31,7 @@ public partial class MaintenanceFestivals : ComponentBase
     protected string FileName = "Amusing edities";
     protected FestivalModel? SelectedFestival;
     protected FestivalModel? SelectedFestivalOriginal;
-    protected List<string> ChangedFields = new();
+    protected List<string> ChangedFields = [];
     protected List<string> AvailableStageTypes = [];
     protected List<string> CompatibelTypes = [];
     protected bool FestivalIsDirty = false;
@@ -55,6 +57,84 @@ public partial class MaintenanceFestivals : ComponentBase
         set => SelectedFestival.Aktief = value ? 1 : 0;
     }
 
+    public int SelectedFestivalActive
+    {
+        get => SelectedFestival?.Aktief ?? 0;
+        set { if (SelectedFestival != null) SelectedFestival.Aktief = value; }
+    }
+
+    public DateOnly SelectedFestivalDatum
+    {
+        get => SelectedFestival?.Festivaldatum ?? DateOnly.MinValue;
+        set { if (SelectedFestival != null) SelectedFestival.Festivaldatum = value; }
+    }
+
+    public DateOnly SelectedFestivalStartInschrijving
+    {
+        get => SelectedFestival?.StartInschrijving ?? DateOnly.MinValue;
+        set { if (SelectedFestival != null) SelectedFestival.StartInschrijving = value; }
+    }
+
+    public DateOnly SelectedFestivalEindeInschrijving
+    {
+        get => SelectedFestival?.EindeInschrijving ?? DateOnly.MinValue;
+        set { if (SelectedFestival != null) SelectedFestival.EindeInschrijving = value; }
+    }
+
+    public int SelectedFestivalMinutenTussenOptredens
+    {
+        get => SelectedFestival?.MinutenTussenOptredens ?? 0;
+        set { if (SelectedFestival != null) SelectedFestival.MinutenTussenOptredens = value; }
+    }
+
+    public int SelectedFestivalMaximumMinutenTussenOptredens
+    {
+        get => SelectedFestival?.MaximumMinutenTussenOptredens ?? 0;
+        set { if (SelectedFestival != null) SelectedFestival.MaximumMinutenTussenOptredens = value; }
+    }
+
+    public int SelectedFestivalMaximumUrenVrijwilligers
+    {
+        get => SelectedFestival?.MaximumUrenVrijwilligers ?? 0;
+        set { if (SelectedFestival != null) SelectedFestival.MaximumUrenVrijwilligers = value; }
+    }
+
+    public decimal SelectedFestivalBoeteOnderbrekingOptredens
+    {
+        get => SelectedFestival?.BoeteOnderbrekingOptredens ?? 0m;
+        set { if (SelectedFestival != null) SelectedFestival.BoeteOnderbrekingOptredens = value; }
+    }
+
+    public TimeOnly SelectedFestivalStartVrijwilligersTaken
+    {
+        get => SelectedFestival?.StartVrijwilligersTaken ?? TimeOnly.MinValue;
+        set { if (SelectedFestival != null) SelectedFestival.StartVrijwilligersTaken = value; }
+    }
+
+    public TimeOnly SelectedFestivalEindeVrijwilligersTaken
+    {
+        get => SelectedFestival?.EindeVrijwilligersTaken ?? TimeOnly.MinValue;
+        set { if (SelectedFestival != null) SelectedFestival.EindeVrijwilligersTaken = value; }
+    }
+
+    public TimeOnly SelectedFestivalStartVrijwilligersPauze
+    {
+        get => SelectedFestival?.StartVrijwilligersPauze ?? TimeOnly.MinValue;
+        set { if (SelectedFestival != null) SelectedFestival.StartVrijwilligersPauze = value; }
+    }
+
+    public TimeOnly SelectedFestivalEindeVrijwilligersPauze
+    {
+        get => SelectedFestival?.EindeVrijwilligersPauze ?? TimeOnly.MinValue;
+        set { if (SelectedFestival != null) SelectedFestival.EindeVrijwilligersPauze = value; }
+    }
+
+    public TimeOnly SelectedFestivalEindeVasteVrijwilligersTaken
+    {
+        get => SelectedFestival?.EindeVasteVrijwilligersTaken ?? TimeOnly.MinValue;
+        set { if (SelectedFestival != null) SelectedFestival.EindeVasteVrijwilligersTaken = value; }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         IsLoading = true;
@@ -63,8 +143,8 @@ public partial class MaintenanceFestivals : ComponentBase
 
         Festivals = await FestivalService.GetFestivalDataAsync();
         SelectedFestival = Festivals
-            .OrderByDescending( f => int.Parse( f.Festival ) )
-            .FirstOrDefault();
+            .OrderByDescending(f => int.Parse(f.Festival))
+            .FirstOrDefault() ?? new FestivalModel { Festival = "geen festivals in de lijst" };
         IsLoading = false;
     }
 

@@ -40,6 +40,31 @@ public partial class MaintenanceUsers : ComponentBase
     protected string FileName = "Gebruikers";
     public string HashedPassword { get; set; } = string.Empty;
 
+    // String wrappers voor textboxes en combobox
+    public uint UserId
+    {
+        get => SelectedUser?.UserId ?? 0;
+        set { if (SelectedUser != null) SelectedUser.UserId = value; }
+    }
+
+    public string UserUsername
+    {
+        get => SelectedUser?.Username ?? string.Empty;
+        set { if (SelectedUser != null) SelectedUser.Username = value; }
+    }
+
+    public string UserRole
+    {
+        get => SelectedUser?.Role ?? string.Empty;
+        set { if (SelectedUser != null) SelectedUser.Role = value; }
+    }
+
+    public string UserPassword
+    {
+        get => SelectedUser?.Password ?? string.Empty;
+        set { if (SelectedUser != null) SelectedUser.Password = value; }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         IsLoading = true;

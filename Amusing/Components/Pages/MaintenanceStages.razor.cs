@@ -47,6 +47,81 @@ public partial class MaintenanceStages : ComponentBase
         set => SelectedStage.Aktief = value ? 1 : 0;
     }
 
+    // ========================
+    // String wrappers
+    // ========================
+    public string StageNaam
+    {
+        get => SelectedStage?.Naam ?? string.Empty;
+        set { if (SelectedStage != null) SelectedStage.Naam = value; }
+    }
+
+    public string StageSoort
+    {
+        get => SelectedStage?.Soort ?? string.Empty;
+        set { if (SelectedStage != null) SelectedStage.Soort = value; }
+    }
+
+    public string StageType
+    {
+        get => SelectedStage?.Type ?? string.Empty;
+        set { if (SelectedStage != null) SelectedStage.Type = value; }
+    }
+
+    // ========================
+    // Integer wrappers
+    // ========================
+    public int StageKaartNummer
+    {
+        get => SelectedStage?.KaartNummer ?? 0;
+        set { if (SelectedStage != null) SelectedStage.KaartNummer = value; }
+    }
+
+    public int StageKwaliteit
+    {
+        get => SelectedStage?.Kwaliteit ?? 0;
+        set { if (SelectedStage != null) SelectedStage.Kwaliteit = value; }
+    }
+
+    public int StageMaxZangers
+    {
+        get => SelectedStage?.MaxZangers ?? 0;
+        set { if (SelectedStage != null) SelectedStage.MaxZangers = value; }
+    }
+
+    public int StageVrijwilligers
+    {
+        get => SelectedStage?.Vrijwilligers ?? 0;
+        set { if (SelectedStage != null) SelectedStage.Vrijwilligers = value; }
+    }
+
+    // ========================
+    // TimeOnly wrappers
+    // ========================
+    public TimeOnly StageStart
+    {
+        get => SelectedStage?.Start ?? TimeOnly.MinValue;
+        set { if (SelectedStage != null) SelectedStage.Start = value; }
+    }
+
+    public TimeOnly StageEind
+    {
+        get => SelectedStage?.Eind ?? TimeOnly.MinValue;
+        set { if (SelectedStage != null) SelectedStage.Eind = value; }
+    }
+
+    public TimeOnly StageVan
+    {
+        get => SelectedStage?.Van ?? TimeOnly.MinValue;
+        set { if (SelectedStage != null) SelectedStage.Van = value; }
+    }
+
+    public TimeOnly StageTot
+    {
+        get => SelectedStage?.Tot ?? TimeOnly.MinValue;
+        set { if (SelectedStage != null) SelectedStage.Tot = value; }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         IsLoading = true;

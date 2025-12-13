@@ -6,6 +6,7 @@
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.DataForm
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
@@ -28,9 +29,9 @@ else
             <SfDataForm Model="SelectedStage" OnValidSubmit="SaveStage" LabelPosition="FormLabelPosition.Top">
                 <div class="form-floating-switch">
                     <hr />
-                    <SfTextBox @bind-Value="SelectedStage.Naam" Placeholder="Podium naam" FloatLabelType="FloatLabelType.Always" Width="450px" />
+                    <SfTextBox @bind-Value="StageNaam" Placeholder="Podium naam" FloatLabelType="FloatLabelType.Always" Width="450px" />
                     <SfTooltip ID="CardNumberTooltip"  Target="#CardNumber" Content="Vul een waarde hoger dan 0 in om het podium te activeren" >
-                        <SfNumericTextBox ID="CardNumber" @bind-Value="SelectedStage.KaartNummer" Placeholder="Kaartnummer" FloatLabelType="FloatLabelType.Always" Width="160px" />
+                        <SfNumericTextBox ID="CardNumber" @bind-Value="StageKaartNummer" Placeholder="Kaartnummer" FloatLabelType="FloatLabelType.Always" Width="160px" />
                     </SfTooltip>
                     <SfComboBox 
                         TValue=string
@@ -38,7 +39,7 @@ else
                             FloatLabelType="FloatLabelType.Always"
                             Placeholder="Binnen of buiten podium"
                             DataSource="@dataStageKind"
-                            @bind-Value="@SelectedStage.Soort"
+                            @bind-Value="@StageSoort"
                             Width="180px" />
                     <div />
                     
@@ -51,7 +52,7 @@ else
                         FloatLabelType="FloatLabelType.Always"
                         Placeholder="Kies een podium type"
                         DataSource="@AvailableStageTypes"
-                        @bind-Value="@SelectedStage.Type"
+                        @bind-Value="@StageType"
                         Width="450px">
 
                         <!-- Field mapping voor waarde en tekst -->
@@ -70,17 +71,14 @@ else
                         <ComboBoxEvents TValue="string" TItem="StageTypeModel" Opened="OnOpen" OnClose="OnClose"></ComboBoxEvents>
                     </SfComboBox>
                     <hr/>
-                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="SelectedStage.Start" Placeholder="Begintijd" Width="150px" FloatLabelType="FloatLabelType.Always" />
-                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="SelectedStage.Eind" Placeholder="Eindtijd" Width="150px" FloatLabelType="FloatLabelType.Always" />
-                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="SelectedStage.Van" Placeholder="Vrijwilligers vanaf" Width="150px" FloatLabelType="FloatLabelType.Always" />
-                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="SelectedStage.Tot" Placeholder="Vrijwilligers tot" Width="150px" FloatLabelType="FloatLabelType.Always" />
+                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="StageStart" Placeholder="Begintijd" Width="150px" FloatLabelType="FloatLabelType.Always" />
+                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="StageEind" Placeholder="Eindtijd" Width="150px" FloatLabelType="FloatLabelType.Always" />
+                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="StageVan" Placeholder="Vrijwilligers vanaf" Width="150px" FloatLabelType="FloatLabelType.Always" />
+                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="StageTot" Placeholder="Vrijwilligers tot" Width="150px" FloatLabelType="FloatLabelType.Always" />
                     <hr/>
-                    <SfNumericTextBox TValue="int" Min="0" Max="10" @bind-Value="SelectedStage.Kwaliteit" Placeholder="Kwaliteit" Width="150px" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" />
-                    <SfNumericTextBox TValue="int" Min="0" @bind-Value="SelectedStage.MaxZangers" Placeholder="Max. aantal zangers" Width="170px" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" />
-                    <SfNumericTextBox TValue="int" Min="0" Max="4" @bind-Value="SelectedStage.Vrijwilligers" Placeholder="Vrijwilligers" Width="150px" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" />
-
-
-
+                    <SfNumericTextBox TValue="int" Min="0" Max="10" @bind-Value="StageKwaliteit" Placeholder="Kwaliteit" Width="150px" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" />
+                    <SfNumericTextBox TValue="int" Min="0" @bind-Value="StageMaxZangers" Placeholder="Max. aantal zangers" Width="170px" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" />
+                    <SfNumericTextBox TValue="int" Min="0" Max="4" @bind-Value="StageVrijwilligers" Placeholder="Vrijwilligers" Width="150px" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" />
                 </div>
             </SfDataForm>
             <div class="spacer-large"/>

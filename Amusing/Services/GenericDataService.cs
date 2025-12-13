@@ -87,7 +87,7 @@ public class GenericDataService
             : default!;
     }
 
-    public T ExecuteScalarQuery<T>( string sql, Dictionary<string, object> parameters )
+    public T? ExecuteScalarQuery<T>( string sql, Dictionary<string, object> parameters )
     {
         using var connection = new MySqlConnection(_connection.ConnectionString);
         using var command = new MySqlCommand(sql, connection);
@@ -98,7 +98,7 @@ public class GenericDataService
         }
 
         connection.Open();
-        object result = command.ExecuteScalar();
+        object? result = command.ExecuteScalar();
         connection.Close();
 
         if ( result == null || result == DBNull.Value )
@@ -123,7 +123,7 @@ public class GenericDataService
     public async Task ExecuteReaderAsync(
         string sql,
         Func<DbDataReader, Task> map,
-        Dictionary<string, object> parameters )
+        Dictionary<string, object?>? parameters )
     {
         using var connection = new MySqlConnection(_connection.ConnectionString);
         await connection.OpenAsync();

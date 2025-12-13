@@ -27,8 +27,8 @@ public class ApplicationUser : IdentityUser<uint>
     public string Role { get; set; } = "";
 
     [Column( "SecurityStamp" )]
-    public override string SecurityStamp { get; set; } = Guid.NewGuid().ToString();
+    public override string? SecurityStamp { get; set; } = Guid.NewGuid().ToString();
 
     [Column( "ConcurrencyStamp" )]
-    public override string ConcurrencyStamp { get; set; } = Guid.NewGuid().ToString();
+    public override string? ConcurrencyStamp { get; set; } = Guid.NewGuid().ToString();
 }

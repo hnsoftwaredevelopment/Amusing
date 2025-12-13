@@ -102,6 +102,16 @@ public class MailingsRecipientsBase : ComponentBase
         IsLoading = false;
     }
 
+    public string SelectedRecipientsListName
+    {
+        get => SelectedRecipientsList?.ListName ?? "geen ontvangerslijst beschikbaar";
+        set
+        {
+            if (SelectedRecipientsList != null)
+                SelectedRecipientsList.ListName = value;
+        }
+    }
+
     protected async Task OnGridDataBound()
     {
         if ( !_initialLoadDone && RecipientsList?.Any() == true )

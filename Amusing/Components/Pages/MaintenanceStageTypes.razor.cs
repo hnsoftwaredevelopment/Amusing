@@ -62,6 +62,85 @@ public partial class MaintenanceStageTypes : ComponentBase
         set => SelectedStageType.Active = value ? 1 : 0;
     }
 
+    public string StageTypeName
+    {
+        get => SelectedStageType?.Type ?? string.Empty;
+        set
+        {
+            if (SelectedStageType != null)
+            {
+                SelectedStageType.Type = value;
+            }
+        }
+    }
+
+
+    public decimal StageTypePrice
+    {
+        get => SelectedStageType?.Price ?? 0m;
+        set { if (SelectedStageType != null) SelectedStageType.Price = value; }
+    }
+
+    public int StageTypePiano
+    {
+        get => SelectedStageType?.Piano ?? 0;
+        set { if (SelectedStageType != null) SelectedStageType.Piano = value; }
+    }
+
+    public int StageTypeLectern
+    {
+        get => SelectedStageType?.Lectern ?? 0;
+        set { if (SelectedStageType != null) SelectedStageType.Lectern = value; }
+    }
+
+    public int StageTypeMicrophones
+    {
+        get => SelectedStageType?.Microphones ?? 0;
+        set { if (SelectedStageType != null) SelectedStageType.Microphones = value; }
+    }
+
+    public int StageTypeDrums
+    {
+        get => SelectedStageType?.Drums ?? 0;
+        set { if (SelectedStageType != null) SelectedStageType.Drums = value; }
+    }
+
+    public int StageTypeGuitarAmplifiers
+    {
+        get => SelectedStageType?.GuitarAmplifiers ?? 0;
+        set { if (SelectedStageType != null) SelectedStageType.GuitarAmplifiers = value; }
+    }
+
+    public int StageTypeBassAmplifiers
+    {
+        get => SelectedStageType?.BassAmplifiers ?? 0;
+        set { if (SelectedStageType != null) SelectedStageType.BassAmplifiers = value; }
+    }
+
+    public int StageTypeChoirAmplifiers
+    {
+        get => SelectedStageType?.ChoirAmplifiers ?? 0;
+        set { if (SelectedStageType != null) SelectedStageType.ChoirAmplifiers = value; }
+    }
+
+    public int StageTypeMonitors
+    {
+        get => SelectedStageType?.Monitors ?? 0;
+        set { if (SelectedStageType != null) SelectedStageType.Monitors = value; }
+    }
+
+    public int StageTypeSpeakers
+    {
+        get => SelectedStageType?.Speakers ?? 0;
+        set { if (SelectedStageType != null) SelectedStageType.Speakers = value; }
+    }
+
+    public int StageTypeActive
+    {
+        get => SelectedStageType?.Active ?? 0;
+        set { if (SelectedStageType != null) SelectedStageType.Active = value; }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         IsLoading = true;

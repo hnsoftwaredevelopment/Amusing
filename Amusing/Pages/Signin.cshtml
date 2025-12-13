@@ -31,9 +31,16 @@
 
             var principal = new ClaimsPrincipal(identity);
 
-            await _accessor.HttpContext.SignInAsync(
+            var httpContext = _accessor.HttpContext;
+
+            if (httpContext is null)
+            {
+                throw new InvalidOperationException("HttpContext is not available.");
+            }
+
+            await httpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
-                principal );
+                principal);
 
             return Redirect( "~/" );
         }

@@ -49,6 +49,84 @@ public partial class MaintenancePeople : ComponentBase
             }
         }
     }
+
+    // Strings
+    public string SelectedPersonFirstName
+    {
+        get => SelectedPerson?.FirstName ?? string.Empty;
+        set { if (SelectedPerson != null) SelectedPerson.FirstName = value; }
+    }
+
+    public string SelectedPersonNameInfix
+    {
+        get => SelectedPerson?.NameInfix ?? string.Empty;
+        set { if (SelectedPerson != null) SelectedPerson.NameInfix = value; }
+    }
+
+    public string SelectedPersonLastName
+    {
+        get => SelectedPerson?.LastName ?? string.Empty;
+        set { if (SelectedPerson != null) SelectedPerson.LastName = value; }
+    }
+
+    public string SelectedPersonStreet
+    {
+        get => SelectedPerson?.Street ?? string.Empty;
+        set { if (SelectedPerson != null) SelectedPerson.Street = value; }
+    }
+
+    public string SelectedPersonHomeNr
+    {
+        get => SelectedPerson?.HomeNr ?? string.Empty;
+        set { if (SelectedPerson != null) SelectedPerson.HomeNr = value; }
+    }
+
+    public string SelectedPersonHomeNrAddition
+    {
+        get => SelectedPerson?.HomeNrAddition ?? string.Empty;
+        set { if (SelectedPerson != null) SelectedPerson.HomeNrAddition = value; }
+    }
+
+    public string SelectedPersonZip
+    {
+        get => SelectedPerson?.Zip ?? string.Empty;
+        set { if (SelectedPerson != null) SelectedPerson.Zip = value; }
+    }
+
+    public string SelectedPersonCity
+    {
+        get => SelectedPerson?.City ?? string.Empty;
+        set { if (SelectedPerson != null) SelectedPerson.City = value; }
+    }
+
+    public string SelectedPersonEmail
+    {
+        get => SelectedPerson?.PersonsEmail ?? string.Empty;
+        set { if (SelectedPerson != null) SelectedPerson.PersonsEmail = value; }
+    }
+
+    public string SelectedPersonMobile
+    {
+        get => SelectedPerson?.Mobile ?? string.Empty;
+        set { if (SelectedPerson != null) SelectedPerson.Mobile = value; }
+    }
+
+    public string SelectedPersonPhone
+    {
+        get => SelectedPerson?.Phone ?? string.Empty;
+        set { if (SelectedPerson != null) SelectedPerson.Phone = value; }
+    }
+
+    // Booleans
+    public bool SelectedPersonInfoMailing
+    {
+        get => SelectedPerson?.InfoMailingBool ?? false;
+        set { if (SelectedPerson != null) SelectedPerson.InfoMailingBool = value; }
+    }
+
+
+
+
     private string FileName = "Personen";
 
 

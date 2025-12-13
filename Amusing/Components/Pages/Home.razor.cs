@@ -41,7 +41,7 @@ public partial class Home : ComponentBase
     private List<DashboardStatisticsGenre> _genre = [];
     private List<DashboardStatisticsCountry> _country = [];
     private List<DashboardStatisticsStage> _stage = [];
-    private List<IDictionary<string, object>> _pivot = [];
+    private List<IDictionary<string, object?>> _pivot = [];
     private List<DashboardStatisticsGraph> _graph = [];
     private List<string> _pivotColumns = [];
     protected List<Edition> Editions = [];
@@ -86,7 +86,7 @@ public partial class Home : ComponentBase
 
     protected List<int> Years = [2, 5, 10 ];
     protected string? selectedEditionId;
-    public string SelectedEditionId
+    public string? SelectedEditionId
     {
         get => selectedEditionId;
         set

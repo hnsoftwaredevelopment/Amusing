@@ -67,49 +67,49 @@
 									<div class="row">
 										<label>Gewenste tijd tussen optredens</label>
 										<input type="number" width="50"
-												@bind="SelectedCondition.WishTimeBetweenPerformances"
+												@bind="WishTimeBetweenPerformances"
 												disabled="@( !IsEditingConditions )" /> 
 									</div>
 
 									<div class="row">
 										<label>Maximale tijd tussen optredens</label>
 										<input type="number" width="50"
-												@bind="SelectedCondition.MaxTimeBetweenPerformances"
+												@bind="MaxTimeBetweenPerformances"
 												disabled="@( !IsEditingConditions )" />
 									</div>
 
 									<div class="row">
 											<label>Maximale lengte vrijwilligers dienst</label>
 											<input type="number"
-												   @bind="SelectedCondition.MaxLentgVolunteersShift"
+												   @bind="MaxLentgVolunteersShift"
 												   disabled="@( !IsEditingConditions )" />
 										</div>
 
 									<div class="row">
 										<label>Boete bij onderbreking</label>
 										<input type="number"
-											   @bind="SelectedCondition.PenaltyInteruptionPerformances"
+											   @bind="PenaltyInteruptionPerformances"
 											   disabled="@( !IsEditingConditions )" />
 									</div>
 
 									<div class="row">
 										<label>Taken zonder wisseltijd</label>
 										<input type="text"
-											   @bind="SelectedCondition.TasknamesWithoutSwitchTime"
+											   @bind="TasknamesWithoutSwitchTime"
 											   disabled = "disabled" />
 									</div>
 
 									<div class="row">
 										<label>Reserve taaknaam</label>
 										<input type="text"
-												   @bind="SelectedCondition.SubstitudeTaskName" 
+												   @bind="SubstitudeTaskName" 
 												   disabled="disabled" />
 									</div>
 
 									<div class="row">
 										<label>Duur optreden (min)</label>
 										<input type="number"
-											   @bind="SelectedCondition.PerformanceTime"
+											   @bind="PerformanceTime"
 											   disabled="@( !IsEditingConditions )" />
 									</div>
 								</div>

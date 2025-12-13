@@ -31,7 +31,7 @@ public class TaskModel
     public string? ShortName { get; set; } = string.Empty;
 
     [Display( Name = "Taak" )]
-    public string? Name { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     [Display( Name = "Minimale tijdsduur" )]
     public int MinTimeSpan { get; set; }
