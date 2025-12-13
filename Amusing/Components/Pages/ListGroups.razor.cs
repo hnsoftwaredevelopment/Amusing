@@ -28,7 +28,6 @@ public partial class ListGroups : ComponentBase
     protected int VisibleRowCount = 0;
     protected List<FestivalParticipationDynamicViewModel> Zanggroepen = [];
     protected List<int> YearColumns = [];
-    private bool _hasRendered = false;
 
     protected int FilterOnFestival;
 

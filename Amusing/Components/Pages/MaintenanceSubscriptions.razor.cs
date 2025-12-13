@@ -21,7 +21,6 @@ public partial class MaintenanceSubscriptions : ComponentBase
     protected string? SelectedEditionId;
     protected int VisibleRowCount = 0;
     private bool showPaymentDialog;
-    private bool _hasRendered = false;
 
     private bool showDatePicker { get; set; }
     private DateTime? selectedDate { get; set; }
@@ -53,8 +52,6 @@ public partial class MaintenanceSubscriptions : ComponentBase
     {
         if (firstRender)
         {
-            _hasRendered = true;
-
             if (Editions?.Count > 0)
             {
                 await UpdateVisibleRowCount();

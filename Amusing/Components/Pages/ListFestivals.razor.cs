@@ -24,26 +24,12 @@ public partial class ListFestivals : ComponentBase
     protected int VisibleRowCount = 0;
     protected List<FestivalModel> Festivals = [];
     protected string FileName = "Festivals";
-    private bool _hasRendered = false;
 
     protected override async Task OnInitializedAsync()
     {
         IsLoading = true;
         Festivals = await FestivalService.GetFestivalOverviewAsync();
         IsLoading = false;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            _hasRendered = true;
-
-            if (Festivals?.Count > 0)
-            {
-                await UpdateVisibleRowCountAsync();
-            }
-        }
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
