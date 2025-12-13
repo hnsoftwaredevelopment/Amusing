@@ -37,19 +37,6 @@ public partial class ListStageTypes : ComponentBase
     {
         if (firstRender)
         {
-            _hasRendered = true;
-
-            if (StageTypes?.Count > 0)
-            {
-                await UpdateVisibleRowCountAsync();
-            }
-        }
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
             if (StageTypes?.Count > 0)
             {
                 await UpdateVisibleRowCountAsync();
