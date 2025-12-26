@@ -74,14 +74,14 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
-      
-      - name: Test SSH connection
-        run: ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo ok"
+          printf "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 
-      - name: Stop service
-        run: ssh -4 -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "sudo systemctl stop amusing.service"
+      - name: Test SSH connection
+        run: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo ok"
       
+      - name: Stop service before deploy
+        run: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "sudo systemctl stop amusing.service"
+     
       - name: Deploy via rsync
         uses: burnett01/rsync-deployments@7.1.0
         with:
