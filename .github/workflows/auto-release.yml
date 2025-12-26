@@ -44,8 +44,13 @@ jobs:
       - name: Show csproj
         run: cat Amusing/Amusing.csproj
 
+      - name: Clean previous build
+        run: |
+          dotnet clean Amusing/Amusing.csproj
+          rm -rf published/
+
       - name: Build
-        run: dotnet build Amusing/Amusing.csproj --configuration Release /t:Clean
+        run: dotnet build Amusing/Amusing.csproj --configuration Release
 
       - name: Publish
         run: |
@@ -71,6 +76,9 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           printf "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 
+      - name: Stop service before deploy
+        run: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "sudo systemctl stop amusing.service"
+
       - name: Deploy to VPS via rsync
         uses: burnett01/rsync-deployments@7.1.0
         with:
@@ -81,3 +89,6 @@ jobs:
           remote_user: ${{ secrets.SSH_USER }}
           remote_key: ${{ secrets.SSH_KEY }}
           remote_port: ${{ secrets.SSH_PORT }}
+
+      - name: Start service after deploy
+        run: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "sudo systemctl start amusing.service"
