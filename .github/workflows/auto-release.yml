@@ -79,20 +79,19 @@ jobs:
       - name: Test SSH connection
         run: ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo ok"
 
-
-      - name: Stop service before deploy
-        run: ssh -i ~/.ssh/id_ed25519 -4 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "sudo systemctl stop amusing.service"
-
-      - name: Deploy to VPS via rsync
+      - name: Stop service
+        run: ssh -4 -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "sudo systemctl stop amusing.service"
+      
+      - name: Deploy via rsync
         uses: burnett01/rsync-deployments@7.1.0
         with:
-          switches: -avzr --delete --exclude=start.sh --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r
+          switches: -avzr --delete --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r
           path: published/
           remote_path: /home/groups/svp/dev.beheer.amusing-hengelo.nl/www/Amusing
           remote_host: ${{ secrets.SSH_HOST }}
           remote_user: ${{ secrets.SSH_USER }}
           remote_key: ${{ secrets.SSH_KEY }}
           remote_port: ${{ secrets.SSH_PORT }}
-
-      - name: Start service after deploy
-        run: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "sudo systemctl start amusing.service"
+      
+      - name: Start service
+        run: ssh -4 -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "sudo systemctl start amusing.service"
