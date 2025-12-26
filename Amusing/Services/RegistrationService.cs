@@ -73,11 +73,17 @@ public class RegistrationService( GenericDataService dataService )
                 };
 
                 // Dynamicly add each year
-                for ( int jaar = startYear; jaar <= endYear; jaar++ )
+                for (int i = 0; i < reader.FieldCount; i++)
                 {
-                    if ( !reader.IsDBNull( reader.GetOrdinal( jaar.ToString() ) ) )
+                    string columnName = reader.GetName(i);
+
+                    if (columnName.StartsWith("Y") &&
+                         int.TryParse(columnName.AsSpan(1), out int jaar))
                     {
-                        vm.DeelnamePerJaar [ jaar ] = reader [ jaar.ToString() ].ToString()!;
+                        if (!reader.IsDBNull(i))
+                        {
+                            vm.DeelnamePerJaar[jaar] = reader.GetString(i);
+                        }
                     }
                 }
 

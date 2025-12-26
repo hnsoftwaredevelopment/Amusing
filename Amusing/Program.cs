@@ -146,6 +146,10 @@ builder.Services.AddScoped<ProtectedSessionStorage>();
 
 builder.Services.AddAuthorizationCore();
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
 // ---------------------------------------------------------
 // 5. Database configuration
 // ---------------------------------------------------------

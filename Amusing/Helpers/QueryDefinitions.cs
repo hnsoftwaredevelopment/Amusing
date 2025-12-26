@@ -847,7 +847,7 @@ public static class QueryDefinitions
                 "CASE " +
                 "WHEN i.ingeschreven IS NULL OR YEAR(i.ingeschreven) = 0 THEN '' " +
                 $"ELSE DATE_FORMAT(i.ingeschreven, '%d-%m-%Y') END " +
-                $"END) AS `{year}`," );
+                $"END) AS `Y{year}`," );
         }
 
         // Remove last semicolun
@@ -869,7 +869,7 @@ public static class QueryDefinitions
             sb.AppendLine( "           SELECT 1" );
             sb.AppendLine( "           FROM ah_inschrijvingen ins" );
             sb.AppendLine( "           JOIN ah_festivals fs ON fs.festival_id = ins.festival_id" );
-            sb.AppendLine( $"         WHERE zg.zanggroep_id = zg.zanggroep_id AND YEAR(f.festivaldatum) > {newestYear - NumberOfYearsForExclusion}" );
+            sb.AppendLine( $"         WHERE ins.zanggroep_id = zg.zanggroep_id AND YEAR(fs.festivaldatum) > {newestYear - NumberOfYearsForExclusion}" );
             sb.AppendLine( "       )" );
             sb.AppendLine( "   )" );
         }
@@ -879,6 +879,7 @@ public static class QueryDefinitions
 
         return sb.ToString();
     }
+  
     public static readonly string ModifyStage = @"
         UPDATE amusing.ah_podia 
             SET naam = @Naam,
