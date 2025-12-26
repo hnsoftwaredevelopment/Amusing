@@ -77,7 +77,7 @@ jobs:
           printf "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 
       - name: Stop service before deploy
-        run: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "sudo systemctl stop amusing.service"
+        run: ssh -4 ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "sudo systemctl stop amusing.service"
 
       - name: Deploy to VPS via rsync
         uses: burnett01/rsync-deployments@7.1.0
