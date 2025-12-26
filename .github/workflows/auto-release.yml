@@ -11,11 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Debug SSH connectivity
-      run: |
-        echo "Trying to connect to VPS..."
-        ssh -v -4 -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo ok"
-      
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
@@ -80,6 +75,11 @@ jobs:
         echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
         chmod 600 ~/.ssh/id_ed25519
         printf "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+
+    - name: Debug SSH connectivity
+      run: |
+        echo "Trying to connect to VPS..."
+        ssh -v -4 -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo ok"
 
     - name: Test SSH connection
       run: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo ok"
