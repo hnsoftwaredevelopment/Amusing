@@ -1,0 +1,90 @@
+name: Auto Release & Deploy from Main (Self-Hosted Runner)
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  release-deploy:
+    # Gebruik self-hosted runner op je VPS
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+
+    - name: Generate version
+      id: version
+      run: |
+        DATE=$(date +"%y.%m.%d")
+        COUNT=$(git tag -l "$DATE.*" | wc -l)
+        BUILD=$(printf "%02d" $((COUNT + 1)))
+        VERSION="$DATE.$BUILD"
+        echo "Generated version: $VERSION"
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Restore dependencies
+      run: dotnet restore Amusing/Amusing.csproj --use-lock-file
+
+    - name: Inject version into csproj
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        echo "Injecting version $VERSION into csproj"
+        sed -i "s|<AssemblyVersion>.*</AssemblyVersion>|<AssemblyVersion>${VERSION}</AssemblyVersion>|" Amusing/Amusing.csproj
+        sed -i "s|<FileVersion>.*</FileVersion>|<FileVersion>${VERSION}</FileVersion>|" Amusing/Amusing.csproj
+
+    - name: Show csproj
+      run: cat Amusing/Amusing.csproj
+
+    - name: Clean previous build
+      run: |
+        dotnet clean Amusing/Amusing.csproj
+        rm -rf published/
+
+    - name: Build
+      run: dotnet build Amusing/Amusing.csproj --configuration Release
+
+    - name: Publish
+      run: |
+        dotnet publish Amusing/Amusing.csproj \
+          --configuration Release \
+          --runtime linux-x64 \
+          --self-contained true \
+          -o published
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: "v${{ steps.version.outputs.version }}"
+        name: "Release v${{ steps.version.outputs.version }}"
+        body: "Automated release and deploy from main branch."
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # -----------------------------
+    # Deploy stap (lokaal op VPS)
+    # -----------------------------
+    - name: Stop Blazor service
+      run: sudo systemctl stop amusing.service
+
+    - name: Deploy published files
+      run: |
+        DEPLOY_DIR="/home/groups/svp/dev.beheer.amusing-hengelo.nl/www/Amusing"
+        # Verwijder oude bestanden
+        rm -rf $DEPLOY_DIR/*
+        # Kopieer nieuwe build
+        cp -r published/* $DEPLOY_DIR/
+        # Zet rechten
+        chmod -R 755 $DEPLOY_DIR
+
+    - name: Start Blazor service
+      run: sudo systemctl start amusing.service
