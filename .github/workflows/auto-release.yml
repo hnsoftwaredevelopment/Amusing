@@ -61,6 +61,9 @@ jobs:
       run: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
         "sudo systemctl stop amusing.service"
 
+    - name: Test SSH connectivity
+      run: ssh -4 -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo ok"
+
     - name: Deploy published folder (rsync)
       uses: burnett01/rsync-deployments@7.1.0
       with:
@@ -73,7 +76,7 @@ jobs:
         remote_port: ${{ secrets.SSH_PORT }}
 
     - name: Start Blazor service
-      run: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+      run: ssh -4 -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
         "sudo systemctl start amusing.service"
 
     - name: Clean old releases
