@@ -76,6 +76,6 @@ jobs:
       run: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
         "sudo systemctl start amusing.service"
 
-    - name: Optional: Clean old releases
+    - name: Clean old releases
       run: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
         "find /home/groups/svp/dev.beheer.amusing-hengelo.nl/www/Amusing -maxdepth 1 -type d -mtime +30 -exec rm -rf {} \;"
