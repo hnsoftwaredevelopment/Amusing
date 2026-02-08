@@ -14,7 +14,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0   
+        fetch-depth: 0
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -37,37 +37,18 @@ jobs:
     - name: Inject version into csproj
       run: |
         VERSION="${{ steps.version.outputs.version }}"
-        echo "Injecting version $VERSION into csproj"
         sed -i "s|<AssemblyVersion>.*</AssemblyVersion>|<AssemblyVersion>${VERSION}</AssemblyVersion>|" Amusing/Amusing.csproj
         sed -i "s|<FileVersion>.*</FileVersion>|<FileVersion>${VERSION}</FileVersion>|" Amusing/Amusing.csproj
 
-    - name: Show csproj
-      run: cat Amusing/Amusing.csproj
-
-    - name: Clean previous build
+    - name: Build & Publish
       run: |
         dotnet clean Amusing/Amusing.csproj
-        rm -rf published/
-
-    - name: Build
-      run: dotnet build Amusing/Amusing.csproj --configuration Release
-
-    - name: Publish
-      run: |
+        dotnet build Amusing/Amusing.csproj --configuration Release
         dotnet publish Amusing/Amusing.csproj \
           --configuration Release \
           --runtime linux-x64 \
           --self-contained true \
           -o published
-
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: "v${{ steps.version.outputs.version }}"
-        name: "Release v${{ steps.version.outputs.version }}"
-        body: "Automated release and deploy from main branch."
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Setup SSH
       run: |
@@ -76,18 +57,11 @@ jobs:
         chmod 600 ~/.ssh/id_ed25519
         printf "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 
-    - name: Debug SSH connectivity
-      run: |
-        echo "Trying to connect to VPS..."
-        ssh -v -4 -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo ok"
+    - name: Stop Blazor service
+      run: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+        "sudo systemctl stop amusing.service"
 
-    - name: Test SSH connection
-      run: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo ok"
-    
-    - name: Stop service before deploy
-      run: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "sudo systemctl stop amusing.service"
-   
-    - name: Deploy via rsync
+    - name: Deploy published folder (rsync)
       uses: burnett01/rsync-deployments@7.1.0
       with:
         switches: -avzr --delete --chmod=Du=rwx,Dg=rx,Do=rx,Fu=rw,Fg=r,Fo=r
@@ -97,6 +71,11 @@ jobs:
         remote_user: ${{ secrets.SSH_USER }}
         remote_key: ${{ secrets.SSH_KEY }}
         remote_port: ${{ secrets.SSH_PORT }}
-    
-    - name: Start service
-      run: ssh -4 -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "sudo systemctl start amusing.service"
+
+    - name: Start Blazor service
+      run: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+        "sudo systemctl start amusing.service"
+
+    - name: Optional: Clean old releases
+      run: ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+        "find /home/groups/svp/dev.beheer.amusing-hengelo.nl/www/Amusing -maxdepth 1 -type d -mtime +30 -exec rm -rf {} \;"
