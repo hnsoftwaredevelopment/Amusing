@@ -34,7 +34,7 @@
 								TItem="Registration" DataSource="@RegistrationList"
 								Width="100%"
 								AllowExcelExport="true" AllowPdfExport="true"
-								AllowSorting="true"
+								AllowSorting="true" 
 								AllowMultiSorting="true">
 
 							<SfToolbar>
@@ -67,7 +67,7 @@
 
 							<GridColumns>
 								<GridColumn Field="Datum" HeaderText="Datum" TextAlign="TextAlign.Center" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="90"></GridColumn>
-								<GridColumn Field="Naam" HeaderText="Naam"></GridColumn>
+								<GridColumn Field="Naam" HeaderText="Naam" Width="200"></GridColumn>
 								<GridColumn Field="Stad" HeaderText="Stad" Width="180"></GridColumn>
 								<GridColumn Field="Podium" HeaderText="Podium" Width="70" TextAlign="TextAlign.Center"></GridColumn>
 								<GridColumn Field="Zangers" HeaderText="Zangers" TextAlign="TextAlign.Center" Width="70"></GridColumn>
@@ -118,10 +118,123 @@
 										</div>
 									</FooterTemplate>
 								</DialogTemplates>
-
 							</SfDialog>
-								<GridColumn Field="Bevestigd" HeaderText="Bevestigd" Width="80" TextAlign="TextAlign.Center"></GridColumn>
-								<GridColumn Field="Kleedkamer" HeaderText="Kleedkamer" Width="100" TextAlign="TextAlign.Center"></GridColumn>
+
+							<SfDialog 
+								Width="300px"
+								IsModal="true"
+								@bind-Visible="showYesNoDialog"
+								ShowCloseIcon="true"
+							    Header="@selectedYesNoHeaderText">
+
+								<DialogTemplates>
+										<Content>
+											<div class="p-3">
+												<p>
+													<strong>@selectedRegistration?.Naam</strong><br />
+													Wijzigen: <em>@selectedYesNoField</em>
+												</p>
+											</div>
+										</Content>
+
+										<FooterTemplate>
+											<div class="flex justify-end gap-2">
+												<button class="btn btn-green" @onclick="OnYesClicked">Ja</button>
+												<button class="btn btn-red" @onclick="OnNoClicked">Nee</button>
+												<button class="btn btn-gray" @onclick="CloseYesNoDialog">Annuleren</button>
+											</div>
+										</FooterTemplate>
+									</DialogTemplates>
+							</SfDialog>
+
+							<GridColumn Field="Bevestigd"
+										HeaderText="Bevestigd"
+										Width="90"
+										TextAlign="TextAlign.Center">
+
+								<Template Context="row">
+									@{
+										var reg = (RegistrationModel)row;
+									}
+
+									<span class="yesno-cell"
+											style="cursor:pointer; font-weight:600"
+											@onclick="@(() => OpenYesNoDialog(reg, nameof(RegistrationModel.Bevestigd), YesNoHeaders.Bevestigd ))"> @reg.Bevestigd
+									</span>
+								</Template>
+							</GridColumn>
+
+							<GridColumn 
+								Field="Kleedkamer" 
+								HeaderText="Kleedkamer" 
+								Width="100" TextAlign="TextAlign.Center">
+									<Template Context="row">
+										@{
+											var reg = (RegistrationModel)row;
+										}
+
+										<span class="yesno-cell"
+											  style="cursor:pointer; font-weight:600"
+											  @onclick="@(() => OpenYesNoDialog(reg, nameof(RegistrationModel.Kleedkamer), YesNoHeaders.Kleedkamer))">
+											@reg.Kleedkamer
+										</span>
+									</Template>
+								</GridColumn>
+
+							<GridColumn 
+								Field="SingAlong" 
+								HeaderText="SingAlong" 
+								Width="100" 
+								TextAlign="TextAlign.Center">
+									<Template Context="row">
+										@{
+											var reg = (RegistrationModel)row;
+										}
+
+										<span class="yesno-cell"
+											  style="cursor:pointer; font-weight:600"
+											  @onclick="@(() => OpenYesNoDialog(reg, nameof(RegistrationModel.SingAlong), YesNoHeaders.SingAlong))">
+											@reg.SingAlong
+										</span>
+									</Template>
+								</GridColumn>
+
+							<GridColumn 
+								Field="AcapellaBattle" 
+								HeaderText="AcapellaBattle" 
+								Width="100" 
+								TextAlign="TextAlign.Center">
+									<Template Context="row">
+										@{
+											var reg = (RegistrationModel)row;
+										}
+
+										<span class="yesno-cell"
+											  style="cursor:pointer; font-weight:600"
+											  @onclick="@(() => OpenYesNoDialog(reg, nameof(RegistrationModel.AcapellaBattle), YesNoHeaders.AcapellaBattle))">
+											@reg.AcapellaBattle
+										</span>
+									</Template>
+								</GridColumn>
+
+							<GridColumn 
+								Field="Beoordeling" 
+								HeaderText="Beoordeling" 
+								Width="100" 
+								TextAlign="TextAlign.Center">
+									<Template Context="row">
+										@{
+											var reg = (RegistrationModel)row;
+										}
+
+										<span class="yesno-cell"
+											  style="cursor:pointer; font-weight:600"
+											  @onclick="@(() => OpenYesNoDialog(reg, nameof(RegistrationModel.Beoordeling), YesNoHeaders.Beoordeling))">
+											@reg.Beoordeling
+										</span>
+									</Template>
+								</GridColumn>
+
 								<GridColumn Field="Binnen" HeaderText="Binnen" Width="70" TextAlign="TextAlign.Center"></GridColumn>
 								<GridColumn Field="Buiten" HeaderText="Buiten" Width="70" TextAlign="TextAlign.Center"></GridColumn>
 								<GridColumn HeaderText="Afgehaakt" Width="120" TextAlign="TextAlign.Center">

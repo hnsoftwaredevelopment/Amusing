@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `ah_inschrijvingen` (
   `zanggroep_id` int unsigned NOT NULL DEFAULT '0',
   `wens_1` enum('ja','nee') NOT NULL DEFAULT 'nee' COMMENT 'kleedruimte',
   `wens_2` enum('ja','nee') NOT NULL DEFAULT 'nee' COMMENT 'singalong',
-  `wens_3` enum('ja','nee') NOT NULL DEFAULT 'nee' COMMENT 'stand',
+  `wens_3` enum('ja','nee') NOT NULL DEFAULT 'nee' COMMENT 'acapellabattle',
   `wens_4` enum('ja','nee') NOT NULL DEFAULT 'nee' COMMENT 'beoordeling',
   `nfve` enum('ja','nee') NOT NULL DEFAULT 'nee',
   `afactor` enum('ja','nee') NOT NULL DEFAULT 'nee',

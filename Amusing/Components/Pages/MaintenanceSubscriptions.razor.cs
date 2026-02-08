@@ -22,6 +22,8 @@ public partial class MaintenanceSubscriptions : ComponentBase
     protected int VisibleRowCount = 0;
     private bool showPaymentDialog;
 
+    private readonly List<string> YesNoList = new() { "Ja", "Nee" };
+
     private bool showDatePicker { get; set; }
     private DateTime? selectedDate { get; set; }
     private RegistrationModel? selectedRegistration;
@@ -178,5 +180,93 @@ public partial class MaintenanceSubscriptions : ComponentBase
         // Update UI-model
         registration.Afgehaakt = ( newValue == null ) ? "Nee" : "Ja";
         StateHasChanged();
+    }
+
+    private async Task OnYesNoChangedAsync(
+    RegistrationModel registration,
+    string columnName,
+    string value)
+    {
+        // Update UI model
+        typeof(RegistrationModel)
+            .GetProperty(columnName)!
+            .SetValue(registration, value);
+
+        // Update DB
+        await RegistrationService.UpdateYesNoFieldAsync(
+            registration.FestivalId,
+            registration.GroepId,
+            columnName,
+            value
+        );
+    }
+
+    private bool showYesNoDialog;
+    private string? selectedYesNoField;
+    private string? selectedYesNoHeaderText;
+    private static class YesNoHeaders
+    {
+        public const string Bevestigd = "Bevestiging wijzigen";
+        public const string Kleedkamer = "Gebruik kleedkamer wijzigen";
+        public const string SingAlong = "Deelname sing along wijzigen";
+        public const string AcapellaBattle = "Deelname acapella battle wijzigen";
+        public const string Beoordeling = "Wil beoordeling wijzigen";
+    }
+    private void OpenYesNoDialog( RegistrationModel registration, string fieldName, string headerText )
+    {
+        selectedRegistration = registration;
+        selectedYesNoField = fieldName;
+        selectedYesNoHeaderText = headerText;
+
+        showYesNoDialog = true;
+    }
+
+    private async Task ConfirmYesNoAsync(string value)
+    {
+        if (selectedRegistration is null || string.IsNullOrEmpty(selectedYesNoField))
+            return;
+
+        string mappedFieldName = selectedYesNoField switch
+        {
+            nameof(RegistrationModel.Bevestigd) => "Bevestigd",
+            nameof(RegistrationModel.Kleedkamer) => "Wens_1",
+            nameof(RegistrationModel.SingAlong) => "Wens_2",
+            nameof(RegistrationModel.AcapellaBattle) => "Wens_3",
+            nameof(RegistrationModel.Beoordeling) => "Wens_4",
+            _ => throw new InvalidOperationException("Unknown Yes/No field")
+        };
+
+        // Update model
+        typeof(RegistrationModel)
+            .GetProperty(selectedYesNoField)!
+            .SetValue(selectedRegistration, value);
+
+        await RegistrationService.UpdateYesNoFieldAsync(
+            selectedRegistration.FestivalId,
+            selectedRegistration.GroepId,
+            mappedFieldName,
+            value
+        );
+
+        showYesNoDialog = false;
+    }
+
+
+    private Task OnYesClicked()
+    {
+        return ConfirmYesNoAsync("Ja");
+    }
+
+    private Task OnNoClicked()
+    {
+        return ConfirmYesNoAsync("Nee");
+    }
+
+    private void CloseYesNoDialog()
+    {
+        showYesNoDialog = false;
+        selectedRegistration = null;
+        selectedYesNoField = null;
+        selectedYesNoHeaderText = null;
     }
 }

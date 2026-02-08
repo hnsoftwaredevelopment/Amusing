@@ -245,7 +245,10 @@ public static class QueryDefinitions
             END)) AS TeBetalen,
             IF((i.betaald IS null), 'Nee', 'Ja') AS Betaald,
             IF((i.bevestigd IS null), 'Nee', 'Ja') AS Bevestigd,
-            i.nfve AS Kleedkamer,
+            IF((LOWER(i.Wens_1) IS null), 'nee', i.wens_1 ) AS Kleedkamer,
+            IF((LOWER(i.Wens_2) IS null), 'nee', i.wens_2) AS SingAlong,
+            IF((LOWER(i.wens_3) IS null), 'nee', i.wens_3) AS AcapellaBattle,
+            IF((LOWER(i.Wens_4) IS null), 'nee', i.wens_4) AS Beoordeling,
             i.binnenoptredens AS Binnen,
             i.buitenoptredens AS Buiten,
             IF((i.afgehaakt IS null), 'Nee', 'Ja') AS Afgehaakt
@@ -1270,7 +1273,7 @@ public static class QueryDefinitions
 	        IF(sub.bevestigd IS NOT NULL, 1, 0) AS Confirmed,
 	        IF(sub.wens_1 = 'ja', 1, 0) AS Dressingroom,
 	        IF(sub.wens_2 = 'ja', 1, 0) AS SingAlong,
-	        IF(sub.wens_3 = 'ja', 1, 0) AS Stand,
+	        IF(sub.wens_3 = 'ja', 1, 0) AS AcapellaBattle,
 	        IF(sub.wens_4 = 'ja', 1, 0) AS Judgement,
 	        sub.aantal_deelnemers AS Singers
         FROM amusing.ah_personen per
@@ -1298,7 +1301,7 @@ public static class QueryDefinitions
 	        IF(sub.bevestigd IS NOT NULL, 1, 0) AS Confirmed,
 	        IF(sub.wens_1 = 'ja', 1, 0) AS Dressingroom,
 	        IF(sub.wens_2 = 'ja', 1, 0) AS SingAlong,
-	        IF(sub.wens_3 = 'ja', 1, 0) AS Stand,
+	        IF(sub.wens_3 = 'ja', 1, 0) AS AcapellaBattle,
 	        IF(sub.wens_4 = 'ja', 1, 0) AS Judgement,
 	        sub.aantal_deelnemers AS Singers,
 	        IF(vol.persoon_id IS NOT NULL, 1, 0) AS Volunteer
@@ -1419,10 +1422,10 @@ public static class QueryDefinitions
             IF(sub.afgehaakt   IS NOT NULL, 'ja', 'nee') AS Canceled,
             IF(sub.betaald     IS NOT NULL, 'ja', 'nee') AS Paid,
             IF(sub.bevestigd   IS NOT NULL, 'ja', 'nee') AS Confirmed,
-            IF(sub.wens_1 = 'ja', 'ja', 'nee') AS Dressingroom,
-            IF(sub.wens_2 = 'ja', 'ja', 'nee') AS SingAlong,
-            IF(sub.wens_3 = 'ja', 'ja', 'nee') AS Stand,
-            IF(sub.wens_4 = 'ja', 'ja', 'nee') AS Judgement,
+            IF((LOWER(i.Wens_1) IS null), 'nee', i.wens_1 ) AS Kleedkamer,
+            IF((LOWER(i.Wens_2) IS null), 'nee', i.wens_2) AS SingAlong,
+            IF((LOWER(i.wens_3) IS null), 'nee', i.wens_3) AS AcapellaBattle,
+            IF((LOWER(i.Wens_4) IS null), 'nee', i.wens_4) AS Beoordeling,
             sub.aantal_deelnemers AS Singers,
             sub.podiumsoort       AS StageType,
             IF(vol.persoon_id IS NOT NULL, 'ja', 'nee') AS Vrijwilliger
@@ -1468,6 +1471,29 @@ public static class QueryDefinitions
                         query	AS ListQuery
                     FROM amusing.ah_recipient_lists
                     ORDER BY name;";
+
+    public static readonly string GetRecipientListById = @"
+                    SELECT 
+                        id 		AS ListId,
+                        name 	AS ListName,
+                        created AS ListCreated,
+                        changed AS ListChanged,
+                        source 	AS ListSource,
+                        filter	AS ListFilter,
+                        query	AS ListQuery
+                    FROM amusing.ah_recipient_lists
+                    WHERE id = @ListId;";
+
+    public static string ModifyChangedGridValue(string fieldName)
+    {
+        return $@"
+        UPDATE amusing.ah_inschrijvingen
+        SET `{fieldName}` = @value
+        WHERE festival_id = @FestivalId
+          AND zanggroep_Id = @GroepId;";
+    }
+
+
     public static readonly string ModifyRecipientQueryById = @"
     UPDATE amusing.ah_recipient_lists
     SET 

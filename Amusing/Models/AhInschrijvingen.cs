@@ -13,7 +13,7 @@ public partial class AhInschrijvingen
     /// </summary>
     public string Wens2 { get; set; } = null!;
     /// <summary>
-    /// stand
+    /// Acapella Battle
     /// </summary>
     public string Wens3 { get; set; } = null!;
     /// <summary>

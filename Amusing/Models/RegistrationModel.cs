@@ -15,6 +15,10 @@ public class RegistrationModel
     public DateTime? Betaaldatum { get; set; }
     public string Bevestigd { get; set; }
     public string Kleedkamer { get; set; }
+    public string SingAlong { get; set; }
+    public string AcapellaBattle { get; set; }
+    public string Beoordeling { get; set; }
+    public string Stand { get; set; }
     public int Binnen { get; set; }
     public int Buiten { get; set; }
     public string Afgehaakt { get; set; }

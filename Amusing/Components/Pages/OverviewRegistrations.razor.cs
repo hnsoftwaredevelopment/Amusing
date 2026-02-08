@@ -38,12 +38,8 @@ public partial class OverviewRegistrations : ComponentBase
                 .OrderByDescending( e => int.Parse( e.Text ) )
                 .First().ID;
 
-            // Get the registrations for the selected edition
-            RegistrationList = await RegistrationService.GetRegistrationsByFestivalIdAsync( Convert.ToUInt32( SelectedEditionId ) );
-            if ( SelectedEditionId != null && RegistrationList.Count > 0 )
-            {
-                await UpdateVisibleRowCount();
-            }
+        // Get the registrations for the selected edition
+        RegistrationList = await RegistrationService.GetRegistrationsByFestivalIdAsync( Convert.ToUInt32( SelectedEditionId ) );
         }
     }
 

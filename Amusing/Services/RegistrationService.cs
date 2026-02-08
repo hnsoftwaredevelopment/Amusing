@@ -27,6 +27,9 @@ public class RegistrationService( GenericDataService dataService )
                 Betaald = reader [ "Betaald" ].ToString(),
                 Bevestigd = reader [ "Bevestigd" ].ToString(),
                 Kleedkamer = reader [ "Kleedkamer" ].ToString(),
+                AcapellaBattle = reader["AcapellaBattle"].ToString(),
+                SingAlong = reader ["SingAlong"].ToString(),
+                Beoordeling = reader["Beoordeling"].ToString(),
                 Binnen = Convert.ToInt32( reader [ "Binnen" ] ),
                 Buiten = Convert.ToInt32( reader [ "Buiten" ] ),
                 Afgehaakt = reader [ "Afgehaakt" ].ToString()
@@ -144,5 +147,17 @@ public class RegistrationService( GenericDataService dataService )
         }
         return;
 
+    }
+
+    public async Task UpdateYesNoFieldAsync(uint festivalId, uint groepId, string fieldName, string value)
+    {
+        var sqlQuery = QueryDefinitions.ModifyChangedGridValue(fieldName);
+
+        await _dataService.ExecuteNonQueryAsync(sqlQuery, new Dictionary<string, object>
+        {
+            ["@value"] = value,
+            ["@FestivalId"] = festivalId,
+            ["@GroepId"] = groepId
+        });
     }
 }
