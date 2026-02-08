@@ -1,4 +1,4 @@
-name: Auto Release & Deploy from Main (Self-Hosted Runner)
+name: Auto Release & Deploy from Main
 
 on:
   push:
@@ -8,20 +8,28 @@ on:
 
 jobs:
   release-deploy:
-    # Gebruik self-hosted runner op je VPS
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
+    # ---------------------------
+    # Checkout
+    # ---------------------------
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
+    # ---------------------------
+    # .NET setup
+    # ---------------------------
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
 
+    # ---------------------------
+    # Versioning
+    # ---------------------------
     - name: Generate version
       id: version
       run: |
@@ -32,18 +40,17 @@ jobs:
         echo "Generated version: $VERSION"
         echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+    # ---------------------------
+    # Restore / build / publish
+    # ---------------------------
     - name: Restore dependencies
       run: dotnet restore Amusing/Amusing.csproj --use-lock-file
 
     - name: Inject version into csproj
       run: |
         VERSION="${{ steps.version.outputs.version }}"
-        echo "Injecting version $VERSION into csproj"
         sed -i "s|<AssemblyVersion>.*</AssemblyVersion>|<AssemblyVersion>${VERSION}</AssemblyVersion>|" Amusing/Amusing.csproj
         sed -i "s|<FileVersion>.*</FileVersion>|<FileVersion>${VERSION}</FileVersion>|" Amusing/Amusing.csproj
-
-    - name: Show csproj
-      run: cat Amusing/Amusing.csproj
 
     - name: Clean previous build
       run: |
@@ -61,6 +68,9 @@ jobs:
           --self-contained true \
           -o published
 
+    # ---------------------------
+    # GitHub release
+    # ---------------------------
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
@@ -70,21 +80,35 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    # -----------------------------
-    # Deploy stap (lokaal op VPS)
-    # -----------------------------
-    - name: Stop Blazor service
-      run: sudo systemctl stop amusing.service
-
-    - name: Deploy published files
+    # ---------------------------
+    # SSH setup
+    # ---------------------------
+    - name: Setup SSH
       run: |
-        DEPLOY_DIR="/home/groups/svp/dev.beheer.amusing-hengelo.nl/www/Amusing"
-        # Verwijder oude bestanden
-        rm -rf $DEPLOY_DIR/*
-        # Kopieer nieuwe build
-        cp -r published/* $DEPLOY_DIR/
-        # Zet rechten
-        chmod -R 755 $DEPLOY_DIR
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
+        printf "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
 
-    - name: Start Blazor service
-      run: sudo systemctl start amusing.service
+    # ---------------------------
+    # Deploy via rsync
+    # ---------------------------
+    - name: Deploy via rsync
+      uses: burnett01/rsync-deployments@7.1.0
+      with:
+        switches: -avzr --delete
+        path: published/
+        remote_path: /home/groups/svp/dev.beheer.amusing-hengelo.nl/www/Amusing
+        remote_host: ${{ secrets.SSH_HOST }}
+        remote_user: ${{ secrets.SSH_USER }}
+        remote_key: ${{ secrets.SSH_KEY }}
+        remote_port: ${{ secrets.SSH_PORT }}
+
+    # ---------------------------
+    # Restart via VPS deploy script
+    # ---------------------------
+    - name: Restart Amusing on VPS
+      run: |
+        ssh -i ~/.ssh/id_ed25519 -p ${{ secrets.SSH_PORT }} \
+          ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} \
+          "sudo /home/groups/svp/deploy-scripts/deploy-amusing.sh"
