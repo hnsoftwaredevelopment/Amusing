@@ -14,15 +14,14 @@ else
 @code {
     [CascadingParameter]
     private HttpContext? HttpContext { get; set; }
+    private bool _hasRefreshed;
 
     protected override void OnParametersSet()
     {
-        if (HttpContext is null)
+        if (!_hasRefreshed && HttpContext is null)
         {
-            // If this code runs, we're currently rendering in interactive mode, so there is no HttpContext.
-            // The identity pages need to set cookies, so they require an HttpContext. To achieve this we
-            // must transition back From interactive mode to a server-rendered page.
-            NavigationManager.Refresh(forceReload: true);
+            _hasRefreshed = true;
+            //NavigationManager.Refresh(forceReload: true);
         }
     }
 }

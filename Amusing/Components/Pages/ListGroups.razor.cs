@@ -96,19 +96,17 @@ public partial class ListGroups : ComponentBase
         StateHasChanged();
         Zanggroepen = await RegistrationService.GetRegistrationdPerFestivalAsync( filterOutOldGroups: FilterOutOldGroups );
 
-        YearColumns = Zanggroepen
+        YearColumns = [.. Zanggroepen
             .SelectMany( z => z.DeelnamePerJaar.Keys )
             .Union( Enumerable.Range( minslider, maxslider - minslider + 1 ) )
             .Distinct()
-            .OrderBy( y => y )
-            .ToList();
+            .OrderBy( y => y )];
 
         //Filter only rows with year values
         var zichtbareJaren = VisibleYearCollumns;
-        Zanggroepen = Zanggroepen
+        Zanggroepen = [.. Zanggroepen
             .Where( z => z.DeelnamePerJaar
-                .Any( d => zichtbareJaren.Contains( d.Key ) && !string.IsNullOrWhiteSpace( d.Value ) ) )
-            .ToList();
+                .Any( d => zichtbareJaren.Contains( d.Key ) && !string.IsNullOrWhiteSpace( d.Value ) ) )];
 
         IsLoading = false;
 

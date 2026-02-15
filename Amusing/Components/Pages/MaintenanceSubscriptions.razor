@@ -165,41 +165,6 @@
 							</GridColumn>
 
 							<GridColumn 
-								Field="Kleedkamer" 
-								HeaderText="Kleedkamer" 
-								Width="100" TextAlign="TextAlign.Center">
-									<Template Context="row">
-										@{
-											var reg = (RegistrationModel)row;
-										}
-
-										<span class="yesno-cell"
-											  style="cursor:pointer; font-weight:600"
-											  @onclick="@(() => OpenYesNoDialog(reg, nameof(RegistrationModel.Kleedkamer), YesNoHeaders.Kleedkamer))">
-											@reg.Kleedkamer
-										</span>
-									</Template>
-								</GridColumn>
-
-							<GridColumn 
-								Field="SingAlong" 
-								HeaderText="SingAlong" 
-								Width="100" 
-								TextAlign="TextAlign.Center">
-									<Template Context="row">
-										@{
-											var reg = (RegistrationModel)row;
-										}
-
-										<span class="yesno-cell"
-											  style="cursor:pointer; font-weight:600"
-											  @onclick="@(() => OpenYesNoDialog(reg, nameof(RegistrationModel.SingAlong), YesNoHeaders.SingAlong))">
-											@reg.SingAlong
-										</span>
-									</Template>
-								</GridColumn>
-
-							<GridColumn 
 								Field="AcapellaBattle" 
 								HeaderText="AcapellaBattle" 
 								Width="100" 
@@ -213,24 +178,6 @@
 											  style="cursor:pointer; font-weight:600"
 											  @onclick="@(() => OpenYesNoDialog(reg, nameof(RegistrationModel.AcapellaBattle), YesNoHeaders.AcapellaBattle))">
 											@reg.AcapellaBattle
-										</span>
-									</Template>
-								</GridColumn>
-
-							<GridColumn 
-								Field="Beoordeling" 
-								HeaderText="Beoordeling" 
-								Width="100" 
-								TextAlign="TextAlign.Center">
-									<Template Context="row">
-										@{
-											var reg = (RegistrationModel)row;
-										}
-
-										<span class="yesno-cell"
-											  style="cursor:pointer; font-weight:600"
-											  @onclick="@(() => OpenYesNoDialog(reg, nameof(RegistrationModel.Beoordeling), YesNoHeaders.Beoordeling))">
-											@reg.Beoordeling
 										</span>
 									</Template>
 								</GridColumn>

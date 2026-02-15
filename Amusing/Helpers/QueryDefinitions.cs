@@ -221,41 +221,42 @@ public static class QueryDefinitions
         )
     GROUP BY ah_personen.email
     ORDER BY `Groep` ASC;";
+
     public static readonly string GetRegistrationsByFestifalId = @"
         SELECT
             i.festival_id AS festival_id,
             i.zanggroep_id AS zanggroep_id,
-            i.ingeschreven AS Datum,
-            grp.naam AS Naam,
-            grp.standplaats AS Stad,
-            i.podiumsoort AS Podium,
-            i.aantal_deelnemers AS Zangers,
-            gen.nl AS Genre,
+            i.ingeschreven AS datum,
+            COALESCE(grp.naam,'') AS naam,
+            COALESCE(grp.standplaats,'') AS stad,
+            i.podiumsoort AS podium,
+            i.aantal_deelnemers AS zangers,
+            COALESCE(gen.nl,'') AS genre,
             ((CASE
                 i.podiumsoort WHEN 'B' THEN 25.00
-                WHEN 'C' THEN 50.00
-                WHEN 'D' THEN 75.00
-                ELSE 0.00
+                              WHEN 'C' THEN 50.00
+                              WHEN 'D' THEN 75.00
+                              ELSE 0.00
             END) + (CASE
                 WHEN (i.aantal_deelnemers BETWEEN 1 and 20) THEN 50.00
                 WHEN (i.aantal_deelnemers BETWEEN 21 and 50) THEN 75.00
                 WHEN (i.aantal_deelnemers BETWEEN 51 and 100) THEN 100.00
                 WHEN (i.aantal_deelnemers > 100) THEN 125.00
                 ELSE 0.00
-            END)) AS TeBetalen,
-            IF((i.betaald IS null), 'Nee', 'Ja') AS Betaald,
-            IF((i.bevestigd IS null), 'Nee', 'Ja') AS Bevestigd,
-            IF((LOWER(i.Wens_1) IS null), 'nee', i.wens_1 ) AS Kleedkamer,
-            IF((LOWER(i.Wens_2) IS null), 'nee', i.wens_2) AS SingAlong,
-            IF((LOWER(i.wens_3) IS null), 'nee', i.wens_3) AS AcapellaBattle,
-            IF((LOWER(i.Wens_4) IS null), 'nee', i.wens_4) AS Beoordeling,
-            i.binnenoptredens AS Binnen,
-            i.buitenoptredens AS Buiten,
-            IF((i.afgehaakt IS null), 'Nee', 'Ja') AS Afgehaakt
+            END)) AS tebetalen,
+            IF(i.betaald IS NULL, 'Nee', 'Ja') AS betaald,
+            IF(i.bevestigd IS NULL, 'Nee', 'Ja') AS bevestigd,
+            IF(i.wens_1 IS NULL OR LOWER(i.wens_1)='', 'nee', i.wens_1) AS kleedkamer,
+            IF(i.wens_2 IS NULL OR LOWER(i.wens_2)='', 'nee', i.wens_2) AS singalong,
+            IF(i.wens_3 IS NULL OR LOWER(i.wens_3)='', 'nee', i.wens_3) AS acapellabattle,
+            IF(i.wens_4 IS NULL OR LOWER(i.wens_4)='', 'nee', i.wens_4) AS beoordeling,
+            i.binnenoptredens AS binnen,
+            i.buitenoptredens AS buiten,
+            IF(i.afgehaakt IS NULL, 'Nee', 'Ja') AS afgehaakt
         FROM
             amusing.ah_inschrijvingen i
-            LEFT JOIN amusing.ah_zanggroepen grp on i.zanggroep_id = grp.zanggroep_id
-            LEFT JOIN amusing.ah_genres gen on grp.genre_id = gen.genre_id
+            LEFT JOIN amusing.ah_zanggroepen grp ON i.zanggroep_id = grp.zanggroep_id
+            LEFT JOIN amusing.ah_genres gen ON grp.genre_id = gen.genre_id
         WHERE
             i.festival_id = @festivalId
         ORDER BY
@@ -877,7 +878,7 @@ public static class QueryDefinitions
             sb.AppendLine( "   )" );
         }
 
-        sb.AppendLine( "GROUP BY zg.zanggroep_id" );
+        sb.AppendLine("GROUP BY zg.zanggroep_id, zg.naam, zg.standplaats, p.datecreate");
         sb.AppendLine( "ORDER BY zg.naam" );
 
         return sb.ToString();

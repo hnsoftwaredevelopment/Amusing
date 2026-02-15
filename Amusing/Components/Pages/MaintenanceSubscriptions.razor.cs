@@ -17,12 +17,12 @@ public partial class MaintenanceSubscriptions : ComponentBase
 
     protected SfGrid<RegistrationModel> GridRef;
     protected List<Edition> Editions = [];
-    protected List<RegistrationModel> RegistrationList = new();
+    protected List<RegistrationModel> RegistrationList = [];
     protected string? SelectedEditionId;
     protected int VisibleRowCount = 0;
     private bool showPaymentDialog;
 
-    private readonly List<string> YesNoList = new() { "Ja", "Nee" };
+    private readonly List<string> YesNoList = ["Ja", "Nee"];
 
     private bool showDatePicker { get; set; }
     private DateTime? selectedDate { get; set; }
