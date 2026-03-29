@@ -7,8 +7,6 @@ using Amusing.Models;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 
-using Microsoft.Extensions.Logging;
-
 using MimeKit;
 
 namespace Amusing.Services;
@@ -19,31 +17,28 @@ public class MailingService
     private readonly IMailingLogger _logger;
     private readonly GenericDataService _dataService;
     private readonly FieldMappingService _mappingService;
-    private readonly TransipMailingService _transipMailingService;
 
-    public MailingService( 
+    public MailingService(
         GenericDataService dataService,
         EmailSettings emailSettings,
         FieldMappingService mappingService,
-        IMailingLogger logger,
-        TransipMailingService transipMailingService )
+        IMailingLogger logger)
     {
         _emailSettings = emailSettings;
         _logger = logger;
         _dataService = dataService;
         _mappingService = mappingService;
-        _transipMailingService = transipMailingService;
     }
 
     #region Template Replacement
 
-    private string ReplaceTemplateFields( string templateText, IDictionary<string, object> recipient )
+    private string ReplaceTemplateFields(string templateText, IDictionary<string, object> recipient)
     {
-        foreach ( var kvp in recipient )
+        foreach (var kvp in recipient)
         {
             string placeholder = "{" + kvp.Key + "}";
             string value = kvp.Value?.ToString() ?? string.Empty;
-            templateText = templateText.Replace( placeholder, value, StringComparison.OrdinalIgnoreCase );
+            templateText = templateText.Replace(placeholder, value, StringComparison.OrdinalIgnoreCase);
         }
         return templateText;
     }
@@ -52,36 +47,32 @@ public class MailingService
 
     #region Send Mail Core
 
-    private async Task _SendMimeMessageAsync( MimeMessage message )
+    private async Task _SendMimeMessageAsync(MimeMessage message)
     {
         try
         {
             using var client = new SmtpClient();
             var secureOption = _emailSettings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None;
 
-            Debug.WriteLine( $"SMTP Host: {_emailSettings.SmtpHost}, Port: {_emailSettings.SmtpPort}, SSL: {_emailSettings.EnableSsl}, Using: {secureOption}" );
-            Debug.WriteLine( $"User: {_emailSettings.SmtpUser}, PW: {_emailSettings.SmtpPass}, SendMail: {_emailSettings.SenderAddress}" );
+            Debug.WriteLine($"SMTP Host: {_emailSettings.SmtpHost}, Port: {_emailSettings.SmtpPort}, SSL: {_emailSettings.EnableSsl}, Using: {secureOption}");
+            Debug.WriteLine($"User: {_emailSettings.SmtpUser}, PW: {_emailSettings.SmtpPass}, SendMail: {_emailSettings.SenderAddress}");
 
-            await client.ConnectAsync( _emailSettings.SmtpHost, _emailSettings.SmtpPort, secureOption );
-            await client.AuthenticateAsync( _emailSettings.SmtpUser, _emailSettings.SmtpPass );
-            await client.SendAsync( message );
-            await client.DisconnectAsync( true );
+            await client.ConnectAsync(_emailSettings.SmtpHost, _emailSettings.SmtpPort, secureOption);
+            await client.AuthenticateAsync(_emailSettings.SmtpUser, _emailSettings.SmtpPass);
+            await client.SendAsync(message);
+            await client.DisconnectAsync(true);
 
-            await _logger.LogMailSentAsync( message.To.ToString(), message.Subject, success: true );
+            await _logger.LogMailSentAsync(message.To.ToString(), message.Subject, success: true);
         }
-        catch ( Exception smtpEx )
+        catch (Exception smtpEx)
         {
-            Debug.WriteLine( $"[MailingService] SMTP failed: {smtpEx}. Trying TransIP fallback..." );
-            try
-            {
-                await _transipMailingService.SendAsync( message.To.ToString(), message.Subject, ( message.Body as TextPart )?.Text ?? "" );
-                await _logger.LogMailSentAsync( message.To.ToString(), message.Subject, success: true );
-            }
-            catch ( Exception transipEx )
-            {
-                Debug.WriteLine( $"TransIP fallback failed: {transipEx.Message}" );
-                await _logger.LogMailSentAsync( message.To.ToString(), message.Subject, success: false, errorMessage: transipEx.Message );
-            }
+            Debug.WriteLine($"[MailingService] SMTP failed: {smtpEx}");
+
+            await _logger.LogMailSentAsync(
+                message.To.ToString(),
+                message.Subject,
+                success: false,
+                errorMessage: smtpEx.Message);
         }
     }
 
@@ -89,55 +80,55 @@ public class MailingService
 
     #region Public Send Methods
 
-    public async Task SendTestMailAsync( TemplatesListModel template, List<ExpandoObject> recipients, string testEmail, int numberToSend = 15 )
+    public async Task SendTestMailAsync(TemplatesListModel template, List<ExpandoObject> recipients, string testEmail, int numberToSend = 15)
     {
         var toSend = recipients.Take(numberToSend);
-        foreach ( var recipient in toSend )
+        foreach (var recipient in toSend)
         {
             var dict = recipient as IDictionary<string, object>;
-            if ( dict == null )
+            if (dict == null)
                 continue;
 
             var message = new MimeMessage();
-            message.From.Add( new MailboxAddress( _emailSettings.SenderName, _emailSettings.SenderAddress ) );
-            message.To.Add( MailboxAddress.Parse( testEmail ) );
-            message.Subject = ReplaceTemplateFields( template.TemplateSubject, dict );
-            message.Body = new TextPart( "html" ) { Text = ReplaceTemplateFields( template.TemplateContent ?? "", dict ) };
+            message.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderAddress));
+            message.To.Add(MailboxAddress.Parse(testEmail));
+            message.Subject = ReplaceTemplateFields(template.TemplateSubject, dict);
+            message.Body = new TextPart("html") { Text = ReplaceTemplateFields(template.TemplateContent ?? "", dict) };
 
-            await _SendMimeMessageAsync( message );
+            await _SendMimeMessageAsync(message);
         }
     }
 
-    public async Task SendBulkMailAsync( TemplatesListModel template, List<ExpandoObject> recipients )
+    public async Task SendBulkMailAsync(TemplatesListModel template, List<ExpandoObject> recipients)
     {
-        foreach ( var recipient in recipients )
+        foreach (var recipient in recipients)
         {
             var dict = recipient as IDictionary<string, object>;
-            if ( dict == null || !dict.TryGetValue( "Email", out var emailObj ) || string.IsNullOrWhiteSpace( emailObj?.ToString() ) )
+            if (dict == null || !dict.TryGetValue("Email", out var emailObj) || string.IsNullOrWhiteSpace(emailObj?.ToString()))
                 continue;
 
             var message = new MimeMessage();
-            message.From.Add( new MailboxAddress( _emailSettings.SenderName, _emailSettings.SenderAddress ) );
-            message.To.Add( MailboxAddress.Parse( emailObj.ToString()! ) );
-            message.Subject = ReplaceTemplateFields( template.TemplateSubject, dict );
-            message.Body = new TextPart( "html" ) { Text = ReplaceTemplateFields( template.TemplateContent ?? "", dict ) };
+            message.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderAddress));
+            message.To.Add(MailboxAddress.Parse(emailObj.ToString()!));
+            message.Subject = ReplaceTemplateFields(template.TemplateSubject, dict);
+            message.Body = new TextPart("html") { Text = ReplaceTemplateFields(template.TemplateContent ?? "", dict) };
 
-            await _SendMimeMessageAsync( message );
+            await _SendMimeMessageAsync(message);
         }
     }
 
     public async Task<List<(string Recipient, string Subject, string Body)>> GeneratePreviewAsync(
-        string subjectTemplate, string bodyTemplate, IEnumerable<IDictionary<string, object>> recipients )
+        string subjectTemplate, string bodyTemplate, IEnumerable<IDictionary<string, object>> recipients)
     {
         var result = new List<(string, string, string)>();
 
-        foreach ( var recipient in recipients )
+        foreach (var recipient in recipients)
         {
             string subject = ReplaceTemplateFields(subjectTemplate, recipient);
             string body = ReplaceTemplateFields(bodyTemplate, recipient);
 
             string email = recipient.TryGetValue("Email", out var val) ? val?.ToString() ?? "" : "";
-            result.Add( (email, subject, body) );
+            result.Add((email, subject, body));
         }
 
         return result;
@@ -158,7 +149,7 @@ public class MailingService
     {
         return await _dataService.ExecuteQueryAsync(
             QueryDefinitions.GetEditionsList,
-            reader => reader [ "Festival" ].ToString()!
+            reader => reader["Festival"].ToString()!
         );
     }
 
@@ -178,18 +169,18 @@ public class MailingService
 
                 return new RecipientListModel
                 {
-                    ListId = Convert.ToUInt32( reader [ "ListId" ] ),
-                    ListName = reader [ "ListName" ].ToString() ?? string.Empty,
-                    ListCreated = reader [ "ListCreated" ].ToString() ?? string.Empty,
-                    ListChanged = reader [ "ListChanged" ].ToString() ?? string.Empty,
+                    ListId = Convert.ToUInt32(reader["ListId"]),
+                    ListName = reader["ListName"].ToString() ?? string.Empty,
+                    ListCreated = reader["ListCreated"].ToString() ?? string.Empty,
+                    ListChanged = reader["ListChanged"].ToString() ?? string.Empty,
                     ListSource = listSourceEnum,
-                    ListFilter = reader [ "ListFilter" ].ToString() ?? string.Empty,
-                    ListQuery = reader [ "ListQuery" ].ToString() ?? string.Empty
+                    ListFilter = reader["ListFilter"].ToString() ?? string.Empty,
+                    ListQuery = reader["ListQuery"].ToString() ?? string.Empty
                 };
-            } );
+            });
     }
 
-    public async Task<List<ExpandoObject>> GetDynamicRecipientsAsync( string query )
+    public async Task<List<ExpandoObject>> GetDynamicRecipientsAsync(string query)
     {
         List<Dictionary<string, object?>> rawList = await _dataService.ExecuteQueryAsync(query, reader =>
     {
@@ -200,15 +191,15 @@ public class MailingService
     }
 );
 
-        return [.. rawList.Select( ToExpando )];
+        return [.. rawList.Select(ToExpando)];
     }
 
-    private static ExpandoObject ToExpando( Dictionary<string, object?> dict )
+    private static ExpandoObject ToExpando(Dictionary<string, object?> dict)
     {
         var expando = new ExpandoObject() as IDictionary<string, object?>;
-        foreach ( var kvp in dict )
-            expando [ kvp.Key ] = kvp.Value;
-        return ( ExpandoObject ) expando;
+        foreach (var kvp in dict)
+            expando[kvp.Key] = kvp.Value;
+        return (ExpandoObject)expando;
     }
 
     public Task<List<RecipientListFilterModel>> GetAllRecipientsAsync()
@@ -217,26 +208,26 @@ public class MailingService
             QueryDefinitions.GetFullPersonsList,
             reader => new RecipientListFilterModel
             {
-                PersonId = Convert.ToUInt16( reader [ "PersonId" ] ),
-                Firstname = reader [ "Firstname" ].ToString() ?? string.Empty,
-                Lastname = reader [ "Lastname" ].ToString() ?? string.Empty,
-                Name = reader [ "Name" ].ToString() ?? string.Empty,
-                Email = reader [ "Email" ].ToString() ?? string.Empty,
-                Infomailing = Convert.ToBoolean( reader [ "Infomailing" ] ),
-                Active = Convert.ToBoolean( reader [ "Active" ] ),
-                Role = reader [ "Role" ].ToString() ?? string.Empty,
-                GroupName = reader [ "GroupName" ].ToString() ?? string.Empty,
-                Festival = reader [ "Festival" ].ToString(),
-                StageType = reader [ "StageType" ].ToString() ?? string.Empty,
-                Subscribed = Convert.ToBoolean( reader [ "Subscribed" ] ),
-                Canceled = Convert.ToBoolean( reader [ "Canceled" ] ),
-                Paid = Convert.ToBoolean( reader [ "Paid" ] ),
-                Confirmed = Convert.ToBoolean( reader [ "Confirmed" ] ),
-                Singers = Convert.ToInt32( reader [ "Singers" ] )
-            } );
+                PersonId = Convert.ToUInt16(reader["PersonId"]),
+                Firstname = reader["Firstname"].ToString() ?? string.Empty,
+                Lastname = reader["Lastname"].ToString() ?? string.Empty,
+                Name = reader["Name"].ToString() ?? string.Empty,
+                Email = reader["Email"].ToString() ?? string.Empty,
+                Infomailing = Convert.ToBoolean(reader["Infomailing"]),
+                Active = Convert.ToBoolean(reader["Active"]),
+                Role = reader["Role"].ToString() ?? string.Empty,
+                GroupName = reader["GroupName"].ToString() ?? string.Empty,
+                Festival = reader["Festival"].ToString(),
+                StageType = reader["StageType"].ToString() ?? string.Empty,
+                Subscribed = Convert.ToBoolean(reader["Subscribed"]),
+                Canceled = Convert.ToBoolean(reader["Canceled"]),
+                Paid = Convert.ToBoolean(reader["Paid"]),
+                Confirmed = Convert.ToBoolean(reader["Confirmed"]),
+                Singers = Convert.ToInt32(reader["Singers"])
+            });
     }
 
-    public async Task<uint> AddRecipientQueryAsync( RecipientListModel model )
+    public async Task<uint> AddRecipientQueryAsync(RecipientListModel model)
     {
         var parameters = new Dictionary<string, object>
         {
@@ -245,10 +236,10 @@ public class MailingService
             {"@Filter", model.ListFilter},
             {"@Query", model.ListQuery}
         };
-        return await _dataService.ExecuteScalarAsync<uint>( QueryDefinitions.AddNewRecipientQuery, parameters );
+        return await _dataService.ExecuteScalarAsync<uint>(QueryDefinitions.AddNewRecipientQuery, parameters);
     }
 
-    public async Task UpdateRecipientQueryAsync( RecipientListModel model )
+    public async Task UpdateRecipientQueryAsync(RecipientListModel model)
     {
         var parameters = new Dictionary<string, object>
         {
@@ -258,16 +249,27 @@ public class MailingService
             {"@ListFilter", model.ListFilter},
             {"@ListQuery", model.ListQuery}
         };
-        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyRecipientQueryById, parameters );
+        await _dataService.ExecuteNonQueryAsync(QueryDefinitions.ModifyRecipientQueryById, parameters);
     }
 
-    public async Task DeleteRecipientQueryAsync( uint queryId )
+    public async Task DeleteRecipientQueryAsync(uint queryId)
     {
         var parameters = new Dictionary<string, object> { { "QueryId", queryId } };
-        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.DeleteRecipientQuery, parameters );
+        await _dataService.ExecuteNonQueryAsync(QueryDefinitions.DeleteRecipientQuery, parameters);
     }
 
     #endregion
+
+    public async Task SendSingleAsync(string to, string subject, string body)
+    {
+        var message = new MimeKit.MimeMessage();
+        message.From.Add(new MimeKit.MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderAddress));
+        message.To.Add(MimeKit.MailboxAddress.Parse(to));
+        message.Subject = subject;
+        message.Body = new MimeKit.TextPart("html") { Text = body };
+
+        await _SendMimeMessageAsync(message);
+    }
 
     #region Templates
 
@@ -277,21 +279,21 @@ public class MailingService
             QueryDefinitions.GetAllEmailTemplates,
             reader => new TemplatesListModel
             {
-                TemplateId = Convert.ToUInt32( reader [ "TemplateId" ] ),
-                TemplateCreated = reader [ "TemplateCreated" ].ToString() ?? string.Empty,
-                TemplateChanged = reader [ "TemplateChanged" ].ToString() ?? string.Empty,
-                RecipientListId = Convert.ToUInt32( reader [ "RecipientListId" ] ),
-                RecipientListName = reader [ "RecipientListName" ].ToString(),
-                RecipientListFilter = reader [ "RecipientListFilter" ].ToString() ?? string.Empty,
-                RecipientListQuery = reader [ "RecipientListQuery" ].ToString() ?? string.Empty,
-                RecipientListSource = reader [ "RecipientListSource" ].ToString(),
-                TemplateName = reader [ "TemplateName" ].ToString(),
-                TemplateSubject = reader [ "TemplateSubject" ].ToString(),
-                TemplateContent = reader [ "TemplateContent" ].ToString()
-            } );
+                TemplateId = Convert.ToUInt32(reader["TemplateId"]),
+                TemplateCreated = reader["TemplateCreated"].ToString() ?? string.Empty,
+                TemplateChanged = reader["TemplateChanged"].ToString() ?? string.Empty,
+                RecipientListId = Convert.ToUInt32(reader["RecipientListId"]),
+                RecipientListName = reader["RecipientListName"].ToString(),
+                RecipientListFilter = reader["RecipientListFilter"].ToString() ?? string.Empty,
+                RecipientListQuery = reader["RecipientListQuery"].ToString() ?? string.Empty,
+                RecipientListSource = reader["RecipientListSource"].ToString(),
+                TemplateName = reader["TemplateName"].ToString(),
+                TemplateSubject = reader["TemplateSubject"].ToString(),
+                TemplateContent = reader["TemplateContent"].ToString()
+            });
     }
 
-    public async Task<uint> AddTemplateQueryAsync( TemplatesListModel model )
+    public async Task<uint> AddTemplateQueryAsync(TemplatesListModel model)
     {
         var parameters = new Dictionary<string, object>
         {
@@ -300,10 +302,10 @@ public class MailingService
             {"@TemplateContent", model.TemplateContent},
             {"@RecipientListId", model.RecipientListId}
         };
-        return await _dataService.ExecuteScalarAsync<uint>( QueryDefinitions.AddNewTemplateQuery, parameters );
+        return await _dataService.ExecuteScalarAsync<uint>(QueryDefinitions.AddNewTemplateQuery, parameters);
     }
 
-    public async Task UpdateTemplateQueryAsync( TemplatesListModel model )
+    public async Task UpdateTemplateQueryAsync(TemplatesListModel model)
     {
         var parameters = new Dictionary<string, object>
         {
@@ -313,13 +315,13 @@ public class MailingService
             {"@TemplateContent", model.TemplateContent},
             {"@RecipientListId", model.RecipientListId}
         };
-        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyTemplateQueryById, parameters );
+        await _dataService.ExecuteNonQueryAsync(QueryDefinitions.ModifyTemplateQueryById, parameters);
     }
 
-    public async Task DeleteTemplateQueryAsync( uint queryId )
+    public async Task DeleteTemplateQueryAsync(uint queryId)
     {
         var parameters = new Dictionary<string, object> { { "QueryId", queryId } };
-        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.DeleteTemplateQuery, parameters );
+        await _dataService.ExecuteNonQueryAsync(QueryDefinitions.DeleteTemplateQuery, parameters);
     }
 
     #endregion

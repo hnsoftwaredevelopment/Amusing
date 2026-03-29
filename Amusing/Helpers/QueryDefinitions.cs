@@ -355,7 +355,7 @@ public static class QueryDefinitions
             END AS `Gepubliceerd`
         FROM ah_festivals
         ORDER BY YEAR(festivaldatum) DESC;";
-    public static readonly string GetAllStages =@"
+    public static readonly string GetAllStages = @"
         SELECT  
              podium_id AS `Podium-Id`, 
              naam AS `Naam`, 
@@ -832,58 +832,58 @@ public static class QueryDefinitions
         DELETE FROM ah_festivals WHERE festival_id = @festivalid;";
     public static readonly string DeleteCondition = @"
         DELETE FROM planner_voorwaarden WHERE festival_id = @festivalid;";
-    public static string GetFestivalOverviewQuery( int oldestYear, int newestYear, bool filterOutOldGroups )
+    public static string GetFestivalOverviewQuery(int oldestYear, int newestYear, bool filterOutOldGroups)
     {
         int NumberOfYearsForExclusion = 3;
 
         StringBuilder sb = new();
 
-        sb.AppendLine( "SELECT" );
-        sb.AppendLine( "    zg.zanggroep_id," );
-        sb.AppendLine( "    zg.naam AS `Naam`," );
-        sb.AppendLine( "    zg.standplaats AS `Stad`," );
-        sb.AppendLine( "    CASE WHEN p.datecreate IS NULL OR YEAR(p.datecreate) = 0 THEN '' ELSE DATE_FORMAT(p.datecreate, '%d-%m-%Y') END AS `Aangemaakt`," );
+        sb.AppendLine("SELECT");
+        sb.AppendLine("    zg.zanggroep_id,");
+        sb.AppendLine("    zg.naam AS `Naam`,");
+        sb.AppendLine("    zg.standplaats AS `Stad`,");
+        sb.AppendLine("    CASE WHEN p.datecreate IS NULL OR YEAR(p.datecreate) = 0 THEN '' ELSE DATE_FORMAT(p.datecreate, '%d-%m-%Y') END AS `Aangemaakt`,");
 
         // Dynamisch jaartal-kolommen toevoegen
-        for ( int year = oldestYear; year <= newestYear; year++ )
+        for (int year = oldestYear; year <= newestYear; year++)
         {
-            sb.AppendLine( $"    MAX(CASE YEAR(f.festivaldatum) WHEN {year} THEN " +
+            sb.AppendLine($"    MAX(CASE YEAR(f.festivaldatum) WHEN {year} THEN " +
                 "CASE " +
                 "WHEN i.ingeschreven IS NULL OR YEAR(i.ingeschreven) = 0 THEN '' " +
                 $"ELSE DATE_FORMAT(i.ingeschreven, '%d-%m-%Y') END " +
-                $"END) AS `Y{year}`," );
+                $"END) AS `Y{year}`,");
         }
 
         // Remove last semicolun
         sb.Length -= 3;
         sb.AppendLine();
 
-        sb.AppendLine( "FROM ah_zanggroepen zg" );
-        sb.AppendLine( "LEFT JOIN ah_inschrijvingen i ON zg.zanggroep_id = i.zanggroep_id" );
-        sb.AppendLine( "LEFT JOIN ah_festivals f ON f.festival_id = i.festival_id" );
-        sb.AppendLine( "LEFT JOIN ah_profielen p ON p.zanggroep_id = zg.zanggroep_id" );
+        sb.AppendLine("FROM ah_zanggroepen zg");
+        sb.AppendLine("LEFT JOIN ah_inschrijvingen i ON zg.zanggroep_id = i.zanggroep_id");
+        sb.AppendLine("LEFT JOIN ah_festivals f ON f.festival_id = i.festival_id");
+        sb.AppendLine("LEFT JOIN ah_profielen p ON p.zanggroep_id = zg.zanggroep_id");
 
-        sb.AppendLine( "WHERE zg.actief = 1 AND p.datecreate IS NOT NULL" );
+        sb.AppendLine("WHERE zg.actief = 1 AND p.datecreate IS NOT NULL");
 
-        if ( filterOutOldGroups )
+        if (filterOutOldGroups)
         {
-            sb.AppendLine( "  AND NOT (" );
-            sb.AppendLine( $"       YEAR(p.datecreate) < {newestYear - NumberOfYearsForExclusion}" );
-            sb.AppendLine( "       AND NOT EXISTS(" );
-            sb.AppendLine( "           SELECT 1" );
-            sb.AppendLine( "           FROM ah_inschrijvingen ins" );
-            sb.AppendLine( "           JOIN ah_festivals fs ON fs.festival_id = ins.festival_id" );
-            sb.AppendLine( $"         WHERE ins.zanggroep_id = zg.zanggroep_id AND YEAR(fs.festivaldatum) > {newestYear - NumberOfYearsForExclusion}" );
-            sb.AppendLine( "       )" );
-            sb.AppendLine( "   )" );
+            sb.AppendLine("  AND NOT (");
+            sb.AppendLine($"       YEAR(p.datecreate) < {newestYear - NumberOfYearsForExclusion}");
+            sb.AppendLine("       AND NOT EXISTS(");
+            sb.AppendLine("           SELECT 1");
+            sb.AppendLine("           FROM ah_inschrijvingen ins");
+            sb.AppendLine("           JOIN ah_festivals fs ON fs.festival_id = ins.festival_id");
+            sb.AppendLine($"         WHERE ins.zanggroep_id = zg.zanggroep_id AND YEAR(fs.festivaldatum) > {newestYear - NumberOfYearsForExclusion}");
+            sb.AppendLine("       )");
+            sb.AppendLine("   )");
         }
 
         sb.AppendLine("GROUP BY zg.zanggroep_id, zg.naam, zg.standplaats, p.datecreate");
-        sb.AppendLine( "ORDER BY zg.naam" );
+        sb.AppendLine("ORDER BY zg.naam");
 
         return sb.ToString();
     }
-  
+
     public static readonly string ModifyStage = @"
         UPDATE amusing.ah_podia 
             SET naam = @Naam,
@@ -1321,16 +1321,16 @@ public static class QueryDefinitions
         WHERE per.email IS NOT NULL;
         ";
     public static readonly string WhereFestival = "YEAR(fes.festivaldatum)";
-    public static readonly string WherePaid        = "IF(sub.betaald IS NOT NULL, 1, 0)";
-    public static readonly string WhereCanceled    = "IF(sub.afgehaakt IS NOT NULL, 1, 0)";
-    public static readonly string WhereSubscribed  = "IF(sub.ingeschreven IS NOT NULL, 1, 0)";
-    public static readonly string WhereConfirmed   = "IF(sub.bevestigd IS NOT NULL, 1, 0)";
-    public static readonly string WhereDressingroom= "IF(sub.wens_1 = 'ja', 1, 0)";
-    public static readonly string WhereSingers     = "sub.aantal_deelnemers";
-    public static readonly string WhereVolunteer   = "vol.persoon_id";
+    public static readonly string WherePaid = "IF(sub.betaald IS NOT NULL, 1, 0)";
+    public static readonly string WhereCanceled = "IF(sub.afgehaakt IS NOT NULL, 1, 0)";
+    public static readonly string WhereSubscribed = "IF(sub.ingeschreven IS NOT NULL, 1, 0)";
+    public static readonly string WhereConfirmed = "IF(sub.bevestigd IS NOT NULL, 1, 0)";
+    public static readonly string WhereDressingroom = "IF(sub.wens_1 = 'ja', 1, 0)";
+    public static readonly string WhereSingers = "sub.aantal_deelnemers";
+    public static readonly string WhereVolunteer = "vol.persoon_id";
     public static readonly string WhereInfomailing = "per.infomailing";
-    public static readonly string WhereRole        = "rol.rol";
-    public static readonly string WhereJury        = "IF(sub.wens_4 = 'ja', 1, 0)";
+    public static readonly string WhereRole = "rol.rol";
+    public static readonly string WhereJury = "IF(sub.wens_4 = 'ja', 1, 0)";
     #endregion
 
     #region Query definition for Recipientlists based on groups
@@ -1423,10 +1423,10 @@ public static class QueryDefinitions
             IF(sub.afgehaakt   IS NOT NULL, 'ja', 'nee') AS Canceled,
             IF(sub.betaald     IS NOT NULL, 'ja', 'nee') AS Paid,
             IF(sub.bevestigd   IS NOT NULL, 'ja', 'nee') AS Confirmed,
-            IF((LOWER(i.Wens_1) IS null), 'nee', i.wens_1 ) AS Kleedkamer,
-            IF((LOWER(i.Wens_2) IS null), 'nee', i.wens_2) AS SingAlong,
-            IF((LOWER(i.wens_3) IS null), 'nee', i.wens_3) AS AcapellaBattle,
-            IF((LOWER(i.Wens_4) IS null), 'nee', i.wens_4) AS Beoordeling,
+            IF((LOWER(sub.wens_1) IS null), 'nee', sub.wens_1 ) AS Kleedkamer,
+            IF((LOWER(sub.wens_2) IS null), 'nee', sub.wens_2) AS SingAlong,
+            IF((LOWER(sub.wens_3) IS null), 'nee', sub.wens_3) AS AcapellaBattle,
+            IF((LOWER(sub.wens_4) IS null), 'nee', sub.wens_4) AS Beoordeling,
             sub.aantal_deelnemers AS Singers,
             sub.podiumsoort       AS StageType,
             IF(vol.persoon_id IS NOT NULL, 'ja', 'nee') AS Vrijwilliger
@@ -1619,7 +1619,7 @@ public static class QueryDefinitions
 
     public static readonly string DashboardStatisticsSubscribtionsByNumberByStagetype = @"
         CALL GetPivotSubscriptionsPerStage(@FestivalId);";
-    
+
     public static readonly string DashboardStatisticsGetNubmerOfSubscribtions = @"
         CALL GetNumberOfFestivalSubscriptions(@FestivalId);";
     public static readonly string DashboardStatisticsGetGraphData = @"
@@ -1776,7 +1776,7 @@ public static class QueryDefinitions
         GROUP BY p.type_id
         ORDER BY p.type_id;";
     public static readonly string GetPlanningStageGenreRelations = "";
-    public static readonly string GetPlanningStageGroupRelations = ""; 
+    public static readonly string GetPlanningStageGroupRelations = "";
     public static readonly string GetPlanningVolunteers = @"
         SELECT 
 	        v.id AS id,
@@ -1836,7 +1836,7 @@ public static class QueryDefinitions
 	        t.maximumduur AS maximumduur
         FROM amusing.ah_taken t
         WHERE t.actief = 1;";
-  
+
     public static readonly string HasPlanningPerformances = @"
         SELECT EXISTS(
             SELECT 1

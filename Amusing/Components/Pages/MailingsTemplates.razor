@@ -108,8 +108,12 @@ else
 							Height="100%"
 							Placeholder="Beschrijving" 
 							@bind-Value="_selectedTemplatesList.TemplateContent" >
+
+							<RichTextEditorImageSettings SaveFormat="SaveFormat.Base64" />
+
 							<RichTextEditorEvents 
 								SlashMenuItemSelecting="OnSlashMenuItemSelect" />
+
 							<Syncfusion.Blazor.RichTextEditor.RichTextEditorToolbarSettings 
 								Items="@_rteToolbarItems"
 								EnableFloating="true">

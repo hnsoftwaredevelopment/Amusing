@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Components;
 
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Inputs;
-using Syncfusion.Blazor.Calendars;
 
 namespace Amusing.Components.Pages;
 
@@ -28,22 +27,22 @@ public partial class MaintenanceSubscriptions : ComponentBase
     private DateTime? selectedDate { get; set; }
     private RegistrationModel? selectedRegistration;
 
-    protected string SelectedEditionText => Editions.FirstOrDefault( e => e.ID == SelectedEditionId )?.Text ?? "Onbekende editie";
+    protected string SelectedEditionText => Editions.FirstOrDefault(e => e.ID == SelectedEditionId)?.Text ?? "Onbekende editie";
 
     protected override async Task OnInitializedAsync()
     {
         Editions = await EditionService.GetEditionsAsync();
 
-        if ( Editions.Any() )
+        if (Editions.Any())
         {
             // Auto select the current festival edition
             SelectedEditionId = Editions
-                .OrderByDescending( e => int.Parse( e.Text ) )
+                .OrderByDescending(e => int.Parse(e.Text))
                 .First().ID;
 
             // Get the registrations for the selected edition
-            RegistrationList = await RegistrationService.GetRegistrationsByFestivalIdAsync( Convert.ToUInt32( SelectedEditionId ) );
-            if ( SelectedEditionId != null && RegistrationList.Count > 0 )
+            RegistrationList = await RegistrationService.GetRegistrationsByFestivalIdAsync(Convert.ToUInt32(SelectedEditionId));
+            if (SelectedEditionId != null && RegistrationList.Count > 0)
             {
                 await UpdateVisibleRowCount();
             }
@@ -61,16 +60,16 @@ public partial class MaintenanceSubscriptions : ComponentBase
         }
     }
 
-    protected async Task OnEditionChanged( string selectedId )
+    protected async Task OnEditionChanged(string selectedId)
     {
-        if ( string.IsNullOrWhiteSpace( selectedId ) )
+        if (string.IsNullOrWhiteSpace(selectedId))
             return;
 
         SelectedEditionId = selectedId;
 
         await LoadRegistrationsAsync();
 
-        if ( GridRef != null )
+        if (GridRef != null)
         {
             await GridRef.Refresh();
             VisibleRowCount = RegistrationList.Count;
@@ -79,23 +78,23 @@ public partial class MaintenanceSubscriptions : ComponentBase
 
     protected async Task LoadRegistrationsAsync()
     {
-        if ( Convert.ToUInt32( SelectedEditionId ) != 0 )
+        if (Convert.ToUInt32(SelectedEditionId) != 0)
         {
-            RegistrationList = await RegistrationService.GetRegistrationsByFestivalIdAsync( Convert.ToUInt32( SelectedEditionId ) );
+            RegistrationList = await RegistrationService.GetRegistrationsByFestivalIdAsync(Convert.ToUInt32(SelectedEditionId));
         }
     }
 
     // Manage direct search functionality
-    public void OnInput( InputEventArgs args )
+    public void OnInput(InputEventArgs args)
     {
-        this.GridRef.SearchAsync( args.Value );
+        this.GridRef.SearchAsync(args.Value);
 
         // Count the Number of visible rows
-        _ = Task.Run( async () =>
+        _ = Task.Run(async () =>
         {
-            await Task.Delay( 200 ); // Short delay to handle fast typers
-            await InvokeAsync( UpdateVisibleRowCount );
-        } );
+            await Task.Delay(200); // Short delay to handle fast typers
+            await InvokeAsync(UpdateVisibleRowCount);
+        });
     }
 
     protected async Task UpdateVisibleRowCount()
@@ -108,7 +107,7 @@ public partial class MaintenanceSubscriptions : ComponentBase
     }
 
     // Open dialog for a specific registration
-    private void OpenPaymentDialog( RegistrationModel registration )
+    private void OpenPaymentDialog(RegistrationModel registration)
     {
         selectedRegistration = registration;
         selectedDate = DateTime.Now; // Default to today
@@ -126,7 +125,7 @@ public partial class MaintenanceSubscriptions : ComponentBase
     // Confirm payment and update in DB
     private async Task ConfirmPaymentDateAsync()
     {
-        if ( selectedRegistration != null )
+        if (selectedRegistration != null)
         {
             await RegistrationService.UpdatePaymentStatusAsync(
                 selectedRegistration.FestivalId,
@@ -143,7 +142,7 @@ public partial class MaintenanceSubscriptions : ComponentBase
     }
 
     // Handle "Gestorneerd" button
-    private async Task TogglePaymentAsync( RegistrationModel registration )
+    private async Task TogglePaymentAsync(RegistrationModel registration)
     {
         await RegistrationService.UpdatePaymentStatusAsync(
             registration.FestivalId,
@@ -155,14 +154,14 @@ public partial class MaintenanceSubscriptions : ComponentBase
         StateHasChanged();
     }
 
-    private async Task ToggleDropOutAsync( RegistrationModel registration )
+    private async Task ToggleDropOutAsync(RegistrationModel registration)
     {
         DateOnly? newValue;
 
-        if ( registration.Afgehaakt == "Nee" )
+        if (registration.Afgehaakt == "Nee")
         {
             // Koort haakt af → zet huidige datum
-            newValue = DateOnly.FromDateTime( DateTime.Now );
+            newValue = DateOnly.FromDateTime(DateTime.Now);
         }
         else
         {
@@ -178,7 +177,7 @@ public partial class MaintenanceSubscriptions : ComponentBase
         );
 
         // Update UI-model
-        registration.Afgehaakt = ( newValue == null ) ? "Nee" : "Ja";
+        registration.Afgehaakt = (newValue == null) ? "Nee" : "Ja";
         StateHasChanged();
     }
 
@@ -212,7 +211,7 @@ public partial class MaintenanceSubscriptions : ComponentBase
         public const string AcapellaBattle = "Deelname acapella battle wijzigen";
         public const string Beoordeling = "Wil beoordeling wijzigen";
     }
-    private void OpenYesNoDialog( RegistrationModel registration, string fieldName, string headerText )
+    private void OpenYesNoDialog(RegistrationModel registration, string fieldName, string headerText)
     {
         selectedRegistration = registration;
         selectedYesNoField = fieldName;
@@ -229,10 +228,10 @@ public partial class MaintenanceSubscriptions : ComponentBase
         string mappedFieldName = selectedYesNoField switch
         {
             nameof(RegistrationModel.Bevestigd) => "Bevestigd",
-            nameof(RegistrationModel.Kleedkamer) => "Wens_1",
-            nameof(RegistrationModel.SingAlong) => "Wens_2",
-            nameof(RegistrationModel.AcapellaBattle) => "Wens_3",
-            nameof(RegistrationModel.Beoordeling) => "Wens_4",
+            nameof(RegistrationModel.Kleedkamer) => "wens_1",
+            nameof(RegistrationModel.SingAlong) => "wens_2",
+            nameof(RegistrationModel.AcapellaBattle) => "wens_3",
+            nameof(RegistrationModel.Beoordeling) => "wens_4",
             _ => throw new InvalidOperationException("Unknown Yes/No field")
         };
 

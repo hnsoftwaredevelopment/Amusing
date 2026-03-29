@@ -1,0 +1,8 @@
+dotnet user-secrets set "EmailSettings:SmtpUser = amusing@vps.transip.email"
+dotnet user-secrets set "EmailSettings:SmtpPort = 587"
+dotnet user-secrets set "EmailSettings:SmtpPass = NcXRMbTihipWmNDH"
+dotnet user-secrets set "EmailSettings:SmtpHost = vps.transip.email"
+dotnet user-secrets set "EmailSettings:SenderName = Korenfestival Amusing Hengelo"
+dotnet user-secrets set "EmailSettings:SenderAddress = koren@amusing-hengelo.nl"
+dotnet user-secrets set "EmailSettings:EnableSsl = true"
+dotnet user-secrets set "ConnectionStrings:DefaultConnection = Server=amusing-vps.amusing-hengelo.nl;Database=amusing;User=amuser;Password=EghoZ7doh3;Connection Timeout=60;Command Timeout=300;CharSet=utf8mb4;SslMode=Disabled;AllowUserVariables=true;IgnoreCommandTransaction=true;AllowZeroDateTime=True;ConvertZeroDateTime=True;"
