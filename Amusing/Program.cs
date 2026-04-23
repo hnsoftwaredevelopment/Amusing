@@ -28,10 +28,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Debug: dump all config providers
 var root = (IConfigurationRoot)builder.Configuration;
-foreach (var provider in root.Providers)
-{
-    Console.WriteLine("Provider: " + provider);
-}
+//foreach (var provider in root.Providers)
+//{
+//    Console.WriteLine("Provider: " + provider);
+//}
 
 using var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
 var logger = loggerFactory.CreateLogger<Program>();
@@ -53,7 +53,7 @@ builder.Configuration
     .AddEnvironmentVariables();
 
 var defaultConn = builder.Configuration.GetValue<string>("DefaultConnection");
-Console.WriteLine($"DefaultConnection={defaultConn}");
+//Console.WriteLine($"DefaultConnection={defaultConn}");
 
 // -------------------------------
 // 2. Retrieve connectionstring (sanity check)
@@ -68,14 +68,14 @@ logger.LogInformation($"Full path ['ConnectionStrings:DefaultConnection']: {conf
 logger.LogInformation("===========================");
 
 // Dump na laden
-Console.WriteLine("=== CONFIG DUMP ===");
-Console.WriteLine("ENV: " + builder.Environment.EnvironmentName);
-Console.WriteLine("ConnectionString: " + builder.Configuration.GetConnectionString("DefaultConnection"));
-Console.WriteLine("====================");
+//Console.WriteLine("=== CONFIG DUMP ===");
+//Console.WriteLine("ENV: " + builder.Environment.EnvironmentName);
+//Console.WriteLine("ConnectionString: " + builder.Configuration.GetConnectionString("DefaultConnection"));
+//Console.WriteLine("====================");
 
 // Debug output
-Console.WriteLine($"Environment: {builder.Environment.EnvironmentName}");
-Console.WriteLine($"DB Connection: {(string.IsNullOrWhiteSpace(connectionString) ? "NOT FOUND" : "FOUND")}");
+//Console.WriteLine($"Environment: {builder.Environment.EnvironmentName}");
+//Console.WriteLine($"DB Connection: {(string.IsNullOrWhiteSpace(connectionString) ? "NOT FOUND" : "FOUND")}");
 
 // ---------------------------------------------------------
 // 2. Email settings configuration
@@ -87,7 +87,7 @@ builder.Services.AddSingleton(sp =>
     sp.GetRequiredService<IOptions<EmailSettings>>().Value);
 
 var smtpPass = builder.Configuration["EmailSettings:SmtpPass"];
-Console.WriteLine($"SMTP Password Loaded: {smtpPass ?? "NOT FOUND"}");
+//Console.WriteLine($"SMTP Password Loaded: {smtpPass ?? "NOT FOUND"}");
 
 // ---------------------------------------------------------
 // 3. Culture settings

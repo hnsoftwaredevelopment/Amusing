@@ -1,12 +1,7 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
-using Amusing.Helpers;
 using Amusing.Models;
 using Amusing.Services;
 
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Inputs;
@@ -41,30 +36,30 @@ public partial class ListStages : ComponentBase
     }
 
     // Manage direct search functionality
-    public async void OnInputActive( InputEventArgs args )
+    public async void OnInputActive(InputEventArgs args)
     {
-        await GridRefActive.SearchAsync( args.Value );
+        await GridRefActive.SearchAsync(args.Value);
 
-        await Task.Delay( 50 );
+        await Task.Delay(50);
         await UpdateVisibleRowCountActiveAsync();
     }
 
-    public async void OnInputInactive( InputEventArgs args )
+    public async void OnInputInactive(InputEventArgs args)
     {
-        await GridRefInactive.SearchAsync( args.Value );
+        await GridRefInactive.SearchAsync(args.Value);
 
-        await Task.Delay( 50 );
+        await Task.Delay(50);
         await UpdateVisibleRowCountInactiveAsync();
     }
 
     protected async Task UpdateVisibleRowCountActiveAsync()
     {
-        if ( GridRefActive is not null )
+        if (GridRefActive is not null)
         {
             await GridRefActive.Refresh();
-            await Task.Delay( 50 );
+            await Task.Delay(50);
             var records = await GridRefActive.GetCurrentViewRecordsAsync();
-            await Task.Delay( 150 );
+            await Task.Delay(150);
             VisibleRowCountActive = records?.Count ?? 0;
             StateHasChanged();
         }
@@ -72,12 +67,12 @@ public partial class ListStages : ComponentBase
 
     protected async Task UpdateVisibleRowCountInactiveAsync()
     {
-        if ( GridRefInactive is not null )
+        if (GridRefInactive is not null)
         {
             await GridRefInactive.Refresh();
-            await Task.Delay( 50 );
+            await Task.Delay(50);
             var records = await GridRefInactive.GetCurrentViewRecordsAsync();
-            await Task.Delay( 150 );
+            await Task.Delay(150);
             VisibleRowCountInactive = records?.Count ?? 0;
             StateHasChanged();
         }
@@ -85,7 +80,7 @@ public partial class ListStages : ComponentBase
 
     protected async Task OnGridDataBoundActive()
     {
-        if ( !_initialLoadDoneActive )
+        if (!_initialLoadDoneActive)
         {
             _initialLoadDoneActive = true;
             await UpdateVisibleRowCountActiveAsync();
@@ -94,7 +89,7 @@ public partial class ListStages : ComponentBase
 
     protected async Task OnGridDataBoundInactive()
     {
-        if ( !_initialLoadDoneInactive )
+        if (!_initialLoadDoneInactive)
         {
             _initialLoadDoneInactive = true;
             await UpdateVisibleRowCountInactiveAsync();
@@ -109,10 +104,10 @@ public partial class ListStages : ComponentBase
             FileName = $"{FileNameActive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx"
         };
 
-        await GridRefActive!.ExportToExcelAsync( exportProps );
+        await GridRefActive!.ExportToExcelAsync(exportProps);
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
-        await LoggingService.WriteUserActionAsync( "Lijsten", "Podia", "success", _report );
+        await LoggingService.WriteUserActionAsync("Lijsten", "Podia", "success", _report);
     }
 
     protected async Task ExportToExcelInactive()
@@ -122,10 +117,10 @@ public partial class ListStages : ComponentBase
             FileName = $"{FileNameInactive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx"
         };
 
-        await GridRefInactive!.ExportToExcelAsync( exportProps );
+        await GridRefInactive!.ExportToExcelAsync(exportProps);
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
-        await LoggingService.WriteUserActionAsync( "Lijsten", "Podia", "success", _report );
+        await LoggingService.WriteUserActionAsync("Lijsten", "Podia", "success", _report);
     }
 
     protected async Task ExportToCsvActive()
@@ -135,10 +130,10 @@ public partial class ListStages : ComponentBase
             FileName = $"{FileNameActive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv"
         };
 
-        await GridRefActive!.ExportToCsvAsync( exportProps );
+        await GridRefActive!.ExportToCsvAsync(exportProps);
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
-        await LoggingService.WriteUserActionAsync( "Lijsten", "Podia", "success", _report );
+        await LoggingService.WriteUserActionAsync("Lijsten", "Podia", "success", _report);
     }
 
     protected async Task ExportToCsvInactive()
@@ -148,10 +143,10 @@ public partial class ListStages : ComponentBase
             FileName = $"{FileNameInactive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv"
         };
 
-        await GridRefInactive!.ExportToCsvAsync( exportProps );
+        await GridRefInactive!.ExportToCsvAsync(exportProps);
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
-        await LoggingService.WriteUserActionAsync( "Lijsten", "Podia", "success", _report );
+        await LoggingService.WriteUserActionAsync("Lijsten", "Podia", "success", _report);
     }
 
     protected async Task ExportToPdfActive()
@@ -163,10 +158,10 @@ public partial class ListStages : ComponentBase
             PageSize = PdfPageSize.A4,
             AllowHorizontalOverflow = true
         };
-        await GridRefActive!.ExportToPdfAsync( exportProps );
+        await GridRefActive!.ExportToPdfAsync(exportProps);
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
-        await LoggingService.WriteUserActionAsync( "Lijsten", "Podia", "success", _report );
+        await LoggingService.WriteUserActionAsync("Lijsten", "Podia", "success", _report);
     }
 
     protected async Task ExportToPdfInactive()
@@ -178,9 +173,72 @@ public partial class ListStages : ComponentBase
             PageSize = PdfPageSize.A4,
             AllowHorizontalOverflow = true
         };
-        await GridRefInactive!.ExportToPdfAsync( exportProps );
+        await GridRefInactive!.ExportToPdfAsync(exportProps);
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
-        await LoggingService.WriteUserActionAsync( "Lijsten", "Podia", "success", _report );
+        await LoggingService.WriteUserActionAsync("Lijsten", "Podia", "success", _report);
+    }
+
+    // Ensure grid-dependent operations run after first render
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        // If the grid reference exists, update counts and refresh it
+        if (GridRefActive != null)
+        {
+            // Update visible row count safely
+            await UpdateVisibleRowCountActiveAsync();
+
+            // Refresh the grid to ensure it renders the bound datasource
+            try
+            {
+                await GridRefActive.Refresh();
+            }
+            catch
+            {
+                // Swallow any refresh exceptions to avoid breaking first render
+                // (grid refresh is best-effort here)
+            }
+        }
+        else
+        {
+            // Ensure UI is updated if grid ref is not available
+            StateHasChanged();
+        }
+
+        if (GridRefInactive != null)
+        {
+            // Update visible row count safely
+            await UpdateVisibleRowCountInactiveAsync();
+
+            // Refresh the grid to ensure it renders the bound datasource
+            try
+            {
+                await GridRefInactive.Refresh();
+            }
+            catch
+            {
+                // Swallow any refresh exceptions to avoid breaking first render
+                // (grid refresh is best-effort here)
+            }
+        }
+        else
+        {
+            // Ensure UI is updated if grid ref is not available
+            StateHasChanged();
+        }
+    }
+
+    protected async Task UpdateVisibleRowCountStage()
+    {
+        if (GridRefActive == null)
+        {
+            VisibleRowCountActive = 0;
+            return;
+        }
+
+        var data = await GridRefActive.GetCurrentViewRecordsAsync();
+        VisibleRowCountActive = data?.Count ?? 0;
     }
 }

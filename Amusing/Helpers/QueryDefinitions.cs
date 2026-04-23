@@ -1549,58 +1549,88 @@ public static class QueryDefinitions
 
     #region Dashboard queries
     public static readonly string DashboardStatisticsTotal = @"
+        WITH counts AS (
+            SELECT 
+                COUNT(*) AS Total,
+                SUM(CASE WHEN wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
+                SUM(CASE WHEN betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paid,
+                SUM(CASE WHEN afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
+            FROM amusing.ah_inschrijvingen
+            WHERE festival_id = @FestivalId
+        )
         SELECT 
-            COUNT(*) AS Total,
-            SUM(CASE WHEN wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
-            SUM(CASE WHEN betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paid,
-            SUM(CASE WHEN afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
-        FROM amusing.ah_inschrijvingen
-        WHERE festival_id = @FestivalId;";
+            Total - DroppedOut AS Total,
+            InQueue,
+            Paid,
+            DroppedOut
+        FROM counts;";
 
     public static readonly string DashboardStatisticsGenre = @"
+        WITH counts AS (
+            SELECT 
+                g.nl AS Genre,
+                COUNT(*) AS Total,
+                SUM(CASE WHEN i.wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
+                SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paid,
+                SUM(CASE WHEN i.afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
+            FROM amusing.ah_inschrijvingen i
+            JOIN amusing.ah_zanggroepen zg ON i.zanggroep_id = zg.zanggroep_id
+            JOIN amusing.ah_genres g ON zg.genre_id = g.genre_id
+            WHERE i.festival_id = @FestivalId
+            GROUP BY g.nl
+        )
         SELECT 
-	        g.nl AS Genre,
-            COUNT(*) AS Total,
-            SUM(CASE WHEN i.wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
-            SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paid,
-            SUM(CASE WHEN i.afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
-        FROM amusing.ah_inschrijvingen i
-        JOIN amusing.ah_zanggroepen zg 
-            ON i.zanggroep_id = zg.zanggroep_id
-        JOIN amusing.ah_genres g
-            ON zg.genre_id = g.genre_id
-        WHERE i.festival_id = @festivalid
-        GROUP BY g.nl
-        ORDER BY g.nl;";
+            Genre,
+            Total - DroppedOut AS Total,
+            InQueue,
+            Paid,
+            DroppedOut
+        FROM counts
+        ORDER BY Genre;";
 
     public static readonly string DashboardStatisticsCountry = @"
+        WITH counts AS (
+            SELECT 
+                l.naam AS Country,
+                COUNT(*) AS Total,
+                SUM(CASE WHEN i.wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
+                SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paid,
+                SUM(CASE WHEN i.afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
+            FROM amusing.ah_inschrijvingen i
+            JOIN amusing.ah_zanggroepen zg ON i.zanggroep_id = zg.zanggroep_id
+            JOIN amusing.ah_landen l ON zg.land COLLATE utf8mb3_unicode_ci = l.code
+            WHERE i.festival_id = @FestivalId
+            GROUP BY l.naam
+        )
         SELECT 
-	        l.naam AS Country,
-            COUNT(*) AS Total,
-            SUM(CASE WHEN i.wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
-            SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paid,
-            SUM(CASE WHEN i.afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
-        FROM amusing.ah_inschrijvingen i
-        JOIN amusing.ah_zanggroepen zg 
-            ON i.zanggroep_id = zg.zanggroep_id
-        JOIN amusing.ah_landen l
-            ON zg.land COLLATE utf8mb3_unicode_ci = l.code 
-        WHERE i.festival_id = @FestivalId
-        GROUP BY l.naam 
-        ORDER BY l.naam;";
+            Country,
+            Total - DroppedOut AS Total,
+            InQueue,
+            Paid,
+            DroppedOut
+        FROM counts
+        ORDER BY Country;";
 
     public static readonly string DashboardStatisticsStagetype = @"
+        WITH counts AS (
+            SELECT 
+                i.podiumsoort AS Stagetype,
+                COUNT(*) AS Total,
+                SUM(CASE WHEN i.wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
+                SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paid,
+                SUM(CASE WHEN i.afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
+            FROM amusing.ah_inschrijvingen i
+            WHERE i.festival_id = @FestivalId
+            GROUP BY i.podiumsoort
+        )
         SELECT 
-	        i.podiumsoort  AS Stagetype,
-            COUNT(*) AS Total,
-            SUM(CASE WHEN i.wachtlijst <> 0 THEN 1 ELSE 0 END) AS InQueue,
-            SUM(CASE WHEN i.betaald IS NOT NULL THEN 1 ELSE 0 END) AS Paid,
-            SUM(CASE WHEN i.afgehaakt IS NOT NULL THEN 1 ELSE 0 END) AS DroppedOut
-        FROM amusing.ah_inschrijvingen i
- 
-        WHERE i.festival_id = @FestivalId
-        GROUP BY i.podiumsoort 
-        ORDER BY i.podiumsoort;";
+            Stagetype,
+            Total - DroppedOut AS Total,
+            InQueue,
+            Paid,
+            DroppedOut
+        FROM counts
+        ORDER BY Stagetype;";
 
     public static readonly string DashboardStatistictsSubscritionsByNumber = @"
         SELECT 
