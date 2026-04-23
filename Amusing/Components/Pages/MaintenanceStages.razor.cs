@@ -1,20 +1,12 @@
-using System.ComponentModel.DataAnnotations;
-
 using Amusing.Helpers;
 using Amusing.Models;
 using Amusing.Services;
 
-using Bit.BlazorUI;
-using Bit.BlazorUI.Extras;
-
 using Microsoft.AspNetCore.Components;
 
-using Syncfusion.Blazor.Buttons;
-using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Data;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Inputs;
-using Syncfusion.Blazor.Navigations;
 using Syncfusion.Blazor.Popups;
 
 namespace Amusing.Components.Pages;
@@ -31,7 +23,7 @@ public partial class MaintenanceStages : ComponentBase
     protected string FileName = "Podia";
     protected StageModel? SelectedStage;
     protected StageModel? SelectedStageOriginal;
-    protected List<StageTypeModel> AvailableStageTypes = new();
+    protected List<StageTypeModel> AvailableStageTypes = [];
     protected string? SelectedStageType;
     protected int VisibleRowCount = 0;
     protected List<StageModel> Stages = [];
@@ -39,7 +31,7 @@ public partial class MaintenanceStages : ComponentBase
     protected SfTooltip? TooltipObj;
     protected bool isOpen = false;
 
-    protected string SelectedStageTypeText => AvailableStageTypes.FirstOrDefault( e => e.Type == SelectedStageType )?.Type ?? "Onbekende podium type";
+    protected string SelectedStageTypeText => AvailableStageTypes.FirstOrDefault(e => e.Type == SelectedStageType)?.Type ?? "Onbekende podium type";
 
     protected bool ActiveChecked
     {
@@ -129,14 +121,14 @@ public partial class MaintenanceStages : ComponentBase
         Stages = await StageService.GetAllStagesAsync();
         AvailableStageTypes = await StageTypeService.GetAllStageTypesListAsync();
         SelectedStage = Stages
-            .OrderByDescending( f => f.Naam )
+            .OrderByDescending(f => f.Naam)
             .FirstOrDefault();
         IsLoading = false;
     }
 
     protected async Task OnGridDataBound()
     {
-        if ( !_initialLoadDone )
+        if (!_initialLoadDone)
         {
             _initialLoadDone = true;
             await UpdateVisibleRowCountAsync();
@@ -145,26 +137,23 @@ public partial class MaintenanceStages : ComponentBase
 
     protected async Task UpdateVisibleRowCountAsync()
     {
-        if ( GridRef is not null )
+        if (GridRef is not null)
         {
-            await GridRef.Refresh();
-            await Task.Delay( 50 );
             var records = await GridRef.GetCurrentViewRecordsAsync();
-            await Task.Delay( 150 );
             VisibleRowCount = records?.Count ?? 0;
             StateHasChanged();
         }
     }
 
-    public async Task OnInput( InputEventArgs args )
+    public async Task OnInput(InputEventArgs args)
     {
-        await GridRef.SearchAsync( args.Value );
+        await GridRef.SearchAsync(args.Value);
 
-        await Task.Delay( 50 );
+        await Task.Delay(50);
         await UpdateVisibleRowCountAsync();
     }
 
-    protected void OnRowSelected( RowSelectEventArgs<StageModel> args )
+    protected void OnRowSelected(RowSelectEventArgs<StageModel> args)
     {
         SelectedStage = args.Data;
 
@@ -191,31 +180,46 @@ public partial class MaintenanceStages : ComponentBase
         StateHasChanged();
     }
 
+    public async Task OnSearchInput(InputEventArgs args)
+    {
+        if (GridRef is null)
+            return;
+
+        var searchText = args?.Value?.ToString() ?? string.Empty;
+
+        await GridRef.SearchAsync(searchText);
+
+        var records = await GridRef.GetCurrentViewRecordsAsync();
+        VisibleRowCount = records?.Count ?? 0;
+
+        StateHasChanged();
+    }
+
     protected async Task SaveStage()
     {
-        if ( SelectedStage is null )
+        if (SelectedStage is null)
             return;
 
         // Check the differences between the original and cjhanged version
         var differences = ObjectDiffHelper.GetDifferences(SelectedStageOriginal, SelectedStage);
 
-        if ( differences.Count > 0 )
+        if (differences.Count > 0)
         {
             string stageName = SelectedStage.Naam;
 
-            foreach ( var diff in differences )
+            foreach (var diff in differences)
             {
                 string logMessage =
                 $"<_userName> heeft {diff.PropertyName} van podium \"{stageName}\" gewijzigd van '{diff.OldValue}' in '{diff.NewValue}'.";
 
-                await LoggingService.WriteUserActionStageAsync(SelectedStage.PodiumId, "Beheer", "Podia", "updated", logMessage );
+                await LoggingService.WriteUserActionStageAsync(SelectedStage.PodiumId, "Beheer", "Podia", "updated", logMessage);
             }
         }
 
         // Save te current Index of the record in the grid
         var savedId = SelectedStage.PodiumId;
 
-        await StageService.ModifyStageAsync( SelectedStage );
+        await StageService.ModifyStageAsync(SelectedStage);
 
         // Refresh the list
         Stages = await StageService.GetAllStagesAsync();
@@ -223,23 +227,23 @@ public partial class MaintenanceStages : ComponentBase
 
         // Search the modified record
         var index = Stages.FindIndex(s => s.PodiumId == savedId);
-        if ( index >= 0 )
+        if (index >= 0)
         {
-            SelectedStage = Stages [ index ];
-            await GridRef.SelectRowAsync( index );
+            SelectedStage = Stages[index];
+            await GridRef.SelectRowAsync(index);
         }
     }
 
     protected async Task AddNewStage()
     {
-        if ( SelectedStage is null )
+        if (SelectedStage is null)
             return;
 
         // Insert new record for this year in the table, and get the Stage-Id
         var stageId = await StageService.InsertNewStageAsync();
 
         var logMessage = $"<_userName> heeft podium met Id:{stageId} toegevoegd.";
-        await LoggingService.WriteUserActionStageAsync( stageId, "Beheer", "Podia", "added", logMessage );
+        await LoggingService.WriteUserActionStageAsync(stageId, "Beheer", "Podia", "added", logMessage);
 
         // Refresh the list
         Stages = await StageService.GetAllStagesAsync();
@@ -247,37 +251,37 @@ public partial class MaintenanceStages : ComponentBase
 
         // Search the new record
         var index = Stages.FindIndex(s => s.PodiumId == stageId);
-        if ( index >= 0 )
+        if (index >= 0)
         {
-            SelectedStage = Stages [ index ];
-            await GridRef.SelectRowAsync( index );
+            SelectedStage = Stages[index];
+            await GridRef.SelectRowAsync(index);
         }
     }
 
     protected async Task DeleteStage()
     {
-        if ( SelectedStage is null )
+        if (SelectedStage is null)
             return;
 
-        await StageService.DeleteStageAsync( SelectedStage.PodiumId );
+        await StageService.DeleteStageAsync(SelectedStage.PodiumId);
 
         var logMessage = $"<_userName> heeft podium \"{SelectedStage.Naam}\" verwijderd.";
-        await LoggingService.WriteUserActionStageAsync( SelectedStage.PodiumId, "Beheer", "Podia", "deleted", logMessage );
+        await LoggingService.WriteUserActionStageAsync(SelectedStage.PodiumId, "Beheer", "Podia", "deleted", logMessage);
 
         // refresh the table
         var stageModels = await StageService.GetAllStagesAsync();
 
         Stages = await StageService.GetAllStagesAsync();
         SelectedStage = Stages
-            .OrderByDescending( f => f.Naam )
+            .OrderByDescending(f => f.Naam)
             .FirstOrDefault();
         await GridRef.Refresh();
 
         // Select the first record in the grid
-        if ( Stages.Any() )
+        if (Stages.Any())
         {
-            SelectedStage = Stages [ 0 ];
-            await GridRef.SelectRowAsync( 0 );
+            SelectedStage = Stages[0];
+            await GridRef.SelectRowAsync(0);
         }
         else
         {
@@ -285,14 +289,14 @@ public partial class MaintenanceStages : ComponentBase
         }
     }
 
-    protected void OnOpen( Syncfusion.Blazor.DropDowns.PopupEventArgs args )
+    protected void OnOpen(Syncfusion.Blazor.DropDowns.PopupEventArgs args)
     {
         isOpen = true;
     }
 
-    protected async Task OnClose( Syncfusion.Blazor.DropDowns.PopupEventArgs args )
+    protected async Task OnClose(Syncfusion.Blazor.DropDowns.PopupEventArgs args)
     {
-        if ( TooltipObj != null )
+        if (TooltipObj != null)
         {
             await TooltipObj.CloseAsync();
         }
@@ -303,4 +307,3 @@ public partial class MaintenanceStages : ComponentBase
     public string ComboBoxValue { get; set; } = "Buiten";
     public string[] dataStageKind = { "Binnen", "Buiten" };
 }
- 

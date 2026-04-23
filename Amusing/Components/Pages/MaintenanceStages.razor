@@ -1,156 +1,154 @@
 ﻿@page "/Maintenance-Stages"
 @using Amusing.Models
-@using Amusing.Services
-@using Bit.BlazorUI
-@using Bit.BlazorUI.Extras
-@using Syncfusion.Blazor.Buttons
-@using Syncfusion.Blazor.DropDowns
-@using Syncfusion.Blazor.Calendars
-@using Syncfusion.Blazor.DataForm
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Calendars
 @using Syncfusion.Blazor.Navigations
-@using System.ComponentModel.DataAnnotations
 @using Syncfusion.Blazor.Popups
 
 @if (IsLoading)
 {
     <div class="text-center p-2">
-        <SfSpinner CssClass="e-spin-center" />
+        <SfSpinner />
         <p>@FileName worden geladen...</p>
     </div>
 }
 else
 {
     <div class="page-container">
+
+        <!-- HEADER / EDIT SECTION -->
         <div class="fixed-header">
+
             <h3>Onderhoud @FileName</h3>
-            @* Detail Fields *@
-            <SfDataForm Model="SelectedStage" OnValidSubmit="SaveStage" LabelPosition="FormLabelPosition.Top">
-                <div class="form-floating-switch">
-                    <hr />
-                    <SfTextBox @bind-Value="StageNaam" Placeholder="Podium naam" FloatLabelType="FloatLabelType.Always" Width="450px" />
-                    <SfTooltip ID="CardNumberTooltip"  Target="#CardNumber" Content="Vul een waarde hoger dan 0 in om het podium te activeren" >
-                        <SfNumericTextBox ID="CardNumber" @bind-Value="StageKaartNummer" Placeholder="Kaartnummer" FloatLabelType="FloatLabelType.Always" Width="160px" />
-                    </SfTooltip>
-                    <SfComboBox 
-                        TValue=string
-                            TItem=string 
-                            FloatLabelType="FloatLabelType.Always"
-                            Placeholder="Binnen of buiten podium"
-                            DataSource="@dataStageKind"
-                            @bind-Value="@StageSoort"
-                            Width="180px" />
-                    <div />
-                    
-                    <!-- Tooltip component: target the list item nodes that have a title attribute -->
-                    <SfTooltip @ref="TooltipObj" Target=".e-list-item .name[title]"></SfTooltip>
-                    
-                    <SfComboBox 
-                        TValue="string"
-                        TItem="StageTypeModel"
-                        FloatLabelType="FloatLabelType.Always"
-                        Placeholder="Kies een podium type"
-                        DataSource="@AvailableStageTypes"
-                        @bind-Value="@StageType"
-                        Width="450px">
 
-                        <!-- Field mapping voor waarde en tekst -->
-                        <ComboBoxFieldSettings Text="ComboBoxDisplayName" Value="Type"></ComboBoxFieldSettings>
+            <EditForm Model="@SelectedStage" OnValidSubmit="SaveStage">
 
-                        <!-- Templates zodat je een tooltip kunt tonen -->
-                        <ComboBoxTemplates TItem="StageTypeModel">
-                            <ItemTemplate Context="stageType">
-                                <div class="name" title="@stageType.ComboBoxDisplayName">
-                                    @stageType.ComboBoxDisplayName
-                                </div>
-                            </ItemTemplate>
-                        </ComboBoxTemplates>
+                <div class="form-grid">
 
-                        <!-- Events zodat we tooltip kunnen refreshen bij open -->
-                        <ComboBoxEvents TValue="string" TItem="StageTypeModel" Opened="OnOpen" OnClose="OnClose"></ComboBoxEvents>
-                    </SfComboBox>
-                    <hr/>
-                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="StageStart" Placeholder="Begintijd" Width="150px" FloatLabelType="FloatLabelType.Always" />
-                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="StageEind" Placeholder="Eindtijd" Width="150px" FloatLabelType="FloatLabelType.Always" />
-                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="StageVan" Placeholder="Vrijwilligers vanaf" Width="150px" FloatLabelType="FloatLabelType.Always" />
-                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="StageTot" Placeholder="Vrijwilligers tot" Width="150px" FloatLabelType="FloatLabelType.Always" />
-                    <hr/>
-                    <SfNumericTextBox TValue="int" Min="0" Max="10" @bind-Value="StageKwaliteit" Placeholder="Kwaliteit" Width="150px" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" />
-                    <SfNumericTextBox TValue="int" Min="0" @bind-Value="StageMaxZangers" Placeholder="Max. aantal zangers" Width="170px" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" />
-                    <SfNumericTextBox TValue="int" Min="0" Max="4" @bind-Value="StageVrijwilligers" Placeholder="Vrijwilligers" Width="150px" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" />
+                    <div class="form-row-1">
+                        <SfTextBox class="col-span-2"
+                                   @bind-Value="StageNaam"
+                                   Placeholder="Podium naam"
+                                   FloatLabelType="FloatLabelType.Always" />
+
+                        <SfNumericTextBox class="col-span-1"
+                                          @bind-Value="StageKaartNummer"
+                                          Placeholder="Kaartnummer"
+                                          Width="150px"
+                                          FloatLabelType="FloatLabelType.Always" />
+
+                        <SfComboBox class="col-span-1"
+                                    TValue="string"
+                                    TItem="string"
+                                    DataSource="@dataStageKind"
+                                    @bind-Value="@StageSoort"
+                                    Width="170px"
+                                    Placeholder="Binnen of buiten podium"
+                                    FloatLabelType="FloatLabelType.Always" />
+
+                        <SfComboBox class="col-span-1"
+                                    TValue="string"
+                                    TItem="StageTypeModel"
+                                    DataSource="@AvailableStageTypes"
+                                    @bind-Value="@StageType"
+                                    Width="150px"
+                                    Placeholder="Kies podium type"
+                                    FloatLabelType="FloatLabelType.Always"
+                                    AllowFiltering="true"
+                                    ShowClearButton="true">
+
+                            <ComboBoxFieldSettings Text="ComboBoxDisplayName" Value="Type"></ComboBoxFieldSettings>
+                        </SfComboBox>
+                    </div>
+
+                    <div class="form-row-2">
+                        <SfTimePicker class="col-span-1" @bind-Value="StageStart" Placeholder="Start" FloatLabelType="FloatLabelType.Always" />
+                        <SfTimePicker class="col-span-1" @bind-Value="StageEind" Placeholder="Eind" FloatLabelType="FloatLabelType.Always" />
+                        <SfTimePicker class="col-span-1" @bind-Value="StageVan" Placeholder="Vrijw. van" FloatLabelType="FloatLabelType.Always" />
+                        <SfTimePicker class="col-span-1" @bind-Value="StageTot" Placeholder="Vrijw. tot" FloatLabelType="FloatLabelType.Always" />
+                    </div>
+
+                    <div class="form-row-3">
+                        <SfNumericTextBox class="col-span-1" @bind-Value="StageKwaliteit" Placeholder="Kwaliteit" FloatLabelType="FloatLabelType.Always" />
+                        <SfNumericTextBox class="col-span-1" @bind-Value="StageMaxZangers" Placeholder="Max zangers" FloatLabelType="FloatLabelType.Always" />
+                        <SfNumericTextBox class="col-span-2" @bind-Value="StageVrijwilligers" Placeholder="Vrijwilligers" FloatLabelType="FloatLabelType.Always" />
+                    </div>
                 </div>
-            </SfDataForm>
-            <div class="spacer-large"/>
-            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
-                <SfToolbar Width="800px">
-                    <ToolbarItems>
-                        <ToolbarItem Type="ItemType.Button">
-                            <Template>
-                                <button class="custom-toolbar-btn"
-                                        @onclick="SaveStage"
-                                        title="Sla het podium op">
-                                    <img src="icons/button-save.svg" class="icon" alt="SAVE" />
-                                </button>
-                            </Template>
-                        </ToolbarItem>
-                        <ToolbarItem Type="ItemType.Button">
-                            <Template>
-                                <button class="custom-toolbar-btn" @onclick="AddNewStage" title="Voeg een nieuw podium toe">
-                                    <img src="icons/button-add.svg" class="icon" alt="ADD" />
-                                </button>
-                            </Template>
-                        </ToolbarItem>
-                        <ToolbarItem Type="ItemType.Button">
-                            <Template>
-                                <button class="custom-toolbar-btn @(SelectedStage?.Aktief == 1 ? "disabled" : "")"
-                                        @onclick="DeleteStage"
-                                        title="Verwijder geselecteerde podium"
-                                        disabled="@(SelectedStage?.Aktief == 1)">
-                                    <img src="icons/button-del.svg" class="icon" alt="DEL" />
-                                </button>
-                            </Template>
-                        </ToolbarItem>
-                        <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
-                            <Template>
-                                <span class="toolbar-count">@FileName: @VisibleRowCount</span>
-                            </Template>
-                        </ToolbarItem>
-                        <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
-                            <Template>
-                                <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
-                            </Template>
-                        </ToolbarItem>
-                    </ToolbarItems>
-                </SfToolbar>
-            </div>
+
+                <!-- TOOLBAR -->
+                <div class="toolbar-row">
+                    <SfToolbar Width="800px">
+                        <ToolbarItems>
+                            <ToolbarItem Type="ItemType.Button">
+                                <Template>
+                                    <button class="custom-toolbar-btn" @onclick="SaveStage" title="Sla het podium op">
+                                        <img src="icons/button-save.svg" class="icon" alt="SAVE" />
+                                    </button>
+                                </Template>
+                            </ToolbarItem>
+
+                            <ToolbarItem Type="ItemType.Button">
+                                <Template>
+                                    <button class="custom-toolbar-btn" @onclick="AddNewStage" title="Voeg een nieuw podium toe">
+                                        <img src="icons/button-add.svg" class="icon" alt="ADD" />
+                                    </button>
+                                </Template>
+                            </ToolbarItem>
+
+                            <ToolbarItem Type="ItemType.Button">
+                                <Template>
+                                    <button class="custom-toolbar-btn @(SelectedStage?.Aktief == 1 ? "disabled" : "")" @onclick="DeleteStage" title="Verwijder geselecteerde podium" disabled="@(SelectedStage?.Aktief == 1)">
+                                        <img src="icons/button-del.svg" class="icon" alt="DEL" />
+                                    </button>
+                                </Template>
+                            </ToolbarItem>
+
+                            <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                                <Template>
+                                    <span class="toolbar-count">@FileName: @VisibleRowCount</span>
+                                </Template>
+                            </ToolbarItem>
+
+                            <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                                <Template>
+                                    <SfTextBox
+                                        Placeholder="Zoek" 
+                                        Input="OnSearchInput">
+                                    </SfTextBox>
+                                </Template>
+                            </ToolbarItem>
+                        </ToolbarItems>
+                    </SfToolbar>
+                </div>
+            </EditForm>
         </div>
 
+        <!-- GRID -->
         <div class="scrollable-content">
-            @* DataGrid *@ 
-            <div class="spacer-small"></div>
-            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
-                <SfGrid @ref="GridRef"
-                    TValue="StageModel"
-                    DataSource="@Stages" 
-                    EnableStickyHeader="true"
-                    AllowResizing="true" 
-                    Height="560px"
-                    Width="800px" 
-                    AllowSorting="true" 
-                    AllowMultiSorting="true"
-                    AllowSelection="true">
-                    <GridEvents TValue="StageModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
 
-                    <GridColumns>
-                        <GridColumn Field="Naam" HeaderText="Naam" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="500px" />
-                        <GridColumn Field="Type" HeaderText="Type" TextAlign="TextAlign.Center" AllowSorting=true AllowResizing="true" Width="60px" />
-                        <GridColumn Field="Soort" HeaderText="Soort" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="80px" />
-                        <GridColumn Field="KaartNummer" HeaderText="Kaart nummer" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="130px" />
-                    </GridColumns>
-                </SfGrid>
-                <div class="spacer-large"></div>
-            </div>
+            <SfGrid @ref="GridRef" 
+                    TValue="StageModel"
+                    DataSource="@Stages"
+                    Height="560px"
+                    AllowSorting="true"
+                    AllowSelection="true">
+
+                <GridEvents TValue="StageModel"
+                            RowSelected="OnRowSelected"
+                            DataBound="OnGridDataBound" />
+
+                <GridColumns>
+                    <GridColumn Field="Naam" HeaderText="Naam" Width="300" />
+                    <GridColumn Field="Type" HeaderText="Type" Width="80" />
+                    <GridColumn Field="Soort" HeaderText="Soort" Width="120" />
+                    <GridColumn Field="KaartNummer" HeaderText="Kaart" Width="100" />
+                </GridColumns>
+
+            </SfGrid>
+
         </div>
+
     </div>
 }
