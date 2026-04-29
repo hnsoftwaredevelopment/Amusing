@@ -5,8 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-Amusing-d4b4dda8-27a3-4a96-94e4-f605690b8606</UserSecretsId>
-    <AssemblyVersion>26.4.24.0</AssemblyVersion>
-    <FileVersion>26.4.24.0</FileVersion>
+    <AssemblyVersion>26.4.40.0</AssemblyVersion>
+    <FileVersion>26.4.40.0</FileVersion>
     <HotReloadAutoRestart>true</HotReloadAutoRestart>
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
   </PropertyGroup>
@@ -41,7 +41,7 @@
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="FluentValidation" Version="12.0.0" />
-    <PackageReference Include="MailKit" Version="4.14.1" />
+    <PackageReference Include="MailKit" Version="4.16.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.10" />
@@ -63,6 +63,7 @@
     <PackageReference Include="Syncfusion.Blazor.Themes" Version="31.2.4" />
     <PackageReference Include="Syncfusion.Pdf.Net.Core" Version="31.2.4" />
     <PackageReference Include="Syncfusion.XlsIO.Net.Core" Version="31.2.4" />
+    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
   </ItemGroup>
 
   <ItemGroup>

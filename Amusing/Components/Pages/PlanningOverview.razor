@@ -9,8 +9,8 @@
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
 @using System.ComponentModel.DataAnnotations
+@using Syncfusion.Blazor.Notifications
 @using Syncfusion.Blazor.PivotView
-
 
 <AuthorizeView>
 	<Authorized>
@@ -26,25 +26,38 @@
 			</div>
 
 			<div class="row row2">
-				<div class="col left">
-					<SfComboBox TValue="string"
+				<div class="col left toolbar">
+
+					<SfComboBox class="sf-combobox" TValue="string"
 								TItem="Edition"
 								Placeholder="Kies een editie"
 								ValueChanged="OnEditionChanged"
 								DataSource="@Editions"
-								Width="150px">
+								Width="175px">
 						<ComboBoxFieldSettings Value="ID" Text="Text"></ComboBoxFieldSettings>
 					</SfComboBox>
-				</div>
-				
-				<button class="xml-btn" @onclick="ExportToXmlAsync" title="XML Export">
-					<img src="icons/xml.svg" class="icon" alt="XML" />
-				</button>
 
-				<button class="xml-btn" @onclick="ExportToExcelAsync" title="Excel Export">
-					<img src="icons/excel.svg" class="icon" alt="XML" />
-				</button>
+					<button class="xml-btn @(string.IsNullOrWhiteSpace(SelectedEdition) ? "hidden" : "")"
+							@onclick="ExportToExcelAsync"
+							title="Excel Export">
+						<img src="icons/excel.svg" class="icon" alt="Excel" />
+					</button>
+
+					<button class="xml-btn @(string.IsNullOrWhiteSpace(SelectedEdition) ? "hidden" : "")"
+							@onclick="ExportToXmlAsync"
+							title="XML Export">
+						<img src="icons/xml.svg" class="icon" alt="XML" />
+					</button>
+				</div>
 			</div>
+			<SfToast @ref="ToastObj"
+					 TimeOut="3000"
+					 ShowCloseButton="true"
+					 NewestOnTop="true">
+				<ToastPosition X="Center" Y="Top" />
+				<ToastEvents Closed="@OnToastClose"></ToastEvents>
+			</SfToast>
+
 
 			<div class="row row3">
 				<div class="col left">
@@ -68,7 +81,7 @@
 										<label>Gewenste tijd tussen optredens</label>
 										<input type="number" width="50"
 												@bind="WishTimeBetweenPerformances"
-												disabled="@( !IsEditingConditions )" /> 
+												disabled="@( !IsEditingConditions )" />
 									</div>
 
 									<div class="row">
@@ -102,7 +115,7 @@
 									<div class="row">
 										<label>Reserve taaknaam</label>
 										<input type="text"
-												   @bind="SubstitudeTaskName" 
+												   @bind="SubstitudeTaskName"
 												   disabled="disabled" />
 									</div>
 
@@ -124,12 +137,12 @@
 				{
 					<div class="schedule-grid scroll-container">
 						<div class="title">Podiumplanning</div>
-						<SfGrid 
-							DataSource="@StageRows" 
-							AllowSorting="false" 
-							AllowFiltering="false" 
-							AllowPaging="false" 
-							GridLines="GridLine.Both" 
+						<SfGrid
+							DataSource="@StageRows"
+							AllowSorting="false"
+							AllowFiltering="false"
+							AllowPaging="false"
+							GridLines="GridLine.Both"
 							Width="100%">
 							<GridColumns>
 								<GridColumn Field="SortOrder"
@@ -152,10 +165,10 @@
 									</HeaderTemplate>
 								</GridColumn>
 
-								<GridColumn 
-									Field="StageName" 
-									HeaderText="Podium" 
-									Width="350" 
+								<GridColumn
+									Field="StageName"
+									HeaderText="Podium"
+									Width="350"
 									IsFrozen="true">
 									<Template Context="rowObj">
 										@{
@@ -291,10 +304,6 @@
 
 
 		</div>
-		@if ( !string.IsNullOrWhiteSpace( _message ) )
-		{
-			<div class="alert alert-success mt-2">@_message</div>
-		}
 
 	</Authorized>
 	<NotAuthorized>

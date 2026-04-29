@@ -1,23 +1,11 @@
-using System.Xml.Linq;
-
-using Amusing.Helpers;
 using Amusing.Models;
 using Amusing.Services;
 
-using BootstrapBlazor.Components;
-
-using ClosedXML.Excel;
-
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.JSInterop;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Grids.Internal;
-
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using static Mysqlx.Expect.Open.Types;
+using Syncfusion.Blazor.Notifications;
 
 namespace Amusing.Components.Pages;
 
@@ -35,15 +23,16 @@ public partial class PlanningOverview
     private string _message;
     private string SelectedEditionId { get; set; }
     public string SelectedEditionText { get; set; }
+    private string? SelectedEdition = null;
 
     public List<PlanningConditionsModel> Conditions { get; set; } = [];
     public PlanningConditionsModel? SelectedCondition { get; set; }
     public bool IsEditingConditions { get; set; } = false;
 
-    public List<PlanningStageVolunteersModel> StageDuty { get; set; } = [ ];
+    public List<PlanningStageVolunteersModel> StageDuty { get; set; } = [];
     public PlanningStageVolunteersModel? SelectedStageDuty { get; set; }
 
-    public List<PlanningOtherVolunteerTasksModel> OtherTasks { get; set; } = [ ];
+    public List<PlanningOtherVolunteerTasksModel> OtherTasks { get; set; } = [];
     public PlanningOtherVolunteerTasksModel? SelectedOtherTasks { get; set; }
 
     public List<StageScheduleRow> StageRows = [];
@@ -107,11 +96,11 @@ public partial class PlanningOverview
     {
         Editions = await EditionService.GetEditionsAsync();
 
-        if ( Editions.Count != 0 )
+        if (Editions.Count != 0)
         {
             // Auto select the newest festival by its numeric value
             SelectedEditionId = Editions
-                .OrderByDescending( e => int.Parse( e.Text ) )
+                .OrderByDescending(e => int.Parse(e.Text))
                 .First().ID;
 
             // Find label text
@@ -122,11 +111,11 @@ public partial class PlanningOverview
 
     private async Task LoadConditionsAsync()
     {
-        if ( SelectedEditionId == null )
+        if (SelectedEditionId == null)
             return;
 
         Conditions = await PlanningService.GetPlanningConditionsAsync(
-            int.Parse( SelectedEditionId )
+            int.Parse(SelectedEditionId)
         );
 
         // For your detail table, pick the first (often the only) record
@@ -135,11 +124,11 @@ public partial class PlanningOverview
 
     private async Task LoadStageDutyAsync()
     {
-        if ( SelectedEditionId == null )
+        if (SelectedEditionId == null)
             return;
 
         StageDuty = await PlanningService.GetPlanningVolunteersPerStageOverview(
-            int.Parse( SelectedEditionId )
+            int.Parse(SelectedEditionId)
         );
 
         // For your detail table, pick the first (often the only) record
@@ -148,11 +137,11 @@ public partial class PlanningOverview
 
     private async Task LoadOtherTasksAsync()
     {
-        if ( SelectedEditionId == null )
+        if (SelectedEditionId == null)
             return;
 
         OtherTasks = await PlanningService.GetPlanningOtherVolunteerTasksOverview(
-            int.Parse( SelectedEditionId )
+            int.Parse(SelectedEditionId)
         );
 
         // For your detail table, pick the first (often the only) record
@@ -160,12 +149,16 @@ public partial class PlanningOverview
     }
 
 
-    protected async Task OnEditionChanged( string selectedId )
+    protected async Task OnEditionChanged(string selectedId)
     {
-        if ( string.IsNullOrWhiteSpace( selectedId ) )
+        if (string.IsNullOrWhiteSpace(selectedId))
+        {
+            SelectedEdition = null;
             return;
+        }
 
         SelectedEditionId = selectedId;
+        SelectedEdition = "Selected";
 
         // Find label text
         var edition = Editions.FirstOrDefault(e => e.ID == selectedId);
@@ -177,7 +170,7 @@ public partial class PlanningOverview
 
         TimeSlots = GenerateTimeSlots(); // optioneel opnieuw genereren
         var raw = await PlanningService.GetStagePerformancesAsync(int.Parse(SelectedEditionId));
-        StageRows = BuildScheduleRows( raw );
+        StageRows = BuildScheduleRows(raw);
 
         StateHasChanged();
 
@@ -185,7 +178,7 @@ public partial class PlanningOverview
 
     private void ToggleEditConditions()
     {
-        if ( IsEditingConditions )
+        if (IsEditingConditions)
         {
             // TODO: Save to database
             // Example:
@@ -195,7 +188,7 @@ public partial class PlanningOverview
         IsEditingConditions = !IsEditingConditions;
     }
 
-    private async Task<string> ExportFilename (int _editionId, string fileType)
+    private async Task<string> ExportFilename(int _editionId, string fileType)
     {
         var ExportFileName = await PlanningService.GetExportFileName(_editionId);
 
@@ -210,38 +203,105 @@ public partial class PlanningOverview
     }
     private async Task ExportToXmlAsync()
     {
-        var _editionId = int.Parse( SelectedEditionId );
-        var ExportFileName = ExportFilename(_editionId, "xml");
+        var _editionId = int.Parse(SelectedEditionId);
+        var ExportFileName = await ExportFilename(_editionId, "xml");
         // Trigger XML export for the selected edition
-        await PlanningService.ExportFullPlanningToXmlAsync( _editionId, ExportFileName.ToString() );
-        _message = "Planning naar XML export completed.";
+        await ExportWithRetryAsync(_editionId, ExportFileName.ToString(), (id, file) => PlanningService.ExportFullPlanningToXmlAsync(id, file)).ConfigureAwait(false);
+        await ShowToast("Planning naar XML voltooid.", "success");
     }
 
     private async Task ExportToExcelAsync()
     {
-        var _editionId = int.Parse( SelectedEditionId );
-        var ExportFileName = ExportFilename(_editionId, "xlxs");
+        var _editionId = int.Parse(SelectedEditionId);
+        var ExportFileName = await ExportFilename(_editionId, "xlsx");
         // Trigger Excel export for the selected edition
-        await PlanningService.ExportFullPlanningToExcelAsync( _editionId, ExportFileName.ToString() );
-        _message = "Planning naar Excel export completed.";
+        await ExportWithRetryAsync(_editionId, ExportFileName.ToString(), (id, file) => PlanningService.ExportFullPlanningToExcelAsync(id, file)).ConfigureAwait(false);
+        await ShowToast("Planning naar Excel voltooid.", "success");
     }
 
-    private PlanningStageVolunteersModel? GetPreviousItem( PlanningStageVolunteersModel current )
+    private async Task ExportWithRetryAsync(int _editionId, string exportFileName, Func<int, string, Task> exportAction)
+    {
+        const int maxAttempts = 3;
+        TimeSpan delay = TimeSpan.FromSeconds(1);
+        var correlationId = Guid.NewGuid().ToString("N");
+
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                await exportAction(_editionId, exportFileName).ConfigureAwait(false);
+                return;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex) when (attempt < maxAttempts && (ex is System.IO.IOException || ex is System.Net.Http.HttpRequestException || ex is TimeoutException))
+            {
+                await Task.Delay(delay).ConfigureAwait(false);
+                delay = delay + delay;
+                continue;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Export failed (cid:{correlationId})", ex);
+            }
+        }
+    }
+
+    private SfToast? _toast;
+    protected SfToast? ToastObj { get; set; }
+
+
+    protected async Task ShowToast(string message, string type = "error")
+    {
+        string css = type switch
+        {
+            "success" => "e-toast-success",
+            "warning" => "e-toast-warning",
+            _ => "e-toast-danger"
+        };
+
+        string icon = type switch
+        {
+            "success" => "e-check",
+            "warning" => "e-warning",
+            _ => "e-error"
+        };
+
+        if (ToastObj != null)
+        {
+            await ToastObj.ShowAsync(new ToastModel
+            {
+                Title = "Export",
+                Content = message,
+                CssClass = css,
+                Icon = icon
+            });
+        }
+    }
+
+    protected void OnToastClose(ToastCloseArgs args)
+    {
+        // Do something after the toast cloases
+    }
+
+    private PlanningStageVolunteersModel? GetPreviousItem(PlanningStageVolunteersModel current)
     {
         var index = StageDuty.IndexOf(current);
-        if ( index <= 0 )
+        if (index <= 0)
             return null;
 
-        return StageDuty [ index - 1 ];
+        return StageDuty[index - 1];
     }
 
-    private PlanningOtherVolunteerTasksModel? GetPreviousTaskItem( PlanningOtherVolunteerTasksModel current )
+    private PlanningOtherVolunteerTasksModel? GetPreviousTaskItem(PlanningOtherVolunteerTasksModel current)
     {
         var index = OtherTasks.IndexOf(current);
-        if ( index <= 0 )
+        if (index <= 0)
             return null;
 
-        return OtherTasks [ index - 1 ];
+        return OtherTasks[index - 1];
     }
 
     protected override async Task OnParametersSetAsync()
@@ -250,10 +310,10 @@ public partial class PlanningOverview
         TimeSlots = GenerateTimeSlots();
 
         // Fetch raw schedule data from the service
-        var raw = await PlanningService.GetStagePerformancesAsync(int.Parse( SelectedEditionId));
+        var raw = await PlanningService.GetStagePerformancesAsync(int.Parse(SelectedEditionId));
 
         // Transform raw performances into pivot structure
-        StageRows = BuildScheduleRows( raw );
+        StageRows = BuildScheduleRows(raw);
     }
 
     // Generate times from 11:00 to 18:00 (30-minute steps)
@@ -262,25 +322,25 @@ public partial class PlanningOverview
         var list = new List<string>();
         var time = new TimeOnly(11, 0);
 
-        for ( int i = 0; i < 14; i++ ) // 7 hours * 2 slots/hour
+        for (int i = 0; i < 14; i++) // 7 hours * 2 slots/hour
         {
-            list.Add( time.ToString( "HH:mm" ) );
-            time = time.AddMinutes( 30 );
+            list.Add(time.ToString("HH:mm"));
+            time = time.AddMinutes(30);
         }
 
         return list;
     }
 
     // Convert timeslot number to start time
-    private TimeOnly SlotToStartTime( int tijdvak )
+    private TimeOnly SlotToStartTime(int tijdvak)
     {
         var baseTime = new TimeOnly(11, 0);
-        return baseTime.AddMinutes( ( tijdvak - 1 ) * 30 );
+        return baseTime.AddMinutes((tijdvak - 1) * 30);
     }
 
     // Pivot transformation
     private List<StageScheduleRow> BuildScheduleRows(List<StagePerformanceModel> data)
-{
+    {
         var rows = data
         .GroupBy(x => new { x.StageId, x.StageName })
         .Select(g =>
