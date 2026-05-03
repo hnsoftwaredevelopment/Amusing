@@ -222,7 +222,7 @@ public static class QueryDefinitions
     GROUP BY ah_personen.email
     ORDER BY `Groep` ASC;";
 
-    public static readonly string GetRegistrationsByFestifalId = @"
+    public static readonly string GetRegistrationsByFestivalId = @"
         SELECT
             i.festival_id AS festival_id,
             i.zanggroep_id AS zanggroep_id,
@@ -883,6 +883,26 @@ public static class QueryDefinitions
 
         return sb.ToString();
     }
+
+    public static readonly string GetNotRegisteredGroups = @"
+        SELECT
+            zg.zanggroep_id,
+            zg.naam,
+            zg.standplaats
+        FROM amusing.ah_zanggroepen zg
+        WHERE COALESCE(zg.actief, 0) = 1
+          AND NOT EXISTS (
+              SELECT 1
+              FROM amusing.ah_inschrijvingen i
+              WHERE i.festival_id = @festivalId
+                AND i.zanggroep_id = zg.zanggroep_id
+          )
+        ORDER BY zg.naam, zg.standplaats;";
+    public static readonly string AddRegistration = @"
+        INSERT INTO amusing.ah_inschrijvingen
+            (festival_id, zanggroep_id, aantal_deelnemers, podiumsoort, ingeschreven)
+        VALUES
+            (@festivalId, @zanggroepId, @aantalDeelnemers, @podiumsoort, @ingeschreven);";
 
     public static readonly string ModifyStage = @"
         UPDATE amusing.ah_podia 

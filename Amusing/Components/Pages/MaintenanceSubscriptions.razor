@@ -42,6 +42,16 @@
 
 							<SfToolbar>
 								<ToolbarItems>
+									<ToolbarItem Type="ItemType.Input" Align="ItemAlign.Left">
+										<Template>
+											<button class="btn btn-blue" hidden="@( !CanAddGroup )"
+													@onclick="OpenAddGroupDialog"
+													disabled="@(!CanAddGroup)">
+												Koor toevoegen
+											</button>
+										</Template>
+									</ToolbarItem>
+
 									<ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
 										<Template>
 											<span class="toolbar-count">Inschrijvingen: @VisibleRowCount</span>
@@ -116,6 +126,83 @@
 												Opslaan
 											</button>
 											<button class="btn btn-gray" @onclick="ClosePaymentDialog">
+												Annuleren
+											</button>
+										</div>
+									</FooterTemplate>
+								</DialogTemplates>
+							</SfDialog>
+
+							<SfDialog Width="500px"
+									  IsModal="true"
+									  @bind-Visible="showAddGroupDialog"
+									  ShowCloseIcon="true"
+									  Header="Koor toevoegen">
+								<DialogTemplates>
+									<Content>
+										<div class="p-3">
+											@if (IsCurrentEditionSelected)
+											{
+												<SfComboBox TValue="uint?"
+															TItem="AvailableGroupModel"
+															DataSource="@AvailableGroups"
+															@bind-Value="selectedAvailableGroupId"
+															Placeholder="Selecteer een koor"
+															Width="100%">
+													<ComboBoxFieldSettings Value="ZanggroepId" Text="Naam"></ComboBoxFieldSettings>
+													<ComboBoxTemplates TItem="AvailableGroupModel">
+														<ItemTemplate Context="group">
+															<div>
+																<strong>@group.Naam</strong><br />
+																<span>@group.Standplaats</span>
+															</div>
+														</ItemTemplate>
+													</ComboBoxTemplates>
+												</SfComboBox>
+
+												<div class="mt-3"></div>
+
+												<SfNumericTextBox TValue="int?"
+																  @bind-Value="selectedAantalDeelnemers"
+																  Placeholder="Aantal deelnemers"
+																  Width="100%"
+																  Min="1"
+																  FloatLabelType="FloatLabelType.Always" />
+
+												<div class="mt-3"></div>
+
+												<SfComboBox TValue="string"
+															TItem="StageTypeModel"
+															DataSource="@AvailableStageTypes"
+															@bind-Value="selectedPodiumsoort"
+															Placeholder="Selecteer podiumsoort"
+															Width="100%">
+													<ComboBoxFieldSettings Value="Type" Text="Type"></ComboBoxFieldSettings>
+													<ComboBoxTemplates TItem="StageTypeModel">
+														<ItemTemplate Context="stageType">
+															<div>
+																<strong>@stageType.Type</strong><br />
+																<span>@stageType.Omschrijving</span>
+															</div>
+														</ItemTemplate>
+													</ComboBoxTemplates>
+												</SfComboBox>
+											}
+											else
+											{
+												<p>Nieuwe koren kunnen alleen aan de huidige editie worden toegevoegd.</p>
+											}
+										</div>
+									</Content>
+
+									<FooterTemplate>
+										<div class="flex justify-end gap-2">
+											<button class="btn btn-green"
+													@onclick="ConfirmAddGroupAsync"
+													disabled="@(!CanConfirmAddGroup)">
+												Toevoegen
+											</button>
+											<button class="btn btn-gray" @onclick="CloseAddGroupDialog">
 												Annuleren
 											</button>
 										</div>

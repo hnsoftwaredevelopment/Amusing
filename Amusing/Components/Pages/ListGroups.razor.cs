@@ -94,7 +94,7 @@ public partial class ListGroups : ComponentBase
     {
         IsLoading = true;
         StateHasChanged();
-        Zanggroepen = await RegistrationService.GetRegistrationdPerFestivalAsync( filterOutOldGroups: FilterOutOldGroups );
+        Zanggroepen = await RegistrationService.GetRegistrationPerFestivalAsync( filterOutOldGroups: FilterOutOldGroups );
 
         YearColumns = [.. Zanggroepen
             .SelectMany( z => z.DeelnamePerJaar.Keys )

@@ -1,44 +1,42 @@
-﻿using System.Net.NetworkInformation;
-
-using Amusing.Helpers;
+﻿using Amusing.Helpers;
 using Amusing.Models;
 
 namespace Amusing.Services;
 
-public class RegistrationService( GenericDataService dataService )
+public class RegistrationService(GenericDataService dataService)
 {
     private readonly GenericDataService _dataService = dataService;
 
-    public Task<List<RegistrationModel>> GetRegistrationsByFestivalIdAsync( uint festivalId )
+    public Task<List<RegistrationModel>> GetRegistrationsByFestivalIdAsync(uint festivalId)
     {
         return _dataService.ExecuteQueryAsync(
-            QueryDefinitions.GetRegistrationsByFestifalId,
+            QueryDefinitions.GetRegistrationsByFestivalId,
             reader => new RegistrationModel
             {
-                FestivalId = Convert.ToUInt32( reader [ "festival_id" ] ),
-                GroepId = Convert.ToUInt32( reader [ "zanggroep_id" ] ),
-                Datum = Convert.ToDateTime( reader [ "Datum" ] ),
-                Naam = reader [ "Naam" ].ToString(),
-                Stad = reader [ "Stad" ].ToString(),
-                Podium = reader [ "Podium" ].ToString(),
-                Zangers = Convert.ToInt32( reader [ "Zangers" ] ),
-                Genre = reader [ "Genre" ].ToString(),
-                TeBetalen = Convert.ToDecimal( reader [ "TeBetalen" ] ),
-                Betaald = reader [ "Betaald" ].ToString(),
-                Bevestigd = reader [ "Bevestigd" ].ToString(),
-                Kleedkamer = reader [ "Kleedkamer" ].ToString(),
+                FestivalId = Convert.ToUInt32(reader["festival_id"]),
+                GroepId = Convert.ToUInt32(reader["zanggroep_id"]),
+                Datum = Convert.ToDateTime(reader["Datum"]),
+                Naam = reader["Naam"].ToString(),
+                Stad = reader["Stad"].ToString(),
+                Podium = reader["Podium"].ToString(),
+                Zangers = Convert.ToInt32(reader["Zangers"]),
+                Genre = reader["Genre"].ToString(),
+                TeBetalen = Convert.ToDecimal(reader["TeBetalen"]),
+                Betaald = reader["Betaald"].ToString(),
+                Bevestigd = reader["Bevestigd"].ToString(),
+                Kleedkamer = reader["Kleedkamer"].ToString(),
                 AcapellaBattle = reader["AcapellaBattle"].ToString(),
-                SingAlong = reader ["SingAlong"].ToString(),
+                SingAlong = reader["SingAlong"].ToString(),
                 Beoordeling = reader["Beoordeling"].ToString(),
-                Binnen = Convert.ToInt32( reader [ "Binnen" ] ),
-                Buiten = Convert.ToInt32( reader [ "Buiten" ] ),
-                Afgehaakt = reader [ "Afgehaakt" ].ToString()
+                Binnen = Convert.ToInt32(reader["Binnen"]),
+                Buiten = Convert.ToInt32(reader["Buiten"]),
+                Afgehaakt = reader["Afgehaakt"].ToString()
             },
             new Dictionary<string, object> { { "@festivalId", festivalId } }
             );
     }
 
-    public async Task<List<FestivalParticipationDynamicViewModel>> GetRegistrationdPerFestivalAsync( bool filterOutOldGroups = false )
+    public async Task<List<FestivalParticipationDynamicViewModel>> GetRegistrationPerFestivalAsync(bool filterOutOldGroups = false)
     {
         // Get the first and current festival year
         var yearRange = await _dataService.ExecuteQueryAsync(
@@ -50,9 +48,9 @@ public class RegistrationService( GenericDataService dataService )
             }
         );
 
-        if ( !yearRange.Any() )
+        if (!yearRange.Any())
         {
-            return [ ];
+            return [];
         }
 
         int startYear = yearRange.First().Oldest;
@@ -91,7 +89,7 @@ public class RegistrationService( GenericDataService dataService )
                 }
 
                 return vm;
-            } );
+            });
 
         return result;
     }
@@ -100,13 +98,13 @@ public class RegistrationService( GenericDataService dataService )
     {
         List<int> result = await _dataService.ExecuteQueryAsync(
         QueryDefinitions.GetCurrentFestival,
-        reader => Convert.ToInt32( reader [ "Huidige" ] )
+        reader => Convert.ToInt32(reader["Huidige"])
     );
 
         return result.FirstOrDefault();
     }
 
-    public async Task UpdatePaymentStatusAsync( uint festivalId, uint groupId, DateTime? paymentDateTime )
+    public async Task UpdatePaymentStatusAsync(uint festivalId, uint groupId, DateTime? paymentDateTime)
     {
         Dictionary<string, object> parameters = new()
         {
@@ -117,20 +115,20 @@ public class RegistrationService( GenericDataService dataService )
 
         try
         {
-            await _dataService.ExecuteNonQueryAsync( QueryDefinitions.UpdatePaymentStatus, parameters );
+            await _dataService.ExecuteNonQueryAsync(QueryDefinitions.UpdatePaymentStatus, parameters);
         }
-        catch ( Exception ex)
+        catch (Exception ex)
         {
             // Write error to db in the future
-            Console.WriteLine( $"[UpdatePaymentStatusAsync] Error updating payment status: {ex.Message}" );
+            Console.WriteLine($"[UpdatePaymentStatusAsync] Error updating payment status: {ex.Message}");
         }
         return;
     }
 
-    public async Task UpdateDropOutStatusAsync( uint festivalId, uint groupId, DateOnly? afgehaaktDate )
+    public async Task UpdateDropOutStatusAsync(uint festivalId, uint groupId, DateOnly? afgehaaktDate)
     {
         Dictionary<string, object> parameters = new()
-		{
+        {
             { "@FestivalId", festivalId },
             { "@GroupId", groupId },
             { "@DropOut", afgehaaktDate ?? (object)DBNull.Value }
@@ -138,12 +136,12 @@ public class RegistrationService( GenericDataService dataService )
 
         try
         {
-            await _dataService.ExecuteNonQueryAsync( QueryDefinitions.UpdateDropOutStatus, parameters );
+            await _dataService.ExecuteNonQueryAsync(QueryDefinitions.UpdateDropOutStatus, parameters);
         }
-        catch ( Exception ex )
+        catch (Exception ex)
         {
             // Write error to db in the future
-            Console.WriteLine( $"[UpdateDropOutStatusAsync] Error updating payment status: {ex.Message}" );
+            Console.WriteLine($"[UpdateDropOutStatusAsync] Error updating payment status: {ex.Message}");
         }
         return;
 
@@ -159,5 +157,35 @@ public class RegistrationService( GenericDataService dataService )
             ["@FestivalId"] = festivalId,
             ["@GroepId"] = groepId
         });
+    }
+
+    public Task<List<AvailableGroupModel>> GetNotRegisteredGroupsAsync(uint festivalId)
+    {
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetNotRegisteredGroups,
+            reader => new AvailableGroupModel
+            {
+                ZanggroepId = Convert.ToUInt32(reader["zanggroep_id"]),
+                Naam = reader["naam"]?.ToString() ?? string.Empty,
+                Standplaats = reader["standplaats"]?.ToString() ?? string.Empty
+            },
+            new Dictionary<string, object>
+            {
+                ["@festivalId"] = festivalId
+            });
+    }
+
+    public Task AddRegistrationAsync(uint festivalId, uint zanggroepId, int aantalDeelnemers, string podiumsoort)
+    {
+        return _dataService.ExecuteNonQueryAsync(
+            QueryDefinitions.AddRegistration,
+            new Dictionary<string, object>
+            {
+                ["@festivalId"] = festivalId,
+                ["@zanggroepId"] = zanggroepId,
+                ["@aantalDeelnemers"] = aantalDeelnemers,
+                ["@podiumsoort"] = podiumsoort,
+                ["@ingeschreven"] = DateTime.Now
+            });
     }
 }

@@ -3,9 +3,6 @@ using Amusing.Services;
 
 using Microsoft.AspNetCore.Components;
 
-using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Inputs;
-
 namespace Amusing.Components.Pages;
 
 public partial class MaintenanceSubscriptions : ComponentBase
@@ -13,13 +10,20 @@ public partial class MaintenanceSubscriptions : ComponentBase
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected EditionService EditionService { get; set; } = default!;
     [Inject] protected RegistrationService RegistrationService { get; set; } = default!;
+    [Inject] protected StageTypeService StageTypeService { get; set; } = default!;
 
     protected SfGrid<RegistrationModel> GridRef;
     protected List<Edition> Editions = [];
     protected List<RegistrationModel> RegistrationList = [];
+    protected List<AvailableGroupModel> AvailableGroups = [];
+    protected List<StageTypeModel> AvailableStageTypes = [];
     protected string? SelectedEditionId;
     protected int VisibleRowCount = 0;
     private bool showPaymentDialog;
+    private bool showAddGroupDialog;
+    private uint? selectedAvailableGroupId;
+    private int? selectedAantalDeelnemers;
+    private string? selectedPodiumsoort;
 
     private readonly List<string> YesNoList = ["Ja", "Nee"];
 
@@ -28,10 +32,18 @@ public partial class MaintenanceSubscriptions : ComponentBase
     private RegistrationModel? selectedRegistration;
 
     protected string SelectedEditionText => Editions.FirstOrDefault(e => e.ID == SelectedEditionId)?.Text ?? "Onbekende editie";
+    protected bool IsCurrentEditionSelected => Editions.FirstOrDefault()?.ID == SelectedEditionId;
+    protected bool CanAddGroup => IsCurrentEditionSelected && AvailableGroups.Count > 0;
+    protected bool CanConfirmAddGroup =>
+        CanAddGroup &&
+        selectedAvailableGroupId is not null &&
+        selectedAantalDeelnemers is > 0 &&
+        !string.IsNullOrWhiteSpace(selectedPodiumsoort);
 
     protected override async Task OnInitializedAsync()
     {
         Editions = await EditionService.GetEditionsAsync();
+        AvailableStageTypes = await StageTypeService.GetActiveStageTypesListAsync();
 
         if (Editions.Any())
         {
@@ -42,6 +54,7 @@ public partial class MaintenanceSubscriptions : ComponentBase
 
             // Get the registrations for the selected edition
             RegistrationList = await RegistrationService.GetRegistrationsByFestivalIdAsync(Convert.ToUInt32(SelectedEditionId));
+            await LoadAvailableGroupsAsync();
             if (SelectedEditionId != null && RegistrationList.Count > 0)
             {
                 await UpdateVisibleRowCount();
@@ -68,6 +81,7 @@ public partial class MaintenanceSubscriptions : ComponentBase
         SelectedEditionId = selectedId;
 
         await LoadRegistrationsAsync();
+        await LoadAvailableGroupsAsync();
 
         if (GridRef != null)
         {
@@ -82,6 +96,19 @@ public partial class MaintenanceSubscriptions : ComponentBase
         {
             RegistrationList = await RegistrationService.GetRegistrationsByFestivalIdAsync(Convert.ToUInt32(SelectedEditionId));
         }
+    }
+
+    protected async Task LoadAvailableGroupsAsync()
+    {
+        if (!IsCurrentEditionSelected || string.IsNullOrWhiteSpace(SelectedEditionId))
+        {
+            AvailableGroups = [];
+            selectedAvailableGroupId = null;
+            return;
+        }
+
+        AvailableGroups = await RegistrationService.GetNotRegisteredGroupsAsync(Convert.ToUInt32(SelectedEditionId));
+        selectedAvailableGroupId = AvailableGroups.FirstOrDefault()?.ZanggroepId;
     }
 
     // Manage direct search functionality
@@ -267,5 +294,47 @@ public partial class MaintenanceSubscriptions : ComponentBase
         selectedRegistration = null;
         selectedYesNoField = null;
         selectedYesNoHeaderText = null;
+    }
+
+    private void OpenAddGroupDialog()
+    {
+        if (!CanAddGroup)
+            return;
+
+        selectedAvailableGroupId = AvailableGroups.FirstOrDefault()?.ZanggroepId;
+        selectedAantalDeelnemers = 20;
+        selectedPodiumsoort = AvailableStageTypes.FirstOrDefault()?.Type;
+        showAddGroupDialog = true;
+    }
+
+    private void CloseAddGroupDialog()
+    {
+        showAddGroupDialog = false;
+        selectedAvailableGroupId = null;
+        selectedAantalDeelnemers = null;
+        selectedPodiumsoort = null;
+    }
+
+    private async Task ConfirmAddGroupAsync()
+    {
+        if (!CanConfirmAddGroup || string.IsNullOrWhiteSpace(SelectedEditionId))
+            return;
+
+        await RegistrationService.AddRegistrationAsync(
+            Convert.ToUInt32(SelectedEditionId),
+            selectedAvailableGroupId!.Value,
+            selectedAantalDeelnemers!.Value,
+            selectedPodiumsoort!);
+        await LoadRegistrationsAsync();
+        await LoadAvailableGroupsAsync();
+
+        if (GridRef != null)
+        {
+            await GridRef.Refresh();
+        }
+
+        VisibleRowCount = RegistrationList.Count;
+        CloseAddGroupDialog();
+        StateHasChanged();
     }
 }
