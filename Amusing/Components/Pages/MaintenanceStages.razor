@@ -16,10 +16,10 @@
 }
 else
 {
-    <div class="page-container">
+    <div class="page-container maintenance-page">
 
         <!-- HEADER / EDIT SECTION -->
-        <div class="fixed-header">
+        <div class="fixed-header maintenance-page__header">
 
             <h3>Onderhoud @FileName</h3>
 
@@ -126,12 +126,13 @@ else
         </div>
 
         <!-- GRID -->
-        <div class="scrollable-content">
+        <div class="scrollable-content maintenance-page__content">
 
             <SfGrid @ref="GridRef" 
                     TValue="StageModel"
                     DataSource="@Stages"
-                    Height="560px"
+                    CssClass="maintenance-grid"
+                    Height="100%"
                     AllowSorting="true"
                     AllowSelection="true">
 

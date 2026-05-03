@@ -74,6 +74,71 @@ a, .btn-link {
     min-width: 800px; /* kan aangepast worden */
 }
 
+.maintenance-page {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: calc(100dvh - 120px);
+    min-height: 0;
+}
+
+.maintenance-page__header {
+    flex: 0 0 auto;
+}
+
+.maintenance-page__content {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 5px;
+}
+
+.maintenance-toolbar-shell {
+    overflow-x: auto;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.maintenance-grid-shell {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.maintenance-grid-shell--fit {
+    display: flex;
+}
+
+.maintenance-grid {
+    height: 100%;
+}
+
+@media (max-width: 1024px), (max-height: 900px) {
+    .maintenance-page {
+        gap: 8px;
+    }
+
+    .maintenance-page__header {
+        min-height: 0;
+        max-height: 55dvh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .maintenance-page__content {
+        min-height: clamp(220px, 30dvh, 320px);
+    }
+
+    .maintenance-grid-shell--fit {
+        min-height: clamp(220px, 30dvh, 320px);
+    }
+}
+
 .log-footer {
     position: sticky;
     bottom: 0;

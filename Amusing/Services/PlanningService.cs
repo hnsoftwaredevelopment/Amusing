@@ -25,11 +25,6 @@ public class PlanningService(GenericDataService dataService)
 {
     private readonly GenericDataService _dataService = dataService;
 
-    // -------------------------------------------------------
-    // Bouwt de geordende lijst van alle exporttabellen op.
-    // Voeg hier tabellen toe of verwijder ze — XML én Excel
-    // profiteren automatisch van elke wijziging.
-    // -------------------------------------------------------
     private List<ExportTableDefinition> BuildExportDefinitions(int festivalId)
     {
         var p = new Dictionary<string, object?> { { "@FestivalId", festivalId } };
@@ -56,12 +51,6 @@ public class PlanningService(GenericDataService dataService)
         ];
     }
 
-    // -------------------------------------------------------
-    // Bouwt alle XElement-tabellen op basis van de definities.
-    // Tabellen zonder rijen worden gefilterd (skipEmpty=true).
-    // De naam-selector bepaalt of de XML- of Excel-naam
-    // als attribuut wordt gebruikt.
-    // -------------------------------------------------------
     private async Task<List<XElement>> BuildAllTablesAsync(
         List<ExportTableDefinition> definitions,
         Func<ExportTableDefinition, string> nameSelector,
@@ -449,21 +438,22 @@ public class PlanningService(GenericDataService dataService)
     #endregion
 
     #region XML Export
-    public async Task ExportFullPlanningToXmlAsync(int festivalId, string filePath)
+    public async Task<byte[]> ExportFullPlanningToXmlAsync(int festivalId)
     {
         var definitions = BuildExportDefinitions(festivalId);
         var tables = await BuildAllTablesAsync(definitions, d => d.XmlName);
 
         var doc = new XDocument(new XElement("channel", tables));
 
-        Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-        await using var writer = File.CreateText(filePath);
-        doc.Save(writer);
+        using var stream = new MemoryStream();
+        doc.Save(stream);
+
+        return stream.ToArray();
     }
     #endregion
 
     #region Excel Export
-    public async Task ExportFullPlanningToExcelAsync(int festivalId, string filePath)
+    public async Task<byte[]> ExportFullPlanningToExcelAsync(int festivalId)
     {
         var definitions = BuildExportDefinitions(festivalId);
         var tables = await BuildAllTablesAsync(definitions, d => d.ExcelName);
@@ -481,14 +471,12 @@ public class PlanningService(GenericDataService dataService)
 
             var columns = rows.First().Elements().Select(e => e.Name.LocalName).ToList();
 
-            // Schrijf kopteksten
             for (int c = 0; c < columns.Count; c++)
             {
                 ws.Cell(1, c + 1).Value = columns[c];
                 ws.Cell(1, c + 1).Style.Font.Bold = true;
             }
 
-            // Schrijf datarijen
             int r = 2;
             foreach (var row in rows)
             {
@@ -504,8 +492,10 @@ public class PlanningService(GenericDataService dataService)
             ws.Columns().AdjustToContents();
         }
 
-        Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-        workbook.SaveAs(filePath);
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+
+        return stream.ToArray();
     }
     #endregion
 

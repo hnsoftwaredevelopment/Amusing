@@ -5,8 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>aspnet-Amusing-d4b4dda8-27a3-4a96-94e4-f605690b8606</UserSecretsId>
-    <AssemblyVersion>26.4.40.0</AssemblyVersion>
-    <FileVersion>26.4.40.0</FileVersion>
+    <AssemblyVersion>26.5.3.0</AssemblyVersion>
+    <FileVersion>26.5.3.0</FileVersion>
     <HotReloadAutoRestart>true</HotReloadAutoRestart>
     <RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
   </PropertyGroup>

@@ -13,26 +13,29 @@
 
 <AuthorizeView>
 	<Authorized>
-		<h3>Beheer Inschrijvingen per Amusing editie</h3>
-		<p />
-		<SfComboBox TValue="string"
-					TItem="Edition"
-					Placeholder="Kies een editie"
-					ValueChanged="OnEditionChanged"
-					DataSource="@Editions"
-					Width="150px">
-			<ComboBoxFieldSettings Value="ID" Text="Text"></ComboBoxFieldSettings>
-		</SfComboBox>
-		<p />
+		<div class="page-container maintenance-page">
+			<div class="fixed-header maintenance-page__header">
+				<h3>Beheer Inschrijvingen per Amusing editie</h3>
+				<p />
+				<SfComboBox TValue="string"
+							TItem="Edition"
+							Placeholder="Kies een editie"
+							ValueChanged="OnEditionChanged"
+							DataSource="@Editions"
+							Width="150px">
+					<ComboBoxFieldSettings Value="ID" Text="Text"></ComboBoxFieldSettings>
+				</SfComboBox>
+			</div>
 
-		@if ( SelectedEditionId != null )
-		{
-			<div class="col-lg-12 control-section">
-				<div class="content-wrapper">
-					<div class="row">
+			@if ( SelectedEditionId != null )
+			{
+				<div class="scrollable-content maintenance-page__content">
+					<div class="maintenance-grid-shell maintenance-grid-shell--fit">
 						<SfGrid @ref="GridRef"
 								TItem="Registration" DataSource="@RegistrationList"
-								Width="100%"
+								Width="100%" Height="100%"
+								CssClass="maintenance-grid"
+								EnableStickyHeader="true"
 								AllowExcelExport="true" AllowPdfExport="true"
 								AllowSorting="true" 
 								AllowMultiSorting="true">
@@ -204,8 +207,8 @@
 						</SfGrid>
 					</div>
 				</div>
-			</div>
-		}
+			}
+		</div>
 	</Authorized>
 	<NotAuthorized>
 		<p class="text-danger">Je hebt alleen toegang tot deze pagina wanneer je bent ingelogt</p>

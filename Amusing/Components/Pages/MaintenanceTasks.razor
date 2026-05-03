@@ -22,9 +22,9 @@
 }
 else
 {
-    <div class="page-container">
+    <div class="page-container maintenance-page">
         <!-- Static detail fields-->
-        <div class="fixed-header">
+        <div class="fixed-header maintenance-page__header">
             <h3>Onderhoud @FileName</h3>
             <EditForm Model="SelectedTask">
                 <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
@@ -84,7 +84,7 @@ else
             </EditForm>
 
             <!-- Toolbar -->
-            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+            <div class="maintenance-toolbar-shell">
                 <SfToolbar Width="870px">
                     <ToolbarItems>
                         <ToolbarItem Type="ItemType.Button">
@@ -121,15 +121,16 @@ else
         <div class="spacer-small"></div>
 
         <!-- Scrollable area for main datagrid -->
-        <div class="scrollable-content">
-            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
+        <div class="scrollable-content maintenance-page__content">
+            <div class="maintenance-grid-shell maintenance-grid-shell--fit">
                 <SfGrid @ref="GridRef"
                         TValue="TaskModel" 
                         Width="870"
                         DataSource="@Tasks"
                         EnableStickyHeader="true"
+                        CssClass="maintenance-grid"
                         AllowResizing="true"
-                        Height="260px"
+                        Height="100%"
                         AllowSorting="true"
                         AllowMultiSorting="true"
                         AllowSelection="true">

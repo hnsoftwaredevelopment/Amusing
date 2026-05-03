@@ -192,61 +192,40 @@ public partial class PlanningOverview
     {
         var ExportFileName = await PlanningService.GetExportFileName(_editionId);
 
-        string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        string downloadsPath = Path.Combine(userProfile, "Downloads");
-
-        string _fileName = Path.Combine(
-            downloadsPath,
-            $"{ExportFileName}.{fileType}"
-        );
-        return _fileName;
+        return $"{ExportFileName}.{fileType}";
     }
     private async Task ExportToXmlAsync()
     {
-        var _editionId = int.Parse(SelectedEditionId);
-        var ExportFileName = await ExportFilename(_editionId, "xml");
-        // Trigger XML export for the selected edition
-        await ExportWithRetryAsync(_editionId, ExportFileName.ToString(), (id, file) => PlanningService.ExportFullPlanningToXmlAsync(id, file)).ConfigureAwait(false);
+        var editionId = int.Parse(SelectedEditionId);
+
+        var fileName = await ExportFilename(editionId, "xml");
+
+        var bytes = await PlanningService.ExportFullPlanningToXmlAsync(editionId);
+
+        await JS.InvokeVoidAsync(
+            "downloadFile",
+            fileName,
+            "application/xml",
+            Convert.ToBase64String(bytes));
+
         await ShowToast("Planning naar XML voltooid.", "success");
     }
 
     private async Task ExportToExcelAsync()
     {
-        var _editionId = int.Parse(SelectedEditionId);
-        var ExportFileName = await ExportFilename(_editionId, "xlsx");
-        // Trigger Excel export for the selected edition
-        await ExportWithRetryAsync(_editionId, ExportFileName.ToString(), (id, file) => PlanningService.ExportFullPlanningToExcelAsync(id, file)).ConfigureAwait(false);
+        var editionId = int.Parse(SelectedEditionId);
+
+        var fileName = await ExportFilename(editionId, "xlsx");
+
+        var bytes = await PlanningService.ExportFullPlanningToExcelAsync(editionId);
+
+        await JS.InvokeVoidAsync(
+            "downloadFile",
+            fileName,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            Convert.ToBase64String(bytes));
+
         await ShowToast("Planning naar Excel voltooid.", "success");
-    }
-
-    private async Task ExportWithRetryAsync(int _editionId, string exportFileName, Func<int, string, Task> exportAction)
-    {
-        const int maxAttempts = 3;
-        TimeSpan delay = TimeSpan.FromSeconds(1);
-        var correlationId = Guid.NewGuid().ToString("N");
-
-        for (int attempt = 1; attempt <= maxAttempts; attempt++)
-        {
-            try
-            {
-                await exportAction(_editionId, exportFileName).ConfigureAwait(false);
-                return;
-            }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
-            catch (Exception ex) when (attempt < maxAttempts && (ex is System.IO.IOException || ex is System.Net.Http.HttpRequestException || ex is TimeoutException))
-            {
-                await Task.Delay(delay).ConfigureAwait(false);
-                delay = delay + delay;
-                continue;
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Export failed (cid:{correlationId})", ex);
-            }
-        }
     }
 
     private SfToast? _toast;

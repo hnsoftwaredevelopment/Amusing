@@ -21,8 +21,8 @@
 }
 else
 {
-    <div class="page-container">
-        <div class="fixed-header">
+    <div class="page-container maintenance-page">
+        <div class="fixed-header maintenance-page__header">
             <h3>Onderhoud Amusing editie: @(SelectedFestival?.Festival ?? "geen editie beschibaar")</h3>
                 @* Detail Fields *@
                 <SfDataForm Model="SelectedFestival" OnValidSubmit="SaveFestival" LabelPosition="FormLabelPosition.Top">
@@ -54,10 +54,10 @@ else
             </SfDataForm>
         </div>
 
-        <div class="scrollable-content">
+        <div class="scrollable-content maintenance-page__content">
         @* DataGrid *@ 
         <div class="spacer-medium"></div>
-        <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+        <div class="maintenance-toolbar-shell">
             <SfToolbar Width="550px">
                 <ToolbarItems>
                     <ToolbarItem Type="ItemType.Button">
@@ -99,12 +99,16 @@ else
                     </ToolbarItem>
                 </ToolbarItems>
             </SfToolbar>
-    
-                <SfGrid @ref="GridRef"
-                    TValue="FestivalModel"
-                    DataSource="@Festivals" EnableStickyHeader="true"
-                    AllowResizing="true" Width="550px"
-                    AllowSelection="true" >
+        </div>
+
+        <div class="maintenance-grid-shell maintenance-grid-shell--fit">
+            <SfGrid @ref="GridRef"
+                CssClass="maintenance-grid"
+                TValue="FestivalModel"
+                DataSource="@Festivals" EnableStickyHeader="true"
+                Height="100%"
+                AllowResizing="true" Width="550px"
+                AllowSelection="true" >
                 <GridEvents TValue="FestivalModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
 
 
@@ -131,8 +135,8 @@ else
                     </GridColumn>
                 </GridColumns>          
             </SfGrid>
-            <div class="spacer-large"></div>
-            </div>
+        </div>
+        <div class="spacer-large"></div>
         </div>
     </div>
 }

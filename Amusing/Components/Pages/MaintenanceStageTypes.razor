@@ -19,8 +19,8 @@
 }
 else
 {
-    <div class="page-container">
-        <div class="fixed-header">
+    <div class="page-container maintenance-page">
+        <div class="fixed-header maintenance-page__header">
             <SfDataForm Model="SelectedStageType" OnValidSubmit="SaveStageType" LabelPosition="FormLabelPosition.Top">
             <div class="form-floating-switch">
                 <h5>Algemeen</h5>
@@ -65,12 +65,15 @@ else
         </SfDataForm>
         </div>
 
-        <div class="scrollable-content">
+        <div class="scrollable-content maintenance-page__content">
             <div class="spacer-medium"></div>
-            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+            <div class="maintenance-grid-shell maintenance-grid-shell--fit">
                 <SfGrid @ref="GridRef"
                         TValue="StageTypeModel"
                         DataSource="@StageTypes"
+                        CssClass="maintenance-grid"
+                        EnableStickyHeader="true"
+                        Height="100%"
                         AllowResizing="true"
                         AllowMultiSorting="true"
                         AllowSelection="true"

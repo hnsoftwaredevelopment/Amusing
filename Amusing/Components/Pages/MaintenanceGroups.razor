@@ -27,8 +27,8 @@
 }
 else
 {
-    <div class="page-container">
-        <div class="fixed-header">
+    <div class="page-container maintenance-page">
+        <div class="fixed-header maintenance-page__header">
             <h3>Onderhoud @FileName</h3>
             <SfTab @ref="GroupTab" @bind-SelectedItem="currentTabIndex">
                 <TabEvents Selected="OnTabSelected"/>
@@ -200,7 +200,7 @@ else
             <div class="spacer-small" />
 
             <!-- Toolbar -->
-            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
+            <div class="maintenance-toolbar-shell">
                 <SfToolbar Width="800px">
                     <ToolbarItems>
                         <ToolbarItem Type="ItemType.Button">
@@ -244,15 +244,16 @@ else
             </div>
         </div>
 
-        <div class="scrollable-content">
+        <div class="scrollable-content maintenance-page__content">
             <div class="spacer-small"></div>
-            <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
+            <div class="maintenance-grid-shell maintenance-grid-shell--fit">
                 <SfGrid @ref="GridRef"
                     TValue="GroupModel"
                     DataSource="@Groups" 
                     EnableStickyHeader="true"
+                    CssClass="maintenance-grid"
                     AllowResizing="true" 
-                    Height="260px"
+                    Height="100%"
                     Width="800px" 
                     AllowSorting="true" 
                     AllowMultiSorting="true"
