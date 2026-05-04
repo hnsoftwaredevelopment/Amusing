@@ -37,16 +37,16 @@
 								CssClass="maintenance-grid"
 								EnableStickyHeader="true"
 								AllowExcelExport="true" AllowPdfExport="true"
-								AllowSorting="true" 
+								AllowSorting="true"
 								AllowMultiSorting="true">
 
 							<SfToolbar>
 								<ToolbarItems>
 									<ToolbarItem Type="ItemType.Input" Align="ItemAlign.Left">
 										<Template>
-											<button class="btn btn-blue" hidden="@( !CanAddGroup )"
+											<button class="btn btn-blue"
 													@onclick="OpenAddGroupDialog"
-													disabled="@(!CanAddGroup)">
+													hidden="@(!CanAddGroup)">
 												Koor toevoegen
 											</button>
 										</Template>
@@ -210,7 +210,7 @@
 								</DialogTemplates>
 							</SfDialog>
 
-							<SfDialog 
+							<SfDialog
 								Width="300px"
 								IsModal="true"
 								@bind-Visible="showYesNoDialog"
@@ -254,10 +254,10 @@
 								</Template>
 							</GridColumn>
 
-							<GridColumn 
-								Field="AcapellaBattle" 
-								HeaderText="AcapellaBattle" 
-								Width="100" 
+							<GridColumn
+								Field="AcapellaBattle"
+								HeaderText="AcapellaBattle"
+								Width="100"
 								TextAlign="TextAlign.Center">
 									<Template Context="row">
 										@{
