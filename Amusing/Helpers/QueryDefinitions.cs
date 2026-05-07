@@ -1881,7 +1881,7 @@ public static class QueryDefinitions
         SELECT  
 	        t.taak_id AS taak_id,
 	        t.korte_naam AS korte_naam,
-	        t.naam AS naaam,
+	        t.naam AS naam,
 	        t.minimumduur AS minimumduur,
 	        t.maximumduur AS maximumduur
         FROM amusing.ah_taken t
