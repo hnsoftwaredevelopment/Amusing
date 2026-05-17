@@ -919,7 +919,7 @@ public static class QueryDefinitions
                 kaart_nummer = @KaartNummer
         WHERE podium_id = @PodiumId;";
     public static readonly string InsertNewStage = @"
-        INSERT INTO amusing.ah_podia (type, aantal_vrijwilligers, kaart_nummer) VALUES ('A', 'geen', 0);
+        INSERT INTO amusing.ah_podia (type, aantal_vrijwilligers, kaart_nummer) VALUES ('A', 0, 0);
         SELECT LAST_INSERT_ID();";
     public static readonly string DeleteStage = @"
         DELETE FROM ah_podia WHERE podium_id = @StageId;";
@@ -1999,7 +1999,7 @@ public static class QueryDefinitions
     public static readonly string LogError = @"
         INSERT INTO amusing.user_log
             (ip_address, area, action, status, report)
-        VALUES (@Area, @Action, @Status, @Report);";
+        VALUES (@UserIp, @Area, @Action, @Status, @Report);";
     #endregion
 
 }

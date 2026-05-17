@@ -253,7 +253,7 @@ CREATE TABLE `ah_podia` (
   `type` enum('A','B','C','D','E') NOT NULL,
   `kwaliteit` tinyint unsigned NOT NULL DEFAULT '10',
   `max_zangers` tinyint unsigned NOT NULL DEFAULT '0',
-  `aantal_vrijwilligers` enum('geen','1','2','3','4') NOT NULL DEFAULT '1',
+  `aantal_vrijwilligers` tinyint unsigned NOT NULL DEFAULT '1',
   `opening` time NOT NULL DEFAULT '11:00:00',
   `sluiting` time NOT NULL DEFAULT '17:00:00',
   `vrijwilligers_vanaf` time NOT NULL DEFAULT '10:00:00',
