@@ -38,8 +38,8 @@ var logger = loggerFactory.CreateLogger<Program>();
 
 logger.LogInformation("=== ENVIRONMENT VARIABLES CHECK ===");
 logger.LogInformation($"DOTNET_ENVIRONMENT: {Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")}");
-logger.LogInformation($"ConnectionStrings__DefaultConnection: {Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")}");
-logger.LogInformation($"DefaultConnection: {Environment.GetEnvironmentVariable("DefaultConnection")}");
+logger.LogInformation($"ConnectionStrings__DefaultConnection: {(string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")) ? "NOT FOUND" : "FOUND")}");
+logger.LogInformation($"DefaultConnection: {(string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("DefaultConnection")) ? "NOT FOUND" : "FOUND")}");
 logger.LogInformation("====================================");
 
 // ---------------------------------------------------------
@@ -62,9 +62,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 var config = builder.Configuration;
 logger.LogInformation("=== CONFIGURATION CHECK ===");
-logger.LogInformation($"GetConnectionString('DefaultConnection'): {config.GetConnectionString("DefaultConnection")}");
-logger.LogInformation($"Direct ['DefaultConnection']: {config["DefaultConnection"]}");
-logger.LogInformation($"Full path ['ConnectionStrings:DefaultConnection']: {config["ConnectionStrings:DefaultConnection"]}");
+logger.LogInformation($"GetConnectionString('DefaultConnection'): {(string.IsNullOrWhiteSpace(config.GetConnectionString("DefaultConnection")) ? "NOT FOUND" : "FOUND")}");
+logger.LogInformation($"Direct ['DefaultConnection']: {(string.IsNullOrWhiteSpace(config["DefaultConnection"]) ? "NOT FOUND" : "FOUND")}");
+logger.LogInformation($"Full path ['ConnectionStrings:DefaultConnection']: {(string.IsNullOrWhiteSpace(config["ConnectionStrings:DefaultConnection"]) ? "NOT FOUND" : "FOUND")}");
 logger.LogInformation("===========================");
 
 // Dump na laden
