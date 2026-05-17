@@ -82,7 +82,7 @@ public class StageService( GenericDataService dataService )
                 { "@Type", model.Type },
                 { "@Kwaliteit", model.Kwaliteit },
                 { "@MaxZangers", model.MaxZangers },
-                { "@AantalVrijwilligers", model.Vrijwilligers == 0 ? "geen" : model.Vrijwilligers.ToString() },
+                { "@AantalVrijwilligers", model.Vrijwilligers },
                 { "@Opening", model.Start.ToTimeSpan() },
                 { "@Sluiting", model.Eind.ToTimeSpan() },
                 { "@VrijwilligersVanaf", model.Van.ToTimeSpan() },
