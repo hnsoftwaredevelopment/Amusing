@@ -844,19 +844,19 @@ public static class QueryDefinitions
         sb.AppendLine("    zg.standplaats AS `Stad`,");
         sb.AppendLine("    CASE WHEN p.datecreate IS NULL OR YEAR(p.datecreate) = 0 THEN '' ELSE DATE_FORMAT(p.datecreate, '%d-%m-%Y') END AS `Aangemaakt`,");
 
+        List<string> yearColumns = [];
+
         // Dynamisch jaartal-kolommen toevoegen
         for (int year = oldestYear; year <= newestYear; year++)
         {
-            sb.AppendLine($"    MAX(CASE YEAR(f.festivaldatum) WHEN {year} THEN " +
+            yearColumns.Add($"    MAX(CASE YEAR(f.festivaldatum) WHEN {year} THEN " +
                 "CASE " +
                 "WHEN i.ingeschreven IS NULL OR YEAR(i.ingeschreven) = 0 THEN '' " +
                 $"ELSE DATE_FORMAT(i.ingeschreven, '%d-%m-%Y') END " +
-                $"END) AS `Y{year}`,");
+                $"END) AS `Y{year}`");
         }
 
-        // Remove last semicolun
-        sb.Length -= 3;
-        sb.AppendLine();
+        sb.AppendLine(string.Join($",{Environment.NewLine}", yearColumns));
 
         sb.AppendLine("FROM ah_zanggroepen zg");
         sb.AppendLine("LEFT JOIN ah_inschrijvingen i ON zg.zanggroep_id = i.zanggroep_id");

@@ -96,4 +96,28 @@ public class QueryDefinitionsTests
         Assert.Contains("@FestivalId", query);
         Assert.Contains("NOT EXISTS", query);
     }
+
+    [Fact]
+    public void GetFestivalOverviewQuery_ClosesLastDynamicYearAlias()
+    {
+        string query = QueryDefinitions.GetFestivalOverviewQuery(2024, 2026, filterOutOldGroups: false);
+
+        Assert.Contains("AS `Y2026`", query);
+        Assert.DoesNotContain("AS `Y2026" + Environment.NewLine + "FROM", query);
+    }
+
+    [Fact]
+    public void GetFestivalOverviewQuery_DoesNotTrimDynamicColumnsByPlatformNewlineWidth()
+    {
+        string source = File.ReadAllText(Path.Combine(
+            "..",
+            "..",
+            "..",
+            "..",
+            "Amusing",
+            "Helpers",
+            "QueryDefinitions.cs"));
+
+        Assert.DoesNotContain("Length -= 3", source);
+    }
 }
