@@ -111,6 +111,17 @@ else
                                 </Template>
                             </ToolbarItem>
 
+                            <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                                <Template>
+                                    <label class="stage-active-filter">
+                                        <input type="checkbox"
+                                               checked="@ShowOnlyActiveStages"
+                                               @onchange="OnShowOnlyActiveStagesChanged" />
+                                        <span>Alleen actieve podia</span>
+                                    </label>
+                                </Template>
+                            </ToolbarItem>
+
                             <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
                                 <Template>
                                     <SfTextBox
@@ -130,7 +141,7 @@ else
 
             <SfGrid @ref="GridRef" 
                     TValue="StageModel"
-                    DataSource="@Stages"
+                    DataSource="@FilteredStages"
                     CssClass="maintenance-grid"
                     Height="100%"
                     AllowSorting="true"
@@ -141,10 +152,10 @@ else
                             DataBound="OnGridDataBound" />
 
                 <GridColumns>
+                    <GridColumn Field="KaartNummer" HeaderText="Podium" Width="100" />
                     <GridColumn Field="Naam" HeaderText="Naam" Width="300" />
                     <GridColumn Field="Type" HeaderText="Type" Width="80" />
                     <GridColumn Field="Soort" HeaderText="Soort" Width="120" />
-                    <GridColumn Field="KaartNummer" HeaderText="Kaart" Width="100" />
                 </GridColumns>
 
             </SfGrid>

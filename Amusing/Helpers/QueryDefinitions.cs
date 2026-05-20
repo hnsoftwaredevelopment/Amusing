@@ -903,6 +903,33 @@ public static class QueryDefinitions
             (festival_id, zanggroep_id, aantal_deelnemers, podiumsoort, ingeschreven)
         VALUES
             (@festivalId, @zanggroepId, @aantalDeelnemers, @podiumsoort, @ingeschreven);";
+    public static readonly string GetGroupRegistrationsByGroupId = @"
+        SELECT
+            i.festival_id AS FestivalId,
+            YEAR(f.festivaldatum) AS Festival,
+            i.ingeschreven AS RegisteredAt,
+            i.aantal_deelnemers AS Singers,
+            i.podiumsoort AS StageType,
+            IF(i.betaald IS NULL, 'nee', 'ja') AS Paid,
+            IF(i.bevestigd IS NULL, 'nee', 'ja') AS Confirmed,
+            IF(i.afgehaakt IS NULL, 'nee', 'ja') AS DroppedOut
+        FROM amusing.ah_inschrijvingen i
+        INNER JOIN amusing.ah_festivals f ON f.festival_id = i.festival_id
+        WHERE i.zanggroep_id = @GroupId
+        ORDER BY f.festivaldatum DESC;";
+    public static readonly string RegisterGroupForCurrentFestival = @"
+        INSERT INTO amusing.ah_inschrijvingen
+            (festival_id, zanggroep_id, aantal_deelnemers, podiumsoort, ingeschreven)
+        SELECT
+            @FestivalId, @GroupId, 0, '', NOW()
+        FROM amusing.ah_festivals f
+        WHERE f.festival_id = @FestivalId
+          AND NOT EXISTS (
+              SELECT 1
+              FROM amusing.ah_inschrijvingen existing
+              WHERE existing.festival_id = @FestivalId
+                AND existing.zanggroep_id = @GroupId
+          );";
 
     public static readonly string ModifyStage = @"
         UPDATE amusing.ah_podia 
@@ -1047,6 +1074,16 @@ public static class QueryDefinitions
         ORDER BY Name;";
     public static readonly string GetPeronRoles = @"
         SELECT DISTINCT rol.rol  FROM amusing.ah_personen_rollen rol ORDER BY rol.rol;";
+    public static readonly string GetPersonRolesByPersonId = @"
+        SELECT
+            rol.persoon_id AS PersonId,
+            rol.zanggroep_id AS GroupId,
+            rol.rol AS Role,
+            COALESCE(zg.naam, '') AS GroupName
+        FROM amusing.ah_personen_rollen rol
+        INNER JOIN amusing.ah_zanggroepen zg ON zg.zanggroep_id = rol.zanggroep_id
+        WHERE rol.persoon_id = @PersonId
+        ORDER BY rol.rol, zg.naam;";
     public static readonly string ModifyPersonRole = @"
         UPDATE amusing.ah_personen_rollen 
         SET rol = @Role
@@ -1056,6 +1093,41 @@ public static class QueryDefinitions
     public static readonly string DeletePersonRole = @"
         DELETE FROM ah_personen_rollen 
         WHERE persoon_id = @PersonId AND zanggroep_id = @GroupId;";
+    public static readonly string GetVolunteerRegistrationsByPersonId = @"
+        SELECT
+            v.id AS VolunteerId,
+            v.festival_id AS FestivalId,
+            YEAR(f.festivaldatum) AS Festival,
+            v.datum AS SignedUpAt,
+            v.afgehaakt AS DroppedOut
+        FROM amusing.ah_vrijwilligers v
+        INNER JOIN amusing.ah_festivals f ON f.festival_id = v.festival_id
+        WHERE v.persoon_id = @PersonId
+        ORDER BY f.festivaldatum DESC;";
+    public static readonly string GetLatestFestivalForPersonMaintenance = @"
+        SELECT
+            festival_id AS FestivalId,
+            YEAR(festivaldatum) AS Festival
+        FROM amusing.ah_festivals
+        ORDER BY festivaldatum DESC
+        LIMIT 1;";
+    public static readonly string RegisterPersonForCurrentFestival = @"
+        INSERT INTO amusing.ah_vrijwilligers
+            (datum, festival_id, persoon_id, beschikbaar_van, beschikbaar_tot, uren_achtereen, lunch, vegetarisch, bijeenkomst, ervaring, podiumdienst, nietpodiumdienst, taken, taakvoorkeur, taakafkeur, opmerkingen, afgehaakt)
+        SELECT
+            NOW(), @FestivalId, @PersonId, f.start_festivaldag, f.einde_festivaldag, 0, 'nee', 'nee', 'nee', 'nee', 'ja', 'nee', '', '', '', '', 'nee'
+        FROM amusing.ah_festivals f
+        WHERE f.festival_id = @FestivalId
+          AND NOT EXISTS (
+              SELECT 1
+              FROM amusing.ah_vrijwilligers existing
+              WHERE existing.festival_id = @FestivalId
+                AND existing.persoon_id = @PersonId
+          );";
+    public static readonly string UpsertPersonPassword = @"
+        INSERT INTO amusing.ah_personen_wachtwoorden (id, hash)
+        VALUES (@PersonId, @Hash)
+        ON DUPLICATE KEY UPDATE hash = @Hash;";
     public static readonly string GetAllPersons = @"
         SELECT 
             p.persoon_id AS PersonId,

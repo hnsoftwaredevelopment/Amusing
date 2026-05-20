@@ -194,6 +194,42 @@ else
                             </div>
                         </ContentTemplate>
                     </TabItem>
+
+                    <!-- Registrations -->
+                    <TabItem Disabled="@(!IsPersonsTabEnabled)">
+                        <ChildContent>
+                            <TabHeader Text="Inschrijvingen"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="group-registrations-layout">
+                                <SfGrid DataSource="@GroupRegistrations"
+                                        TValue="GroupRegistrationModel"
+                                        AllowSorting="true"
+                                        Height="250px">
+                                    <GridColumns>
+                                        <GridColumn Field="Festival" HeaderText="Festival" Width="90px" />
+                                        <GridColumn Field="RegisteredAt" HeaderText="Ingeschreven" Format="dd-MM-yyyy" Type="ColumnType.Date" Width="130px" />
+                                        <GridColumn Field="Singers" HeaderText="Zangers" Width="90px" />
+                                        <GridColumn Field="StageType" HeaderText="Podiumsoort" Width="110px" />
+                                        <GridColumn Field="Paid" HeaderText="Betaald" Width="90px" />
+                                        <GridColumn Field="Confirmed" HeaderText="Bevestigd" Width="100px" />
+                                        <GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100px" />
+                                    </GridColumns>
+                                </SfGrid>
+
+                                @if (LatestFestival is not null && !IsRegisteredForLatestFestival)
+                                {
+                                    <div class="group-registrations-actions">
+                                        <SfButton CssClass="e-primary"
+                                                  Disabled="@(!CanRegisterForLatestFestival)"
+                                                  OnClick="RegisterSelectedGroupForLatestFestivalAsync">
+                                            Registreer voor @LatestFestival.Festival
+                                        </SfButton>
+                                    </div>
+                                }
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
                 </TabItems>
             </SfTab>
 

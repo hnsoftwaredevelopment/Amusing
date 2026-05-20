@@ -27,6 +27,7 @@ public partial class MaintenanceGroups : ComponentBase
     [Inject] protected GenreService GenreService { get; set; } = default!;
     [Inject] protected GroupService GroupService { get; set; } = default!;
     [Inject] protected PersonService PersonService { get; set; } = default!;
+    [Inject] protected RegistrationService RegistrationService { get; set; } = default!;
 
     private bool _initialLoadDone = false;
     private bool _selectFirstRowActivePending;
@@ -49,6 +50,8 @@ public partial class MaintenanceGroups : ComponentBase
     private List<GroupModel> Groups = [];
     private List<PersonModel> ActivePersonsList = new();
     private List<PersonModel> UnrelatedPersonsList = new();
+    private List<GroupRegistrationModel> GroupRegistrations = new();
+    private PersonFestivalModel? LatestFestival;
     private SfGrid<GroupModel>? GridRef;
     private SfGrid<PersonModel>? ActivePersonGridRef;
     private SfGrid<PersonModel>? UnrelatedPersonGridRef;
@@ -106,6 +109,16 @@ public partial class MaintenanceGroups : ComponentBase
         get => SelectedGroup?.GenreId ?? 0;
         set { if (SelectedGroup != null) SelectedGroup.GenreId = value; }
     }
+
+    private bool IsRegisteredForLatestFestival =>
+        LatestFestival is not null &&
+        GroupRegistrations.Any(registration => registration.FestivalId == LatestFestival.FestivalId);
+
+    private bool CanRegisterForLatestFestival =>
+        SelectedGroup is not null &&
+        SelectedGroup.GroupId != 0 &&
+        LatestFestival is not null &&
+        !IsRegisteredForLatestFestival;
 
     public async Task OnContextMenuClickActivePerson(ContextMenuClickEventArgs<PersonModel> args)
     {
@@ -229,6 +242,7 @@ public partial class MaintenanceGroups : ComponentBase
         Groups = await GroupService.GetAllGroupsAsync();
         Genres = await GenreService.GetGenresAsync();
         Countries = await CountryService.GetActiveCountriesAsync();
+        LatestFestival = await RegistrationService.GetLatestFestivalForMaintenanceAsync();
 
         SelectedGroup = Groups.FirstOrDefault();
 
@@ -306,6 +320,10 @@ public partial class MaintenanceGroups : ComponentBase
         if (currentTabIndex == 2)
         {
             await SetupPersonTabAsync();
+        }
+        else if (currentTabIndex == 3)
+        {
+            await LoadGroupRegistrationsAsync();
         }
 
         StateHasChanged();
@@ -429,6 +447,31 @@ public partial class MaintenanceGroups : ComponentBase
         {
             await SetupPersonTabAsync();
         }
+        else if (currentTabIndex == 3) // 3 = Inschrijvingen
+        {
+            await LoadGroupRegistrationsAsync();
+        }
+    }
+
+    private async Task LoadGroupRegistrationsAsync()
+    {
+        if (SelectedGroup is null || SelectedGroup.GroupId == 0)
+        {
+            GroupRegistrations = [];
+            return;
+        }
+
+        GroupRegistrations = await RegistrationService.GetGroupRegistrationsByGroupIdAsync(SelectedGroup.GroupId);
+        StateHasChanged();
+    }
+
+    private async Task RegisterSelectedGroupForLatestFestivalAsync()
+    {
+        if (!CanRegisterForLatestFestival || SelectedGroup is null || LatestFestival is null)
+            return;
+
+        await RegistrationService.RegisterGroupForCurrentFestivalAsync(SelectedGroup.GroupId, LatestFestival.FestivalId);
+        await LoadGroupRegistrationsAsync();
     }
 
     private async Task LoadPersonsAsync()

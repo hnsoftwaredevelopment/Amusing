@@ -27,44 +27,107 @@ else
         <!-- Static detail fields-->
         <div class="fixed-header maintenance-page__header">
             <h3>Onderhoud @FileName</h3>
-            <EditForm Model="SelectedPerson">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
-                <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
-                    <SfTextBox Placeholder="Voornaam" FloatLabelType="FloatLabelType.Always" Width="200px" @bind-Value="SelectedPersonFirstName" />
-                    <SfTextBox Placeholder="Tussenvoegsel" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedPersonNameInfix" />
-                    <SfTextBox Placeholder="Achternaam" FloatLabelType="FloatLabelType.Always" Width="250px" @bind-Value="SelectedPersonLastName" />
-                    <BitTooltip Text="@(IsActive ? "Deze persoon is actief, klik om te deactiveren" : "Deze persoon is niet actief, klik om te activeren")" HideDelay="200" ShowOnHover="true">
-                        <BitToggleButton 
-                            @bind-IsChecked="IsActive" OnClick="PersonActivation"
-                            Text="@(IsActive ? "Aktief" : "Niet aktief")"
-                                         Styles="@(new() { Root = "height: 32px;  min-height: 32px; width: 100px; border-radius: 16px; vertical-align: bottom; --toggle-background: red; background: var(--toggle-background); border: none", Checked = "--toggle-background: green;", Text = "color: white;" })" />
-                    </BitTooltip>
-                </div>
+            <SfTab>
+                <TabItems>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader Text="Persoon"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="person-tab-layout">
+                                <EditForm Model="SelectedPerson">
+                                    <DataAnnotationsValidator />
+                                    <ValidationSummary />
+                                    <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
+                                        <SfTextBox Placeholder="Voornaam" FloatLabelType="FloatLabelType.Always" Width="200px" @bind-Value="SelectedPersonFirstName" />
+                                        <SfTextBox Placeholder="Tussenvoegsel" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedPersonNameInfix" />
+                                        <SfTextBox Placeholder="Achternaam" FloatLabelType="FloatLabelType.Always" Width="250px" @bind-Value="SelectedPersonLastName" />
+                                        <BitTooltip Text="@(IsActive ? "Deze persoon is actief, klik om te deactiveren" : "Deze persoon is niet actief, klik om te activeren")" HideDelay="200" ShowOnHover="true">
+                                            <BitToggleButton
+                                                @bind-IsChecked="IsActive" OnClick="PersonActivation"
+                                                Text="@(IsActive ? "Aktief" : "Niet aktief")"
+                                                             Styles="@(new() { Root = "height: 32px;  min-height: 32px; width: 100px; border-radius: 16px; vertical-align: bottom; --toggle-background: red; background: var(--toggle-background); border: none", Checked = "--toggle-background: green;", Text = "color: white;" })" />
+                                        </BitTooltip>
+                                    </div>
 
-                <div class="form-row">
-                    <SfTextBox Placeholder="Straat" FloatLabelType="FloatLabelType.Always" Width="350px" @bind-Value="SelectedPersonStreet" />
-                    <SfTextBox Placeholder="Huisnummer" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedPersonHomeNr" />
-                    <SfTextBox Placeholder="Toevoeging" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedPersonHomeNrAddition" />
-                </div>
+                                    <div class="form-row">
+                                        <SfTextBox Placeholder="Straat" FloatLabelType="FloatLabelType.Always" Width="350px" @bind-Value="SelectedPersonStreet" />
+                                        <SfTextBox Placeholder="Huisnummer" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedPersonHomeNr" />
+                                        <SfTextBox Placeholder="Toevoeging" FloatLabelType="FloatLabelType.Always" Width="100px" @bind-Value="SelectedPersonHomeNrAddition" />
+                                    </div>
 
-                <div class="form-row">
-                    <SfTextBox Placeholder="Postcode" FloatLabelType="FloatLabelType.Always" Width="80px" @bind-Value="SelectedPersonZip" />
-                    <SfTextBox Placeholder="Woonplaats" FloatLabelType="FloatLabelType.Always" Width="230px" @bind-Value="SelectedPersonCity" />
-                </div>
+                                    <div class="form-row">
+                                        <SfTextBox Placeholder="Postcode" FloatLabelType="FloatLabelType.Always" Width="80px" @bind-Value="SelectedPersonZip" />
+                                        <SfTextBox Placeholder="Woonplaats" FloatLabelType="FloatLabelType.Always" Width="230px" @bind-Value="SelectedPersonCity" />
+                                    </div>
 
-                <div class="form-row">
-                    <SfTextBox Placeholder="E-mail" FloatLabelType="FloatLabelType.Always" Width="250px" @bind-Value="SelectedPersonEmail" />
-                    
-                    <div class="form-group col-md-2">
-                        <label class="custom-checkbox-label">Info mailing</label>
-                        <SfCheckBox CssClass="big-checkbox" @bind-Checked="SelectedPersonInfoMailing" />
-                    </div>
-                    
-                    <SfTextBox Placeholder="Mobiel" FloatLabelType="FloatLabelType.Always" Width="130px" @bind-Value="SelectedPersonMobile" />
-                    <SfTextBox Placeholder="Telefoon" FloatLabelType="FloatLabelType.Always" Width="130px" @bind-Value="SelectedPersonPhone" />
-                </div>
-            </EditForm>
+                                    <div class="form-row">
+                                        <SfTextBox Placeholder="E-mail" FloatLabelType="FloatLabelType.Always" Width="250px" @bind-Value="SelectedPersonEmail" />
+
+                                        <div class="form-group col-md-2">
+                                            <label class="custom-checkbox-label">Info mailing</label>
+                                            <SfCheckBox CssClass="big-checkbox" @bind-Checked="SelectedPersonInfoMailing" />
+                                        </div>
+
+                                        <SfTextBox Placeholder="Mobiel" FloatLabelType="FloatLabelType.Always" Width="130px" @bind-Value="SelectedPersonMobile" />
+                                        <SfTextBox Placeholder="Telefoon" FloatLabelType="FloatLabelType.Always" Width="130px" @bind-Value="SelectedPersonPhone" />
+                                    </div>
+                                </EditForm>
+
+                                <div class="person-password-actions">
+                                    <SfButton CssClass="e-primary" Disabled="@(SelectedPerson is null || SelectedPerson.PersonId == 0)" OnClick="GenerateTemporaryPasswordAsync">Genereer nieuw wachtwoord</SfButton>
+                                    @if (!string.IsNullOrWhiteSpace(GeneratedPassword))
+                                    {
+                                        <input class="e-input generated-password" readonly value="@GeneratedPassword" />
+                                    }
+                                </div>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+
+                    <TabItem Disabled="@(SelectedPerson is null || SelectedPerson.PersonId == 0)">
+                        <ChildContent>
+                            <TabHeader Text="Rollen"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="person-roles-tab-layout">
+                                <section>
+                                    <h4>Rollen</h4>
+                                    <SfGrid TValue="PersonRoleAssignmentModel" DataSource="@SelectedPersonRoles" Height="180px">
+                                        <GridColumns>
+                                            <GridColumn Field="Role" HeaderText="Rol" Width="140px" />
+                                            <GridColumn Field="GroupName" HeaderText="Zanggroep" Width="260px" />
+                                        </GridColumns>
+                                    </SfGrid>
+                                    <div class="person-detail-panel__actions">
+                                        <SfDropDownList TValue="string" TItem="string" Width="150px" Placeholder="Rol" DataSource="@PersonRoleOptions" @bind-Value="NewRoleName" />
+                                        <SfDropDownList TValue="uint?" TItem="GroupModel" Width="260px" Placeholder="Zanggroep" DataSource="@GroupOptions" @bind-Value="NewRoleGroupId">
+                                            <DropDownListFieldSettings Text="Name" Value="GroupId" />
+                                        </SfDropDownList>
+                                        <SfButton CssClass="e-primary" Disabled="@(!CanAddRole)" OnClick="AddPersonRoleAsync">Toevoegen</SfButton>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <h4>Vrijwilligersregistraties</h4>
+                                    <SfGrid TValue="PersonVolunteerRegistrationModel" DataSource="@SelectedPersonVolunteerRegistrations" Height="180px">
+                                        <GridColumns>
+                                            <GridColumn Field="Festival" HeaderText="Festival" Width="110px" />
+                                            <GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="120px" />
+                                        </GridColumns>
+                                    </SfGrid>
+                                    @if (LatestFestival is not null && !IsRegisteredForLatestFestival)
+                                    {
+                                        <div class="person-detail-panel__actions">
+                                            <SfButton CssClass="e-primary" Disabled="@(!CanRegisterForLatestFestival)" OnClick="RegisterForLatestFestivalAsync">Registreer voor @LatestFestival.Festival</SfButton>
+                                        </div>
+                                    }
+                                </section>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                </TabItems>
+            </SfTab>
 
             <!-- Toolbar -->
             <div class="maintenance-toolbar-shell">

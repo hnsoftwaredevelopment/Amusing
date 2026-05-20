@@ -188,4 +188,49 @@ public class RegistrationService(GenericDataService dataService)
                 ["@ingeschreven"] = DateTime.Now
             });
     }
+
+    public Task<List<GroupRegistrationModel>> GetGroupRegistrationsByGroupIdAsync(uint groupId)
+    {
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetGroupRegistrationsByGroupId,
+            reader => new GroupRegistrationModel
+            {
+                FestivalId = Convert.ToUInt32(reader["FestivalId"]),
+                Festival = reader["Festival"]?.ToString() ?? string.Empty,
+                RegisteredAt = Convert.ToDateTime(reader["RegisteredAt"]),
+                Singers = Convert.ToInt32(reader["Singers"]),
+                StageType = reader["StageType"]?.ToString() ?? string.Empty,
+                Paid = reader["Paid"]?.ToString() ?? string.Empty,
+                Confirmed = reader["Confirmed"]?.ToString() ?? string.Empty,
+                DroppedOut = reader["DroppedOut"]?.ToString() ?? string.Empty
+            },
+            new Dictionary<string, object>
+            {
+                ["@GroupId"] = groupId
+            });
+    }
+
+    public async Task<PersonFestivalModel?> GetLatestFestivalForMaintenanceAsync()
+    {
+        List<PersonFestivalModel> festivals = await _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetLatestFestivalForPersonMaintenance,
+            reader => new PersonFestivalModel
+            {
+                FestivalId = Convert.ToUInt32(reader["FestivalId"]),
+                Festival = reader["Festival"]?.ToString() ?? string.Empty
+            });
+
+        return festivals.FirstOrDefault();
+    }
+
+    public Task RegisterGroupForCurrentFestivalAsync(uint groupId, uint festivalId)
+    {
+        return _dataService.ExecuteNonQueryAsync(
+            QueryDefinitions.RegisterGroupForCurrentFestival,
+            new Dictionary<string, object>
+            {
+                ["@GroupId"] = groupId,
+                ["@FestivalId"] = festivalId
+            });
+    }
 }

@@ -91,6 +91,87 @@ public class PersonService( GenericDataService dataService )
 
         await _dataService.ExecuteNonQueryAsync( QueryDefinitions.DeletePersonRole, parameters );
     }
+
+    public Task<List<PersonRoleAssignmentModel>> GetPersonRolesByPersonIdAsync( uint personId )
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { "@PersonId", personId }
+        };
+
+        return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPersonRolesByPersonId,
+            reader => new PersonRoleAssignmentModel
+            {
+                PersonId = Convert.ToUInt32( reader [ "PersonId" ] ),
+                GroupId = Convert.ToUInt32( reader [ "GroupId" ] ),
+                Role = reader [ "Role" ]?.ToString() ?? string.Empty,
+                GroupName = reader [ "GroupName" ]?.ToString() ?? string.Empty
+            }, parameters );
+    }
+
+    public Task<List<string>> GetPersonRoleOptionsAsync()
+    {
+        return _dataService.ExecuteQueryAsync( QueryDefinitions.GetPeronRoles,
+            reader => reader [ "rol" ]?.ToString() ?? string.Empty );
+    }
+
+    public Task<List<PersonVolunteerRegistrationModel>> GetVolunteerRegistrationsByPersonIdAsync( uint personId )
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { "@PersonId", personId }
+        };
+
+        return _dataService.ExecuteQueryAsync( QueryDefinitions.GetVolunteerRegistrationsByPersonId,
+            reader => new PersonVolunteerRegistrationModel
+            {
+                VolunteerId = Convert.ToUInt32( reader [ "VolunteerId" ] ),
+                FestivalId = Convert.ToUInt32( reader [ "FestivalId" ] ),
+                Festival = reader [ "Festival" ]?.ToString() ?? string.Empty,
+                SignedUpAt = Convert.ToDateTime( reader [ "SignedUpAt" ] ),
+                DroppedOut = reader [ "DroppedOut" ]?.ToString() ?? string.Empty
+            }, parameters );
+    }
+
+    public async Task<PersonFestivalModel?> GetLatestFestivalForPersonMaintenanceAsync()
+    {
+        List<PersonFestivalModel> festivals = await _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetLatestFestivalForPersonMaintenance,
+            reader => new PersonFestivalModel
+            {
+                FestivalId = Convert.ToUInt32( reader [ "FestivalId" ] ),
+                Festival = reader [ "Festival" ]?.ToString() ?? string.Empty
+            } );
+
+        return festivals.FirstOrDefault();
+    }
+
+    public async Task RegisterPersonForCurrentFestivalAsync( uint personId, uint festivalId )
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { "@PersonId", personId },
+            { "@FestivalId", festivalId }
+        };
+
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.RegisterPersonForCurrentFestival, parameters );
+    }
+
+    public async Task<string> GenerateAndStoreTemporaryPasswordAsync( uint personId )
+    {
+        string password = PersonPasswordGenerator.GenerateTemporaryPassword();
+        string hash = BCrypt.Net.BCrypt.HashPassword( password );
+
+        Dictionary<string, object> parameters = new()
+        {
+            { "@PersonId", personId },
+            { "@Hash", hash }
+        };
+
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.UpsertPersonPassword, parameters );
+        return password;
+    }
+
     public Task<List<PersonModel>> GetAllPersonsAsync()
     {
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetAllPersons,

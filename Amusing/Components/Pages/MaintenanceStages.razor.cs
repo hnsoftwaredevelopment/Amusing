@@ -27,9 +27,13 @@ public partial class MaintenanceStages : ComponentBase
     protected string? SelectedStageType;
     protected int VisibleRowCount = 0;
     protected List<StageModel> Stages = [];
+    protected List<StageModel> FilteredStages = [];
 
     protected SfTooltip? TooltipObj;
     protected bool isOpen = false;
+
+    private bool _showOnlyActiveStages;
+    protected bool ShowOnlyActiveStages => _showOnlyActiveStages;
 
     protected string SelectedStageTypeText => AvailableStageTypes.FirstOrDefault(e => e.Type == SelectedStageType)?.Type ?? "Onbekende podium type";
 
@@ -119,8 +123,9 @@ public partial class MaintenanceStages : ComponentBase
         IsLoading = true;
 
         Stages = await StageService.GetAllStagesAsync();
+        ApplyStageFilter();
         AvailableStageTypes = await StageTypeService.GetAllStageTypesListAsync();
-        SelectedStage = Stages
+        SelectedStage = FilteredStages
             .OrderByDescending(f => f.Naam)
             .FirstOrDefault();
         IsLoading = false;
@@ -143,6 +148,37 @@ public partial class MaintenanceStages : ComponentBase
             VisibleRowCount = records?.Count ?? 0;
             StateHasChanged();
         }
+    }
+
+    private void ApplyStageFilter()
+    {
+        FilteredStages = ShowOnlyActiveStages
+            ? Stages.Where(stage => stage.KaartNummer > 0).ToList()
+            : Stages.ToList();
+    }
+
+    private async Task ApplyStageFilterAsync()
+    {
+        ApplyStageFilter();
+
+        if (GridRef is not null)
+        {
+            await GridRef.Refresh();
+            await UpdateVisibleRowCountAsync();
+        }
+
+        if (SelectedStage is not null && !FilteredStages.Any(stage => stage.PodiumId == SelectedStage.PodiumId))
+        {
+            SelectedStage = FilteredStages.FirstOrDefault();
+        }
+
+        StateHasChanged();
+    }
+
+    protected async Task OnShowOnlyActiveStagesChanged(ChangeEventArgs args)
+    {
+        _showOnlyActiveStages = args.Value is bool value && value;
+        await ApplyStageFilterAsync();
     }
 
     public async Task OnInput(InputEventArgs args)
@@ -223,15 +259,22 @@ public partial class MaintenanceStages : ComponentBase
 
         // Refresh the list
         Stages = await StageService.GetAllStagesAsync();
+        ApplyStageFilter();
         await GridRef.Refresh();
 
         // Search the modified record
-        var index = Stages.FindIndex(s => s.PodiumId == savedId);
+        var index = FilteredStages.FindIndex(s => s.PodiumId == savedId);
         if (index >= 0)
         {
-            SelectedStage = Stages[index];
+            SelectedStage = FilteredStages[index];
             await GridRef.SelectRowAsync(index);
         }
+        else
+        {
+            SelectedStage = FilteredStages.FirstOrDefault();
+        }
+
+        await UpdateVisibleRowCountAsync();
     }
 
     protected async Task AddNewStage()
@@ -247,15 +290,22 @@ public partial class MaintenanceStages : ComponentBase
 
         // Refresh the list
         Stages = await StageService.GetAllStagesAsync();
+        ApplyStageFilter();
         await GridRef.Refresh();
 
         // Search the new record
-        var index = Stages.FindIndex(s => s.PodiumId == stageId);
+        var index = FilteredStages.FindIndex(s => s.PodiumId == stageId);
         if (index >= 0)
         {
-            SelectedStage = Stages[index];
+            SelectedStage = FilteredStages[index];
             await GridRef.SelectRowAsync(index);
         }
+        else
+        {
+            SelectedStage = FilteredStages.FirstOrDefault();
+        }
+
+        await UpdateVisibleRowCountAsync();
     }
 
     protected async Task DeleteStage()
@@ -272,21 +322,24 @@ public partial class MaintenanceStages : ComponentBase
         var stageModels = await StageService.GetAllStagesAsync();
 
         Stages = await StageService.GetAllStagesAsync();
-        SelectedStage = Stages
+        ApplyStageFilter();
+        SelectedStage = FilteredStages
             .OrderByDescending(f => f.Naam)
             .FirstOrDefault();
         await GridRef.Refresh();
 
         // Select the first record in the grid
-        if (Stages.Any())
+        if (FilteredStages.Any())
         {
-            SelectedStage = Stages[0];
+            SelectedStage = FilteredStages[0];
             await GridRef.SelectRowAsync(0);
         }
         else
         {
             SelectedStage = null;
         }
+
+        await UpdateVisibleRowCountAsync();
     }
 
     protected void OnOpen(Syncfusion.Blazor.DropDowns.PopupEventArgs args)

@@ -43,4 +43,57 @@ public class QueryDefinitionsTests
         Assert.Contains("ip_address", query);
         Assert.Contains("@UserIp", query);
     }
+
+    [Fact]
+    public void GetPersonRolesByPersonIdQuery_LoadsRolesWithGroupsForSelectedPerson()
+    {
+        string query = QueryDefinitions.GetPersonRolesByPersonId;
+
+        Assert.Contains("ah_personen_rollen", query);
+        Assert.Contains("ah_zanggroepen", query);
+        Assert.Contains("@PersonId", query);
+    }
+
+    [Fact]
+    public void RegisterPersonForCurrentFestivalQuery_PreventsDuplicateVolunteerRegistration()
+    {
+        string query = QueryDefinitions.RegisterPersonForCurrentFestival;
+
+        Assert.Contains("ah_vrijwilligers", query);
+        Assert.Contains("@PersonId", query);
+        Assert.Contains("@FestivalId", query);
+        Assert.Contains("NOT EXISTS", query);
+    }
+
+    [Fact]
+    public void UpsertPersonPasswordQuery_StoresHashForPerson()
+    {
+        string query = QueryDefinitions.UpsertPersonPassword;
+
+        Assert.Contains("ah_personen_wachtwoorden", query);
+        Assert.Contains("@PersonId", query);
+        Assert.Contains("@Hash", query);
+        Assert.Contains("ON DUPLICATE KEY UPDATE", query);
+    }
+
+    [Fact]
+    public void GetGroupRegistrationsByGroupIdQuery_LoadsRegistrationsForSelectedGroup()
+    {
+        string query = QueryDefinitions.GetGroupRegistrationsByGroupId;
+
+        Assert.Contains("ah_inschrijvingen", query);
+        Assert.Contains("ah_festivals", query);
+        Assert.Contains("@GroupId", query);
+    }
+
+    [Fact]
+    public void RegisterGroupForCurrentFestivalQuery_PreventsDuplicateRegistration()
+    {
+        string query = QueryDefinitions.RegisterGroupForCurrentFestival;
+
+        Assert.Contains("ah_inschrijvingen", query);
+        Assert.Contains("@GroupId", query);
+        Assert.Contains("@FestivalId", query);
+        Assert.Contains("NOT EXISTS", query);
+    }
 }

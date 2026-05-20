@@ -27,6 +27,7 @@ public partial class MaintenancePeople : ComponentBase
 {
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected PersonService PersonService { get; set; } = default!;
+    [Inject] protected GroupService GroupService { get; set; } = default!;
 
     private bool _initialLoadDone = false;
     private bool IsDeleteEnabled => SelectedPerson?.PersonId != 0 || SelectedPerson?.IsActive == true;
@@ -35,6 +36,14 @@ public partial class MaintenancePeople : ComponentBase
     private int _visibleRowCount = 0;
     private List<PersonModel> Persons = [];
     private List<PersonModel> FilteredPersons = new();
+    private List<PersonRoleAssignmentModel> SelectedPersonRoles = [];
+    private List<PersonVolunteerRegistrationModel> SelectedPersonVolunteerRegistrations = [];
+    private List<string> PersonRoleOptions = [];
+    private List<GroupModel> GroupOptions = [];
+    private PersonFestivalModel? LatestFestival;
+    private string NewRoleName = string.Empty;
+    private uint? NewRoleGroupId;
+    private string GeneratedPassword = string.Empty;
     private SfGrid<PersonModel>? GridRef;
     private string _activeFilter = "All";
     private string ActiveFilter
@@ -135,8 +144,15 @@ public partial class MaintenancePeople : ComponentBase
         _isLoading = true;
 
         Persons = await PersonService.GetAllPersonsAsync();
+        PersonRoleOptions = await PersonService.GetPersonRoleOptionsAsync();
+        GroupOptions = ( await GroupService.GetAllGroupsAsync() )
+            .Where( group => group.Active == 1 )
+            .OrderBy( group => group.Name )
+            .ToList();
+        LatestFestival = await PersonService.GetLatestFestivalForPersonMaintenanceAsync();
 
         SelectedPerson = Persons.FirstOrDefault();
+        await LoadSelectedPersonDetailsAsync();
         ApplyFilter();
 
         _isLoading = false;
@@ -157,11 +173,29 @@ public partial class MaintenancePeople : ComponentBase
         }
     }
 
-    private void OnRowSelected( RowSelectEventArgs<PersonModel> args )
+    private async Task OnRowSelected( RowSelectEventArgs<PersonModel> args )
     {
         SelectedPerson = args.Data;
+        await LoadSelectedPersonDetailsAsync();
 
         StateHasChanged();
+    }
+
+    private async Task LoadSelectedPersonDetailsAsync()
+    {
+        GeneratedPassword = string.Empty;
+
+        if ( SelectedPerson is null || SelectedPerson.PersonId == 0 )
+        {
+            SelectedPersonRoles = [];
+            SelectedPersonVolunteerRegistrations = [];
+            return;
+        }
+
+        SelectedPersonRoles = await PersonService.GetPersonRolesByPersonIdAsync( SelectedPerson.PersonId );
+        SelectedPersonVolunteerRegistrations = await PersonService.GetVolunteerRegistrationsByPersonIdAsync( SelectedPerson.PersonId );
+        NewRoleName = PersonRoleOptions.FirstOrDefault() ?? string.Empty;
+        NewRoleGroupId = GroupOptions.FirstOrDefault()?.GroupId;
     }
 
     private async Task UpdateVisibleRowCountAsync()
@@ -225,9 +259,25 @@ public partial class MaintenancePeople : ComponentBase
 
     private bool IsActive
     {
-        get => SelectedPerson.Active == 1;
-        set => SelectedPerson.Active = value ? 1 : 0;
+        get => SelectedPerson?.Active == 1;
+        set { if ( SelectedPerson is not null ) SelectedPerson.Active = value ? 1 : 0; }
     }
+
+    private bool IsRegisteredForLatestFestival =>
+        LatestFestival is not null &&
+        SelectedPersonVolunteerRegistrations.Any( registration => registration.FestivalId == LatestFestival.FestivalId );
+
+    private bool CanAddRole =>
+        SelectedPerson is not null &&
+        SelectedPerson.PersonId != 0 &&
+        !string.IsNullOrWhiteSpace( NewRoleName ) &&
+        NewRoleGroupId.HasValue;
+
+    private bool CanRegisterForLatestFestival =>
+        SelectedPerson is not null &&
+        SelectedPerson.PersonId != 0 &&
+        LatestFestival is not null &&
+        !IsRegisteredForLatestFestival;
 
     private async Task Save()
     {
@@ -261,6 +311,7 @@ public partial class MaintenancePeople : ComponentBase
             {
                 SelectedPerson = Persons [ index ];
                 await GridRef.SelectRowAsync( index );
+                await LoadSelectedPersonDetailsAsync();
             }
         }
     }
@@ -291,6 +342,49 @@ public partial class MaintenancePeople : ComponentBase
         SelectedPerson = newPerson;
 
         StateHasChanged();
+    }
+
+    private async Task AddPersonRoleAsync()
+    {
+        if ( !CanAddRole || SelectedPerson is null || NewRoleGroupId is null )
+            return;
+
+        await PersonService.InsertNewPersonRoleAsync( NewRoleGroupId.Value, SelectedPerson.PersonId, NewRoleName );
+        await RefreshPersonRowsAndDetailsAsync( SelectedPerson.PersonId );
+    }
+
+    private async Task RegisterForLatestFestivalAsync()
+    {
+        if ( !CanRegisterForLatestFestival || SelectedPerson is null || LatestFestival is null )
+            return;
+
+        await PersonService.RegisterPersonForCurrentFestivalAsync( SelectedPerson.PersonId, LatestFestival.FestivalId );
+        await RefreshPersonRowsAndDetailsAsync( SelectedPerson.PersonId );
+    }
+
+    private async Task GenerateTemporaryPasswordAsync()
+    {
+        if ( SelectedPerson is null || SelectedPerson.PersonId == 0 )
+            return;
+
+        GeneratedPassword = await PersonService.GenerateAndStoreTemporaryPasswordAsync( SelectedPerson.PersonId );
+    }
+
+    private async Task RefreshPersonRowsAndDetailsAsync( uint selectedPersonId )
+    {
+        Persons = await PersonService.GetAllPersonsAsync();
+        ApplyFilter();
+
+        PersonModel? refreshedPerson = Persons.FirstOrDefault( person => person.PersonId == selectedPersonId );
+        if ( refreshedPerson is not null )
+            SelectedPerson = refreshedPerson;
+
+        await LoadSelectedPersonDetailsAsync();
+
+        if ( GridRef is not null )
+        {
+            await GridRef.Refresh();
+        }
     }
 
     private async Task PersonActivation()

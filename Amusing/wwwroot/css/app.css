@@ -118,6 +118,74 @@ a, .btn-link {
     height: 100%;
 }
 
+.person-tab-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.person-password-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.person-roles-tab-layout {
+    display: grid;
+    grid-template-columns: minmax(360px, 1fr) minmax(300px, 0.8fr);
+    gap: 12px;
+    min-width: 0;
+}
+
+.person-roles-tab-layout section {
+    min-width: 0;
+}
+
+.person-roles-tab-layout h4 {
+    margin: 0 0 4px;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.person-detail-panel__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-top: 6px;
+}
+
+.generated-password {
+    width: 180px;
+    font-family: Consolas, monospace;
+}
+
+.group-registrations-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+
+.group-registrations-actions {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.stage-active-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.stage-active-filter input {
+    width: 16px;
+    height: 16px;
+}
+
 @media (max-width: 1024px), (max-height: 900px) {
     .maintenance-page {
         gap: 8px;
@@ -136,6 +204,10 @@ a, .btn-link {
 
     .maintenance-grid-shell--fit {
         min-height: clamp(220px, 30dvh, 320px);
+    }
+
+    .person-roles-tab-layout {
+        grid-template-columns: 1fr;
     }
 }
 
