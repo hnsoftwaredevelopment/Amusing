@@ -3,6 +3,7 @@
 @using Amusing.Services
 @using Bit.BlazorUI
 @using Bit.BlazorUI.Extras
+@using Blazorise
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.DataForm
 @using Syncfusion.Blazor.Grids
@@ -21,48 +22,52 @@ else
 {
     <div class="page-container maintenance-page">
         <div class="fixed-header maintenance-page__header">
-            <SfDataForm Model="SelectedStageType" OnValidSubmit="SaveStageType" LabelPosition="FormLabelPosition.Top">
-            <div class="form-floating-switch">
+            <div class="form-grid">
                 <h5>Algemeen</h5>
-                <SfTextBox @bind-Value="StageTypeName" Placeholder="Type" FloatLabelType="FloatLabelType.Always" Width="60px" CssClass="e-ntstyle center-textbox" Enabled=@ActiveChecked/>
-                <SfNumericTextBox TValue="decimal" @bind-Value="StageTypePrice" Placeholder="Prijs" Format="c2" FloatLabelType="FloatLabelType.Always" Width="140px" Step="5" CssClass="e-ntstyle"  Enabled=@ActiveChecked />
-                <SfMultiSelect TValue="List<string>"
-                                TItem="string"
-                                Placeholder="Compatibel met"
-                                FloatLabelType="FloatLabelType.Always"
-                                @bind-Value="CompatibelTypes"
-                                DataSource="@AvailableStageTypes"
-                                Mode="VisualMode.CheckBox"
-                                CssClass="e-ntstyle"
-                                Width="130px"  Enabled=@ActiveChecked>
-                </SfMultiSelect>
-                <BitToggleButton @bind-IsChecked="ActiveChecked" Text="@(ActiveChecked ? "Aktief" : "Niet aktief")" Styles="@(new() { Root = "--toggle-background: gray; background: var(--toggle-background); border: none",
-                    Checked = "--toggle-background: green;",
-                    Text = "color: white;" })"/>
+                <div class="form-row-1">
+                    <SfTextBox @bind-Value="StageTypeName" Placeholder="Type" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle center-textbox" Enabled=@ActiveChecked class="col-span-1" />
+                    <SfNumericTextBox TValue="decimal" @bind-Value="StageTypePrice" Placeholder="Prijs" Format="c2" FloatLabelType="FloatLabelType.Always" Step="5" CssClass="e-ntstyle" Enabled=@ActiveChecked class="col-span-1" />
+                    <SfMultiSelect TValue="List<string>"
+                                    TItem="string"
+                                    Placeholder="Compatibel met"
+                                    FloatLabelType="FloatLabelType.Always"
+                                    @bind-Value="CompatibelTypes"
+                                    DataSource="@AvailableStageTypes"
+                                    Mode="VisualMode.CheckBox"
+                                    CssClass="e-ntstyle"
+                                    Enabled=@ActiveChecked
+                                   class="col-span-1">
+                    </SfMultiSelect>
+                    <BitToggleButton @bind-IsChecked="ActiveChecked" Text="@(ActiveChecked ? "Aktief" : "Niet aktief")" Styles="@(new() { Root = "--toggle-background: gray; background: var(--toggle-background); border: none",
+                        Checked = "--toggle-background: green;",
+                                         Text = "color: white;"
+                                     })" class="col-span-1" />
+                </div>
                 <hr />
                 <h5>Instrumenten e.d</h5>
-                <div Width="50%">
-                <SfNumericTextBox TValue="int" Min="0" Max="2" @bind-Value="StageTypePiano" Placeholder="Piano" Width="10%" FloatLabelType="@FloatLabelType.Auto" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
-                <SfNumericTextBox TValue="int" Min="0" Max="10" @bind-Value="StageTypeLectern" Placeholder="Lessenaar" Width="10%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
-                <SfNumericTextBox TValue="int" Min="0" Max="10" @bind-Value="StageTypeMicrophones" Placeholder="Microfoons" Width="10%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
-                <SfNumericTextBox TValue="int" Min="0" Max="2" @bind-Value="StageTypeDrums" Placeholder="Drums" Width="10%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
-                </div> 
+                <div class="form-row-2">
+                    <SfNumericTextBox TValue="int" Min="0" Max="2" @bind-Value="StageTypePiano" Placeholder="Piano" FloatLabelType="@FloatLabelType.Auto" CssClass="e-ntstyle" Enabled=@ActiveChecked class ="col-span-1" />
+                    <SfNumericTextBox TValue="int" Min="0" Max="10" @bind-Value="StageTypeLectern" Placeholder="Lessenaar" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" Enabled=@ActiveChecked class="col-span-1" />
+                    <SfNumericTextBox TValue="int" Min="0" Max="10" @bind-Value="StageTypeMicrophones" Placeholder="Microfoons" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" Enabled=@ActiveChecked class="col-span-1" />
+                    <SfNumericTextBox TValue="int" Min="0" Max="2" @bind-Value="StageTypeDrums" Placeholder="Drums" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" Enabled=@ActiveChecked class="col-span-1" />
+                </div>
                 <hr />
                 <h5>Techniek</h5>
-                <div width="75%">
-                <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="StageTypeGuitarAmplifiers" Placeholder="Gitaar versterkers" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
-                <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="StageTypeBassAmplifiers" Placeholder="Bas versterkers" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
-                <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="StageTypeChoirAmplifiers" Placeholder="Koor versterking" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
-                <SfNumericTextBox TValue="int" Min="0" Max="4" @bind-Value="StageTypeMonitors" Placeholder="Monitoren" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
-                <SfNumericTextBox TValue="int" Min="0" Max="4" @bind-Value="StageTypeSpeakers" Placeholder="Speakers" Width="15%" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle"  Enabled=@ActiveChecked/>
+                <div class="form-row-4">
+                    <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="StageTypeGuitarAmplifiers" Placeholder="Gitaar versterkers" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" Enabled=@ActiveChecked class="col-span-1" />
+                    <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="StageTypeBassAmplifiers" Placeholder="Bas versterkers" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" Enabled=@ActiveChecked class="col-span-1" />
+                    <SfNumericTextBox TValue="int" Min="0" Max="6" @bind-Value="StageTypeChoirAmplifiers" Placeholder="Koor versterking" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" Enabled=@ActiveChecked class="col-span-1" />
+                    <SfNumericTextBox TValue="int" Min="0" Max="4" @bind-Value="StageTypeMonitors" Placeholder="Monitoren" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" Enabled=@ActiveChecked class="col-span-1" />
+                    <SfNumericTextBox TValue="int" Min="0" Max="4" @bind-Value="StageTypeSpeakers" Placeholder="Speakers" FloatLabelType="FloatLabelType.Always" CssClass="e-ntstyle" Enabled=@ActiveChecked class="col-span-1" />
                 </div>
                 <div class="spacer-medium"></div>
-                <SfCheckBox @bind-Checked="ElectronicsChecked" Disabled="!ActiveChecked">Electra</SfCheckBox>
-                <SfCheckBox @bind-Checked="MixingConsoleChecked" Disabled="!ActiveChecked">Mengpaneel</SfCheckBox>
-                <SfCheckBox @bind-Checked="Mp3Checked" Disabled="!ActiveChecked">MD/MP3</SfCheckBox>
+                <div class="form-row-3">
+                    <SfCheckBox @bind-Checked="ElectronicsChecked" Disabled="!ActiveChecked">Electra</SfCheckBox>
+                    <SfCheckBox @bind-Checked="MixingConsoleChecked" Disabled="!ActiveChecked">Mengpaneel</SfCheckBox>
+                    <SfCheckBox @bind-Checked="Mp3Checked" Disabled="!ActiveChecked">MD/MP3</SfCheckBox>
+                </div>
                 <hr />
             </div>
-        </SfDataForm>
         </div>
 
         <div class="scrollable-content maintenance-page__content">
@@ -80,8 +85,8 @@ else
                         AllowSorting="true" >
 
                     <GridTextWrapSettings WrapMode=" WrapMode.Header"></GridTextWrapSettings>
-                    <GridSelectionSettings 
-                        Mode="Syncfusion.Blazor.Grids.SelectionMode.Row" 
+                    <GridSelectionSettings
+                        Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"
                         Type="Syncfusion.Blazor.Grids.SelectionType.Single">
                     </GridSelectionSettings>
 
@@ -152,7 +157,7 @@ else
                     <div>Let op: wanneer je een podium type verwijdert, verwijder je alleen de laatste versie van dat type.</div>
                     <div>De regel kan dus gewoon zichtbaar blijven in de lijst, dit is dan de vorige versie.</div>
                     <div>Wil je een podium type niet meer gebruiken, zet hem dan op disabled en sla het type op.</div>
-                </BitMessage>    
+                </BitMessage>
             </div>
         </div>
     </div>
