@@ -2013,13 +2013,111 @@ public static class QueryDefinitions
             vd.tot AS EndTime
         FROM amusing.ah_taken t 
         LEFT JOIN amusing.planner_vrijwilligersdiensten vd 
-                       ON vd.taak = t.taak_id 
+                      ON vd.taak = t.taak_id 
                       AND vd.festival_id = @FestivalId
           LEFT JOIN amusing.ah_personen v 
                        ON vd.persoon_id = v.persoon_id
         WHERE t.actief = ""ja""
 	        AND vd.van IS NOT NULL
         ORDER BY t.taak_id";
+    public static readonly string GetPlanningVolunteerOverviewByVolunteer = @"
+        SELECT *
+        FROM (
+            SELECT
+                vw.persoon_id AS PersonId,
+                CONCAT_WS(' ', p.voornaam, NULLIF(p.tussenvoegsel, ''), p.achternaam) AS Volunteer,
+                CONCAT_WS(' / ',
+                    NULLIF(c.telefoon_mobiel, ''),
+                    NULLIF(c.telefoon_vast, ''),
+                    NULLIF(p.email, ''),
+                    CONCAT('beschikbaar van ', TIME_FORMAT(vw.beschikbaar_van, '%H:%i'), ' tot ', TIME_FORMAT(vw.beschikbaar_tot, '%H:%i'))
+                ) AS Contact,
+                vd.van AS StartTime,
+                vd.tot AS EndTime,
+                CASE
+                    WHEN vd.taak IS NOT NULL THEN t.naam
+                    ELSE CONCAT('Podium ', s.naam)
+                END AS Description,
+                CASE WHEN vd.vastgezet = 'ja' THEN 'vastgezet' ELSE '' END AS Fixed
+            FROM amusing.ah_vrijwilligers vw
+            INNER JOIN amusing.ah_personen p
+                    ON p.persoon_id = vw.persoon_id
+            LEFT JOIN amusing.ah_contactgegevens c
+                   ON c.persoon_id = vw.persoon_id
+            INNER JOIN amusing.planner_vrijwilligersdiensten vd
+                    ON vd.festival_id = vw.festival_id
+                   AND vd.persoon_id = vw.persoon_id
+            LEFT JOIN amusing.ah_taken t
+                   ON t.taak_id = vd.taak
+            LEFT JOIN amusing.ah_podia s
+                   ON s.podium_id = vd.podium_id
+            WHERE vw.festival_id = @FestivalId
+              AND vw.afgehaakt = 'nee'
+
+            UNION ALL
+
+            SELECT DISTINCT
+                vw.persoon_id AS PersonId,
+                CONCAT_WS(' ', p.voornaam, NULLIF(p.tussenvoegsel, ''), p.achternaam) AS Volunteer,
+                CONCAT_WS(' / ',
+                    NULLIF(c.telefoon_mobiel, ''),
+                    NULLIF(c.telefoon_vast, ''),
+                    NULLIF(p.email, ''),
+                    CONCAT('beschikbaar van ', TIME_FORMAT(vw.beschikbaar_van, '%H:%i'), ' tot ', TIME_FORMAT(vw.beschikbaar_tot, '%H:%i'))
+                ) AS Contact,
+                ADDTIME(CAST('11:00:00' AS TIME), SEC_TO_TIME((po.tijdvak - 1) * 1800)) AS StartTime,
+                ADDTIME(CAST('11:00:00' AS TIME), SEC_TO_TIME(po.tijdvak * 1800)) AS EndTime,
+                CONCAT('Optreden met ', g.naam, ', ', s.naam) AS Description,
+                '' AS Fixed
+            FROM amusing.ah_vrijwilligers vw
+            INNER JOIN amusing.ah_personen p
+                    ON p.persoon_id = vw.persoon_id
+            LEFT JOIN amusing.ah_contactgegevens c
+                   ON c.persoon_id = vw.persoon_id
+            INNER JOIN amusing.ah_personen_rollen r
+                    ON r.persoon_id = vw.persoon_id
+                   AND r.rol NOT IN ('contact', 'treasurer')
+            INNER JOIN amusing.planner_optredens po
+                    ON po.festival_id = vw.festival_id
+                   AND po.zanggroep_id = r.zanggroep_id
+            INNER JOIN amusing.ah_zanggroepen g
+                    ON g.zanggroep_id = po.zanggroep_id
+            INNER JOIN amusing.ah_podia s
+                    ON s.podium_id = po.podium_id
+            WHERE vw.festival_id = @FestivalId
+              AND vw.afgehaakt = 'nee'
+        ) planning
+        ORDER BY Volunteer, StartTime, Description;";
+    public static readonly string GetPlanningVolunteerOverviewByTask = @"
+        SELECT
+            t.naam AS GroupName,
+            CONCAT_WS(' ', p.voornaam, NULLIF(p.tussenvoegsel, ''), p.achternaam) AS Volunteer,
+            vd.van AS StartTime,
+            vd.tot AS EndTime,
+            CASE WHEN vd.vastgezet = 'ja' THEN 'vastgezet' ELSE '' END AS Fixed
+        FROM amusing.planner_vrijwilligersdiensten vd
+        INNER JOIN amusing.ah_taken t
+                ON t.taak_id = vd.taak
+        INNER JOIN amusing.ah_personen p
+                ON p.persoon_id = vd.persoon_id
+        WHERE vd.festival_id = @FestivalId
+          AND vd.taak IS NOT NULL
+        ORDER BY t.naam, vd.van, Volunteer;";
+    public static readonly string GetPlanningVolunteerOverviewByStage = @"
+        SELECT
+            CONCAT(pod.kaart_nummer, ' ', pod.naam) AS GroupName,
+            CONCAT_WS(' ', person.voornaam, NULLIF(person.tussenvoegsel, ''), person.achternaam) AS Volunteer,
+            vd.van AS StartTime,
+            vd.tot AS EndTime,
+            CASE WHEN vd.vastgezet = 'ja' THEN 'vastgezet' ELSE '' END AS Fixed
+        FROM amusing.planner_vrijwilligersdiensten vd
+        INNER JOIN amusing.ah_podia pod
+                ON pod.podium_id = vd.podium_id
+        INNER JOIN amusing.ah_personen person
+                ON person.persoon_id = vd.persoon_id
+        WHERE vd.festival_id = @FestivalId
+          AND vd.taak IS NULL
+        ORDER BY pod.kaart_nummer, vd.van, Volunteer;";
     public static readonly string GetPlanningPerformancesOverview = @"
         SELECT 
             s.kaart_nummer AS SortOrder,

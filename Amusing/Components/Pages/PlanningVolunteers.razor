@@ -1,0 +1,147 @@
+@page "/Planning-Volunteers"
+@using Amusing.Models
+@using Amusing.Services
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Grids
+
+<AuthorizeView>
+    <Authorized>
+        <div class="overview-grid">
+            <div class="row row1">
+                <h3>
+                    Vrijwilligersplanning
+                    @if (!string.IsNullOrWhiteSpace(SelectedEditionId))
+                    {
+                        <span class="edition-label">@SelectedEditionText</span>
+                    }
+                </h3>
+            </div>
+
+            <div class="row row2">
+                <div class="col left toolbar">
+                    <SfComboBox class="sf-combobox"
+                                TValue="string"
+                                TItem="Edition"
+                                Placeholder="Kies een editie"
+                                Value="@SelectedEditionId"
+                                ValueChanged="OnEditionChanged"
+                                DataSource="@Editions"
+                                Width="175px">
+                        <ComboBoxFieldSettings Value="ID" Text="Text"></ComboBoxFieldSettings>
+                    </SfComboBox>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(SelectedEditionId))
+            {
+                <div class="row">
+                    <div class="col left">
+                        <div class="titles-container">
+                            <div class="title">Per vrijwilliger</div>
+                            <SfGrid DataSource="@ByVolunteer"
+                                    AllowResizing="true"
+                                    AllowSorting="false"
+                                    AllowPaging="false"
+                                    CssClass="amusing-grid">
+                                <GridColumns>
+                                    <GridColumn HeaderText="Vrijwilliger" Width="140">
+                                        <Template Context="item">
+                                            @if (item is PlanningVolunteerOverviewRow row)
+                                            {
+                                                var previous = GetPreviousVolunteer(row);
+                                                var showVolunteer = previous == null || previous.PersonId != row.PersonId;
+
+                                                if (showVolunteer)
+                                                {
+                                                    <div class="volunteer-cell podium-start">
+                                                        <div class="volunteer-name">@row.Volunteer</div>
+                                                        <div class="volunteer-contact">@row.Contact</div>
+                                                    </div>
+                                                }
+                                            }
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="StartTime" HeaderText="Van" Width="60" Format="t"></GridColumn>
+                                    <GridColumn Field="EndTime" HeaderText="Tot" Width="60" Format="t"></GridColumn>
+                                    <GridColumn Field="Description" HeaderText="Taak / blokkade" Width="80"></GridColumn>
+                                    <GridColumn Field="Fixed" HeaderText="Vast" Width="60"></GridColumn>
+                                </GridColumns>
+                            </SfGrid>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col left">
+                        <div class="titles-container">
+                            <div class="title">Per taak</div>
+                            <SfGrid DataSource="@ByTask"
+                                    AllowResizing="true"
+                                    AllowSorting="false"
+                                    AllowPaging="false"
+                                    CssClass="amusing-grid">
+                                <GridColumns>
+                                    <GridColumn HeaderText="Taak" Width="120">
+                                        <Template Context="item">
+                                            @if (item is PlanningVolunteerOverviewRow row)
+                                            {
+                                                var previous = GetPreviousTask(row);
+                                                var showTask = previous == null || previous.GroupName != row.GroupName;
+
+                                                if (showTask)
+                                                {
+                                                    <div class="podium-name podium-start">@row.GroupName</div>
+                                                }
+                                            }
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="StartTime" HeaderText="Van" Width="50" Format="t"></GridColumn>
+                                    <GridColumn Field="EndTime" HeaderText="Tot" Width="50" Format="t"></GridColumn>
+                                    <GridColumn Field="Volunteer" HeaderText="Vrijwilliger" Width="100"></GridColumn>
+                                    <GridColumn Field="Fixed" HeaderText="Vast" Width="50"></GridColumn>
+                                </GridColumns>
+                            </SfGrid>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col left">
+                        <div class="titles-container">
+                            <div class="title">Per podium</div>
+                            <SfGrid DataSource="@ByStage"
+                                    AllowResizing="true"
+                                    AllowSorting="false"
+                                    AllowPaging="false"
+                                    CssClass="amusing-grid">
+                                <GridColumns>
+                                    <GridColumn HeaderText="Podium" Width="120">
+                                        <Template Context="item">
+                                            @if (item is PlanningVolunteerOverviewRow row)
+                                            {
+                                                var previous = GetPreviousStage(row);
+                                                var showStage = previous == null || previous.GroupName != row.GroupName;
+
+                                                if (showStage)
+                                                {
+                                                    <div class="podium-name podium-start">@row.GroupName</div>
+                                                }
+                                            }
+                                        </Template>
+                                    </GridColumn>
+                                    <GridColumn Field="StartTime" HeaderText="Van" Width="50" Format="t"></GridColumn>
+                                    <GridColumn Field="EndTime" HeaderText="Tot" Width="50" Format="t"></GridColumn>
+                                    <GridColumn Field="Volunteer" HeaderText="Vrijwilliger" Width="120"></GridColumn>
+                                    <GridColumn Field="Fixed" HeaderText="Vast" Width="50"></GridColumn>
+                                </GridColumns>
+                            </SfGrid>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <p class="text-danger">Je hebt alleen toegang tot deze pagina wanneer je bent ingelogt</p>
+    </NotAuthorized>
+</AuthorizeView>

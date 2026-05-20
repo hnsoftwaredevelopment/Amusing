@@ -1,5 +1,7 @@
 using Amusing.Helpers;
 
+using System.Runtime.CompilerServices;
+
 using Xunit;
 
 namespace Beheer.Tests;
@@ -109,15 +111,52 @@ public class QueryDefinitionsTests
     [Fact]
     public void GetFestivalOverviewQuery_DoesNotTrimDynamicColumnsByPlatformNewlineWidth()
     {
-        string source = File.ReadAllText(Path.Combine(
-            "..",
-            "..",
-            "..",
-            "..",
-            "Amusing",
-            "Helpers",
-            "QueryDefinitions.cs"));
+        string sourcePath = GetSourcePath("Amusing", "Helpers", "QueryDefinitions.cs");
+        string source = File.ReadAllText(sourcePath);
 
         Assert.DoesNotContain("Length -= 3", source);
     }
+
+    [Fact]
+    public void PlanningVolunteerOverviewByVolunteerQuery_LoadsServicesAndPerformances()
+    {
+        string query = QueryDefinitions.GetPlanningVolunteerOverviewByVolunteer;
+
+        Assert.Contains("planner_vrijwilligersdiensten", query);
+        Assert.Contains("planner_optredens", query);
+        Assert.Contains("Optreden met", query);
+        Assert.Contains("@FestivalId", query);
+    }
+
+    [Fact]
+    public void PlanningVolunteerOverviewByTaskQuery_LoadsOnlyTaskServices()
+    {
+        string query = QueryDefinitions.GetPlanningVolunteerOverviewByTask;
+
+        Assert.Contains("planner_vrijwilligersdiensten", query);
+        Assert.Contains("ah_taken", query);
+        Assert.Contains("vd.taak IS NOT NULL", query);
+        Assert.Contains("@FestivalId", query);
+    }
+
+    [Fact]
+    public void PlanningVolunteerOverviewByStageQuery_LoadsOnlyStageServices()
+    {
+        string query = QueryDefinitions.GetPlanningVolunteerOverviewByStage;
+
+        Assert.Contains("planner_vrijwilligersdiensten", query);
+        Assert.Contains("ah_podia", query);
+        Assert.Contains("vd.taak IS NULL", query);
+        Assert.Contains("@FestivalId", query);
+    }
+
+    private static string GetSourcePath(params string[] pathParts)
+    {
+        var testDirectory = Path.GetDirectoryName(GetThisFilePath())!;
+        var repositoryRoot = Directory.GetParent(testDirectory)!.FullName;
+
+        return Path.Combine([repositoryRoot, .. pathParts]);
+    }
+
+    private static string GetThisFilePath([CallerFilePath] string path = "") => path;
 }

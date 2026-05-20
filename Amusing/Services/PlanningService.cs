@@ -418,6 +418,58 @@ public class PlanningService(GenericDataService dataService)
     }
     #endregion
 
+    #region Volunteer overview
+    public Task<List<PlanningVolunteerOverviewRow>> GetPlanningVolunteerOverviewByVolunteerAsync(int festivalId)
+    {
+        var parameters = new Dictionary<string, object> { { "@FestivalId", festivalId } };
+
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetPlanningVolunteerOverviewByVolunteer,
+            reader => new PlanningVolunteerOverviewRow
+            {
+                PersonId = reader.GetMyInt("PersonId"),
+                Volunteer = reader.GetMyString("Volunteer"),
+                Contact = reader.GetMyString("Contact"),
+                StartTime = reader.GetMyTime("StartTime"),
+                EndTime = reader.GetMyTime("EndTime"),
+                Description = reader.GetMyString("Description"),
+                Fixed = reader.GetMyString("Fixed")
+            }, parameters);
+    }
+
+    public Task<List<PlanningVolunteerOverviewRow>> GetPlanningVolunteerOverviewByTaskAsync(int festivalId)
+    {
+        var parameters = new Dictionary<string, object> { { "@FestivalId", festivalId } };
+
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetPlanningVolunteerOverviewByTask,
+            reader => new PlanningVolunteerOverviewRow
+            {
+                GroupName = reader.GetMyString("GroupName"),
+                Volunteer = reader.GetMyString("Volunteer"),
+                StartTime = reader.GetMyTime("StartTime"),
+                EndTime = reader.GetMyTime("EndTime"),
+                Fixed = reader.GetMyString("Fixed")
+            }, parameters);
+    }
+
+    public Task<List<PlanningVolunteerOverviewRow>> GetPlanningVolunteerOverviewByStageAsync(int festivalId)
+    {
+        var parameters = new Dictionary<string, object> { { "@FestivalId", festivalId } };
+
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetPlanningVolunteerOverviewByStage,
+            reader => new PlanningVolunteerOverviewRow
+            {
+                GroupName = reader.GetMyString("GroupName"),
+                Volunteer = reader.GetMyString("Volunteer"),
+                StartTime = reader.GetMyTime("StartTime"),
+                EndTime = reader.GetMyTime("EndTime"),
+                Fixed = reader.GetMyString("Fixed")
+            }, parameters);
+    }
+    #endregion
+
     #region Planned Performances
     public Task<List<StagePerformanceModel>> GetStagePerformancesAsync(int festivalId)
     {
