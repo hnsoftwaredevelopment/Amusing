@@ -15,8 +15,15 @@
     <div class="mb-3" style="max-width: 300px;">
         <InputText @bind-Value="loginModel.Username" placeholder="Gebruikersnaam" class="form-control" />
     </div>
-    <div class="mb-3" style="max-width: 300px;">
-        <InputText @bind-Value="loginModel.Password" placeholder="Wachtwoord" type="password" class="form-control" />
+    <div class="mb-3 login-password-field">
+        <InputText @bind-Value="loginModel.Password" placeholder="Wachtwoord" type="@PasswordInputType" class="form-control login-password-field__input" />
+        <button class="login-password-field__toggle"
+                type="button"
+                title="@PasswordToggleTitle"
+                aria-label="@PasswordToggleTitle"
+                @onclick="TogglePasswordVisibility">
+            <span class="@PasswordToggleIcon" aria-hidden="true"></span>
+        </button>
     </div>
     <button class="btn btn-primary" type="submit">Inloggen</button>
 </EditForm>
@@ -30,6 +37,16 @@
 {
     private LoginModel loginModel = new();
     private string ErrorMessage = "";
+    private bool IsPasswordVisible;
+
+    private string PasswordInputType => IsPasswordVisible ? "text" : "password";
+    private string PasswordToggleIcon => IsPasswordVisible ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
+    private string PasswordToggleTitle => IsPasswordVisible ? "Wachtwoord verbergen" : "Wachtwoord tonen";
+
+    private void TogglePasswordVisibility()
+    {
+        IsPasswordVisible = !IsPasswordVisible;
+    }
 
     private async Task HandleLogin()
     {

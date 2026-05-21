@@ -27,13 +27,13 @@
 }
 else
 {
-	<div class="page-container" style="display:flex; flex-direction:column; height:88vh; padding-top:1rem; overflow:hidden;">
-		<div class="groupbox top-info" style="flex:0 0 auto;">
+	<div class="page-container mail-template-page">
+		<div class="groupbox top-info">
 			<div class="groupbox-header">Template informatie</div>
-			<div class="groupbox-content">
+			<div class="groupbox-content top-info-content">
 				@if ( TemplatesList.Any() )
 				{
-					<div class="inline-row">
+					<div class="inline-row template-selection-row">
 						<SfDropDownList TValue="uint?" TItem="TemplatesListModel"
 										DataSource="@TemplatesList"
 										Value="SelectedTemplatesListId"
@@ -41,7 +41,7 @@ else
 										Placeholder="Selecteer sjabloon"
 										CssClass="e-multi-column"
 										FloatLabelType="FloatLabelType.Always"
-										Width="40%"
+										Width="42%"
 										PopupWidth="800px">
 							<DropDownListFieldSettings Value="TemplateId" Text="TemplateName"></DropDownListFieldSettings>
 							<DropDownListTemplates TItem="TemplatesListModel">
@@ -59,7 +59,7 @@ else
 
 						<SfComboBox TValue="uint?" TItem="RecipientListModel"
 									DataSource="@RecipientsList"
-									Width="30%" FloatLabelType="FloatLabelType.Always"
+									Width="32%" FloatLabelType="FloatLabelType.Always"
 									Value="RecipientListId"
 									ValueChanged="@(async ( uint? id ) => await OnRecipientListChanged( id ))"
 									Placeholder="Ontvangerslijst">
@@ -67,65 +67,16 @@ else
 						</SfComboBox>
 					</div>
 				}
-				<div class="groupbox-spacer"></div>
-				<div>
-					<SfTextBox Placeholder="Sjabloonnaam" FloatLabelType="FloatLabelType.Always" Width="500px" @bind-Value="_selectedTemplatesList.TemplateName" />
-				</div>
-				<div class="inline-row">
+				<div class="inline-row template-detail-row">
+					<SfTextBox Placeholder="Sjabloonnaam" FloatLabelType="FloatLabelType.Always" Width="42%" @bind-Value="_selectedTemplatesList.TemplateName" />
 					<SfTextBox Placeholder="Aangemaakt" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="_selectedTemplatesList.TemplateCreated" />
 					<SfTextBox Placeholder="Laatste wijziging" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="_selectedTemplatesList.TemplateChanged" />
 				</div>
 			</div>
 		</div>
-		<div class="spacer-medium"></div>
-		<div class="groupbox rte-section">
-			<div class="groupbox-header">E-Mail sjabloon</div>
-			<div class="groupbox-content">
-
-				<SfAutoComplete TValue="string" TItem="string"
-								@ref="_subjectAuto"
-								@bind-Value="_selectedTemplatesList.TemplateSubject"
-								Placeholder="Onderwerp"
-								AllowFiltering="true"
-								AllowCustom="true"
-								DataSource="@AvailableFields"
-								SuggestionCount="10"
-								Width="600px"
-								HtmlAttributes="@(new Dictionary<string, object> { { "id", "subjectAutoInput" } })">
-					<AutoCompleteEvents TValue="string" TItem="string"
-										Filtering="OnFiltering"
-										OnValueSelect="OnValueSelect" />
-				</SfAutoComplete>
-
-				<div class="rte-scroll">
-					@if (_showRTE)
-					{
-						<Syncfusion.Blazor.RichTextEditor.SfRichTextEditor 
-							@ref="_rte"
-							ID="rteContent" 
-							EditorMode="EditorMode.HTML"
-							Width="100%"
-							Height="100%"
-							Placeholder="Beschrijving" 
-							@bind-Value="_selectedTemplatesList.TemplateContent" >
-
-							<RichTextEditorImageSettings SaveFormat="SaveFormat.Base64" />
-
-							<RichTextEditorEvents 
-								SlashMenuItemSelecting="OnSlashMenuItemSelect" />
-
-							<Syncfusion.Blazor.RichTextEditor.RichTextEditorToolbarSettings 
-								Items="@_rteToolbarItems"
-								EnableFloating="true">
-							</Syncfusion.Blazor.RichTextEditor.RichTextEditorToolbarSettings>
-						</Syncfusion.Blazor.RichTextEditor.SfRichTextEditor>                      
-					}
-				</div>
-			</div>
-		</div>
 
 		<!-- Toolbar -->
-		<div style="flex:0 0 auto; margin-top:0.5rem;">
+		<div class="mail-template-toolbar">
 			@if ( showSavedMessage )
 			{
 				<div class="toast-message">
@@ -182,6 +133,52 @@ else
 				</ToolbarItems>
 			</SfToolbar>
 		</div>
+
+		<div class="groupbox rte-section">
+			<div class="groupbox-header">E-Mail sjabloon</div>
+			<div class="groupbox-content rte-content">
+
+				<SfAutoComplete TValue="string" TItem="string"
+								@ref="_subjectAuto"
+								@bind-Value="_selectedTemplatesList.TemplateSubject"
+								Placeholder="Onderwerp"
+								AllowFiltering="true"
+								AllowCustom="true"
+								DataSource="@AvailableFields"
+								SuggestionCount="10"
+								Width="600px"
+								HtmlAttributes="@(new Dictionary<string, object> { { "id", "subjectAutoInput" } })">
+					<AutoCompleteEvents TValue="string" TItem="string"
+										Filtering="OnFiltering"
+										OnValueSelect="OnValueSelect" />
+				</SfAutoComplete>
+
+				<div class="rte-scroll">
+					@if (_showRTE)
+					{
+						<Syncfusion.Blazor.RichTextEditor.SfRichTextEditor
+							@ref="_rte"
+							ID="rteContent"
+							EditorMode="EditorMode.HTML"
+							Width="100%"
+							Height="100%"
+							Placeholder="Beschrijving"
+							@bind-Value="_selectedTemplatesList.TemplateContent" >
+
+							<RichTextEditorImageSettings SaveFormat="SaveFormat.Base64" />
+
+							<RichTextEditorEvents
+								SlashMenuItemSelecting="OnSlashMenuItemSelect" />
+
+							<Syncfusion.Blazor.RichTextEditor.RichTextEditorToolbarSettings
+								Items="@_rteToolbarItems"
+								EnableFloating="true">
+							</Syncfusion.Blazor.RichTextEditor.RichTextEditorToolbarSettings>
+						</Syncfusion.Blazor.RichTextEditor.SfRichTextEditor>
+					}
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<SfDialog @bind-Visible="_showPreviewDialog" Width="1100px">
@@ -203,13 +200,12 @@ else
 			        </SfButton>
 
 					<!-- DropDown for manualy selecting a recipient -->
-					<SfDropDownList TValue="ExpandoObject" Width=500px
-						TItem="ExpandoObject"
-						DataSource="_recipientData"
+					<SfDropDownList TValue="string" Width="500px"
+						TItem="string"
+						DataSource="_previewRecipients"
 						Placeholder="Select recipient"
-						@bind-Value="SelectedRecipient"
-						ValueChange="OnRecipientChange">
-						<DropDownListFieldSettings Text="Email" Value="this"/>
+						Value="_selectedPreviewRecipient"
+						ValueChanged="OnRecipientChange">
 					</SfDropDownList>
 
 					<!-- Next -->
@@ -247,11 +243,11 @@ else
 			<Content>
 				<div style="display:flex;gap:20px;align-items:flex-end">
 				<SfTooltip Content="Vul hier het e-mailadres in waar alle testmails naartoe gestuurd moeten worden" Position="Position.BottomCenter">
-					<SfTextBox 
+					<SfTextBox
 						Placeholder="E-mail adres"
-						FloatLabelType="FloatLabelType.Always" 
+						FloatLabelType="FloatLabelType.Always"
 						Input = "@OnEmailInput"
-						Width="375px" 
+						Width="375px"
 						@bind-Value="_testEmailAddress">
 					</SfTextBox>
 				</SfTooltip>

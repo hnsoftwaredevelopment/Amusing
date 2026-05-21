@@ -675,6 +675,14 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
         if (_selectedTemplatesList?.RecipientListId == null)
             return;
 
+        if (string.IsNullOrWhiteSpace(_currentRecipientQuery))
+        {
+            await LoadRecipientDataAsync(_selectedTemplatesList.RecipientListId);
+        }
+
+        if (string.IsNullOrWhiteSpace(_currentRecipientQuery))
+            return;
+
         //Convert Dutch labels to Englisch field keys.
         string? _tempSubject = _selectedTemplatesList.TemplateSubject;
         string _tempContent = _selectedTemplatesList.TemplateContent ?? string.Empty;
@@ -684,15 +692,17 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
         if (!_recipientData.Any())
             return;
 
+        _currentRecipientIndex = 0;
+        SelectedRecipient = _recipientData[0];
+
         _previewRecipients = [ .. _recipientData
-            .Select( r => ( r as IDictionary<string, object> )? [ "Email" ]?.ToString() ?? string.Empty )
-            .Where( e => !string.IsNullOrEmpty( e ) ) ];
+            .Select(GetRecipientEmail)
+            .Where(e => !string.IsNullOrWhiteSpace(e)) ];
 
-        _selectedPreviewRecipient = _previewRecipients.First();
+        _selectedPreviewRecipient = GetRecipientEmail(SelectedRecipient);
 
-        if (_recipientData?.Count > 0)
+        if (SelectedRecipient is not null)
         {
-            SelectedRecipient = _recipientData[0];
             UpdatePreview(SelectedRecipient);
         }
 
@@ -811,13 +821,36 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
         _previewBody = bodyTemplate;
     }
 
-    private void OnRecipientChange(object? newValue)
+    private static string GetRecipientEmail(ExpandoObject? recipient)
     {
-        if (newValue is ExpandoObject recipient)
+        if (recipient is not IDictionary<string, object> data)
+            return string.Empty;
+
+        return data.TryGetValue("Email", out var email)
+            ? email?.ToString() ?? string.Empty
+            : string.Empty;
+    }
+
+    private void SelectPreviewRecipient(int index)
+    {
+        if (_recipientData == null || index < 0 || index >= _recipientData.Count)
+            return;
+
+        _currentRecipientIndex = index;
+        SelectedRecipient = _recipientData[index];
+        _selectedPreviewRecipient = GetRecipientEmail(SelectedRecipient);
+        UpdatePreview(SelectedRecipient);
+    }
+
+    private void OnRecipientChange(string? email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return;
+
+        int index = _recipientData.FindIndex(r => string.Equals(GetRecipientEmail(r), email, StringComparison.OrdinalIgnoreCase));
+        if (index >= 0)
         {
-            SelectedRecipient = recipient;
-            _currentRecipientIndex = _recipientData.IndexOf(recipient);
-            UpdatePreview(SelectedRecipient);
+            SelectPreviewRecipient(index);
         }
     }
 
@@ -826,11 +859,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
         if (_recipientData == null || !_recipientData.Any())
             return;
 
-        if (_currentRecipientIndex > 0)
-            _currentRecipientIndex--;
-
-        SelectedRecipient = _recipientData[0];
-        UpdatePreview(SelectedRecipient);
+        SelectPreviewRecipient(0);
     }
 
     private void PreviousRecipient()
@@ -839,10 +868,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             return;
 
         if (_currentRecipientIndex > 0)
-            _currentRecipientIndex--;
-
-        SelectedRecipient = _recipientData[_currentRecipientIndex];
-        UpdatePreview(SelectedRecipient);
+            SelectPreviewRecipient(_currentRecipientIndex - 1);
     }
 
     private void NextRecipient()
@@ -851,18 +877,14 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             return;
 
         if (_currentRecipientIndex < _recipientData.Count - 1)
-            _currentRecipientIndex++;
-
-        SelectedRecipient = _recipientData[_currentRecipientIndex];
-        UpdatePreview(SelectedRecipient);
+            SelectPreviewRecipient(_currentRecipientIndex + 1);
     }
 
     private void LastRecipient()
     {
         if (_recipientData != null && _recipientData.Count > 0)
         {
-            SelectedRecipient = _recipientData[^1]; // ^1 = laatste element
-            UpdatePreview(SelectedRecipient);
+            SelectPreviewRecipient(_recipientData.Count - 1);
         }
     }
 

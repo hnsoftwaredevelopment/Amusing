@@ -161,6 +161,38 @@ a, .btn-link {
     font-family: Consolas, monospace;
 }
 
+.login-password-field {
+    max-width: 300px;
+    position: relative;
+}
+
+.login-password-field__input {
+    padding-right: 42px;
+}
+
+.login-password-field__toggle {
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 4px 6px;
+    line-height: 1;
+}
+
+.login-password-field__toggle:hover,
+.login-password-field__toggle:focus {
+    color: #1b6ec2;
+}
+
+.login-password-field__toggle:focus-visible {
+    outline: 2px solid #258cfb;
+    outline-offset: 2px;
+}
+
 .group-registrations-layout {
     display: flex;
     flex-direction: column;

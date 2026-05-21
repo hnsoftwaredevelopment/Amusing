@@ -2,23 +2,27 @@
 .page-container {
     display: flex;
     flex-direction: column;
-    height: 100vh; /* vul het scherm, geen outer scrollbar */
-    overflow: hidden; /* outer page mag niet scrollen */
-    background: #e9f0f6; /* achtergrond rondom groupboxes (pas aan) */
+    height: 100vh;
+    overflow: hidden;
+    background: #e9f0f6;
     padding: 0.75rem;
     box-sizing: border-box;
 }
 
-/* Algemene groupbox styling (voorbeeld) */
+.mail-template-page {
+    height: 88vh;
+    padding-top: 0.75rem;
+    gap: 0.4rem;
+}
+
 .groupbox {
     position: relative;
     background: #e9f0f6;
     border: 1px solid #ccc;
     border-radius: 8px;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
-    padding: 0.75rem;
-    margin-bottom: 1rem;
     box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+    padding: 0.55rem 0.65rem 0.65rem;
+    margin-bottom: 0;
     box-sizing: border-box;
 }
 
@@ -38,6 +42,38 @@
     flex: 0 0 auto;
 }
 
+.top-info-content {
+    gap: 0.25rem;
+    padding-top: 0.1rem;
+}
+
+.template-selection-row,
+.template-detail-row {
+    min-height: 34px;
+}
+
+.template-detail-row {
+    align-items: flex-start;
+}
+
+.mail-template-toolbar {
+    flex: 0 0 auto;
+}
+
+.mail-template-toolbar .e-toolbar {
+    min-height: 36px;
+}
+
+.mail-template-toolbar .custom-toolbar-btn {
+    height: 32px;
+    min-width: 36px;
+    padding: 2px 6px;
+}
+
+.mail-template-toolbar .icon {
+    max-height: 26px;
+}
+
 /* RTE section: neemt de overgebleven ruimte.
    min-height:0 is essentieel zodat child overflow werkt */
 .rte-section {
@@ -45,6 +81,10 @@
     display: flex;
     flex-direction: column;
     min-height: 0; /* CRUCIAAL voor internal scrollbars */
+}
+
+.rte-content {
+    gap: 0.35rem;
 }
 
 /* Content binnen groupbox (fix voor layout) */
@@ -61,6 +101,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem; /* kleine ruimte tussen de velden */
+    flex-wrap: wrap;
 }
 
 .inline-row > * {
@@ -80,6 +121,12 @@
     height: 100%;
     box-sizing: border-box;
     background: transparent; /* laat groupbox achtergrond zichtbaar zijn */
+}
+
+.rte-scroll .e-rte-content,
+.rte-scroll .e-source-content {
+    min-height: 0;
+    overflow-y: auto;
 }
 
 /* Maak toolbar sticky binnen de RTE-container */

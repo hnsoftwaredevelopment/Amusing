@@ -45,3 +45,41 @@
 .e-toast .e-toast-title {
     font-weight: bold;
 }
+
+.selected-list-grid {
+    overflow-x: auto;
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+.mailing-recipients-page .scrollable-content {
+    background-color: transparent;
+    flex: 0 0 auto;
+    overflow-y: visible;
+    padding: 0;
+}
+
+.selected-list-grid-header {
+    align-items: baseline;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    width: 870px;
+}
+
+.selected-list-grid-header h5 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.selected-list-count {
+    color: #555;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.export-grid-container {
+    display: none;
+}

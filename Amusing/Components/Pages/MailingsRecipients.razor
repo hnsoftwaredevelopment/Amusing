@@ -28,7 +28,7 @@
 }
 else
 {
-    <div class="page-container">
+    <div class="page-container mailing-recipients-page">
         <!-- Static detail fields-->
         <div class="fixed-header">
             <SfRadioButton Label="Groepen" Name="source" Value="groups" TChecked="string" @onchange="OnSourceChange" @bind-Checked="SourceChecked"></SfRadioButton>
@@ -76,13 +76,13 @@ else
                         </QueryBuilderTemplates>
                     </QueryBuilderColumn>
 
-                    <QueryBuilderColumn 
+                    <QueryBuilderColumn
                         Field="IsPaid"
-                        Label="Groep heeft betaald" 
+                        Label="Groep heeft betaald"
                         Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
                         Operators="EqualOnlyOperator" />
 
-                    <QueryBuilderColumn 
+                    <QueryBuilderColumn
                         Field="IsSubscribed"
                         Label="Groep is ingeschreven"
                         Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
@@ -93,27 +93,27 @@ else
                         Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
                         Operators="EqualOnlyOperator" />
 
-                    <QueryBuilderColumn Field="IsCanceled" 
-                        Label="Groep is afgehaakt" 
-                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
-                        Operators="EqualOnlyOperator" />
-
-                    <QueryBuilderColumn 
-                        Field="Dressingroom" 
-                        Label="Groep wil kleedkamer" 
+                    <QueryBuilderColumn Field="IsCanceled"
+                        Label="Groep is afgehaakt"
                         Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
                         Operators="EqualOnlyOperator" />
 
-                    <QueryBuilderColumn 
-                        Field="Jury" 
-                        Label="Groep wil beoordeling" 
-                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
+                    <QueryBuilderColumn
+                        Field="Dressingroom"
+                        Label="Groep wil kleedkamer"
+                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
                         Operators="EqualOnlyOperator" />
 
-                    <QueryBuilderColumn 
-                        Field="Singers" 
-                        Label="Aantal zangers" 
-                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Number" 
+                    <QueryBuilderColumn
+                        Field="Jury"
+                        Label="Groep wil beoordeling"
+                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
+                        Operators="EqualOnlyOperator" />
+
+                    <QueryBuilderColumn
+                        Field="Singers"
+                        Label="Aantal zangers"
+                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Number"
                         Operators="NumberOperator" />
 
                     <QueryBuilderColumn Field="Role"
@@ -136,10 +136,10 @@ else
                             </QueryBuilderTemplates>
                         </QueryBuilderColumn>
 
-                    <QueryBuilderColumn 
-                        Field="Infomailing" 
-                        Label="Persoon wil Infomailing" 
-                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean" 
+                    <QueryBuilderColumn
+                        Field="Infomailing"
+                        Label="Persoon wil Infomailing"
+                        Type="Syncfusion.Blazor.QueryBuilder.ColumnType.Boolean"
                         Operators="EqualOnlyOperator" />
 
                     <QueryBuilderColumn Field="Volunteer"
@@ -234,6 +234,9 @@ else
 
         <!-- Scrollable area for main datagrid -->
         <div class="scrollable-content">
+            <div class="selected-list-grid-header">
+                <h5>Selecteer een Ontvangerslijst</h5>
+            </div>
             <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px;">
                 <SfGrid @ref="GridRef"
                         TValue="RecipientListModel"
@@ -257,32 +260,54 @@ else
                 </SfGrid>
             </div>
         </div>
+
+        <div class="spacer-small"></div>
+
+        <div class="selected-list-grid">
+            <div class="selected-list-grid-header">
+                <h5>E-mail adressen in de geselecteerde lijst</h5>
+                <span class="selected-list-count">Er staan @SelectedListRowCount e-mail adressen in deze lijst</span>
+            </div>
+            <SfGrid @ref="SelectedListGridRef"
+                    TValue="ExpandoObject"
+                    AllowExcelExport="true"
+                    AllowPdfExport="true"
+                    DataSource="@DynamicRecipients"
+                    Width="870px"
+                    Height="300px"
+                    AllowSorting="true"
+                    AllowResizing="true">
+                <GridColumns>
+                    <GridColumn Field="Name" HeaderText="Volledige naam" TextAlign="TextAlign.Left" Width="300px"></GridColumn>
+                    <GridColumn Field="GroupName" HeaderText="Groep" TextAlign="TextAlign.Left" Width="300px"></GridColumn>
+                    <GridColumn Field="Email" HeaderText="E-Mail" TextAlign="TextAlign.Left" Width="270px"></GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </div>
     </div>
-    <SfToast 
-        @ref="ToastObj" 
-        TimeOut="3000" 
-        ShowCloseButton="true" 
+    <SfToast
+        @ref="ToastObj"
+        TimeOut="3000"
+        ShowCloseButton="true"
         NewestOnTop="true">
         <ToastPosition X="Center" Y="Top"/>
         <ToastEvents Closed="@OnToastClose"></ToastEvents>
     </SfToast>
-    
-    <!-- Hidden grid used only for export -->
-    <SfGrid @ref="HiddenGridRef"
-            TValue="ExpandoObject"
-            AllowExcelExport="true"
-			AllowPdfExport="true"
-            DataSource="@DynamicRecipients"
-            Width="800px" Height="400px">
-        <GridColumns>
-            @if ( DynamicRecipients.Any() )
-            {
-                var firstRow = (IDictionary<string, object?>)DynamicRecipients.First();
-                foreach ( var key in firstRow.Keys )
+
+    <div class="export-grid-container">
+        <SfGrid @ref="ExportGridRef"
+                TValue="ExpandoObject"
+                AllowExcelExport="true"
+                AllowPdfExport="true"
+                DataSource="@DynamicExportRecipients"
+                Width="1600px"
+                Height="300px">
+            <GridColumns>
+                @foreach ( var column in ExportColumns )
                 {
-                    <GridColumn Field="@key" HeaderText="@TranslateToDutch( key )" TextAlign="TextAlign.Left"></GridColumn>
+                    <GridColumn Field="@column.Field" HeaderText="@column.HeaderText" TextAlign="TextAlign.Left"></GridColumn>
                 }
-            }
-        </GridColumns>
-    </SfGrid>
+            </GridColumns>
+        </SfGrid>
+    </div>
 }

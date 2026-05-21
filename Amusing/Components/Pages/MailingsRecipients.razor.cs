@@ -30,11 +30,12 @@ public class MailingsRecipientsBase : ComponentBase
     protected bool IsLoading = false;
     protected bool RoleSelected = false;
     protected bool rulesPending;
-    protected bool ColumnsBuilt = false;
     protected string? pendingRulesJson;
     protected EditContext? editContext;
     protected int VisibleRowCount = 0;
+    protected int SelectedListRowCount = 0;
     protected List<ExpandoObject> DynamicRecipients { get; set; } = new List<ExpandoObject>();
+    protected List<ExpandoObject> DynamicExportRecipients { get; set; } = new List<ExpandoObject>();
     protected List<IDictionary<string, object>> DynamicRecipientsDict { get; set; } = new();
     protected List<RecipientListFilterModel> RecipientsFilterList { get; set; } = new List<RecipientListFilterModel>();
     protected List<RecipientListModel> RecipientsList { get; set; } = [];
@@ -56,7 +57,8 @@ public class MailingsRecipientsBase : ComponentBase
     protected RecipientListModel? SelectedRecipientsList;
     protected SfGrid<RecipientListFilterModel>? GridRefReceipts;
     protected SfGrid<RecipientListModel>? GridRef;
-    protected SfGrid<ExpandoObject>? HiddenGridRef;
+    protected SfGrid<ExpandoObject>? SelectedListGridRef;
+    protected SfGrid<ExpandoObject>? ExportGridRef;
     protected SfQueryBuilder<RuleModel>? personsQueryBuilder;
     protected SfQueryBuilder<RuleModel>? groupsQueryBuilder;
     protected SfToast? ToastObj { get; set; }
@@ -71,6 +73,29 @@ public class MailingsRecipientsBase : ComponentBase
     protected string OldJson = string.Empty;
     protected RenderFragment<bool?> BooleanTemplate => (value) => builder => builder.AddContent(0, value == true ? "Ja" : "Nee");
     protected string[] LastSelectedFestivals = Array.Empty<string>(); // For autoselect the Festivals for Volunteers
+    protected static readonly List<ExportColumnDefinition> ExportColumns =
+    [
+        new("Name", "Volledige naam"),
+        new("GroupName", "Groep"),
+        new("Email", "E-mail"),
+        new("Firstname", "Voornaam"),
+        new("Lastname", "Achternaam"),
+        new("Infomailing", "Infomailing"),
+        new("Active", "Aktief"),
+        new("Role", "Rol"),
+        new("Festival", "Editie"),
+        new("StageType", "Podiumtype"),
+        new("Subscribed", "Ingeschreven"),
+        new("Canceled", "Afgehaakt"),
+        new("Paid", "Betaald"),
+        new("Confirmed", "Bevestigd"),
+        new("Dressingroom", "Kleedkamer"),
+        new("SingAlong", "SingAlong"),
+        new("AcapellaBattle", "AcapellaBattle"),
+        new("Judgement", "Beoordeling"),
+        new("Singers", "Zangers"),
+        new("Volunteer", "Vrijwilliger")
+    ];
 
     protected override async Task OnInitializedAsync()
     {
@@ -174,6 +199,7 @@ public class MailingsRecipientsBase : ComponentBase
             //queryBuilder.RuleAdded += ( sender, args ) => FixInFields( new [ ] { args.Rule } );
         }
 
+        await GenerateMailList();
         await InvokeAsync(StateHasChanged);
     }
 
@@ -739,9 +765,9 @@ public class MailingsRecipientsBase : ComponentBase
 
         try
         {
-            if (HiddenGridRef != null)
+            if (ExportGridRef != null)
             {
-                await HiddenGridRef.ExportToExcelAsync(exportProps);
+                await ExportGridRef.ExportToExcelAsync(exportProps);
             }
 
             await ShowToast($"Export naar Excel ({FileName}) voltooid!", "success");
@@ -766,9 +792,9 @@ public class MailingsRecipientsBase : ComponentBase
 
         try
         {
-            if (HiddenGridRef != null)
+            if (ExportGridRef != null)
             {
-                await HiddenGridRef.ExportToCsvAsync(exportProps);
+                await ExportGridRef.ExportToCsvAsync(exportProps);
             }
 
             await ShowToast($"Export naar CSV ({FileName}) voltooid!", "success");
@@ -796,9 +822,9 @@ public class MailingsRecipientsBase : ComponentBase
 
         try
         {
-            if (HiddenGridRef != null)
+            if (ExportGridRef != null)
             {
-                await HiddenGridRef.ExportToPdfAsync(exportProps);
+                await ExportGridRef.ExportToPdfAsync(exportProps);
             }
 
             await ShowToast($"Export naar PDF ({FileName}) voltooid!", "success");
@@ -813,7 +839,7 @@ public class MailingsRecipientsBase : ComponentBase
     {
         await GenerateMailList();
 
-        if (HiddenGridRef == null || DynamicRecipients == null || DynamicRecipients.Count == 0)
+        if (ExportGridRef == null || DynamicExportRecipients == null || DynamicExportRecipients.Count == 0)
         {
             await ShowToast("Geen gegevens beschikbaar om te exporteren.", "warning");
             return false;
@@ -825,6 +851,15 @@ public class MailingsRecipientsBase : ComponentBase
     protected async Task GenerateMailList()
     {
         RuleModel? rules = personsQueryBuilder?.GetRules();
+        if (rules == null)
+        {
+            DynamicRecipients = [];
+            DynamicExportRecipients = [];
+            SelectedListRowCount = 0;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
         ForceAndCondition(rules);
 
         string fullQuery = QueryBuilderHelper.DetermineQueryFromRules(rules, SourceChecked);
@@ -865,14 +900,64 @@ public class MailingsRecipientsBase : ComponentBase
             }
         }
 
-        if (!ColumnsBuilt && DynamicRecipients.Count != 0)
+        DynamicRecipients = result.Select(ToSelectedListRecipient).ToList();
+        DynamicExportRecipients = result.Select(ToExportRecipient).ToList();
+        SelectedListRowCount = DynamicRecipients.Count;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected static ExpandoObject ToSelectedListRecipient(ExpandoObject row)
+    {
+        var source = (IDictionary<string, object?>)row;
+        IDictionary<string, object?> recipient = new ExpandoObject();
+
+        recipient["Name"] = GetFirstValue(source, "Name", "FullName") ?? string.Empty;
+        recipient["GroupName"] = GetFirstValue(source, "GroupName") ?? string.Empty;
+        recipient["Email"] = GetFirstValue(source, "Email", "PersonEmail", "GroupEmail") ?? string.Empty;
+
+        return (ExpandoObject)recipient;
+    }
+
+    protected static ExpandoObject ToExportRecipient(ExpandoObject row)
+    {
+        var source = (IDictionary<string, object?>)row;
+        IDictionary<string, object?> recipient = new ExpandoObject();
+
+        recipient["Name"] = GetFirstValue(source, "Name", "FullName") ?? string.Empty;
+        recipient["GroupName"] = GetFirstValue(source, "GroupName") ?? string.Empty;
+        recipient["Email"] = GetFirstValue(source, "Email", "PersonEmail", "GroupEmail") ?? string.Empty;
+        recipient["Firstname"] = GetFirstValue(source, "Firstname", "FirstName") ?? string.Empty;
+        recipient["Lastname"] = GetFirstValue(source, "Lastname", "LastName") ?? string.Empty;
+        recipient["Infomailing"] = GetFirstValue(source, "Infomailing") ?? string.Empty;
+        recipient["Active"] = GetFirstValue(source, "Active") ?? string.Empty;
+        recipient["Role"] = GetFirstValue(source, "Role", "ROLE") ?? string.Empty;
+        recipient["Festival"] = GetFirstValue(source, "Festival") ?? string.Empty;
+        recipient["StageType"] = GetFirstValue(source, "StageType") ?? string.Empty;
+        recipient["Subscribed"] = GetFirstValue(source, "Subscribed") ?? string.Empty;
+        recipient["Canceled"] = GetFirstValue(source, "Canceled") ?? string.Empty;
+        recipient["Paid"] = GetFirstValue(source, "Paid") ?? string.Empty;
+        recipient["Confirmed"] = GetFirstValue(source, "Confirmed") ?? string.Empty;
+        recipient["Dressingroom"] = GetFirstValue(source, "Dressingroom", "Kleedkamer") ?? string.Empty;
+        recipient["SingAlong"] = GetFirstValue(source, "SingAlong") ?? string.Empty;
+        recipient["AcapellaBattle"] = GetFirstValue(source, "AcapellaBattle") ?? string.Empty;
+        recipient["Judgement"] = GetFirstValue(source, "Judgement", "Beoordeling") ?? string.Empty;
+        recipient["Singers"] = GetFirstValue(source, "Singers") ?? string.Empty;
+        recipient["Volunteer"] = GetFirstValue(source, "Volunteer", "Vrijwilliger") ?? string.Empty;
+
+        return (ExpandoObject)recipient;
+    }
+
+    protected static object? GetFirstValue(IDictionary<string, object?> row, params string[] fields)
+    {
+        foreach (string field in fields)
         {
-            BuildDynamicColumns(DynamicRecipients);
-            ColumnsBuilt = true;
+            if (row.TryGetValue(field, out object? value) && value != null)
+            {
+                return value;
+            }
         }
 
-        DynamicRecipients = result;
-        await InvokeAsync(StateHasChanged);
+        return null;
     }
 
     protected string TranslateToDutch(string field)
@@ -897,37 +982,8 @@ public class MailingsRecipientsBase : ComponentBase
             "Paid" => "Betaald",
             "Confirmed" => "Bevestigd",
             "Singers" => "Zangers",
-            "PersonId" => "PersoonId",
             _ => field
         };
-    }
-
-    protected void BuildDynamicColumns(List<ExpandoObject> data)
-    {
-        if (data == null || !data.Any() || HiddenGridRef == null)
-        {
-            return;
-        }
-
-        HiddenGridRef.Columns ??= [];
-        HiddenGridRef.Columns?.Clear();
-
-        if (data.First() is not IDictionary<string, object?> firstRow)
-        {
-            return;
-        }
-
-        foreach (KeyValuePair<string, object?> key in firstRow)
-        {
-            HiddenGridRef.Columns.Add(new GridColumn
-            {
-                Field = key.Key,
-                HeaderText = TranslateToDutch(key.Key),
-                TextAlign = TextAlign.Left
-            });
-        }
-
-        ColumnsBuilt = true;
     }
 
     protected async Task ShowToast(string message, string type = "error")
@@ -963,4 +1019,6 @@ public class MailingsRecipientsBase : ComponentBase
         // Do something after the toast cloases
     }
     #endregion
+
+    protected record ExportColumnDefinition(string Field, string HeaderText);
 }
