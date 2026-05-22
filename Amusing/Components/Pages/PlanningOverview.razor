@@ -50,15 +50,6 @@
 					</button>
 				</div>
 			</div>
-			<SfToast @ref="ToastObj"
-					 TimeOut="3000"
-					 ShowCloseButton="true"
-					 NewestOnTop="true">
-				<ToastPosition X="Center" Y="Top" />
-				<ToastEvents Closed="@OnToastClose"></ToastEvents>
-			</SfToast>
-
-
 			<div class="row row3">
 				<div class="col left">
 					@if ( SelectedEditionId != null )

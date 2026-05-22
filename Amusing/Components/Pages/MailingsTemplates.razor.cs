@@ -158,6 +158,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
     [Inject] public MailingService MailingService { get; set; } = default!;
     [Inject] public LoggingService LoggingService { get; set; } = default!;
     [Inject] public IJSRuntime JSRuntime { get; set; } = default!;
+    [Inject] public ToastService ToastService { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -207,6 +208,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             await MailingService.UpdateTemplateQueryAsync(_selectedTemplatesList);
             string logMessage = $"<_userName> heeft het mailingsjabloon {_selectedTemplatesList.TemplateName} aangepast.";
             await LoggingService.WriteUserActionTemplateAsync( _selectedTemplatesList.TemplateId, "Mailing", "Sjablonen", "success", logMessage );
+            await ToastService.ShowSuccessAsync( $"De wijzigingen voor sjabloon {_selectedTemplatesList.TemplateName} zijn opgeslagen." );
         }
         else
         {
@@ -225,6 +227,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
             string logMessage = $"<_userName> heeft het mailingsjabloon {_selectedTemplatesList.TemplateName} toegevoegd.";
             await LoggingService.WriteUserActionTemplateAsync( savedId, "Mailing", "Sjablonen", "success", logMessage );
+            await ToastService.ShowSuccessAsync( $"Sjabloon {_selectedTemplatesList.TemplateName} is opgeslagen." );
         }
 
         showSavedMessage = true;
@@ -285,6 +288,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
         await MailingService.DeleteTemplateQueryAsync(_selectedTemplatesList.TemplateId);
         string logMessage = $"<_userName> heeft het mailingsjabloon {deletedTemplateName} verwijderd.";
         await LoggingService.WriteUserActionTemplateAsync( deletedTemplateId, "Mailing", "Sjablonen", "success", logMessage );
+        await ToastService.ShowSuccessAsync( $"Sjabloon {deletedTemplateName} is verwijderd." );
 
         // Refresh the list
         TemplatesList = await MailingService.GetMailTemplatesAsync();
@@ -767,6 +771,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             Debug.WriteLine($"Testmail(s) verzonden naar {_testEmailAddress}");
             string logMessage = $"<_userName> heeft een testmail verstuurd met sjabloon {_selectedTemplatesList.TemplateName} naar {_testEmailAddress}.";
             await LoggingService.WriteUserActionTemplateAsync( _selectedTemplatesList.TemplateId, "Mailing", "Sjablonen", "success", logMessage );
+            await ToastService.ShowSuccessAsync( $"Testmail voor sjabloon {_selectedTemplatesList.TemplateName} is verzonden naar {_testEmailAddress}." );
         }
         catch (Exception ex)
         {
@@ -780,6 +785,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
                 await LoggingService.WriteUserActionTemplateAsync( templateId, "Mailing", "Sjablonen", "unsuccessful", logMessage );
             else
                 await LoggingService.WriteUserActionAsync( "Mailing", "Sjablonen", "unsuccessful", logMessage );
+            await ToastService.ShowErrorAsync( $"Testmail voor sjabloon {templateName} kon niet worden verzonden." );
         }
     }
     #endregion
@@ -808,6 +814,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             Debug.WriteLine("Bulkmailing verzonden.");
             string logMessage = $"<_userName> heeft een mailing verstuurd met sjabloon {_selectedTemplatesList.TemplateName}.";
             await LoggingService.WriteUserActionTemplateAsync( _selectedTemplatesList.TemplateId, "Mailing", "Sjablonen", "success", logMessage );
+            await ToastService.ShowSuccessAsync( $"Mailing met sjabloon {_selectedTemplatesList.TemplateName} is verzonden." );
         }
         catch (Exception ex)
         {
@@ -819,6 +826,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
                 await LoggingService.WriteUserActionTemplateAsync( templateId, "Mailing", "Sjablonen", "unsuccessful", logMessage );
             else
                 await LoggingService.WriteUserActionAsync( "Mailing", "Sjablonen", "unsuccessful", logMessage );
+            await ToastService.ShowErrorAsync( $"Mailing met sjabloon {templateName} kon niet worden verzonden." );
         }
     }
 

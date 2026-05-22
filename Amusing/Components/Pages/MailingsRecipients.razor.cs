@@ -24,6 +24,7 @@ public class MailingsRecipientsBase : ComponentBase
     [Inject] protected LoggingService LoggingService { get; set; } = null!;
     [Inject] protected NavigationManager NavManager { get; set; } = null!;
     [Inject] protected IJSRuntime JS { get; set; } = null!;
+    [Inject] protected ToastService ToastService { get; set; } = null!;
 
     protected bool _initialLoadDone = false;
     protected bool FestivalSelected = false;
@@ -623,6 +624,7 @@ public class MailingsRecipientsBase : ComponentBase
             await MailingService.UpdateRecipientQueryAsync(SelectedRecipientsList);
             string logMessage = $"<_userName> heeft de ontvangerslijst {SelectedRecipientsList.ListName} aangepast.";
             await LoggingService.WriteUserActionRecipientListAsync( SelectedRecipientsList.ListId, "Mailing", "Ontvangerslijsten", "success", logMessage );
+            await ToastService.ShowSuccessAsync( $"De wijzigingen voor ontvangerslijst {SelectedRecipientsList.ListName} zijn opgeslagen." );
         }
         else
         {
@@ -647,6 +649,7 @@ public class MailingsRecipientsBase : ComponentBase
 
             string logMessage = $"<_userName> heeft de ontvangerslijst {SelectedRecipientsList?.ListName} toegevoegd.";
             await LoggingService.WriteUserActionRecipientListAsync( savedId, "Mailing", "Ontvangerslijsten", "success", logMessage );
+            await ToastService.ShowSuccessAsync( $"Ontvangerslijst {SelectedRecipientsList?.ListName} is opgeslagen." );
         }
     }
 
@@ -680,6 +683,7 @@ public class MailingsRecipientsBase : ComponentBase
         await MailingService.DeleteRecipientQueryAsync((uint)list.ListId);
         string logMessage = $"<_userName> heeft de ontvangerslijst {list.ListName} verwijderd.";
         await LoggingService.WriteUserActionRecipientListAsync( list.ListId, "Mailing", "Ontvangerslijsten", "success", logMessage );
+        await ToastService.ShowSuccessAsync( $"Ontvangerslijst {list.ListName} is verwijderd." );
 
         // Refresh the list
         RecipientsList = await MailingService.GetRecipientListsAsync();
@@ -773,12 +777,13 @@ public class MailingsRecipientsBase : ComponentBase
 
         try
         {
+            await ToastService.ShowExportStartedAsync(exportProps.FileName);
             if (ExportGridRef != null)
             {
                 await ExportGridRef.ExportToExcelAsync(exportProps);
             }
 
-            await ShowToast($"Export naar Excel ({FileName}) voltooid!", "success");
+            await ToastService.ShowExportCompletedAsync(exportProps.FileName, "Excel");
             await LogRecipientListExportAsync( "Excel", exportProps.FileName, "success" );
         }
         catch (Exception ex)
@@ -802,12 +807,13 @@ public class MailingsRecipientsBase : ComponentBase
 
         try
         {
+            await ToastService.ShowExportStartedAsync(exportProps.FileName);
             if (ExportGridRef != null)
             {
                 await ExportGridRef.ExportToCsvAsync(exportProps);
             }
 
-            await ShowToast($"Export naar CSV ({FileName}) voltooid!", "success");
+            await ToastService.ShowExportCompletedAsync(exportProps.FileName, "CSV");
             await LogRecipientListExportAsync( "CSV", exportProps.FileName, "success" );
         }
         catch (Exception ex)
@@ -834,12 +840,13 @@ public class MailingsRecipientsBase : ComponentBase
 
         try
         {
+            await ToastService.ShowExportStartedAsync(exportProps.FileName);
             if (ExportGridRef != null)
             {
                 await ExportGridRef.ExportToPdfAsync(exportProps);
             }
 
-            await ShowToast($"Export naar PDF ({FileName}) voltooid!", "success");
+            await ToastService.ShowExportCompletedAsync(exportProps.FileName, "PDF");
             await LogRecipientListExportAsync( "PDF", exportProps.FileName, "success" );
         }
         catch (Exception ex)

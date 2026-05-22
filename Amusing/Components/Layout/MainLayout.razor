@@ -1,5 +1,6 @@
 ﻿@inherits LayoutComponentBase
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@using Amusing.Components.Shared
 
 <div class="page">
     <div class="sidebar">
@@ -12,6 +13,7 @@
         </article>
     </main>
 </div>
+<ToastHost />
 <div id="blazor-error-ui">
     Er is een onverwachte fout opgetreden.
     <a href="" class="reload">Opnieuw laden</a>

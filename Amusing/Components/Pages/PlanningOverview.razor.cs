@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Notifications;
 
 namespace Amusing.Components.Pages;
 
@@ -19,6 +18,7 @@ public partial class PlanningOverview
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected EditionService EditionService { get; set; } = default!;
     [Inject] public IJSRuntime JS { get; set; } = default!;
+    [Inject] protected ToastService ToastService { get; set; } = default!;
 
     private string _message;
     private string SelectedEditionId { get; set; }
@@ -200,6 +200,7 @@ public partial class PlanningOverview
 
         var fileName = await ExportFilename(editionId, "xml");
 
+        await ToastService.ShowExportStartedAsync(fileName);
         var bytes = await PlanningService.ExportFullPlanningToXmlAsync(editionId);
 
         await JS.InvokeVoidAsync(
@@ -208,7 +209,7 @@ public partial class PlanningOverview
             "application/xml",
             Convert.ToBase64String(bytes));
 
-        await ShowToast("Planning naar XML voltooid.", "success");
+        await ToastService.ShowExportCompletedAsync(fileName, "XML");
     }
 
     private async Task ExportToExcelAsync()
@@ -217,6 +218,7 @@ public partial class PlanningOverview
 
         var fileName = await ExportFilename(editionId, "xlsx");
 
+        await ToastService.ShowExportStartedAsync(fileName);
         var bytes = await PlanningService.ExportFullPlanningToExcelAsync(editionId);
 
         await JS.InvokeVoidAsync(
@@ -225,44 +227,7 @@ public partial class PlanningOverview
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             Convert.ToBase64String(bytes));
 
-        await ShowToast("Planning naar Excel voltooid.", "success");
-    }
-
-    private SfToast? _toast;
-    protected SfToast? ToastObj { get; set; }
-
-
-    protected async Task ShowToast(string message, string type = "error")
-    {
-        string css = type switch
-        {
-            "success" => "e-toast-success",
-            "warning" => "e-toast-warning",
-            _ => "e-toast-danger"
-        };
-
-        string icon = type switch
-        {
-            "success" => "e-check",
-            "warning" => "e-warning",
-            _ => "e-error"
-        };
-
-        if (ToastObj != null)
-        {
-            await ToastObj.ShowAsync(new ToastModel
-            {
-                Title = "Export",
-                Content = message,
-                CssClass = css,
-                Icon = icon
-            });
-        }
-    }
-
-    protected void OnToastClose(ToastCloseArgs args)
-    {
-        // Do something after the toast cloases
+        await ToastService.ShowExportCompletedAsync(fileName, "Excel");
     }
 
     private PlanningStageVolunteersModel? GetPreviousItem(PlanningStageVolunteersModel current)

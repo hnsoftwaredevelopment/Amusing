@@ -13,6 +13,7 @@ public partial class OverviewVolunteers : ComponentBase
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected EditionService EditionService { get; set; } = default!;
     [Inject] protected VolunteerService VolunteerService { get; set; } = default!;
+    [Inject] protected ToastService ToastService { get; set; } = default!;
 
     protected SfGrid<VolunteerModel> GridRef;
     protected SfGrid<VolunteerModel> StageGridRef;
@@ -198,7 +199,9 @@ public partial class OverviewVolunteers : ComponentBase
             FileName = $"Vrijwilligers {SelectedEditionText}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx"
         };
 
+        await ToastService.ShowExportStartedAsync(exportProps.FileName);
         await GridRef!.ExportToExcelAsync(exportProps);
+        await ToastService.ShowExportCompletedAsync(exportProps.FileName, "Excel");
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync("Overzichten", "Vrijwilligers", "success", _report);
@@ -211,7 +214,9 @@ public partial class OverviewVolunteers : ComponentBase
             FileName = $"Vrijwilligers {SelectedEditionText}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv"
         };
 
+        await ToastService.ShowExportStartedAsync(exportProps.FileName);
         await GridRef!.ExportToCsvAsync(exportProps);
+        await ToastService.ShowExportCompletedAsync(exportProps.FileName, "CSV");
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync("Overzichten", "Vrijwilligers", "success", _report);
@@ -226,7 +231,9 @@ public partial class OverviewVolunteers : ComponentBase
             PageSize = PdfPageSize.A4,
             AllowHorizontalOverflow = true
         };
+        await ToastService.ShowExportStartedAsync(exportProps.FileName);
         await GridRef!.ExportToPdfAsync(exportProps);
+        await ToastService.ShowExportCompletedAsync(exportProps.FileName, "PDF");
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync("Overzichten", "Vrijwilligers", "success", _report);

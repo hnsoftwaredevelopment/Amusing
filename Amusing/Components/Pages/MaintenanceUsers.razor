@@ -45,9 +45,6 @@ else
                         </div>
 
                         <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
-                            <SfToast @ref="ToastObj" Title="Wachtwoord gewijzigd" Content="Gewijzigde wachtwoord opgeslagen" Timeout="3000" ShowProgressBar="true" >
-                                <ToastPosition X="300" Y="150"></ToastPosition>
-                            </SfToast>
                             <SfTextBox Placeholder="Wachtwoord" FloatLabelType="FloatLabelType.Always" Width="200px" @bind-Value="UserPassword"/>
                             @if (UserId != 0)
                             {

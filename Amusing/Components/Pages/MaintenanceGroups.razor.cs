@@ -30,6 +30,7 @@ public partial class MaintenanceGroups : ComponentBase
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected PersonService PersonService { get; set; } = default!;
     [Inject] protected RegistrationService RegistrationService { get; set; } = default!;
+    [Inject] protected ToastService ToastService { get; set; } = default!;
 
     private bool _initialLoadDone = false;
     private bool _selectFirstRowActivePending;
@@ -134,12 +135,14 @@ public partial class MaintenanceGroups : ComponentBase
             await PersonService.ModifyPersonRoleAsync(selected.GroupId, selected.PersonId, args.Item.Text);
             string logMessage = $"<_userName> heeft de rol van {AuditLogMessageBuilder.BuildPersonName( selected )} bij het koor {SelectedGroup?.Name} aangepast naar {args.Item.Text}.";
             await LoggingService.WriteUserActionGroupAsync( selected.GroupId, "Beheer", "Groepen", "success", logMessage );
+            await ToastService.ShowSuccessAsync( $"De rol van {AuditLogMessageBuilder.BuildPersonName( selected )} bij {SelectedGroup?.Name} is opgeslagen." );
         }
         else if (args.Item.Id.StartsWith("make"))
         {
             await PersonService.DeletePersonRoleAsync(selected.GroupId, selected.PersonId);
             string logMessage = $"<_userName> heeft {AuditLogMessageBuilder.BuildPersonName( selected )} verwijderd als relatie van het koor {SelectedGroup?.Name}.";
             await LoggingService.WriteUserActionGroupAsync( selected.GroupId, "Beheer", "Groepen", "success", logMessage );
+            await ToastService.ShowSuccessAsync( $"{AuditLogMessageBuilder.BuildPersonName( selected )} is verwijderd als relatie van {SelectedGroup?.Name}." );
         }
 
         await SetupPersonTabAsync();
@@ -154,6 +157,7 @@ public partial class MaintenanceGroups : ComponentBase
         await PersonService.InsertNewPersonRoleAsync(SelectedGroup.GroupId, selected.PersonId, args.Item.Text);
         string logMessage = $"<_userName> heeft {AuditLogMessageBuilder.BuildPersonName( selected )} toegevoegd aan het koor {SelectedGroup.Name} met rol {args.Item.Text}.";
         await LoggingService.WriteUserActionGroupAsync( SelectedGroup.GroupId, "Beheer", "Groepen", "success", logMessage );
+        await ToastService.ShowSuccessAsync( $"{AuditLogMessageBuilder.BuildPersonName( selected )} is toegevoegd aan {SelectedGroup.Name}." );
 
         await SetupPersonTabAsync();
     }
@@ -375,6 +379,7 @@ public partial class MaintenanceGroups : ComponentBase
             await GroupService.UpdateGroupDetailsAsync(SelectedGroup);
             await LogGroupChangesAsync();
             SelectedGroupOriginal = CloneGroup( SelectedGroup );
+            await ToastService.ShowSuccessAsync( $"De wijzigingen voor {SelectedGroup.Name} zijn opgeslagen." );
         }
         else
         {
@@ -400,6 +405,7 @@ public partial class MaintenanceGroups : ComponentBase
             string logMessage = $"<_userName> heeft het koor {groupName} toegevoegd.";
             await LoggingService.WriteUserActionGroupAsync( savedId, "Beheer", "Groepen", "success", logMessage );
             SelectedGroupOriginal = CloneGroup( SelectedGroup );
+            await ToastService.ShowSuccessAsync( $"Koor {groupName} is opgeslagen." );
         }
     }
 
@@ -461,6 +467,7 @@ public partial class MaintenanceGroups : ComponentBase
 
         string logMessage = $"<_userName> heeft het koor {deletedGroupName} verwijderd.";
         await LoggingService.WriteUserActionGroupAsync( deletedGroupId, "Beheer", "Groepen", "success", logMessage );
+        await ToastService.ShowSuccessAsync( $"Koor {deletedGroupName} is verwijderd." );
     }
 
     private async Task OnTabSelected(SelectEventArgs args)
@@ -498,6 +505,7 @@ public partial class MaintenanceGroups : ComponentBase
         string logMessage = $"<_userName> heeft het koor {SelectedGroup.Name} ingeschreven voor festival editie {LatestFestival.Festival}.";
         await LoggingService.WriteUserActionGroupAsync( SelectedGroup.GroupId, "Beheer", "Groepen", "success", logMessage );
         await LoadGroupRegistrationsAsync();
+        await ToastService.ShowSuccessAsync( $"{SelectedGroup.Name} is ingeschreven voor editie {LatestFestival.Festival}." );
     }
 
     private async Task LoadPersonsAsync()

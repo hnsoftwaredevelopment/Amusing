@@ -27,6 +27,7 @@ public partial class MaintenanceTasks : ComponentBase
 {
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected TaskService TaskService { get; set; } = default!;
+    [Inject] protected ToastService ToastService { get; set; } = default!;
 
     protected bool _initialLoadDone = false;
     protected bool IsDeleteEnabled => SelectedTask?.TaskId != 0 || SelectedTask?.IsActive == true;
@@ -245,7 +246,10 @@ public partial class MaintenanceTasks : ComponentBase
 
         // Log changes only when an original version exists
         if (originalTask is null)
+        {
+            await ToastService.ShowSuccessAsync( $"Taak {currentTask.Name} is opgeslagen." );
             return;
+        }
 
         var differences = ObjectDiffHelper.GetDifferences(
             originalTask,
@@ -253,7 +257,10 @@ public partial class MaintenanceTasks : ComponentBase
         );
 
         if (differences.Count == 0)
+        {
+            await ToastService.ShowSuccessAsync( $"De wijzigingen voor taak {currentTask.Name} zijn opgeslagen." );
             return;
+        }
 
         string taskName = currentTask.Name;
 
@@ -271,6 +278,8 @@ public partial class MaintenanceTasks : ComponentBase
                 logMessage
             );
         }
+
+        await ToastService.ShowSuccessAsync( $"De wijzigingen voor taak {currentTask.Name} zijn opgeslagen." );
     }
 
     protected async Task AddNew()
@@ -300,6 +309,7 @@ public partial class MaintenanceTasks : ComponentBase
 
         string logMessage = $"<_userName> heeft een nieuwe taak aangemaakt ({SelectedTask.TaakId}).";
         await LoggingService.WriteUserActionTaskAsync(SelectedTask.TaskId, "Beheer", "Taken", "added", logMessage );
+        await ToastService.ShowSuccessAsync( "Nieuwe taak is klaargezet. Vul de gegevens in en sla daarna op." );
 
         StateHasChanged();
     }
@@ -314,6 +324,7 @@ public partial class MaintenanceTasks : ComponentBase
         var _tempState = SelectedTask.Active == "ja" ? "nee" : "ja";
         string logMessage = $"<_userName> heeft het De active status van {SelectedTask.Name} aangepast in {_tempState}.";
         await LoggingService.WriteUserActionTaskAsync( SelectedTask.TaskId, "Beheer", "Taken", "success", logMessage );
+        await ToastService.ShowSuccessAsync( $"Taak {SelectedTask.Name} is {(_tempState == "ja" ? "geactiveerd" : "gedeactiveerd")}." );
 
         
     }

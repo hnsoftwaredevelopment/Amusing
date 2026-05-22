@@ -17,6 +17,7 @@ public partial class MaintenanceDeactivatedGroups : ComponentBase
 {
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected GroupService GroupService { get; set; } = default!;
+    [Inject] protected ToastService ToastService { get; set; } = default!;
 
     protected bool _initialLoadDone = false;
     protected bool IsLoading = false;
@@ -82,6 +83,7 @@ public partial class MaintenanceDeactivatedGroups : ComponentBase
     {
         if ( SelectedGroup is null )
             return;
+        string groupName = SelectedGroup.Name;
         await GroupService.ReactivateGroupAsync( SelectedGroup.GroupId );
 
         Groups = await GroupService.GetInactiveGroupsAsync();
@@ -100,6 +102,7 @@ public partial class MaintenanceDeactivatedGroups : ComponentBase
         {
             SelectedGroup = null;
         }
+        await ToastService.ShowSuccessAsync( $"Koor {groupName} is opnieuw geactiveerd." );
     }
 
     public async Task OnContextMenuClick( ContextMenuClickEventArgs<GroupModel> args )
@@ -119,6 +122,7 @@ public partial class MaintenanceDeactivatedGroups : ComponentBase
 
             string _report = $"<_userName> heeft niet relevante data van \"{_tempName}\" uit {_tempCity} uit de database verwijderd";
             await LoggingService.WriteUserActionGroupAsync( _tempId, "Beheer", "Groepen", "success", _report );
+            await ToastService.ShowSuccessAsync( $"Niet relevante data van {_tempName} is verwijderd." );
 
             await Task.Delay( 150 );
             Groups = await GroupService.GetInactiveGroupsAsync();

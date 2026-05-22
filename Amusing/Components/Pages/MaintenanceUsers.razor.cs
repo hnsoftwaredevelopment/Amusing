@@ -27,6 +27,7 @@ public partial class MaintenanceUsers : ComponentBase
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected UserService UserService { get; set; } = default!;
     [Inject] protected CustomAuthenticationService CustomAuthenticationService { get; set; } = default!;
+    [Inject] protected ToastService ToastService { get; set; } = default!;
 
     protected bool _initialLoadDone = false;
     protected bool IsLoading = false;
@@ -36,7 +37,6 @@ public partial class MaintenanceUsers : ComponentBase
     protected EditContext? editContext;
     protected List<UserModel> Users = [];
     protected SfGrid<UserModel>? GridRef;
-    protected SfToast ToastObj;
     protected string FileName = "Gebruikers";
     public string HashedPassword { get; set; } = string.Empty;
 
@@ -196,8 +196,12 @@ public partial class MaintenanceUsers : ComponentBase
             }
         }
 
+        await ToastService.ShowSuccessAsync( $"De wijzigingen voor gebruiker {SelectedUser.Username} zijn opgeslagen." );
         SelectedUser.Password = string.Empty;
-        SelectedUserOriginal.Password = string.Empty;
+        if ( SelectedUserOriginal is not null )
+        {
+            SelectedUserOriginal.Password = string.Empty;
+        }
     }
 
     protected async Task AddNew()
@@ -232,7 +236,7 @@ public partial class MaintenanceUsers : ComponentBase
             string logMessage = $"<_userName> heeft wachtwoord van {SelectedUser.Username} gewijzigd van '********' in '********'.";
             await LoggingService.WriteUserActionAsync( "Beheer", "Gebruikers", "password", logMessage );
 
-            await ToastObj.ShowAsync();
+            await ToastService.ShowSuccessAsync( $"Het wachtwoord voor gebruiker {SelectedUser.Username} is opgeslagen." );
         }
     }
 
@@ -241,10 +245,12 @@ public partial class MaintenanceUsers : ComponentBase
         if ( SelectedUser.UserId == 0 )
             return;
 
+        string userName = SelectedUser.Username;
         await UserService.DeleteUserAsync( SelectedUser );
 
-        string logMessage = $"<_userName> heeft het gebruiker: {SelectedUser.Username} verwijderd.";
+        string logMessage = $"<_userName> heeft het gebruiker: {userName} verwijderd.";
         await LoggingService.WriteUserActionAsync( "Beheer", "Gebruikers", "deleted", logMessage );
+        await ToastService.ShowSuccessAsync( $"Gebruiker {userName} is verwijderd." );
 
         // Refresh the list
         Users = await UserService.GetAllUsersAsync();

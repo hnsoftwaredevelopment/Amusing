@@ -24,6 +24,7 @@ public partial class MaintenanceFestivals : ComponentBase
 {
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected FestivalService FestivalService { get; set; } = default!;
+    [Inject] protected ToastService ToastService { get; set; } = default!;
 
     protected bool IsLoading = false;
     protected bool _initialLoadDone = false;
@@ -235,6 +236,7 @@ public partial class MaintenanceFestivals : ComponentBase
         Festivals = await FestivalService.GetFestivalDataAsync();
         await GridRef.Refresh();
         await GridRef.SelectRowAsync( Festivals.IndexOf( SelectedFestival ) );
+        await ToastService.ShowSuccessAsync( $"De wijzigingen voor editie {SelectedFestival.Festival} zijn opgeslagen." );
     }
 
     protected async Task AddNewFestival()
@@ -271,6 +273,7 @@ public partial class MaintenanceFestivals : ComponentBase
             .OrderByDescending( f => int.Parse( f.Festival ) ) // Festival is een string
             .FirstOrDefault();
         await GridRef.Refresh();
+        await ToastService.ShowSuccessAsync( $"Editie {newFestival} is opgeslagen." );
     }
 
     protected async Task DeleteFestival()
@@ -294,5 +297,6 @@ public partial class MaintenanceFestivals : ComponentBase
             .OrderByDescending( f => int.Parse( f.Festival ) ) // Festival is een string
             .FirstOrDefault();
         await GridRef.Refresh();
+        await ToastService.ShowSuccessAsync( $"Editie {deleteFestival} is verwijderd." );
     }
 }

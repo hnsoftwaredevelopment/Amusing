@@ -28,6 +28,7 @@ public partial class MaintenancePeople : ComponentBase
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected PersonService PersonService { get; set; } = default!;
     [Inject] protected GroupService GroupService { get; set; } = default!;
+    [Inject] protected ToastService ToastService { get; set; } = default!;
 
     private bool _initialLoadDone = false;
     private bool IsDeleteEnabled => SelectedPerson?.PersonId != 0 || SelectedPerson?.IsActive == true;
@@ -296,6 +297,7 @@ public partial class MaintenancePeople : ComponentBase
             await PersonService.UpdateContactDataAsync( SelectedPerson );
             await LogPersonChangesAsync();
             SelectedPersonOriginal = ClonePerson( SelectedPerson );
+            await ToastService.ShowSuccessAsync( $"De wijzigingen voor {AuditLogMessageBuilder.BuildPersonName( SelectedPerson )} zijn opgeslagen." );
         }
         else
         {
@@ -324,6 +326,7 @@ public partial class MaintenancePeople : ComponentBase
             string logMessage = $"<_userName> heeft {personName} toegevoegd.";
             await LoggingService.WriteUserActionPersonAsync( savedId, "Beheer", "Personen", "success", logMessage );
             SelectedPersonOriginal = ClonePerson( SelectedPerson );
+            await ToastService.ShowSuccessAsync( $"{personName} is opgeslagen." );
         }
     }
 
@@ -365,6 +368,7 @@ public partial class MaintenancePeople : ComponentBase
         string logMessage = $"<_userName> heeft {AuditLogMessageBuilder.BuildPersonName( SelectedPerson )} toegevoegd aan het koor {groupName} met rol {NewRoleName}.";
         await LoggingService.WriteUserActionPersonAsync( SelectedPerson.PersonId, "Beheer", "Personen", "success", logMessage );
         await RefreshPersonRowsAndDetailsAsync( SelectedPerson.PersonId );
+        await ToastService.ShowSuccessAsync( $"{AuditLogMessageBuilder.BuildPersonName( SelectedPerson )} is toegevoegd aan {groupName}." );
     }
 
     private async Task RegisterForLatestFestivalAsync()
@@ -376,6 +380,7 @@ public partial class MaintenancePeople : ComponentBase
         string logMessage = $"<_userName> heeft {AuditLogMessageBuilder.BuildPersonName( SelectedPerson )} als vrijwilliger ingeschreven voor festival editie {LatestFestival.Festival}.";
         await LoggingService.WriteUserActionPersonAsync( SelectedPerson.PersonId, "Beheer", "Personen", "success", logMessage );
         await RefreshPersonRowsAndDetailsAsync( SelectedPerson.PersonId );
+        await ToastService.ShowSuccessAsync( $"{AuditLogMessageBuilder.BuildPersonName( SelectedPerson )} is ingeschreven voor editie {LatestFestival.Festival}." );
     }
 
     private async Task GenerateTemporaryPasswordAsync()
@@ -386,6 +391,7 @@ public partial class MaintenancePeople : ComponentBase
         GeneratedPassword = await PersonService.GenerateAndStoreTemporaryPasswordAsync( SelectedPerson.PersonId );
         string logMessage = $"<_userName> heeft een tijdelijk wachtwoord aangemaakt voor {AuditLogMessageBuilder.BuildPersonName( SelectedPerson )}.";
         await LoggingService.WriteUserActionPersonAsync( SelectedPerson.PersonId, "Beheer", "Personen", "success", logMessage );
+        await ToastService.ShowSuccessAsync( $"Tijdelijk wachtwoord voor {AuditLogMessageBuilder.BuildPersonName( SelectedPerson )} is aangemaakt." );
     }
 
     private async Task RefreshPersonRowsAndDetailsAsync( uint selectedPersonId )
@@ -414,6 +420,7 @@ public partial class MaintenancePeople : ComponentBase
         await PersonService.PersonActivationAsync( SelectedPerson );
         string logMessage = $"<_userName> heeft {AuditLogMessageBuilder.BuildPersonName( SelectedPerson )} {state}.";
         await LoggingService.WriteUserActionPersonAsync( SelectedPerson.PersonId, "Beheer", "Personen", "success", logMessage );
+        await ToastService.ShowSuccessAsync( $"{AuditLogMessageBuilder.BuildPersonName( SelectedPerson )} is {state}." );
     }
 
     private async Task LogPersonChangesAsync()

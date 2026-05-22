@@ -23,6 +23,7 @@ public partial class MaintenanceStageTypes : ComponentBase
 {
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected StageTypeService StageTypeService { get; set; } = default!;
+    [Inject] protected ToastService ToastService { get; set; } = default!;
 
     protected bool IsLoading = false;
     protected bool _initialLoadDone = false;
@@ -235,6 +236,7 @@ public partial class MaintenanceStageTypes : ComponentBase
         StageTypes = await StageTypeService.GetAllStageTypesAsync();
         await GridRef.Refresh();
         await GridRef.SelectRowAsync( StageTypes.IndexOf( SelectedStageType ) );
+        await ToastService.ShowSuccessAsync( $"De wijzigingen voor podiumtype {SelectedStageType.Type} zijn opgeslagen." );
 
     }
 
@@ -341,6 +343,7 @@ public partial class MaintenanceStageTypes : ComponentBase
 
 
         await GridRef.SelectRowAsync( StageTypes.IndexOf( SelectedStageType ) );
+        await ToastService.ShowSuccessAsync( $"Podiumtype {SelectedStageType.Type} is opgeslagen." );
     }
 
     protected async Task DeleteStageType( string type, int version )
@@ -349,6 +352,7 @@ public partial class MaintenanceStageTypes : ComponentBase
 
         var logMessage = $"<_userName> heeft podiumtype \"{SelectedStageType.Type}\" versie: {SelectedStageType.Version} verwijderd.";
         await LoggingService.WriteUserActionStageTypeAsync( SelectedStageType.Type, "Beheer", "Podiumtype", "deleted", logMessage );
+        await ToastService.ShowSuccessAsync( $"Podiumtype {type} versie {version} is verwijderd." );
 
     }
 

@@ -15,6 +15,7 @@ public partial class MaintenanceSubscriptions : ComponentBase
     [Inject] protected EditionService EditionService { get; set; } = default!;
     [Inject] protected RegistrationService RegistrationService { get; set; } = default!;
     [Inject] protected StageTypeService StageTypeService { get; set; } = default!;
+    [Inject] protected ToastService ToastService { get; set; } = default!;
 
     protected SfGrid<RegistrationModel> GridRef;
     protected List<Edition> Editions = [];
@@ -166,6 +167,7 @@ public partial class MaintenanceSubscriptions : ComponentBase
 
             // Refresh local UI model
             selectedRegistration.Betaald = "Ja";
+            await ToastService.ShowSuccessAsync( $"Betaling voor {selectedRegistration.Naam} is opgeslagen." );
         }
 
         ClosePaymentDialog();
@@ -182,6 +184,7 @@ public partial class MaintenanceSubscriptions : ComponentBase
         );
 
         registration.Betaald = "Nee";
+        await ToastService.ShowSuccessAsync( $"Betaling voor {registration.Naam} is teruggezet naar niet betaald." );
         StateHasChanged();
     }
 
@@ -209,6 +212,7 @@ public partial class MaintenanceSubscriptions : ComponentBase
 
         // Update UI-model
         registration.Afgehaakt = (newValue == null) ? "Nee" : "Ja";
+        await ToastService.ShowSuccessAsync( $"Afhaakstatus voor {registration.Naam} is opgeslagen." );
         StateHasChanged();
     }
 
@@ -229,6 +233,7 @@ public partial class MaintenanceSubscriptions : ComponentBase
             columnName,
             value
         );
+        await ToastService.ShowSuccessAsync( $"De wijziging voor {registration.Naam} is opgeslagen." );
     }
 
     private bool showYesNoDialog;
@@ -279,6 +284,7 @@ public partial class MaintenanceSubscriptions : ComponentBase
         );
 
         showYesNoDialog = false;
+        await ToastService.ShowSuccessAsync( $"De wijziging voor {selectedRegistration.Naam} is opgeslagen." );
     }
 
 
@@ -324,9 +330,11 @@ public partial class MaintenanceSubscriptions : ComponentBase
         if (!CanConfirmAddGroup || string.IsNullOrWhiteSpace(SelectedEditionId))
             return;
 
+        uint groupId = selectedAvailableGroupId!.Value;
+        string groupName = AvailableGroups.FirstOrDefault(group => group.ZanggroepId == groupId)?.Naam ?? "het koor";
         await RegistrationService.AddRegistrationAsync(
             Convert.ToUInt32(SelectedEditionId),
-            selectedAvailableGroupId!.Value,
+            groupId,
             selectedAantalDeelnemers!.Value,
             selectedPodiumsoort!);
         await LoadRegistrationsAsync();
@@ -339,6 +347,7 @@ public partial class MaintenanceSubscriptions : ComponentBase
 
         VisibleRowCount = RegistrationList.Count;
         CloseAddGroupDialog();
+        await ToastService.ShowSuccessAsync( $"{groupName} is ingeschreven voor editie {SelectedEditionText}." );
         StateHasChanged();
     }
 }

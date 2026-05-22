@@ -18,6 +18,7 @@ public partial class OverviewRegistrations : ComponentBase
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected EditionService EditionService { get; set; } = default!;
     [Inject] protected RegistrationService RegistrationService { get; set; } = default!;
+    [Inject] protected ToastService ToastService { get; set; } = default!;
 
     protected SfGrid<RegistrationModel> GridRef;
     protected List<Edition> Editions = [];
@@ -100,7 +101,9 @@ public partial class OverviewRegistrations : ComponentBase
             FileName = $"Inschrijvingen {SelectedEditionText}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx"
         };
 
+        await ToastService.ShowExportStartedAsync( exportProps.FileName );
         await GridRef!.ExportToExcelAsync( exportProps );
+        await ToastService.ShowExportCompletedAsync( exportProps.FileName, "Excel" );
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync( "Overzichten", "Inschrijvingen", "success", _report );
     }
@@ -112,7 +115,9 @@ public partial class OverviewRegistrations : ComponentBase
             FileName = $"Inschrijvingen {SelectedEditionText}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv"
         };
 
+        await ToastService.ShowExportStartedAsync( exportProps.FileName );
         await GridRef!.ExportToCsvAsync( exportProps );
+        await ToastService.ShowExportCompletedAsync( exportProps.FileName, "CSV" );
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync( "Overzichten", "Inschrijvingen", "success", _report );
     }
@@ -126,7 +131,9 @@ public partial class OverviewRegistrations : ComponentBase
             PageSize=PdfPageSize.A4,
             AllowHorizontalOverflow = true
         };
+        await ToastService.ShowExportStartedAsync( exportProps.FileName );
         await GridRef!.ExportToPdfAsync( exportProps );
+        await ToastService.ShowExportCompletedAsync( exportProps.FileName, "PDF" );
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync( "Overzichten", "Inschrijvingen", "success", _report );
     }

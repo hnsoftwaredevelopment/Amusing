@@ -17,6 +17,7 @@ public partial class ListGroups : ComponentBase
 {
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected RegistrationService RegistrationService { get; set; } = default!;
+    [Inject] protected ToastService ToastService { get; set; } = default!;
 
     protected int CurrentFestivalYear;
     protected int maxslider;
@@ -139,7 +140,9 @@ public partial class ListGroups : ComponentBase
             FileName = $"{FileName}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx"
         };
 
+        await ToastService.ShowExportStartedAsync( exportProps.FileName );
         await GridRef!.ExportToExcelAsync( exportProps );
+        await ToastService.ShowExportCompletedAsync( exportProps.FileName, "Excel" );
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync( "Lijsten", "Groepen", "success", _report );
@@ -152,7 +155,9 @@ public partial class ListGroups : ComponentBase
             FileName = $"{FileName}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv"
         };
 
+        await ToastService.ShowExportStartedAsync( exportProps.FileName );
         await GridRef!.ExportToCsvAsync( exportProps );
+        await ToastService.ShowExportCompletedAsync( exportProps.FileName, "CSV" );
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync( "Lijsten", "Groepen", "success", _report );
@@ -167,7 +172,9 @@ public partial class ListGroups : ComponentBase
             PageSize=PdfPageSize.A4,
             AllowHorizontalOverflow = true
         };
+        await ToastService.ShowExportStartedAsync( exportProps.FileName );
         await GridRef!.ExportToPdfAsync( exportProps );
+        await ToastService.ShowExportCompletedAsync( exportProps.FileName, "PDF" );
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync( "Lijsten", "Groepen", "success", _report );

@@ -125,6 +125,7 @@ builder.Services.AddScoped<VolunteerService>();
 builder.Services.AddScoped<FieldMappingService>();
 builder.Services.AddScoped<UserContextHelper>();
 builder.Services.AddScoped<PlanningService>();
+builder.Services.AddScoped<ToastService>();
 
 builder.Services.AddBlazoredSessionStorage();
 

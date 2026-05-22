@@ -12,6 +12,7 @@ public partial class ListStages : ComponentBase
 {
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected StageService StageService { get; set; } = default!;
+    [Inject] protected ToastService ToastService { get; set; } = default!;
 
     protected bool IsLoading = false;
     protected bool _initialLoadDoneActive = false;
@@ -104,7 +105,9 @@ public partial class ListStages : ComponentBase
             FileName = $"{FileNameActive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx"
         };
 
+        await ToastService.ShowExportStartedAsync(exportProps.FileName);
         await GridRefActive!.ExportToExcelAsync(exportProps);
+        await ToastService.ShowExportCompletedAsync(exportProps.FileName, "Excel");
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync("Lijsten", "Podia", "success", _report);
@@ -117,7 +120,9 @@ public partial class ListStages : ComponentBase
             FileName = $"{FileNameInactive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx"
         };
 
+        await ToastService.ShowExportStartedAsync(exportProps.FileName);
         await GridRefInactive!.ExportToExcelAsync(exportProps);
+        await ToastService.ShowExportCompletedAsync(exportProps.FileName, "Excel");
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync("Lijsten", "Podia", "success", _report);
@@ -130,7 +135,9 @@ public partial class ListStages : ComponentBase
             FileName = $"{FileNameActive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv"
         };
 
+        await ToastService.ShowExportStartedAsync(exportProps.FileName);
         await GridRefActive!.ExportToCsvAsync(exportProps);
+        await ToastService.ShowExportCompletedAsync(exportProps.FileName, "CSV");
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync("Lijsten", "Podia", "success", _report);
@@ -143,7 +150,9 @@ public partial class ListStages : ComponentBase
             FileName = $"{FileNameInactive}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv"
         };
 
+        await ToastService.ShowExportStartedAsync(exportProps.FileName);
         await GridRefInactive!.ExportToCsvAsync(exportProps);
+        await ToastService.ShowExportCompletedAsync(exportProps.FileName, "CSV");
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync("Lijsten", "Podia", "success", _report);
@@ -158,7 +167,9 @@ public partial class ListStages : ComponentBase
             PageSize = PdfPageSize.A4,
             AllowHorizontalOverflow = true
         };
+        await ToastService.ShowExportStartedAsync(exportProps.FileName);
         await GridRefActive!.ExportToPdfAsync(exportProps);
+        await ToastService.ShowExportCompletedAsync(exportProps.FileName, "PDF");
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync("Lijsten", "Podia", "success", _report);
@@ -173,7 +184,9 @@ public partial class ListStages : ComponentBase
             PageSize = PdfPageSize.A4,
             AllowHorizontalOverflow = true
         };
+        await ToastService.ShowExportStartedAsync(exportProps.FileName);
         await GridRefInactive!.ExportToPdfAsync(exportProps);
+        await ToastService.ShowExportCompletedAsync(exportProps.FileName, "PDF");
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync("Lijsten", "Podia", "success", _report);

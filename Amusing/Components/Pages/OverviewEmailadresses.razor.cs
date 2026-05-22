@@ -16,6 +16,7 @@ public partial class OverviewEmailAddresses : ComponentBase
 {
     [Inject] private EmailAddressesService EmailAddressesService { get; set; } = default!;
     [Inject] private LoggingService LoggingService { get; set; } = default!;
+    [Inject] private ToastService ToastService { get; set; } = default!;
 
     protected string? SelectedCountry;
     protected bool IsInitialized;
@@ -151,6 +152,8 @@ public partial class OverviewEmailAddresses : ComponentBase
             FileName = $"{GetFileName(fileType)} {(SelectedCountry == "uk" ? "Overige" : SelectedCountry)}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx",
         };
 
+        await ToastService.ShowExportStartedAsync( exportProps.FileName );
+
         switch ( fileType )
         {
             case "newsletter":
@@ -180,6 +183,8 @@ public partial class OverviewEmailAddresses : ComponentBase
         }
 
 
+        await ToastService.ShowExportCompletedAsync( exportProps.FileName, "Excel" );
+
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync( "Overzichten", "E-Mailadressen", "success", _report );
 
@@ -193,6 +198,8 @@ public partial class OverviewEmailAddresses : ComponentBase
         {
             FileName = $"{GetFileName(fileType)} {(SelectedCountry == "uk" ? "Overige" : SelectedCountry)}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.csv",
         };
+
+        await ToastService.ShowExportStartedAsync( exportProps.FileName );
 
         switch ( fileType )
         {
@@ -222,6 +229,8 @@ public partial class OverviewEmailAddresses : ComponentBase
                 break;
         }
 
+        await ToastService.ShowExportCompletedAsync( exportProps.FileName, "CSV" );
+
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync( "Overzichten", "E-Mailadressen", "success", _report );
 
@@ -236,6 +245,8 @@ public partial class OverviewEmailAddresses : ComponentBase
             PageSize=PdfPageSize.A4,
             AllowHorizontalOverflow = true
         };
+
+        await ToastService.ShowExportStartedAsync( exportProps.FileName );
 
         switch ( fileType )
         {
@@ -264,6 +275,8 @@ public partial class OverviewEmailAddresses : ComponentBase
                 await IncompleteEmailAddressesGridRef!.ExportToPdfAsync( exportProps );
                 break;
         }
+
+        await ToastService.ShowExportCompletedAsync( exportProps.FileName, "PDF" );
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync( "Overzichten", "E-Mailadressen", "success", _report );

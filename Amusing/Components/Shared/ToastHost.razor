@@ -1,0 +1,62 @@
+@using Syncfusion.Blazor.Notifications
+@implements IDisposable
+@inject ToastService ToastService
+
+<SfToast @ref="ToastObj"
+         TimeOut="3500"
+         ShowCloseButton="true"
+         ShowProgressBar="true"
+         NewestOnTop="true">
+    <ToastPosition X="Center" Y="Top" />
+</SfToast>
+
+@code {
+    private SfToast? ToastObj { get; set; }
+
+    protected override void OnInitialized()
+    {
+        ToastService.OnShow += ShowToastAsync;
+    }
+
+    private async Task ShowToastAsync(ToastNotification notification)
+    {
+        if (ToastObj is null)
+        {
+            return;
+        }
+
+        await InvokeAsync(async () =>
+        {
+            await ToastObj.ShowAsync(new ToastModel
+            {
+                Title = notification.Title,
+                Content = notification.Message,
+                CssClass = GetCssClass(notification.Type),
+                Icon = GetIcon(notification.Type)
+            });
+        });
+    }
+
+    private static string GetCssClass(ToastType type) =>
+        type switch
+        {
+            ToastType.Success => "e-toast-success amusing-toast-success",
+            ToastType.Warning => "e-toast-warning amusing-toast-warning",
+            ToastType.Error => "e-toast-danger amusing-toast-error",
+            _ => "e-toast-info amusing-toast-info"
+        };
+
+    private static string GetIcon(ToastType type) =>
+        type switch
+        {
+            ToastType.Success => "e-success toast-icons",
+            ToastType.Warning => "e-warning toast-icons",
+            ToastType.Error => "e-error toast-icons",
+            _ => "e-info toast-icons"
+        };
+
+    public void Dispose()
+    {
+        ToastService.OnShow -= ShowToastAsync;
+    }
+}

@@ -16,6 +16,7 @@ public partial class MaintenanceStages : ComponentBase
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected StageService StageService { get; set; } = default!;
     [Inject] protected StageTypeService StageTypeService { get; set; } = default!;
+    [Inject] protected ToastService ToastService { get; set; } = default!;
 
     protected bool IsLoading = false;
     protected bool _initialLoadDone = false;
@@ -275,6 +276,7 @@ public partial class MaintenanceStages : ComponentBase
         }
 
         await UpdateVisibleRowCountAsync();
+        await ToastService.ShowSuccessAsync( $"De wijzigingen voor podium {SelectedStage?.Naam ?? savedId.ToString()} zijn opgeslagen." );
     }
 
     protected async Task AddNewStage()
@@ -306,6 +308,7 @@ public partial class MaintenanceStages : ComponentBase
         }
 
         await UpdateVisibleRowCountAsync();
+        await ToastService.ShowSuccessAsync( $"Podium {SelectedStage?.Naam ?? stageId.ToString()} is opgeslagen." );
     }
 
     protected async Task DeleteStage()
@@ -313,10 +316,12 @@ public partial class MaintenanceStages : ComponentBase
         if (SelectedStage is null)
             return;
 
+        string stageName = SelectedStage.Naam;
         await StageService.DeleteStageAsync(SelectedStage.PodiumId);
 
-        var logMessage = $"<_userName> heeft podium \"{SelectedStage.Naam}\" verwijderd.";
+        var logMessage = $"<_userName> heeft podium \"{stageName}\" verwijderd.";
         await LoggingService.WriteUserActionStageAsync(SelectedStage.PodiumId, "Beheer", "Podia", "deleted", logMessage);
+        await ToastService.ShowSuccessAsync( $"Podium {stageName} is verwijderd." );
 
         // refresh the table
         var stageModels = await StageService.GetAllStagesAsync();
