@@ -156,6 +156,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
     ];
 
     [Inject] public MailingService MailingService { get; set; } = default!;
+    [Inject] public LoggingService LoggingService { get; set; } = default!;
     [Inject] public IJSRuntime JSRuntime { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
@@ -204,6 +205,8 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
         if (_selectedTemplatesList.TemplateId != 0)
         {
             await MailingService.UpdateTemplateQueryAsync(_selectedTemplatesList);
+            string logMessage = $"<_userName> heeft het mailingsjabloon {_selectedTemplatesList.TemplateName} aangepast.";
+            await LoggingService.WriteUserActionTemplateAsync( _selectedTemplatesList.TemplateId, "Mailing", "Sjablonen", "success", logMessage );
         }
         else
         {
@@ -219,6 +222,9 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             {
                 _selectedTemplatesList = TemplatesList[index];
             }
+
+            string logMessage = $"<_userName> heeft het mailingsjabloon {_selectedTemplatesList.TemplateName} toegevoegd.";
+            await LoggingService.WriteUserActionTemplateAsync( savedId, "Mailing", "Sjablonen", "success", logMessage );
         }
 
         showSavedMessage = true;
@@ -274,7 +280,11 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             return;
         }
 
+        uint deletedTemplateId = _selectedTemplatesList.TemplateId;
+        string? deletedTemplateName = _selectedTemplatesList.TemplateName;
         await MailingService.DeleteTemplateQueryAsync(_selectedTemplatesList.TemplateId);
+        string logMessage = $"<_userName> heeft het mailingsjabloon {deletedTemplateName} verwijderd.";
+        await LoggingService.WriteUserActionTemplateAsync( deletedTemplateId, "Mailing", "Sjablonen", "success", logMessage );
 
         // Refresh the list
         TemplatesList = await MailingService.GetMailTemplatesAsync();
@@ -755,12 +765,21 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
             // Eventueel feedback aan gebruiker
             Debug.WriteLine($"Testmail(s) verzonden naar {_testEmailAddress}");
+            string logMessage = $"<_userName> heeft een testmail verstuurd met sjabloon {_selectedTemplatesList.TemplateName} naar {_testEmailAddress}.";
+            await LoggingService.WriteUserActionTemplateAsync( _selectedTemplatesList.TemplateId, "Mailing", "Sjablonen", "success", logMessage );
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Fout bij verzenden testmail: {ex.Message}");
             // Als je IMailingLogger hebt, kun je hier ook loggen:
             _logger.LogError(ex, "Error sending test mail");
+            string templateName = _selectedTemplatesList?.TemplateName ?? "onbekend sjabloon";
+            uint templateId = _selectedTemplatesList?.TemplateId ?? 0;
+            string logMessage = $"<_userName> kon geen testmail versturen met sjabloon {templateName}: {ex.Message}";
+            if ( templateId > 0 )
+                await LoggingService.WriteUserActionTemplateAsync( templateId, "Mailing", "Sjablonen", "unsuccessful", logMessage );
+            else
+                await LoggingService.WriteUserActionAsync( "Mailing", "Sjablonen", "unsuccessful", logMessage );
         }
     }
     #endregion
@@ -787,10 +806,19 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             );
 
             Debug.WriteLine("Bulkmailing verzonden.");
+            string logMessage = $"<_userName> heeft een mailing verstuurd met sjabloon {_selectedTemplatesList.TemplateName}.";
+            await LoggingService.WriteUserActionTemplateAsync( _selectedTemplatesList.TemplateId, "Mailing", "Sjablonen", "success", logMessage );
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Fout bij verzenden bulkmailing: {ex.Message}");
+            string templateName = _selectedTemplatesList?.TemplateName ?? "onbekend sjabloon";
+            uint templateId = _selectedTemplatesList?.TemplateId ?? 0;
+            string logMessage = $"<_userName> kon geen mailing versturen met sjabloon {templateName}: {ex.Message}";
+            if ( templateId > 0 )
+                await LoggingService.WriteUserActionTemplateAsync( templateId, "Mailing", "Sjablonen", "unsuccessful", logMessage );
+            else
+                await LoggingService.WriteUserActionAsync( "Mailing", "Sjablonen", "unsuccessful", logMessage );
         }
     }
 

@@ -47,6 +47,36 @@ public class QueryDefinitionsTests
     }
 
     [Fact]
+    public void LogPersonActionsQuery_IncludesPersonIdParameter()
+    {
+        string query = QueryDefinitions.LogPersonActions;
+
+        Assert.Contains("person_id", query);
+        Assert.Contains("@PersonId", query);
+    }
+
+    [Fact]
+    public void LogMailingEntityQueries_IncludeEntityParameters()
+    {
+        Assert.Contains("template_id", QueryDefinitions.LogTemplateActions);
+        Assert.Contains("@TemplateId", QueryDefinitions.LogTemplateActions);
+        Assert.Contains("recipientlist_id", QueryDefinitions.LogRecipientListActions);
+        Assert.Contains("@RecipientListId", QueryDefinitions.LogRecipientListActions);
+    }
+
+    [Fact]
+    public void GetUsersLogQuery_LoadsUserNameAndLogbookColumns()
+    {
+        string query = QueryDefinitions.GetUsersLog;
+
+        Assert.Contains("ah_beheer", query);
+        Assert.Contains("UserName", query);
+        Assert.Contains("Status", query);
+        Assert.Contains("@FromDate", query);
+        Assert.Contains("ORDER BY l.date DESC", query);
+    }
+
+    [Fact]
     public void GetPersonRolesByPersonIdQuery_LoadsRolesWithGroupsForSelectedPerson()
     {
         string query = QueryDefinitions.GetPersonRolesByPersonId;

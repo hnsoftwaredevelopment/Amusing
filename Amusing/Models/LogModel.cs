@@ -11,6 +11,7 @@ public partial class LogModel
     public string LogArea { get; set; } = "";
     public string LogAction { get; set; } = null!;
     public string LogReport { get; set; }
+    public string LogUsername { get; set; } = "";
 
     // Full loginfo, fields from Small log info exteded with:
     public int LogId { get; set; }

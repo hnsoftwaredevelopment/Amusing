@@ -32,18 +32,25 @@ public class LoggingService
     }
 
     #region Full logs
-    public Task<List<LogModel>> GetUsersLogAsync()
+    public Task<List<LogModel>> GetUsersLogAsync( DateTime? fromDate = null )
     {
-        return _dataService.ExecuteQueryAsync( SPDefinitions.RunGetUsersLog, reader =>
+        Dictionary<string, object> parameters = new()
+        {
+            { "@FromDate", fromDate ?? DateTime.Today.AddYears( -1 ) }
+        };
+
+        return _dataService.ExecuteQueryAsync( QueryDefinitions.GetUsersLog, reader =>
         {
             return new LogModel
             {
-                LogDate = reader [ "date" ] != DBNull.Value ? Convert.ToDateTime( reader [ "date" ] ) : null,
-                LogArea = reader [ "area" ].ToString(),
-                LogAction = reader [ "action" ].ToString(),
-                LogReport = reader [ "report" ].ToString()
+                LogDate = reader [ "LogDate" ] != DBNull.Value ? Convert.ToDateTime( reader [ "LogDate" ] ) : null,
+                LogUsername = reader [ "UserName" ].ToString() ?? string.Empty,
+                LogArea = reader [ "Area" ].ToString() ?? string.Empty,
+                LogAction = reader [ "Action" ].ToString() ?? string.Empty,
+                LogStatus = reader [ "Status" ].ToString() ?? string.Empty,
+                LogReport = reader [ "Report" ].ToString() ?? string.Empty
             };
-        } );
+        }, parameters );
     }
 
     public Task<List<LogModel>> GetPersonsLogAsync()
@@ -237,6 +244,147 @@ public class LoggingService
         try
         {
             await _dataService.ExecuteNonQueryAsync( QueryDefinitions.LogGroupActions, parameters );
+        }
+        catch ( Exception ex )
+        {
+            Dictionary<string, object> err_parameters = new()
+            {
+                { "@UserIp", _userIp },
+                { "@Area", _area },
+                { "@Action", _action },
+                { "@Status", "Error" },
+                { "@Report", ex.Message }
+            };
+
+            await _dataService.ExecuteNonQueryAsync( QueryDefinitions.LogError, err_parameters );
+        }
+        return;
+    }
+
+    public async Task WriteUserActionPersonAsync( uint _personId, string _area, string _action, string _status, string _report )
+    {
+        if ( _report == "" )
+        {
+            return;
+        }
+
+        var authState = await _authProvider.GetAuthenticationStateAsync();
+        var claimUser = authState.User;
+        string? _userId = claimUser.FindFirst("UserId")?.Value;
+        string? userName = ((System.Security.Claims.ClaimsIdentity?)claimUser.Identity)?.Name;
+        userName = string.IsNullOrWhiteSpace( userName ) ? "Een onbekende gebruiker" : userName;
+        _report = ( _report ?? string.Empty ).Replace( "<_userName>", userName );
+
+        string _userIp = _userContextHelper.GetUserIp();
+
+        Dictionary<string, object> parameters = new()
+        {
+            { "@UserId", _userId },
+            { "@UserIp", _userIp },
+            { "@PersonId", _personId },
+            { "@Area", _area },
+            { "@Action", _action },
+            { "@Status", _status },
+            { "@Report", _report }
+        };
+
+        try
+        {
+            await _dataService.ExecuteNonQueryAsync( QueryDefinitions.LogPersonActions, parameters );
+        }
+        catch ( Exception ex )
+        {
+            Dictionary<string, object> err_parameters = new()
+            {
+                { "@UserIp", _userIp },
+                { "@Area", _area },
+                { "@Action", _action },
+                { "@Status", "Error" },
+                { "@Report", ex.Message }
+            };
+
+            await _dataService.ExecuteNonQueryAsync( QueryDefinitions.LogError, err_parameters );
+        }
+        return;
+    }
+
+    public async Task WriteUserActionTemplateAsync( uint _templateId, string _area, string _action, string _status, string _report )
+    {
+        if ( _report == "" )
+        {
+            return;
+        }
+
+        var authState = await _authProvider.GetAuthenticationStateAsync();
+        var claimUser = authState.User;
+        string? _userId = claimUser.FindFirst("UserId")?.Value;
+        string? userName = ((System.Security.Claims.ClaimsIdentity?)claimUser.Identity)?.Name;
+        userName = string.IsNullOrWhiteSpace( userName ) ? "Een onbekende gebruiker" : userName;
+        _report = ( _report ?? string.Empty ).Replace( "<_userName>", userName );
+
+        string _userIp = _userContextHelper.GetUserIp();
+
+        Dictionary<string, object> parameters = new()
+        {
+            { "@UserId", _userId },
+            { "@UserIp", _userIp },
+            { "@TemplateId", _templateId },
+            { "@Area", _area },
+            { "@Action", _action },
+            { "@Status", _status },
+            { "@Report", _report }
+        };
+
+        try
+        {
+            await _dataService.ExecuteNonQueryAsync( QueryDefinitions.LogTemplateActions, parameters );
+        }
+        catch ( Exception ex )
+        {
+            Dictionary<string, object> err_parameters = new()
+            {
+                { "@UserIp", _userIp },
+                { "@Area", _area },
+                { "@Action", _action },
+                { "@Status", "Error" },
+                { "@Report", ex.Message }
+            };
+
+            await _dataService.ExecuteNonQueryAsync( QueryDefinitions.LogError, err_parameters );
+        }
+        return;
+    }
+
+    public async Task WriteUserActionRecipientListAsync( uint _recipientListId, string _area, string _action, string _status, string _report )
+    {
+        if ( _report == "" )
+        {
+            return;
+        }
+
+        var authState = await _authProvider.GetAuthenticationStateAsync();
+        var claimUser = authState.User;
+        string? _userId = claimUser.FindFirst("UserId")?.Value;
+        string? userName = ((System.Security.Claims.ClaimsIdentity?)claimUser.Identity)?.Name;
+        userName = string.IsNullOrWhiteSpace( userName ) ? "Een onbekende gebruiker" : userName;
+        _report = ( _report ?? string.Empty ).Replace( "<_userName>", userName );
+
+        string _userIp = _userContextHelper.GetUserIp();
+
+        Dictionary<string, object> parameters = new()
+        {
+            { "@UserId", _userId },
+            { "@UserIp", _userIp },
+            { "@RecipientListId", _recipientListId },
+            { "@Area", _area },
+            { "@Action", _action },
+            { "@Status", _status },
+            { "@Report", _report }
+        };
+
+        try
+        {
+            await _dataService.ExecuteNonQueryAsync( QueryDefinitions.LogRecipientListActions, parameters );
         }
         catch ( Exception ex )
         {

@@ -33,6 +33,7 @@ public partial class MaintenancePeople : ComponentBase
     private bool IsDeleteEnabled => SelectedPerson?.PersonId != 0 || SelectedPerson?.IsActive == true;
     private bool _isLoading = false;
     private PersonModel? SelectedPerson;
+    private PersonModel? SelectedPersonOriginal;
     private int _visibleRowCount = 0;
     private List<PersonModel> Persons = [];
     private List<PersonModel> FilteredPersons = new();
@@ -152,6 +153,7 @@ public partial class MaintenancePeople : ComponentBase
         LatestFestival = await PersonService.GetLatestFestivalForPersonMaintenanceAsync();
 
         SelectedPerson = Persons.FirstOrDefault();
+        SelectedPersonOriginal = ClonePerson( SelectedPerson );
         await LoadSelectedPersonDetailsAsync();
         ApplyFilter();
 
@@ -176,6 +178,7 @@ public partial class MaintenancePeople : ComponentBase
     private async Task OnRowSelected( RowSelectEventArgs<PersonModel> args )
     {
         SelectedPerson = args.Data;
+        SelectedPersonOriginal = ClonePerson( args.Data );
         await LoadSelectedPersonDetailsAsync();
 
         StateHasChanged();
@@ -291,6 +294,8 @@ public partial class MaintenancePeople : ComponentBase
 
             await PersonService.UpdatePersonAsync( SelectedPerson );
             await PersonService.UpdateContactDataAsync( SelectedPerson );
+            await LogPersonChangesAsync();
+            SelectedPersonOriginal = ClonePerson( SelectedPerson );
         }
         else
         {
@@ -313,6 +318,11 @@ public partial class MaintenancePeople : ComponentBase
                 await GridRef.SelectRowAsync( index );
                 await LoadSelectedPersonDetailsAsync();
             }
+
+            string personName = AuditLogMessageBuilder.BuildPersonName( SelectedPerson );
+            string logMessage = $"<_userName> heeft {personName} toegevoegd.";
+            await LoggingService.WriteUserActionPersonAsync( savedId, "Beheer", "Personen", "success", logMessage );
+            SelectedPersonOriginal = ClonePerson( SelectedPerson );
         }
     }
 
@@ -350,6 +360,9 @@ public partial class MaintenancePeople : ComponentBase
             return;
 
         await PersonService.InsertNewPersonRoleAsync( NewRoleGroupId.Value, SelectedPerson.PersonId, NewRoleName );
+        string groupName = GroupOptions.FirstOrDefault( group => group.GroupId == NewRoleGroupId.Value )?.Name ?? "een koor";
+        string logMessage = $"<_userName> heeft {AuditLogMessageBuilder.BuildPersonName( SelectedPerson )} toegevoegd aan het koor {groupName} met rol {NewRoleName}.";
+        await LoggingService.WriteUserActionPersonAsync( SelectedPerson.PersonId, "Beheer", "Personen", "success", logMessage );
         await RefreshPersonRowsAndDetailsAsync( SelectedPerson.PersonId );
     }
 
@@ -359,6 +372,8 @@ public partial class MaintenancePeople : ComponentBase
             return;
 
         await PersonService.RegisterPersonForCurrentFestivalAsync( SelectedPerson.PersonId, LatestFestival.FestivalId );
+        string logMessage = $"<_userName> heeft {AuditLogMessageBuilder.BuildPersonName( SelectedPerson )} als vrijwilliger ingeschreven voor festival editie {LatestFestival.Festival}.";
+        await LoggingService.WriteUserActionPersonAsync( SelectedPerson.PersonId, "Beheer", "Personen", "success", logMessage );
         await RefreshPersonRowsAndDetailsAsync( SelectedPerson.PersonId );
     }
 
@@ -368,6 +383,8 @@ public partial class MaintenancePeople : ComponentBase
             return;
 
         GeneratedPassword = await PersonService.GenerateAndStoreTemporaryPasswordAsync( SelectedPerson.PersonId );
+        string logMessage = $"<_userName> heeft een tijdelijk wachtwoord aangemaakt voor {AuditLogMessageBuilder.BuildPersonName( SelectedPerson )}.";
+        await LoggingService.WriteUserActionPersonAsync( SelectedPerson.PersonId, "Beheer", "Personen", "success", logMessage );
     }
 
     private async Task RefreshPersonRowsAndDetailsAsync( uint selectedPersonId )
@@ -392,6 +409,74 @@ public partial class MaintenancePeople : ComponentBase
         if ( SelectedPerson is null )
             return;
 
+        string state = SelectedPerson.Active == 0 ? "geactiveerd" : "gedeactiveerd";
         await PersonService.PersonActivationAsync( SelectedPerson );
+        string logMessage = $"<_userName> heeft {AuditLogMessageBuilder.BuildPersonName( SelectedPerson )} {state}.";
+        await LoggingService.WriteUserActionPersonAsync( SelectedPerson.PersonId, "Beheer", "Personen", "success", logMessage );
+    }
+
+    private async Task LogPersonChangesAsync()
+    {
+        if ( SelectedPersonOriginal is null || SelectedPerson is null )
+            return;
+
+        var diffOptions = new DiffOptions
+        {
+            ExcludedProperties =
+            [
+                "PersonId",
+                "Name",
+                "Email",
+                "Address",
+                "IsActive",
+                "GroupId",
+                "Role",
+                "GroupName",
+                "Roles",
+                "Volunteer",
+                "InfoMailingBool"
+            ]
+        };
+
+        var differences = ObjectDiffHelper.GetDifferences( SelectedPersonOriginal, SelectedPerson, diffOptions );
+        string subject = AuditLogMessageBuilder.BuildPersonName( SelectedPerson );
+
+        foreach ( var diff in differences )
+        {
+            string logMessage = AuditLogMessageBuilder.BuildChangeReport( subject, diff );
+            await LoggingService.WriteUserActionPersonAsync( SelectedPerson.PersonId, "Beheer", "Personen", "success", logMessage );
+        }
+    }
+
+    private static PersonModel? ClonePerson( PersonModel? person )
+    {
+        if ( person is null )
+            return null;
+
+        return new PersonModel
+        {
+            PersonId = person.PersonId,
+            Name = person.Name,
+            Email = person.Email,
+            Active = person.Active,
+            GroupId = person.GroupId,
+            Role = person.Role,
+            GroupName = person.GroupName,
+            FirstName = person.FirstName,
+            NameInfix = person.NameInfix,
+            LastName = person.LastName,
+            PersonsEmail = person.PersonsEmail,
+            Address = person.Address,
+            Street = person.Street,
+            HomeNr = person.HomeNr,
+            HomeNrAddition = person.HomeNrAddition,
+            Zip = person.Zip,
+            City = person.City,
+            Mobile = person.Mobile,
+            Phone = person.Phone,
+            InfoMailing = person.InfoMailing,
+            Roles = person.Roles,
+            Volunteer = person.Volunteer
+        };
     }
 }

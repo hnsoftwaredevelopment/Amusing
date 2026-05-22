@@ -29,7 +29,7 @@ public static class ObjectDiffHelper
             var oldValue = prop.GetValue(original);
             var newValue = prop.GetValue(modified);
 
-            if ( Equals( oldValue, newValue ) )
+            if ( ValuesAreEqual( oldValue, newValue ) )
                 continue;
 
             // Get friendly display name if available
@@ -73,6 +73,22 @@ public static class ObjectDiffHelper
             bool b => b ? "Ja" : "Nee",
             _ => value.ToString() ?? "(leeg)"
         };
+    }
+
+    private static bool ValuesAreEqual( object? oldValue, object? newValue )
+    {
+        if ( IsNoByteValue( oldValue ) && IsNoByteValue( newValue ) )
+            return true;
+
+        if ( oldValue is byte[] oldBytes && newValue is byte[] newBytes )
+            return oldBytes.SequenceEqual( newBytes );
+
+        return Equals( oldValue, newValue );
+    }
+
+    private static bool IsNoByteValue( object? value )
+    {
+        return value is null || value is byte[] { Length: 0 };
     }
 }
 

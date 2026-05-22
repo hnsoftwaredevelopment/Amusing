@@ -18,23 +18,35 @@ public partial class PersonModel
     public string? GroupName { get; set; } = "";
 
     [RequiredIfActive( "Active", ErrorMessage = "Voornaam of voorletter(s) is verplicht" )]
+    [Display( Name = "voornaam" )]
     public string? FirstName { get; set; } = "";
+    [Display( Name = "tussenvoegsel" )]
     public string? NameInfix { get; set; } = "";
 
     [RequiredIfActive( "Active", ErrorMessage = "Achternaam is verplicht" )]
+    [Display( Name = "achternaam" )]
     public string? LastName { get; set; } = "";
 
     [RequiredIfActive( "Active", ErrorMessage = "E-mail adres is verplicht" )]
     [EmailAddress( ErrorMessage = "E-mailadres is ongeldig" )]
+    [Display( Name = "e-mailadres" )]
     public string? PersonsEmail { get; set; } = ""; // different e-mail Field for person maintenance where e-mail address is mandetory
     public string? Address { get; set; } = "";
+    [Display( Name = "straat" )]
     public string? Street { get; set; } = "";
+    [Display( Name = "huisnummer" )]
     public string? HomeNr { get; set; } = "";
+    [Display( Name = "huisnummer toevoeging" )]
     public string? HomeNrAddition { get; set; } = "";
+    [Display( Name = "postcode" )]
     public string? Zip { get; set; } = "";
+    [Display( Name = "plaats" )]
     public string? City { get; set; } = "";
+    [Display( Name = "mobiel nummer" )]
     public string? Mobile { get; set; } = "";
+    [Display( Name = "telefoonnummer" )]
     public string? Phone { get; set; } = "";
+    [Display( Name = "infomailing" )]
     public int InfoMailing { get; set; }
     public bool InfoMailingBool
     {

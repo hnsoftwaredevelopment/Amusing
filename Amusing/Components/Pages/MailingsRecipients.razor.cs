@@ -21,6 +21,7 @@ namespace Amusing.Components.Pages;
 public class MailingsRecipientsBase : ComponentBase
 {
     [Inject] protected MailingService MailingService { get; set; } = null!;
+    [Inject] protected LoggingService LoggingService { get; set; } = null!;
     [Inject] protected NavigationManager NavManager { get; set; } = null!;
     [Inject] protected IJSRuntime JS { get; set; } = null!;
 
@@ -620,6 +621,8 @@ public class MailingsRecipientsBase : ComponentBase
         if (SelectedRecipientsList.ListId != 0)
         {
             await MailingService.UpdateRecipientQueryAsync(SelectedRecipientsList);
+            string logMessage = $"<_userName> heeft de ontvangerslijst {SelectedRecipientsList.ListName} aangepast.";
+            await LoggingService.WriteUserActionRecipientListAsync( SelectedRecipientsList.ListId, "Mailing", "Ontvangerslijsten", "success", logMessage );
         }
         else
         {
@@ -641,6 +644,9 @@ public class MailingsRecipientsBase : ComponentBase
                 SelectedRecipientsList = RecipientsList[index];
                 await GridRef.SelectRowAsync(index);
             }
+
+            string logMessage = $"<_userName> heeft de ontvangerslijst {SelectedRecipientsList?.ListName} toegevoegd.";
+            await LoggingService.WriteUserActionRecipientListAsync( savedId, "Mailing", "Ontvangerslijsten", "success", logMessage );
         }
     }
 
@@ -672,6 +678,8 @@ public class MailingsRecipientsBase : ComponentBase
         }
 
         await MailingService.DeleteRecipientQueryAsync((uint)list.ListId);
+        string logMessage = $"<_userName> heeft de ontvangerslijst {list.ListName} verwijderd.";
+        await LoggingService.WriteUserActionRecipientListAsync( list.ListId, "Mailing", "Ontvangerslijsten", "success", logMessage );
 
         // Refresh the list
         RecipientsList = await MailingService.GetRecipientListsAsync();
@@ -771,10 +779,12 @@ public class MailingsRecipientsBase : ComponentBase
             }
 
             await ShowToast($"Export naar Excel ({FileName}) voltooid!", "success");
+            await LogRecipientListExportAsync( "Excel", exportProps.FileName, "success" );
         }
         catch (Exception ex)
         {
             await ShowToast($"Export naar Excel mislukt: {ex.Message}", "error");
+            await LogRecipientListExportAsync( "Excel", exportProps.FileName, "unsuccessful" );
         }
     }
 
@@ -798,10 +808,12 @@ public class MailingsRecipientsBase : ComponentBase
             }
 
             await ShowToast($"Export naar CSV ({FileName}) voltooid!", "success");
+            await LogRecipientListExportAsync( "CSV", exportProps.FileName, "success" );
         }
         catch (Exception ex)
         {
             await ShowToast($"Export naar CSF mislukt: {ex.Message}", "error");
+            await LogRecipientListExportAsync( "CSV", exportProps.FileName, "unsuccessful" );
         }
     }
 
@@ -828,10 +840,12 @@ public class MailingsRecipientsBase : ComponentBase
             }
 
             await ShowToast($"Export naar PDF ({FileName}) voltooid!", "success");
+            await LogRecipientListExportAsync( "PDF", exportProps.FileName, "success" );
         }
         catch (Exception ex)
         {
             await ShowToast($"Export naar PDF mislukt: {ex.Message}", "error");
+            await LogRecipientListExportAsync( "PDF", exportProps.FileName, "unsuccessful" );
         }
     }
 
@@ -846,6 +860,22 @@ public class MailingsRecipientsBase : ComponentBase
         }
 
         return true;
+    }
+
+    private async Task LogRecipientListExportAsync( string format, string fileName, string status )
+    {
+        string listName = SelectedRecipientsList?.ListName ?? "onbekende ontvangerslijst";
+        string logMessage = status == "success"
+            ? $"<_userName> heeft de ontvangerslijst {listName} geexporteerd naar {format} ({fileName})."
+            : $"<_userName> kon de ontvangerslijst {listName} niet exporteren naar {format} ({fileName}).";
+
+        if ( SelectedRecipientsList?.ListId > 0 )
+        {
+            await LoggingService.WriteUserActionRecipientListAsync( SelectedRecipientsList.ListId, "Mailing", "Ontvangerslijsten", status, logMessage );
+            return;
+        }
+
+        await LoggingService.WriteUserActionAsync( "Mailing", "Ontvangerslijsten", status, logMessage );
     }
 
     protected async Task GenerateMailList()

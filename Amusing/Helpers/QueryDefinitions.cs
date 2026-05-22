@@ -2136,6 +2136,20 @@ public static class QueryDefinitions
     #endregion
 
     #region Logging queries
+    public static readonly string GetUsersLog = @"
+        SELECT
+            l.date AS LogDate,
+            COALESCE(usr.username, CONCAT('Gebruiker ', l.user_id), 'Onbekend') AS UserName,
+            COALESCE(l.area, '') AS Area,
+            COALESCE(l.action, '') AS Action,
+            COALESCE(l.status, '') AS Status,
+            COALESCE(l.report, '') AS Report
+        FROM amusing.user_log l
+        LEFT JOIN amusing.ah_beheer usr
+            ON usr.user_id = l.user_id
+        WHERE l.date >= @FromDate
+        ORDER BY l.date DESC;";
+
     public static readonly string LogUserLogin = @"
         INSERT INTO amusing.user_log
             (user_id, ip_address, area, action, status, report)
@@ -2145,6 +2159,21 @@ public static class QueryDefinitions
         INSERT INTO amusing.user_log
             (group_id, user_id, ip_address, area, action, status, report)
         VALUES (@GroupId, @UserId, @UserIp, @Area, @Action, @Status, @Report);";
+
+    public static readonly string LogPersonActions = @"
+        INSERT INTO amusing.user_log
+            (person_id, user_id, ip_address, area, action, status, report)
+        VALUES (@PersonId, @UserId, @UserIp, @Area, @Action, @Status, @Report);";
+
+    public static readonly string LogTemplateActions = @"
+        INSERT INTO amusing.user_log
+            (template_id, user_id, ip_address, area, action, status, report)
+        VALUES (@TemplateId, @UserId, @UserIp, @Area, @Action, @Status, @Report);";
+
+    public static readonly string LogRecipientListActions = @"
+        INSERT INTO amusing.user_log
+            (recipientlist_id, user_id, ip_address, area, action, status, report)
+        VALUES (@RecipientListId, @UserId, @UserIp, @Area, @Action, @Status, @Report);";
 
     public static readonly string LogFestivalActions = @"
         INSERT INTO amusing.user_log

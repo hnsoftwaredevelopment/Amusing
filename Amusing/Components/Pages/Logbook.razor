@@ -1,0 +1,80 @@
+@page "/Logbook"
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Navigations
+
+<AuthorizeView>
+    <Authorized>
+        @if (_isLoading)
+        {
+            <div class="text-center p-2">
+                <SfSpinner CssClass="e-spin-center" />
+                <p>Logboek wordt geladen...</p>
+            </div>
+        }
+        else
+        {
+            <div class="page-container maintenance-page">
+                <div class="fixed-header maintenance-page__header">
+                    <h3>Logboek, toont alle wijzigingen van het afgelopen jaar</h3>
+
+                    <SfToolbar Width="100%">
+                        <ToolbarItems>
+                            <ToolbarItem Type="ItemType.Button" Width="130px">
+                                <Template>
+                                    <SfButton CssClass="e-outline" OnClick="ExpandAllGroupsAsync">
+                                        Alles openklappen
+                                    </SfButton>
+                                </Template>
+                            </ToolbarItem>
+                            <ToolbarItem Type="ItemType.Button" Width="130px">
+                                <Template>
+                                    <SfButton CssClass="e-outline" OnClick="CollapseAllGroupsAsync">
+                                        Alles dichtklappen
+                                    </SfButton>
+                                </Template>
+                            </ToolbarItem>
+                            <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right" Width="240px">
+                                <Template>
+                                    <SfTextBox Placeholder="Zoek in het logboek" Input="OnInput" />
+                                </Template>
+                            </ToolbarItem>
+                        </ToolbarItems>
+                    </SfToolbar>
+                </div>
+
+                <div class="scrollable-content maintenance-page__content">
+                    <div class="maintenance-grid-shell maintenance-grid-shell--fit">
+                        <SfGrid @ref="_grid"
+                                TValue="LogModel"
+                                DataSource="@_logs"
+                                AllowSorting="true"
+                                AllowGrouping="true"
+                                AllowResizing="true"
+                                EnableStickyHeader="true"
+                                Height="100%"
+                                Width="100%">
+                            <GridSearchSettings IgnoreAccent="true" Fields="@_searchFields" />
+                            <GridGroupSettings Columns="@_groupedColumns" ExpandAllGroups="false" />
+                            <GridSortSettings>
+                                <GridSortColumns>
+                                    <GridSortColumn Field="LogDate" Direction="SortDirection.Descending" />
+                                </GridSortColumns>
+                            </GridSortSettings>
+                            <GridColumns>
+                                <GridColumn Field="LogDate" HeaderText="Datum" Format="dd-MM-yyyy HH:mm:ss" Type="ColumnType.DateTime" Width="170" />
+                                <GridColumn Field="LogUsername" HeaderText="Gebruiker" Width="140" />
+                                <GridColumn Field="LogArea" HeaderText="Menu" Width="140" />
+                                <GridColumn Field="LogAction" HeaderText="Submenu/Actie" Width="160" />
+                                <GridColumn Field="LogReport" HeaderText="Omschrijving" Width="520" />
+                                <GridColumn Field="LogStatus" HeaderText="Status" Width="120" />
+                            </GridColumns>
+                        </SfGrid>
+                    </div>
+                </div>
+            </div>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <p class="text-danger">Let op, je bent nog niet ingelogd</p>
+    </NotAuthorized>
+</AuthorizeView>

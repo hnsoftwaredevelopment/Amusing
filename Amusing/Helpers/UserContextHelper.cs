@@ -79,16 +79,6 @@ public class UserContextHelper
 
     public string GetUserIp()
     {
-        var ip = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
-
-        // Handle localhost IPv6 (::1)
-        if ( string.IsNullOrEmpty( ip ) || ip == "::1" )
-            ip = "127.0.0.1 (localhost)";
-
-        // Optional: check for reverse proxy forwarding
-        if ( _httpContextAccessor.HttpContext?.Request.Headers.TryGetValue( "X-Forwarded-For", out var forwarded ) == true )
-            ip = forwarded.FirstOrDefault() ?? ip;
-
-        return ip ?? "Onbekend";
+        return ClientIpAddressHelper.GetClientIp( _httpContextAccessor.HttpContext );
     }
 }

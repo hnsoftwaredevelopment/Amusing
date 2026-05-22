@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Options;
 
 using Syncfusion.Blazor;
@@ -171,6 +172,11 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 // Build & middleware pipeline
 // ---------------------------------------------------------
 var app = builder.Build();
+
+app.UseForwardedHeaders( new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+} );
 
 app.UseStaticFiles();
 app.UseRouting();

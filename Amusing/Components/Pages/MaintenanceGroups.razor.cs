@@ -1,5 +1,6 @@
 using Amusing.Models;
 using Amusing.Services;
+using Amusing.Helpers;
 
 using Bit.BlazorUI;
 
@@ -26,6 +27,7 @@ public partial class MaintenanceGroups : ComponentBase
     [Inject] protected CountryService CountryService { get; set; } = default!;
     [Inject] protected GenreService GenreService { get; set; } = default!;
     [Inject] protected GroupService GroupService { get; set; } = default!;
+    [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected PersonService PersonService { get; set; } = default!;
     [Inject] protected RegistrationService RegistrationService { get; set; } = default!;
 
@@ -43,6 +45,7 @@ public partial class MaintenanceGroups : ComponentBase
     private const long PhotoMaxImageSize = 16 * 1024 * 1024; // 16 MB
 
     private GroupModel? SelectedGroup;
+    private GroupModel? SelectedGroupOriginal;
     private int currentTabIndex = 0;
     private int VisibleRowCount = 0;
     private List<CountryModel> Countries = [];
@@ -129,10 +132,14 @@ public partial class MaintenanceGroups : ComponentBase
         if (args.Item.Id.StartsWith("role-"))
         {
             await PersonService.ModifyPersonRoleAsync(selected.GroupId, selected.PersonId, args.Item.Text);
+            string logMessage = $"<_userName> heeft de rol van {AuditLogMessageBuilder.BuildPersonName( selected )} bij het koor {SelectedGroup?.Name} aangepast naar {args.Item.Text}.";
+            await LoggingService.WriteUserActionGroupAsync( selected.GroupId, "Beheer", "Groepen", "success", logMessage );
         }
         else if (args.Item.Id.StartsWith("make"))
         {
             await PersonService.DeletePersonRoleAsync(selected.GroupId, selected.PersonId);
+            string logMessage = $"<_userName> heeft {AuditLogMessageBuilder.BuildPersonName( selected )} verwijderd als relatie van het koor {SelectedGroup?.Name}.";
+            await LoggingService.WriteUserActionGroupAsync( selected.GroupId, "Beheer", "Groepen", "success", logMessage );
         }
 
         await SetupPersonTabAsync();
@@ -145,6 +152,8 @@ public partial class MaintenanceGroups : ComponentBase
 
         var selected = args.RowInfo.RowData;
         await PersonService.InsertNewPersonRoleAsync(SelectedGroup.GroupId, selected.PersonId, args.Item.Text);
+        string logMessage = $"<_userName> heeft {AuditLogMessageBuilder.BuildPersonName( selected )} toegevoegd aan het koor {SelectedGroup.Name} met rol {args.Item.Text}.";
+        await LoggingService.WriteUserActionGroupAsync( SelectedGroup.GroupId, "Beheer", "Groepen", "success", logMessage );
 
         await SetupPersonTabAsync();
     }
@@ -245,6 +254,7 @@ public partial class MaintenanceGroups : ComponentBase
         LatestFestival = await RegistrationService.GetLatestFestivalForMaintenanceAsync();
 
         SelectedGroup = Groups.FirstOrDefault();
+        SelectedGroupOriginal = CloneGroup( SelectedGroup );
 
         IsLoading = false;
     }
@@ -315,6 +325,7 @@ public partial class MaintenanceGroups : ComponentBase
     private async Task OnRowSelected(RowSelectEventArgs<GroupModel> args)
     {
         SelectedGroup = args.Data;
+        SelectedGroupOriginal = CloneGroup( args.Data );
 
 
         if (currentTabIndex == 2)
@@ -362,6 +373,8 @@ public partial class MaintenanceGroups : ComponentBase
         {
             await GroupService.UpdateGroupAsync(SelectedGroup);
             await GroupService.UpdateGroupDetailsAsync(SelectedGroup);
+            await LogGroupChangesAsync();
+            SelectedGroupOriginal = CloneGroup( SelectedGroup );
         }
         else
         {
@@ -382,6 +395,11 @@ public partial class MaintenanceGroups : ComponentBase
                 SelectedGroup = Groups[index];
                 await GridRef.SelectRowAsync(index);
             }
+
+            string groupName = string.IsNullOrWhiteSpace( SelectedGroup?.Name ) ? "zonder naam" : SelectedGroup.Name;
+            string logMessage = $"<_userName> heeft het koor {groupName} toegevoegd.";
+            await LoggingService.WriteUserActionGroupAsync( savedId, "Beheer", "Groepen", "success", logMessage );
+            SelectedGroupOriginal = CloneGroup( SelectedGroup );
         }
     }
 
@@ -417,6 +435,8 @@ public partial class MaintenanceGroups : ComponentBase
     {
         if (SelectedGroup is null)
             return;
+        uint deletedGroupId = SelectedGroup.GroupId;
+        string deletedGroupName = string.IsNullOrWhiteSpace( SelectedGroup.Name ) ? "zonder naam" : SelectedGroup.Name;
         await GroupService.DeleteGroupAsync(SelectedGroup.GroupId);
 
         var groupModels = await GroupService.GetAllGroupsAsync();
@@ -436,7 +456,11 @@ public partial class MaintenanceGroups : ComponentBase
         else
         {
             SelectedGroup = null;
+            SelectedGroupOriginal = null;
         }
+
+        string logMessage = $"<_userName> heeft het koor {deletedGroupName} verwijderd.";
+        await LoggingService.WriteUserActionGroupAsync( deletedGroupId, "Beheer", "Groepen", "success", logMessage );
     }
 
     private async Task OnTabSelected(SelectEventArgs args)
@@ -471,6 +495,8 @@ public partial class MaintenanceGroups : ComponentBase
             return;
 
         await RegistrationService.RegisterGroupForCurrentFestivalAsync(SelectedGroup.GroupId, LatestFestival.FestivalId);
+        string logMessage = $"<_userName> heeft het koor {SelectedGroup.Name} ingeschreven voor festival editie {LatestFestival.Festival}.";
+        await LoggingService.WriteUserActionGroupAsync( SelectedGroup.GroupId, "Beheer", "Groepen", "success", logMessage );
         await LoadGroupRegistrationsAsync();
     }
 
@@ -511,5 +537,65 @@ public partial class MaintenanceGroups : ComponentBase
         _selectFirstRowUnrelatedPending = UnrelatedPersonsList.Count > 0;
 
         StateHasChanged(); // let the two person grids re-render with new data & menus
+    }
+
+    private async Task LogGroupChangesAsync()
+    {
+        if ( SelectedGroupOriginal is null || SelectedGroup is null )
+            return;
+
+        var diffOptions = new DiffOptions
+        {
+            ExcludedProperties = [ "GroupId", "CountryId", "GenreId", "IsActive" ]
+        };
+
+        var differences = ObjectDiffHelper.GetDifferences( SelectedGroupOriginal, SelectedGroup, diffOptions );
+        string subject = $"het koor {SelectedGroup.Name}";
+
+        if ( SelectedGroupOriginal.GenreId != SelectedGroup.GenreId )
+        {
+            string oldGenre = GetGenreName( SelectedGroupOriginal.GenreId, SelectedGroupOriginal.Genre );
+            string newGenre = GetGenreName( SelectedGroup.GenreId, SelectedGroup.Genre );
+            string logMessage = $"<_userName> heeft het genre aangepast van {subject} van '{oldGenre}' naar '{newGenre}'.";
+            await LoggingService.WriteUserActionGroupAsync( SelectedGroup.GroupId, "Beheer", "Groepen", "success", logMessage );
+        }
+
+        foreach ( var diff in differences )
+        {
+            string logMessage = AuditLogMessageBuilder.BuildChangeReport( subject, diff );
+            await LoggingService.WriteUserActionGroupAsync( SelectedGroup.GroupId, "Beheer", "Groepen", "success", logMessage );
+        }
+    }
+
+    private static GroupModel? CloneGroup( GroupModel? group )
+    {
+        if ( group is null )
+            return null;
+
+        return new GroupModel
+        {
+            GroupId = group.GroupId,
+            Name = group.Name,
+            GenreId = group.GenreId,
+            Genre = group.Genre,
+            City = group.City,
+            CountryId = group.CountryId,
+            Country = group.Country,
+            Website = group.Website,
+            Email = group.Email,
+            Photo = group.Photo?.ToArray() ?? [],
+            Logo = group.Logo?.ToArray() ?? [],
+            Description = group.Description,
+            BankAccount = group.BankAccount,
+            Active = group.Active,
+            IsActive = group.IsActive
+        };
+    }
+
+    private string GetGenreName( uint genreId, string? fallback )
+    {
+        return Genres.FirstOrDefault( genre => genre.GenreId == genreId )?.Nl
+            ?? fallback
+            ?? "onbekend genre";
     }
 }
