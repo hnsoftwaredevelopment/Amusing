@@ -9,10 +9,31 @@ namespace Amusing.Services;
 public class GenericDataService
 {
     private readonly MySqlConnection _connection;
+    private readonly string? _databaseName;
 
     public GenericDataService( IConfiguration config )
     {
-        _connection = new MySqlConnection( config.GetConnectionString( "DefaultConnection" ) );
+        string? connectionString = config.GetConnectionString( "DefaultConnection" );
+
+        _connection = new MySqlConnection( connectionString );
+        _databaseName = string.IsNullOrWhiteSpace( connectionString )
+            ? null
+            : new MySqlConnectionStringBuilder( connectionString ).Database;
+    }
+
+    public static string UseConfiguredDatabase( string sql, string? databaseName )
+    {
+        if ( string.IsNullOrWhiteSpace( databaseName )
+            || string.Equals( databaseName, "amusing", StringComparison.OrdinalIgnoreCase ) )
+        {
+            return sql;
+        }
+
+        string escapedDatabaseName = databaseName.Replace( "`", "``" );
+
+        return sql
+            .Replace( "`amusing`.", $"`{escapedDatabaseName}`.", StringComparison.OrdinalIgnoreCase )
+            .Replace( "amusing.", $"`{escapedDatabaseName}`.", StringComparison.OrdinalIgnoreCase );
     }
 
     public async Task<List<T>> ExecuteQueryAsync<T>(
@@ -25,7 +46,7 @@ public class GenericDataService
         await using MySqlConnection connection = new(_connection.ConnectionString);
         await connection.OpenAsync();
 
-        using MySqlCommand cmd = new(query, connection);
+        using MySqlCommand cmd = new(UseConfiguredDatabase( query, _databaseName ), connection);
 
         if ( parameters is not null )
         {
@@ -52,7 +73,7 @@ public class GenericDataService
         await using MySqlConnection connection = new(_connection.ConnectionString);
         await connection.OpenAsync();
 
-        using MySqlCommand cmd = new(query, connection);
+        using MySqlCommand cmd = new(UseConfiguredDatabase( query, _databaseName ), connection);
 
         if ( parameters is not null )
         {
@@ -70,7 +91,7 @@ public class GenericDataService
         await using MySqlConnection connection = new(_connection.ConnectionString);
         await connection.OpenAsync();
 
-        await using MySqlCommand command = new(query, connection);
+        await using MySqlCommand command = new(UseConfiguredDatabase( query, _databaseName ), connection);
 
         if ( parameters != null )
         {
@@ -90,7 +111,7 @@ public class GenericDataService
     public T? ExecuteScalarQuery<T>( string sql, Dictionary<string, object> parameters )
     {
         using var connection = new MySqlConnection(_connection.ConnectionString);
-        using var command = new MySqlCommand(sql, connection);
+        using var command = new MySqlCommand(UseConfiguredDatabase( sql, _databaseName ), connection);
 
         foreach ( var param in parameters )
         {
@@ -128,7 +149,7 @@ public class GenericDataService
         using var connection = new MySqlConnection(_connection.ConnectionString);
         await connection.OpenAsync();
 
-        using var cmd = new MySqlCommand(sql, connection);
+        using var cmd = new MySqlCommand(UseConfiguredDatabase( sql, _databaseName ), connection);
 
         // Add parameters when provided
         if ( parameters != null )
