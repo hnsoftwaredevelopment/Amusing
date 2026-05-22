@@ -31,10 +31,10 @@ public static class QueryDefinitions
         WHERE prol.rol = 'contactpersoon1' AND pers.email <> '';";
     public static readonly string GetNewlyAddedEmailAddresses = @"
     SELECT 
-        ANY_VALUE(ah_zanggroepen.naam) AS `Groep`,
-        ANY_VALUE(CONCAT_WS(' ', ah_personen.voornaam, NULLIF(ah_personen.tussenvoegsel, ''), ah_personen.achternaam)) AS `Naam`,
-        ANY_VALUE(ah_personen.email) AS `E-Mail`,
-        ANY_VALUE(ah_zanggroepen.land ) AS `Land`
+        MIN(ah_zanggroepen.naam) AS `Groep`,
+        MIN(CONCAT_WS(' ', ah_personen.voornaam, NULLIF(ah_personen.tussenvoegsel, ''), ah_personen.achternaam)) AS `Naam`,
+        MIN(ah_personen.email) AS `E-Mail`,
+        MIN(ah_zanggroepen.land ) AS `Land`
     FROM amusing.ah_profielbeheer_log
     INNER JOIN amusing.ah_zanggroepen ON ah_zanggroepen.zanggroep_id = ah_profielbeheer_log.zanggroep_id
     INNER JOIN amusing.ah_personen_rollen ON ah_personen_rollen.zanggroep_id = ah_zanggroepen.zanggroep_id
@@ -58,7 +58,6 @@ public static class QueryDefinitions
             )
       )
       AND ah_personen_rollen.rol = 'contactpersoon1'
-      AND ah_zanggroepen.land = 'NL'
       AND ah_personen.email <> ''
     GROUP BY 
         ah_personen.email
@@ -66,10 +65,10 @@ public static class QueryDefinitions
         `Naam` ASC;";
     public static readonly string GetOldEmailAddresses = @"
     SELECT
-        any_value(`ah_zanggroepen`.`naam`) AS `Groep`,
-        any_value(concat_ws(' ', `ah_personen`.`voornaam`, NULLIF(`ah_personen`.`tussenvoegsel`, ''), `ah_personen`.`achternaam`)) AS `Naam`,
-        any_value(`ah_personen`.`email`) AS `E-Mail`,
-        any_value(`ah_zanggroepen`.`land`) AS `Land`
+        MIN(`ah_zanggroepen`.`naam`) AS `Groep`,
+        MIN(concat_ws(' ', `ah_personen`.`voornaam`, NULLIF(`ah_personen`.`tussenvoegsel`, ''), `ah_personen`.`achternaam`)) AS `Naam`,
+        MIN(`ah_personen`.`email`) AS `E-Mail`,
+        MIN(`ah_zanggroepen`.`land`) AS `Land`
     FROM
         ((((`ah_inschrijvingen`
     JOIN `ah_zanggroepen` ON
@@ -105,10 +104,10 @@ public static class QueryDefinitions
         `Groep`;";
     public static readonly string GetPreviousEmailAddresses = @"
     SELECT 
-        ANY_VALUE(zg.naam) AS `Groep`,
-        ANY_VALUE(CONCAT_WS(' ', p.voornaam, NULLIF(p.tussenvoegsel, ''), p.achternaam)) AS `Naam`,
+        MIN(zg.naam) AS `Groep`,
+        MIN(CONCAT_WS(' ', p.voornaam, NULLIF(p.tussenvoegsel, ''), p.achternaam)) AS `Naam`,
         p.email AS `E-Mail`,
-        ANY_VALUE(zg.land) AS `Land`
+        MIN(zg.land) AS `Land`
     FROM 
         ah_inschrijvingen i
     INNER JOIN 
@@ -132,13 +131,13 @@ public static class QueryDefinitions
     GROUP BY 
         p.email
     ORDER BY 
-        ANY_VALUE(zg.naam) ASC;";
+        MIN(zg.naam) ASC;";
     public static readonly string GetUpcommingEmailAddresses = @"
     SELECT 
-        ANY_VALUE(zg.naam) AS `Groep`,
-        ANY_VALUE(CONCAT_WS(' ', p.voornaam, NULLIF(p.tussenvoegsel, ''), p.achternaam)) AS `Naam`,
+        MIN(zg.naam) AS `Groep`,
+        MIN(CONCAT_WS(' ', p.voornaam, NULLIF(p.tussenvoegsel, ''), p.achternaam)) AS `Naam`,
         p.email AS `E-Mail`,
-        ANY_VALUE(zg.land) AS `Land`
+        MIN(zg.land) AS `Land`
     FROM 
         ah_inschrijvingen i
     INNER JOIN 
@@ -161,13 +160,13 @@ public static class QueryDefinitions
     GROUP BY 
         p.email
     ORDER BY 
-        ANY_VALUE(zg.naam) ASC;";
+        MIN(zg.naam) ASC;";
     public static readonly string GetQueueUpcommingEmailAddresses = @"
     SELECT 
-        ANY_VALUE(ah_zanggroepen.naam) AS `Groep`,
-        ANY_VALUE(CONCAT_WS(' ', ah_personen.voornaam, NULLIF(ah_personen.tussenvoegsel, ''), ah_personen.achternaam)) AS `Naam`,
-        ANY_VALUE(ah_personen.email) AS `E-Mail`,
-        ANY_VALUE(ah_zanggroepen.land ) as `Land`
+        MIN(ah_zanggroepen.naam) AS `Groep`,
+        MIN(CONCAT_WS(' ', ah_personen.voornaam, NULLIF(ah_personen.tussenvoegsel, ''), ah_personen.achternaam)) AS `Naam`,
+        MIN(ah_personen.email) AS `E-Mail`,
+        MIN(ah_zanggroepen.land ) as `Land`
     FROM ah_inschrijvingen
     INNER JOIN ah_zanggroepen 
         ON ah_zanggroepen.zanggroep_id = ah_inschrijvingen.zanggroep_id
@@ -187,9 +186,9 @@ public static class QueryDefinitions
     ORDER BY `Groep` ASC;";
     public static readonly string GetIncompleteEmailAddresses = @"
     SELECT 
-        ANY_VALUE(ah_zanggroepen.naam) AS `Groep`,
-        ANY_VALUE(CONCAT_WS(' ', ah_personen.voornaam, NULLIF(ah_personen.tussenvoegsel, ''), ah_personen.achternaam)) AS `Naam`,
-        ANY_VALUE(ah_personen.email) AS `E-Mail`,
+        MIN(ah_zanggroepen.naam) AS `Groep`,
+        MIN(CONCAT_WS(' ', ah_personen.voornaam, NULLIF(ah_personen.tussenvoegsel, ''), ah_personen.achternaam)) AS `Naam`,
+        MIN(ah_personen.email) AS `E-Mail`,
         CONCAT_WS(', ',
             IF(ah_contactgegevens.straatnaam IS NULL OR ah_contactgegevens.straatnaam = '', 'Straatnaam', NULL),
             IF(ah_contactgegevens.huisnummer IS NULL OR ah_contactgegevens.huisnummer = '', 'Huisnummer', NULL),
@@ -202,7 +201,7 @@ public static class QueryDefinitions
                 NULL
                 )
         ) AS `Ontbreekt`,
-        ANY_VALUE(ah_zanggroepen.land) as `Land`
+        MIN(ah_zanggroepen.land) as `Land`
     FROM ah_personen
         LEFT JOIN ah_contactgegevens ON ah_contactgegevens.persoon_id = ah_personen.persoon_id
         INNER JOIN ah_personen_rollen ON ah_personen_rollen.persoon_id = ah_personen.persoon_id

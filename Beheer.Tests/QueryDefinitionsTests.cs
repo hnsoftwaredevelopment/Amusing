@@ -130,6 +130,32 @@ public class QueryDefinitionsTests
     }
 
     [Fact]
+    public void GetNewlyAddedEmailAddressesQuery_DoesNotHardcodeDutchCountry()
+    {
+        string query = QueryDefinitions.GetNewlyAddedEmailAddresses;
+
+        Assert.DoesNotContain("ah_zanggroepen.land = 'NL'", query);
+        Assert.DoesNotContain("ah_zanggroepen.land = 'nl'", query);
+    }
+
+    [Fact]
+    public void EmailAddressQueries_DoNotUseUnsupportedAnyValueFunction()
+    {
+        string[] queries =
+        [
+            QueryDefinitions.GetNewlyAddedEmailAddresses,
+            QueryDefinitions.GetOldEmailAddresses,
+            QueryDefinitions.GetPreviousEmailAddresses,
+            QueryDefinitions.GetUpcommingEmailAddresses,
+            QueryDefinitions.GetQueueUpcommingEmailAddresses,
+            QueryDefinitions.GetIncompleteEmailAddresses,
+        ];
+
+        foreach ( string query in queries )
+            Assert.DoesNotContain("any_value", query, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void GetFestivalOverviewQuery_ClosesLastDynamicYearAlias()
     {
         string query = QueryDefinitions.GetFestivalOverviewQuery(2024, 2026, filterOutOldGroups: false);

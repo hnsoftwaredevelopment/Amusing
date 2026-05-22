@@ -23,6 +23,7 @@
 				TValue="string" 
 				TItem="Countries"
 				Placeholder="Selecteer een land"
+				Value="@SelectedCountry"
 				ValueChanged="OnCountryChanged"
 				DataSource="@CountryList"
 				Width="250px">
@@ -41,8 +42,8 @@
 		</div>
 		@if( SelectedCountry != null)
 		{
-		@* Niewsbrief *@
-		<h2 class="mt-5">Niewsbrief mailinglijst</h2>
+		@* Nieuwsbrief *@
+		<h2 class="mt-5">Nieuwsbrief mailinglijst</h2>
 		<p/>
 		@if ( SelectedCountry != null && NewsletterEmailAddressesListVisibleRowCount > 0 )
 		{

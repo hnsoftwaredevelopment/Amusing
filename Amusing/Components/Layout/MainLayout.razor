@@ -1,9 +1,16 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IConfiguration Configuration
 @using Amusing.Components.Shared
 
 <div class="page">
-    <div class="sidebar">
+    <div class="@SidebarCssClass">
+        @if ( ShowEnvironmentMarker )
+        {
+            <div class="environment-badge" aria-label="@EnvironmentBadgeLabel">
+                @EnvironmentBadgeLabel
+            </div>
+        }
         <NavMenu />
     </div>
 
@@ -19,3 +26,19 @@
     <a href="" class="reload">Opnieuw laden</a>
     <a class="dismiss">🗙</a>
 </div>
+
+@code {
+    private string? EnvironmentName => Configuration["Amusing:EnvironmentName"];
+
+    private bool ShowEnvironmentMarker =>
+        !string.IsNullOrWhiteSpace( EnvironmentName )
+        && !string.Equals( EnvironmentName, "Production", StringComparison.OrdinalIgnoreCase );
+
+    private string SidebarCssClass => ShowEnvironmentMarker
+        ? "sidebar sidebar-test"
+        : "sidebar";
+
+    private string EnvironmentBadgeLabel => string.Equals( EnvironmentName, "Test", StringComparison.OrdinalIgnoreCase )
+        ? "TESTOMGEVING"
+        : EnvironmentName?.ToUpperInvariant() ?? string.Empty;
+}

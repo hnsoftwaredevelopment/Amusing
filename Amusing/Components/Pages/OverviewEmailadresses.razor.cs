@@ -19,7 +19,6 @@ public partial class OverviewEmailAddresses : ComponentBase
     [Inject] private ToastService ToastService { get; set; } = default!;
 
     protected string? SelectedCountry;
-    protected bool IsInitialized;
 
     protected SfGrid<EmailAddressesModel>? NewsletterEmailAddressesGridRef;
     protected SfGrid<EmailAddressesModel>? AllKnownEmailAddressesGridRef;
@@ -76,28 +75,16 @@ public partial class OverviewEmailAddresses : ComponentBase
         if ( string.IsNullOrWhiteSpace( selectedCountry ) )
             return;
 
-        SelectedCountry = selectedCountry;
+        SelectedCountry = NormalizeCountryCode( selectedCountry );
 
         await LoadNewsletterEmailAddressesAsync();
         ApplyCountryFilters();
-        NewsletterEmailAddressesListVisibleRowCount = FilteredNewsletterEmailAddressesList.Count;
-        AllKnownEmailAddressesListVisibleRowCount = FilteredAllKnownEmailAddressesList.Count;
-        NewlyAddedEmailAddressesListVisibleRowCount = FilteredNewlyAddedEmailAddressesList.Count;
-        OldEmailAddressesListVisibleRowCount = FilteredOldEmailAddressesList.Count;
-        StateHasChanged(); // Force UI rerender to initializeall Refs
-
-        if ( IsInitialized )
-        {
-            await NewsletterEmailAddressesGridRef.Refresh();
-            await AllKnownEmailAddressesGridRef.Refresh();
-            await NewlyAddedEmailAddressesGridRef.Refresh();
-            await OldEmailAddressesGridRef.Refresh();
-        }
+        StateHasChanged(); // Force UI rerender
     }
 
     protected async Task LoadNewsletterEmailAddressesAsync()
     {
-        if ( SelectedCountry != "" )
+        if ( !string.IsNullOrWhiteSpace( SelectedCountry ) )
         {
             AllNewsletterEmailAddressesList = await EmailAddressesService.GetNewsletterEmailAddressesAsync();
             AllAllKnownEmailAddressesList = await EmailAddressesService.GetAllKnownEmailAddressesAsync();
@@ -122,26 +109,51 @@ public partial class OverviewEmailAddresses : ComponentBase
     // Apply filtering for the Datasurces of the DataGrids
     protected void ApplyCountryFilters()
     {
-        if ( SelectedCountry == "nl" || SelectedCountry == "de" )
-        {
-            FilteredNewsletterEmailAddressesList = AllNewsletterEmailAddressesList.Where( v => v.Land.ToLower() == SelectedCountry ).ToList();
-            FilteredAllKnownEmailAddressesList = AllAllKnownEmailAddressesList.Where( v => v.Land.ToLower() == SelectedCountry ).ToList();
-            FilteredNewlyAddedEmailAddressesList = AllNewlyAddedEmailAddressesList.Where( v => v.Land.ToLower() == SelectedCountry ).ToList();
-            FilteredOldEmailAddressesList = AllOldEmailAddressesList.Where( v => v.Land.ToLower() == SelectedCountry ).ToList();
-        }
-        else
-        {
-            FilteredNewsletterEmailAddressesList = AllNewsletterEmailAddressesList.Where( v => v.Land.ToLower() != "nl" && v.Land.ToLower() != "de" ).ToList();
-            FilteredAllKnownEmailAddressesList = AllAllKnownEmailAddressesList.Where( v => v.Land.ToLower() != "nl" && v.Land.ToLower() != "de" ).ToList();
-            FilteredNewlyAddedEmailAddressesList = AllNewlyAddedEmailAddressesList.Where( v => v.Land.ToLower() != "nl" && v.Land.ToLower() != "de" ).ToList();
-            FilteredOldEmailAddressesList = AllOldEmailAddressesList.Where( v => v.Land.ToLower() != "nl" && v.Land.ToLower() != "de" ).ToList();
-
-        }
+        FilteredNewsletterEmailAddressesList = FilterByCountry( AllNewsletterEmailAddressesList, SelectedCountry );
+        FilteredAllKnownEmailAddressesList = FilterByCountry( AllAllKnownEmailAddressesList, SelectedCountry );
+        FilteredNewlyAddedEmailAddressesList = FilterByCountry( AllNewlyAddedEmailAddressesList, SelectedCountry );
+        FilteredOldEmailAddressesList = FilterByCountry( AllOldEmailAddressesList, SelectedCountry );
+        FilteredPreviousEmailAddressesList = FilterByCountry( AllPreviousEmailAddressesList, SelectedCountry );
+        FilteredUpcommingEmailAddressesList = FilterByCountry( AllUpcommingEmailAddressesList, SelectedCountry );
+        FilteredQueueUpcommingEmailAddressesList = FilterByCountry( AllQueueUpcommingEmailAddressesList, SelectedCountry );
+        FilteredIncompleteEmailAddressesList = FilterByCountry( AllIncompleteEmailAddressesList, SelectedCountry );
 
         NewsletterEmailAddressesListVisibleRowCount = FilteredNewsletterEmailAddressesList.Count;
         AllKnownEmailAddressesListVisibleRowCount = FilteredAllKnownEmailAddressesList.Count;
         NewlyAddedEmailAddressesListVisibleRowCount = FilteredNewlyAddedEmailAddressesList.Count;
         OldEmailAddressesListVisibleRowCount = FilteredOldEmailAddressesList.Count;
+        PreviousEmailAddressesListVisibleRowCount = FilteredPreviousEmailAddressesList.Count;
+        UpcommingEmailAddressesListVisibleRowCount = FilteredUpcommingEmailAddressesList.Count;
+        QueueUpcommingEmailAddressesListVisibleRowCount = FilteredQueueUpcommingEmailAddressesList.Count;
+        IncompleteEmailAddressesListVisibleRowCount = FilteredIncompleteEmailAddressesList.Count;
+    }
+
+    public static List<EmailAddressesModel> FilterByCountry( IEnumerable<EmailAddressesModel> emailAddresses, string? selectedCountry )
+    {
+        string normalizedCountry = NormalizeCountryCode( selectedCountry );
+
+        if ( normalizedCountry == "nl" || normalizedCountry == "de" )
+            return emailAddresses.Where( address => NormalizeCountryCode( address.Land ) == normalizedCountry ).ToList();
+
+        return emailAddresses.Where( address =>
+        {
+            string land = NormalizeCountryCode( address.Land );
+            return land != "nl" && land != "de";
+        } ).ToList();
+    }
+
+    private static string NormalizeCountryCode( string? countryCode )
+    {
+        string normalizedCountryCode = countryCode?.Trim().ToLowerInvariant() ?? string.Empty;
+
+        return normalizedCountryCode switch
+        {
+            "nederland" => "nl",
+            "duitsland" => "de",
+            "deutschland" => "de",
+            "overige" => "uk",
+            _ => normalizedCountryCode,
+        };
     }
 
     // Export functions
