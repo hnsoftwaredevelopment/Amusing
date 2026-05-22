@@ -247,7 +247,7 @@ public class PersonService( GenericDataService dataService )
         { "@FirstName",  model.FirstName },
         { "@NameInfix",  model.NameInfix },
         { "@LastName",  model.LastName },
-        { "@Email",  model.Email },
+        { "@Email",  model.PersonsEmail },
         { "@Active",  model.Active },
         { "@InfoMailing",  model.InfoMailing }
     };
@@ -258,7 +258,7 @@ public class PersonService( GenericDataService dataService )
     {
         Dictionary<string, object> parameters = new()
     {
-        { "@PersonId", model.PersonId },
+        { "@PersonId", personId },
         { "@Zip",  model.Zip },
         { "@Street",  model.Street },
         { "@HomeNr",  model.HomeNr },
@@ -268,6 +268,7 @@ public class PersonService( GenericDataService dataService )
         { "@Mobile",  model.Mobile }
     };
 
-        return await _dataService.ExecuteScalarAsync<uint>( QueryDefinitions.AddNewContactData, parameters );
+        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.AddNewContactData, parameters );
+        return personId;
     }
 }

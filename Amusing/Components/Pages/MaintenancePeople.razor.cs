@@ -307,6 +307,7 @@ public partial class MaintenancePeople : ComponentBase
 
             // Refresh the list
             Persons = await PersonService.GetAllPersonsAsync();
+            ApplyFilter();
             await Task.Delay( 50 );
             await GridRef.Refresh();
 
