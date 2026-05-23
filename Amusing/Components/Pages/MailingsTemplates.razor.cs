@@ -105,14 +105,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
     private uint? RecipientListId
     {
         get => _selectedTemplatesList?.RecipientListId;
-        set
-        {
-            if (_selectedTemplatesList != null && _selectedTemplatesList.RecipientListId != value)
-            {
-                _selectedTemplatesList.RecipientListId = value;
-                _ = LoadRecipientDataAsync(value);
-            }
-        }
+        set { if (_selectedTemplatesList != null) _selectedTemplatesList.RecipientListId = value; }
     }
 
     private readonly List<ToolbarItemModel> _rteToolbarItems =
@@ -232,12 +225,9 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
         showSavedMessage = true;
 
-        var _ = Task.Run(async () =>
-        {
-            await Task.Delay(3000);
-            showSavedMessage = false;
-            StateHasChanged();
-        });
+        await Task.Delay(3000);
+        showSavedMessage = false;
+        await InvokeAsync(StateHasChanged);
 
         // Restore the dutch fieldnames in the UI
         _selectedTemplatesList.TemplateSubject = _tempSubject;
@@ -343,9 +333,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
                 _selectedTemplatesList.TemplateContent = _mappingService.ReplaceKeysWithLabels(_selectedTemplatesList.TemplateContent, true);
 
                 _editContext = new EditContext(_selectedTemplatesList);
-                InvokeAsync(StateHasChanged);
-
-                _ = LoadRecipientDataAsync(_selectedTemplatesList.RecipientListId);
+                _ = InvokeAsync(StateHasChanged);
             }
         }
     }
@@ -760,7 +748,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
             _recipientData = await MailingService.GetDynamicRecipientsAsync(_currentRecipientQuery);
 
-            await MailingService.SendTestMailAsync(
+            MailingSendResult sendResult = await MailingService.SendTestMailAsync(
                 _tempTemplateList,
                 _recipientData,
                 _testEmailAddress,
@@ -771,7 +759,10 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             Debug.WriteLine($"Testmail(s) verzonden naar {_testEmailAddress}");
             string logMessage = $"<_userName> heeft een testmail verstuurd met sjabloon {_selectedTemplatesList.TemplateName} naar {_testEmailAddress}.";
             await LoggingService.WriteUserActionTemplateAsync( _selectedTemplatesList.TemplateId, "Mailing", "Sjablonen", "success", logMessage );
-            await ToastService.ShowSuccessAsync( $"Testmail voor sjabloon {_selectedTemplatesList.TemplateName} is verzonden naar {_testEmailAddress}." );
+            if ( sendResult.HasFailures )
+                await ToastService.ShowErrorAsync( $"Testmail voor sjabloon {_selectedTemplatesList.TemplateName}: {sendResult.Failed} van {sendResult.Requested} berichten kon niet worden verzonden." );
+            else
+                await ToastService.ShowSuccessAsync( $"Testmail voor sjabloon {_selectedTemplatesList.TemplateName} is verzonden naar {_testEmailAddress}." );
         }
         catch (Exception ex)
         {
@@ -806,7 +797,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
             _recipientData = await MailingService.GetDynamicRecipientsAsync(_currentRecipientQuery);
 
-            await MailingService.SendBulkMailAsync(
+            MailingSendResult sendResult = await MailingService.SendBulkMailAsync(
                 _tempTemplateList,
                 _recipientData
             );
@@ -814,7 +805,10 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             Debug.WriteLine("Bulkmailing verzonden.");
             string logMessage = $"<_userName> heeft een mailing verstuurd met sjabloon {_selectedTemplatesList.TemplateName}.";
             await LoggingService.WriteUserActionTemplateAsync( _selectedTemplatesList.TemplateId, "Mailing", "Sjablonen", "success", logMessage );
-            await ToastService.ShowSuccessAsync( $"Mailing met sjabloon {_selectedTemplatesList.TemplateName} is verzonden." );
+            if ( sendResult.HasFailures )
+                await ToastService.ShowErrorAsync( $"Mailing met sjabloon {_selectedTemplatesList.TemplateName}: {sendResult.Failed} van {sendResult.Requested} berichten kon niet worden verzonden." );
+            else
+                await ToastService.ShowSuccessAsync( $"Mailing met sjabloon {_selectedTemplatesList.TemplateName} is verzonden." );
         }
         catch (Exception ex)
         {
@@ -989,6 +983,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
         if (templateId != null && templateId != 0)
         {
             SelectedTemplatesListId = templateId;
+            await LoadRecipientDataAsync(_selectedTemplatesList.RecipientListId);
             await Task.Delay(100); // Allow UI state to settle
             await UpdateRteSlashMenuAsync();
         }
@@ -999,6 +994,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
         if (recipientListId != null && recipientListId != 0)
         {
             RecipientListId = recipientListId;
+            await LoadRecipientDataAsync(recipientListId);
             await Task.Delay(100); // Allow UI state to settle
             await UpdateRteSlashMenuAsync();
         }

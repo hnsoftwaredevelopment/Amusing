@@ -40,7 +40,7 @@ public partial class ListTasks : ComponentBase
     }
 
     // Manage direct search functionality
-    public async void OnInputActive( InputEventArgs args )
+    public async Task OnInputActive( InputEventArgs args )
     {
         await GridRefActive.SearchAsync( args.Value );
 
@@ -48,7 +48,7 @@ public partial class ListTasks : ComponentBase
         await UpdateVisibleRowCountActiveAsync();
     }
 
-    public async void OnInputInactive( InputEventArgs args )
+    public async Task OnInputInactive( InputEventArgs args )
     {
         await GridRefInactive.SearchAsync( args.Value );
         await Task.Delay( 50 );

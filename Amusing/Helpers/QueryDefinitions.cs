@@ -1576,8 +1576,26 @@ public static class QueryDefinitions
                     FROM amusing.ah_recipient_lists
                     WHERE id = @ListId;";
 
+    private static readonly HashSet<string> EditableRegistrationGridFields = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "betaald",
+        "afgehaakt",
+        "bevestigd",
+        "binnen",
+        "buiten",
+        "wens_1",
+        "wens_2",
+        "wens_3",
+        "wens_4"
+    };
+
     public static string ModifyChangedGridValue(string fieldName)
     {
+        if (!EditableRegistrationGridFields.Contains(fieldName))
+        {
+            throw new ArgumentException($"'{fieldName}' is not an editable registration grid field.", nameof(fieldName));
+        }
+
         return $@"
         UPDATE amusing.ah_inschrijvingen
         SET `{fieldName}` = @value

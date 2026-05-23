@@ -11,6 +11,11 @@ using MimeKit;
 
 namespace Amusing.Services;
 
+public record MailingSendResult(int Requested, int Sent, int Failed)
+{
+    public bool HasFailures => Failed > 0;
+}
+
 public class MailingService
 {
     private readonly EmailSettings _emailSettings;
@@ -47,15 +52,12 @@ public class MailingService
 
     #region Send Mail Core
 
-    private async Task _SendMimeMessageAsync(MimeMessage message)
+    private async Task<bool> SendMimeMessageAsync(MimeMessage message)
     {
         try
         {
             using var client = new SmtpClient();
             var secureOption = _emailSettings.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None;
-
-            Debug.WriteLine($"SMTP Host: {_emailSettings.SmtpHost}, Port: {_emailSettings.SmtpPort}, SSL: {_emailSettings.EnableSsl}, Using: {secureOption}");
-            Debug.WriteLine($"User: {_emailSettings.SmtpUser}, PW: {_emailSettings.SmtpPass}, SendMail: {_emailSettings.SenderAddress}");
 
             await client.ConnectAsync(_emailSettings.SmtpHost, _emailSettings.SmtpPort, secureOption);
             await client.AuthenticateAsync(_emailSettings.SmtpUser, _emailSettings.SmtpPass);
@@ -63,6 +65,7 @@ public class MailingService
             await client.DisconnectAsync(true);
 
             await _logger.LogMailSentAsync(message.To.ToString(), message.Subject, success: true);
+            return true;
         }
         catch (Exception smtpEx)
         {
@@ -73,6 +76,7 @@ public class MailingService
                 message.Subject,
                 success: false,
                 errorMessage: smtpEx.Message);
+            return false;
         }
     }
 
@@ -80,41 +84,61 @@ public class MailingService
 
     #region Public Send Methods
 
-    public async Task SendTestMailAsync(TemplatesListModel template, List<ExpandoObject> recipients, string testEmail, int numberToSend = 15)
+    public async Task<MailingSendResult> SendTestMailAsync(TemplatesListModel template, List<ExpandoObject> recipients, string testEmail, int numberToSend = 15)
     {
         var toSend = recipients.Take(numberToSend);
+        int requested = 0;
+        int sent = 0;
+        int failed = 0;
+
         foreach (var recipient in toSend)
         {
             var dict = recipient as IDictionary<string, object>;
             if (dict == null)
                 continue;
 
+            requested++;
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderAddress));
             message.To.Add(MailboxAddress.Parse(testEmail));
             message.Subject = ReplaceTemplateFields(template.TemplateSubject, dict);
             message.Body = new TextPart("html") { Text = ReplaceTemplateFields(template.TemplateContent ?? "", dict) };
 
-            await _SendMimeMessageAsync(message);
+            if ( await SendMimeMessageAsync(message) )
+                sent++;
+            else
+                failed++;
         }
+
+        return new MailingSendResult(requested, sent, failed);
     }
 
-    public async Task SendBulkMailAsync(TemplatesListModel template, List<ExpandoObject> recipients)
+    public async Task<MailingSendResult> SendBulkMailAsync(TemplatesListModel template, List<ExpandoObject> recipients)
     {
+        int requested = 0;
+        int sent = 0;
+        int failed = 0;
+
         foreach (var recipient in recipients)
         {
             var dict = recipient as IDictionary<string, object>;
             if (dict == null || !dict.TryGetValue("Email", out var emailObj) || string.IsNullOrWhiteSpace(emailObj?.ToString()))
                 continue;
 
+            requested++;
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderAddress));
             message.To.Add(MailboxAddress.Parse(emailObj.ToString()!));
             message.Subject = ReplaceTemplateFields(template.TemplateSubject, dict);
             message.Body = new TextPart("html") { Text = ReplaceTemplateFields(template.TemplateContent ?? "", dict) };
 
-            await _SendMimeMessageAsync(message);
+            if ( await SendMimeMessageAsync(message) )
+                sent++;
+            else
+                failed++;
         }
+
+        return new MailingSendResult(requested, sent, failed);
     }
 
     public async Task<List<(string Recipient, string Subject, string Body)>> GeneratePreviewAsync(
@@ -268,7 +292,7 @@ public class MailingService
         message.Subject = subject;
         message.Body = new MimeKit.TextPart("html") { Text = body };
 
-        await _SendMimeMessageAsync(message);
+        await SendMimeMessageAsync(message);
     }
 
     #region Templates

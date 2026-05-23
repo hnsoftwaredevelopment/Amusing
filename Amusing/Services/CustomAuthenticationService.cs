@@ -48,6 +48,9 @@ public class CustomAuthenticationService
 
         string? passwordHash = reader["PasswordHash"] as string;
         string? oldMd5Password = reader["password"] as string;
+        int userId = reader.GetInt32( "user_id" );
+        string storedUsername = reader.GetString( "username" );
+        string role = reader.GetString( "role" ).Trim().ToLowerInvariant();
 
         bool valid = false;
 
@@ -70,7 +73,7 @@ public class CustomAuthenticationService
                     string newHash = BCrypt.Net.BCrypt.HashPassword(password);
 
                     // Update PasswordHash kolom in DB
-                    await reader.CloseAsync(); // reader moet eerst gesloten worden
+                    await reader.DisposeAsync(); // reader moet eerst gesloten worden
                     using var updateCmd = new MySqlCommand(
                         "UPDATE ah_beheer SET PasswordHash = @hash WHERE username = @username",
                         connection);
@@ -86,9 +89,9 @@ public class CustomAuthenticationService
 
         return new LoginModel
         {
-            UserId = reader.GetInt32( "user_id" ),
-            Username = reader.GetString( "username" ),
-            Role = reader.GetString( "role" ).Trim().ToLowerInvariant()
+            UserId = userId,
+            Username = storedUsername,
+            Role = role
         };
     }
 

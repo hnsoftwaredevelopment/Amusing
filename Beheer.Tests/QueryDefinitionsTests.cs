@@ -206,6 +206,29 @@ public class QueryDefinitionsTests
         Assert.Contains("@FestivalId", query);
     }
 
+    [Fact]
+    public void ModifyChangedGridValue_RejectsUnknownFieldName()
+    {
+        Assert.Throws<ArgumentException>(() => QueryDefinitions.ModifyChangedGridValue("betaald = NOW() --"));
+    }
+
+    [Theory]
+    [InlineData("betaald")]
+    [InlineData("afgehaakt")]
+    [InlineData("bevestigd")]
+    [InlineData("binnen")]
+    [InlineData("buiten")]
+    [InlineData("wens_1")]
+    [InlineData("wens_2")]
+    [InlineData("wens_3")]
+    [InlineData("wens_4")]
+    public void ModifyChangedGridValue_AllowsKnownEditableFields(string fieldName)
+    {
+        string query = QueryDefinitions.ModifyChangedGridValue(fieldName);
+
+        Assert.Contains($"SET `{fieldName}` = @value", query);
+    }
+
     private static string GetSourcePath(params string[] pathParts)
     {
         var testDirectory = Path.GetDirectoryName(GetThisFilePath())!;

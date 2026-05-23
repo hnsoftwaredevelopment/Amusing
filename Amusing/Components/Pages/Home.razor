@@ -29,7 +29,8 @@
 
                     <SfComboBox TValue="string"
                                 TItem="Edition"
-                                @bind-Value="SelectedEditionId"
+                                Value="SelectedEditionId"
+                                ValueChanged="OnSelectedEditionChangedAsync"
                                 Placeholder="Kies een editie"
                                 DataSource="@Editions"
                                 Width="150px">
@@ -161,7 +162,8 @@
 
                     <SfComboBox TValue="int"
                                 TItem="int"
-                                @bind-Value="SelectedYears"
+                                Value="SelectedYears"
+                                ValueChanged="OnYearsChangedAsync"
                                 DataSource="@Years"
                                 Placeholder="Aantal jaren"
                                 Width="150px">

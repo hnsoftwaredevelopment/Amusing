@@ -22,8 +22,9 @@ else
 {
     <div>
 		<label style="padding: 0 0 -20px 0; font-weight: 600">Vanaf welk jaar moet het overzicht worden</label>
-        <SfSlider 
+        <SfSlider
 			@bind-Value="@slidervalue"
+			@bind-Value:after="LoadDataAsync"
             Min="@minslider" 
             Max="@maxslider" >
 

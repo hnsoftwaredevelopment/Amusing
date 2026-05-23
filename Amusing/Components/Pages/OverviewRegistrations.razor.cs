@@ -81,16 +81,13 @@ public partial class OverviewRegistrations : ComponentBase
     }
 
     // Manage direct search functionality
-    public void OnInput( InputEventArgs args )
+    public async Task OnInput( InputEventArgs args )
     {
-        this.GridRef.SearchAsync( args.Value );
+        await GridRef.SearchAsync( args.Value );
 
         // Count the Number of visible rows
-        _ = Task.Run( async () =>
-        {
-            await Task.Delay( 200 ); // Short delay to handle fast typers
-            await InvokeAsync( UpdateVisibleRowCount );
-        } );
+        await Task.Delay( 200 ); // Short delay to handle fast typers
+        await UpdateVisibleRowCount();
     }
 
     // Export functions

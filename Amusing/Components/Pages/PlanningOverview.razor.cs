@@ -20,7 +20,6 @@ public partial class PlanningOverview
     [Inject] public IJSRuntime JS { get; set; } = default!;
     [Inject] protected ToastService ToastService { get; set; } = default!;
 
-    private string _message;
     private string SelectedEditionId { get; set; }
     public string SelectedEditionText { get; set; }
     private string? SelectedEdition = null;

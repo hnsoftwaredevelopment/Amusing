@@ -34,7 +34,7 @@ public partial class ListPersons : ComponentBase
     }
 
     // Manage direct search functionality
-    public async void OnInput( InputEventArgs args )
+    public async Task OnInput( InputEventArgs args )
     {
         await GridRef.SearchAsync( args.Value );
 

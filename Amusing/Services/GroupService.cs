@@ -53,7 +53,7 @@ public class GroupService( GenericDataService dataService )
     }
     public async Task<uint> AddGroupAsync( GroupModel model )
     {
-        string _description = (model.Description == string.Empty || model.Description == null) ? "" : model.Description;
+        string description = string.IsNullOrEmpty(model.Description) ? "" : model.Description;
 
         Dictionary<string, object> parameters = new()
         {
@@ -62,7 +62,7 @@ public class GroupService( GenericDataService dataService )
             { "@City", model.City },
             { "@CountryId", model.CountryId },
             { "@Website", model.Website },
-            { "@Description", _description },
+            { "@Description", description },
             { "@BankAccount", model.BankAccount },
             { "@Active", model.Active },
             { "@Photo", model.Photo },
@@ -73,8 +73,6 @@ public class GroupService( GenericDataService dataService )
     }
     public async Task<uint> AddGroupDetailsAsync( GroupModel model, uint groupId )
     {
-        string _description = (model.Description == string.Empty || model.Description == null) ? "" : model.Description;
-
         Dictionary<string, object> parameters = new()
         {
             { "@GroupId", groupId },
@@ -85,7 +83,7 @@ public class GroupService( GenericDataService dataService )
     }
     public async Task UpdateGroupAsync( GroupModel model )
     {
-        string _description = (model.Description == string.Empty || model.Description == null) ? "" : model.Description;
+        string description = string.IsNullOrEmpty(model.Description) ? "" : model.Description;
 
         Dictionary<string, object> parameters = new()
         {
@@ -95,7 +93,7 @@ public class GroupService( GenericDataService dataService )
             { "@City", model.City },
             { "@CountryId", model.CountryId },
             { "@Website", model.Website },
-            { "@Description", _description },
+            { "@Description", description },
             { "@BankAccount", model.BankAccount },
             { "@Active", model.Active },
             { "@Photo", model.Photo },

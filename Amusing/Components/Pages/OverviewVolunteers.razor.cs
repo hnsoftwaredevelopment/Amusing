@@ -93,40 +93,31 @@ public partial class OverviewVolunteers : ComponentBase
     }
 
     // Search
-    public void OnInputStage(InputEventArgs args)
+    public async Task OnInputStage(InputEventArgs args)
     {
-        this.StageGridRef.SearchAsync(args.Value);
+        await StageGridRef.SearchAsync(args.Value);
 
         // Count the Number of visible rows
-        _ = Task.Run(async () =>
-        {
-            await Task.Delay(200); // Short delay to handle fast typers
-            await InvokeAsync(UpdateVisibleRowCountStage);
-        });
+        await Task.Delay(200); // Short delay to handle fast typers
+        await UpdateVisibleRowCountStage();
     }
 
-    public void OnInputOther(InputEventArgs args)
+    public async Task OnInputOther(InputEventArgs args)
     {
-        this.OtherGridRef.SearchAsync(args.Value);
+        await OtherGridRef.SearchAsync(args.Value);
 
         // Count the Number of visible rows
-        _ = Task.Run(async () =>
-        {
-            await Task.Delay(200); // Short delay to handle fast typers
-            await InvokeAsync(UpdateVisibleRowCountOther);
-        });
+        await Task.Delay(200); // Short delay to handle fast typers
+        await UpdateVisibleRowCountOther();
     }
 
-    public void OnInputDroppedOut(InputEventArgs args)
+    public async Task OnInputDroppedOut(InputEventArgs args)
     {
-        this.DroppedOutGridRef.SearchAsync(args.Value);
+        await DroppedOutGridRef.SearchAsync(args.Value);
 
         // Count the Number of visible rows
-        _ = Task.Run(async () =>
-        {
-            await Task.Delay(200); // Short delay to handle fast typers
-            await InvokeAsync(UpdateVisibleRowCountDroppedOut);
-        });
+        await Task.Delay(200); // Short delay to handle fast typers
+        await UpdateVisibleRowCountDroppedOut();
     }
 
     // Make sure all Refs are initialized

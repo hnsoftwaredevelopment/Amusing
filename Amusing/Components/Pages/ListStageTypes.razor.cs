@@ -24,8 +24,6 @@ public partial class ListStageTypes : ComponentBase
     protected int VisibleRowCount = 0;
     protected List<StageTypeModel> StageTypes = [];
     protected string FileName = "Podium types";
-    private bool _hasRendered = false;
-
     protected override async Task OnInitializedAsync()
     {
         IsLoading = true;
@@ -45,7 +43,7 @@ public partial class ListStageTypes : ComponentBase
     }
 
     // Manage direct search functionality
-    public async void OnInput( InputEventArgs args )
+    public async Task OnInput( InputEventArgs args )
     {
         await GridRef.SearchAsync( args.Value );
 

@@ -49,14 +49,7 @@ public partial class Home : ComponentBase
     public int SelectedYears
     {
         get => selectedYears;
-        set
-        {
-            if ( selectedYears == value )
-                return;
-            selectedYears = value;
-            // Trigger synchronous wrapper that calls async loader
-            _ = OnYearsChangedAsync( value );
-        }
+        set => selectedYears = value;
     }
 
     private double YAxisMax
@@ -73,30 +66,12 @@ public partial class Home : ComponentBase
 
     private int MaxYear => _graph.Any() ? _graph.Max( x => x.FestivalId ) : 0; // of Festival als string -> int.Parse
 
-    private string GetSeriesColor( string festival )
-    {
-        // Highlight highest year
-        return festival == MaxYear.ToString() ? "red" : "lightblue"; // of andere pastel kleuren
-    }
-
-    private double GetSeriesWidth( string festival )
-    {
-        return festival == MaxYear.ToString() ? 3 : 1.5; // huidige jaar dikkere lijn
-    }
-
     protected List<int> Years = [2, 5, 10 ];
     protected string? selectedEditionId;
     public string? SelectedEditionId
     {
         get => selectedEditionId;
-        set
-        {
-            if ( selectedEditionId == value )
-                return;
-            selectedEditionId = value;
-            // Trigger synchronous wrapper that calls async loader
-            _ = OnSelectedEditionChangedAsync( value );
-        }
+        set => selectedEditionId = value;
     }
 
 
@@ -134,28 +109,7 @@ public partial class Home : ComponentBase
 
             if ( SelectedEditionId != null )
             {
-                var _subscriptions = await DashboardService.GetNumberOfSubscriptions( int.Parse( SelectedEditionId ) );
-                if ( _subscriptions > 0 )
-                {
-                    _totals = await DashboardService.GetDashboardStatisticsTotalsAsync( int.Parse( SelectedEditionId ) );
-                    _genre = await DashboardService.GetDashboardStatisticsGenreAsync( int.Parse( SelectedEditionId ) );
-                    _country = await DashboardService.GetDashboardStatisticsCountryAsync( int.Parse( SelectedEditionId ) );
-                    _stage = await DashboardService.GetDashboardStatisticsStageAsync( int.Parse( SelectedEditionId ) );
-                    _pivot = await DashboardService.GetSubscriptionsPivotAsync( int.Parse( SelectedEditionId ) );
-
-                    if ( _pivot.Any() )
-                        _pivotColumns = [ .. _pivot.First()
-                            .Keys
-                            .Where( k => k != "DeelnemersCategorie" ) ];
-
-                    _hasData = true;
-
-                    StateHasChanged();
-                }
-                else
-                {
-                    _hasData = false;
-                }
+                await LoadSelectedEditionDashboardAsync( int.Parse( SelectedEditionId ) );
             }
         }
     }
@@ -178,7 +132,7 @@ public partial class Home : ComponentBase
         await Task.Delay( 50 );
     }
 
-    private async void AddSearchIcon()
+    private async Task AddSearchIcon()
     {
         if ( searchBox != null )
         {
@@ -198,37 +152,13 @@ public partial class Home : ComponentBase
 
         var editionInt = int.Parse(selectedId);
 
-        // First check: does it have subscriptions?
-        var subs = await DashboardService.GetNumberOfSubscriptions(editionInt);
-        if ( subs <= 0 )
-        {
-            _hasData = false;
-            await InvokeAsync( StateHasChanged );
-            return;
-        }
-
-        // Load all datasets
-        _totals = await DashboardService.GetDashboardStatisticsTotalsAsync( editionInt );
-        _genre = await DashboardService.GetDashboardStatisticsGenreAsync( editionInt );
-        _country = await DashboardService.GetDashboardStatisticsCountryAsync( editionInt );
-        _stage = await DashboardService.GetDashboardStatisticsStageAsync( editionInt );
-        _pivot = await DashboardService.GetSubscriptionsPivotAsync( editionInt );
-
-        if ( _pivot.Any() )
-        {
-            _pivotColumns = _pivot.First()
-                .Keys
-                .Where( k => k != "DeelnemersCategorie" )
-                .ToList();
-        }
-
-        _hasData = true;
-
+        await LoadSelectedEditionDashboardAsync( editionInt );
         await InvokeAsync( StateHasChanged );
     }
 
     protected async Task OnYearsChangedAsync( int years )
     {
+        SelectedYears = years;
         _graph = await DashboardService.GetGraphDataAsync( years );
         await InvokeAsync( StateHasChanged );
     }
@@ -242,31 +172,47 @@ public partial class Home : ComponentBase
 
         if ( SelectedEditionId != null )
         {
-            var _subscriptions = await DashboardService.GetNumberOfSubscriptions( int.Parse( SelectedEditionId ) );
-            if ( _subscriptions > 0 )
-            {
-                _totals = await DashboardService.GetDashboardStatisticsTotalsAsync( int.Parse( SelectedEditionId ) );
-                _genre = await DashboardService.GetDashboardStatisticsGenreAsync( int.Parse( SelectedEditionId ) );
-                _country = await DashboardService.GetDashboardStatisticsCountryAsync( int.Parse( SelectedEditionId ) );
-                _stage = await DashboardService.GetDashboardStatisticsStageAsync( int.Parse( SelectedEditionId ) );
-                _pivot = await DashboardService.GetSubscriptionsPivotAsync( int.Parse( SelectedEditionId ) );
-
-                if ( _pivot.Any() )
-                    _pivotColumns = [ .. _pivot.First()
-                            .Keys
-                            .Where( k => k != "DeelnemersCategorie" ) ];
-
-                _hasData = true;
-
-                StateHasChanged();
-            }
-            else
-            {
-                _hasData = false;
-            }
+            await LoadSelectedEditionDashboardAsync( int.Parse( SelectedEditionId ) );
+            StateHasChanged();
         }
         else
         { _hasData = false; }
+    }
+
+    private async Task LoadSelectedEditionDashboardAsync( int editionId )
+    {
+        var subscriptions = await DashboardService.GetNumberOfSubscriptions( editionId );
+        if ( subscriptions <= 0 )
+        {
+            _hasData = false;
+            _totals = [];
+            _genre = [];
+            _country = [];
+            _stage = [];
+            _pivot = [];
+            _pivotColumns = [];
+            return;
+        }
+
+        var totalsTask = DashboardService.GetDashboardStatisticsTotalsAsync( editionId );
+        var genreTask = DashboardService.GetDashboardStatisticsGenreAsync( editionId );
+        var countryTask = DashboardService.GetDashboardStatisticsCountryAsync( editionId );
+        var stageTask = DashboardService.GetDashboardStatisticsStageAsync( editionId );
+        var pivotTask = DashboardService.GetSubscriptionsPivotAsync( editionId );
+
+        await Task.WhenAll( totalsTask, genreTask, countryTask, stageTask, pivotTask );
+
+        _totals = await totalsTask;
+        _genre = await genreTask;
+        _country = await countryTask;
+        _stage = await stageTask;
+        _pivot = await pivotTask;
+
+        _pivotColumns = _pivot.Any()
+            ? [ .. _pivot.First().Keys.Where( k => k != "DeelnemersCategorie" ) ]
+            : [];
+
+        _hasData = true;
     }
 
     private void OnXAxisLabelRender( AxisLabelRenderEventArgs args )

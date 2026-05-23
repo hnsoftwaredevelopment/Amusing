@@ -56,7 +56,7 @@ public partial class MaintenancePeople : ComponentBase
             if ( _activeFilter != value )
             {
                 _activeFilter = value;
-                ApplyFilter();
+                _ = InvokeAsync( ApplyFilterAsync );
             }
         }
     }
@@ -156,14 +156,9 @@ public partial class MaintenancePeople : ComponentBase
         SelectedPerson = Persons.FirstOrDefault();
         SelectedPersonOriginal = ClonePerson( SelectedPerson );
         await LoadSelectedPersonDetailsAsync();
-        ApplyFilter();
+        await ApplyFilterAsync();
 
         _isLoading = false;
-    }
-
-    protected override void OnInitialized()
-    {
-        ApplyFilter();
     }
 
     private async Task OnGridDataBound()
@@ -221,7 +216,7 @@ public partial class MaintenancePeople : ComponentBase
         await UpdateVisibleRowCountAsync();
     }
 
-    private async void ApplyFilter()
+    private async Task ApplyFilterAsync()
     {
         FilteredPersons = ActiveFilter switch
         {
@@ -309,7 +304,7 @@ public partial class MaintenancePeople : ComponentBase
 
             // Refresh the list
             Persons = await PersonService.GetAllPersonsAsync();
-            ApplyFilter();
+            await ApplyFilterAsync();
             await Task.Delay( 50 );
             await GridRef.Refresh();
 
@@ -397,7 +392,7 @@ public partial class MaintenancePeople : ComponentBase
     private async Task RefreshPersonRowsAndDetailsAsync( uint selectedPersonId )
     {
         Persons = await PersonService.GetAllPersonsAsync();
-        ApplyFilter();
+        await ApplyFilterAsync();
 
         PersonModel? refreshedPerson = Persons.FirstOrDefault( person => person.PersonId == selectedPersonId );
         if ( refreshedPerson is not null )

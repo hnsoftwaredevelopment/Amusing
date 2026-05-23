@@ -37,7 +37,7 @@ public partial class ListStages : ComponentBase
     }
 
     // Manage direct search functionality
-    public async void OnInputActive(InputEventArgs args)
+    public async Task OnInputActive(InputEventArgs args)
     {
         await GridRefActive.SearchAsync(args.Value);
 
@@ -45,7 +45,7 @@ public partial class ListStages : ComponentBase
         await UpdateVisibleRowCountActiveAsync();
     }
 
-    public async void OnInputInactive(InputEventArgs args)
+    public async Task OnInputInactive(InputEventArgs args)
     {
         await GridRefInactive.SearchAsync(args.Value);
 

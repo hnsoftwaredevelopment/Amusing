@@ -36,7 +36,8 @@ public class UserContextHelper
         if ( _cachedUserId.HasValue )
             return _cachedUserId.Value;
 
-        var claim = (_authProvider.GetAuthenticationStateAsync().Result).User.FindFirst(ClaimTypes.NameIdentifier);
+        var user = _httpContextAccessor.HttpContext?.User;
+        var claim = user?.FindFirst("UserId") ?? user?.FindFirst(ClaimTypes.NameIdentifier);
         return int.TryParse( claim?.Value, out var id ) ? id : 0;
     }
 
@@ -61,7 +62,7 @@ public class UserContextHelper
         if ( !string.IsNullOrEmpty( _cachedUsername ) )
             return _cachedUsername;
 
-        return ( _authProvider.GetAuthenticationStateAsync().Result ).User.Identity?.Name ?? "Onbekend";
+        return _httpContextAccessor.HttpContext?.User.Identity?.Name ?? "Onbekend";
     }
 
     public async Task<string> GetUsernameAsync()

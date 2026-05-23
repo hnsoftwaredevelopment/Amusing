@@ -25,8 +25,8 @@ public partial class ListGroups : ComponentBase
     protected string FileName = "Groepen";
     protected SfGrid<FestivalParticipationDynamicViewModel> GridRef;
     protected bool FilterOutOldGroups = false;
-    protected bool IsLoading = false;
-    protected int VisibleRowCount = 0;
+    protected bool IsLoading;
+    protected int VisibleRowCount;
     protected List<FestivalParticipationDynamicViewModel> Zanggroepen = [];
     protected List<int> YearColumns = [];
 
@@ -62,8 +62,6 @@ public partial class ListGroups : ComponentBase
             {
                 _slidervalue = value;
                 ShowNumberOfYears = maxslider - _slidervalue + 1;
-
-                _ = LoadDataAsync();
             }
         }
     }
@@ -124,7 +122,7 @@ public partial class ListGroups : ComponentBase
     }
 
     // Manage direct search functionality
-    public async void OnInput( InputEventArgs args )
+    public async Task OnInput( InputEventArgs args )
     {
         await GridRef.SearchAsync( args.Value );
 
@@ -178,13 +176,6 @@ public partial class ListGroups : ComponentBase
 
         string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
         await LoggingService.WriteUserActionAsync( "Lijsten", "Groepen", "success", _report );
-    }
-
-    protected async Task OnSliderChanged( double newValue )
-    {
-        slidervalue = ( int ) newValue;
-        ShowNumberOfYears = maxslider - ( int ) newValue + 1;
-        StateHasChanged();
     }
 
     protected async Task OnGridDataBound()
