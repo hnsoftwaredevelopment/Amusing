@@ -246,6 +246,24 @@ public class QueryDefinitionsTests
     }
 
     [Fact]
+    public void MobileCurrentPerformancesQuery_LoadsPublicMobileFields()
+    {
+        string query = QueryDefinitions.GetMobileCurrentPerformances;
+
+        Assert.Contains("FestivalId", query);
+        Assert.Contains("GroupId", query);
+        Assert.Contains("GroupName", query);
+        Assert.Contains("StageId", query);
+        Assert.Contains("StageName", query);
+        Assert.Contains("AS `From`", query);
+        Assert.Contains("AS `To`", query);
+        Assert.Contains("@FestivalId", query);
+        Assert.DoesNotContain("email", query, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("telefoon", query, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("phone", query, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public void CalamityListWordExport_CreatesDocxDocument()
     {
         List<PlanningCalamityListRow> rows =
