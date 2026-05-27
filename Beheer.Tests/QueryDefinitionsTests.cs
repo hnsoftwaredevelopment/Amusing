@@ -229,6 +229,22 @@ public class QueryDefinitionsTests
     }
 
     [Fact]
+    public void GetPlanningFestivalsQuery_UsesAliasesReadByPlanningService()
+    {
+        string query = QueryDefinitions.GetPlanningFestivals;
+
+        Assert.Contains("f.festival_id AS FestivalId", query);
+        Assert.Contains("CONCAT('Amusing Hengelo ', YEAR(f.festivaldatum)) AS Festival", query);
+        Assert.Contains("f.festivaldatum AS FestivalDate", query);
+        Assert.Contains("f.duuroptreden AS PerformanceLength", query);
+        Assert.Contains("TIME_FORMAT(f.start_festivaldag, '%H:%i') AS StartFestivalday", query);
+        Assert.Contains("TIME_FORMAT(f.einde_festivaldag, '%H:%i') AS EndFestivalday", query);
+        Assert.Contains("TIME_FORMAT(f.begin_pauze, '%H:%i') AS StartPause", query);
+        Assert.Contains("TIME_FORMAT(f.einde_pauze, '%H:%i') AS EndPause", query);
+        Assert.Contains("TIME_FORMAT(f.einde_ervaren_reserve, '%H:%i') AS EndExperiencedSubstitude", query);
+    }
+
+    [Fact]
     public void CalamityListWordExport_CreatesDocxDocument()
     {
         List<PlanningCalamityListRow> rows =

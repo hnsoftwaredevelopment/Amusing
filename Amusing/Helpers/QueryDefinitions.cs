@@ -1779,15 +1779,15 @@ public static class QueryDefinitions
         WHERE pv.festival_id = @FestivalId;";
     public static readonly string GetPlanningFestivals = @"
         SELECT 
-	        f.festival_id AS festival_id,
-	        CONCAT ('Amusing Hengelo ',YEAR(f.festivaldatum )) AS naam,
+	        f.festival_id AS FestivalId,
+	        CONCAT('Amusing Hengelo ', YEAR(f.festivaldatum)) AS Festival,
             f.festivaldatum AS FestivalDate,
-            f.duuroptreden AS duuroptreden,
-	        TIME_FORMAT(f.start_festivaldag, '%H:%i') AS start_festivaldag,
-	        TIME_FORMAT(f.einde_festivaldag, '%H:%i') AS einde_festivaldag,
-	        TIME_FORMAT(f.begin_pauze, '%H:%i') AS begin_pauze,
-	        TIME_FORMAT(f.einde_pauze, '%H:%i') AS einde_pauze,
-	        TIME_FORMAT(f.einde_ervaren_reserve, '%H:%i') AS einde_ervaren_reserve
+            f.duuroptreden AS PerformanceLength,
+	        TIME_FORMAT(f.start_festivaldag, '%H:%i') AS StartFestivalday,
+	        TIME_FORMAT(f.einde_festivaldag, '%H:%i') AS EndFestivalday,
+	        TIME_FORMAT(f.begin_pauze, '%H:%i') AS StartPause,
+	        TIME_FORMAT(f.einde_pauze, '%H:%i') AS EndPause,
+	        TIME_FORMAT(f.einde_ervaren_reserve, '%H:%i') AS EndExperiencedSubstitude
         FROM amusing.ah_festivals f
         WHERE f.festival_id = @FestivalId;";
     public static readonly string GetPlanningGenres = @"
