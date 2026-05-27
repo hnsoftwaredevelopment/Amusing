@@ -42,18 +42,28 @@ public class MobilePlanningServiceTests
             }
         ];
 
+        var retrievedAt = new DateTimeOffset(2026, 5, 27, 12, 0, 0, TimeSpan.Zero);
+
         var dto = MobilePlanningService.BuildPlanningDto(
             festival,
             festival.FestivalDate,
             performances,
-            new DateTimeOffset(2026, 5, 27, 12, 0, 0, TimeSpan.Zero));
+            retrievedAt);
 
         Assert.Equal((uint)2026, dto.Festival.FestivalId);
         Assert.Equal("Amusing Hengelo 2026", dto.Festival.FestivalName);
         Assert.Equal(new DateOnly(2026, 6, 7), dto.Festival.FestivalDate);
+        Assert.Equal(retrievedAt, dto.RetrievedAt);
         Assert.Equal(2, dto.Performances.Count);
-        Assert.All(dto.Performances, performance => Assert.Equal((uint)2026, performance.FestivalId));
-        Assert.Equal(["Koor A", "Koor A"], dto.Performances.Select(p => p.GroupName).ToArray());
+
+        var firstPerformance = dto.Performances[0];
+        Assert.Equal((uint)2026, firstPerformance.FestivalId);
+        Assert.Equal((uint)10, firstPerformance.GroupId);
+        Assert.Equal("Koor A", firstPerformance.GroupName);
+        Assert.Equal((uint)5, firstPerformance.StageId);
+        Assert.Equal("Podium A", firstPerformance.StageName);
+        Assert.Equal(new TimeOnly(11, 0), firstPerformance.From);
+        Assert.Equal(new TimeOnly(11, 30), firstPerformance.To);
     }
 
     [Fact]
