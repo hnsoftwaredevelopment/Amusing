@@ -2135,6 +2135,26 @@ public static class QueryDefinitions
         WHERE vd.festival_id = @FestivalId
           AND vd.taak IS NULL
         ORDER BY pod.kaart_nummer, vd.van, Volunteer;";
+    public static readonly string GetPlanningCalamityList = @"
+        SELECT
+            pod.naam AS StageName,
+            pod.kaart_nummer AS StageNumber,
+            vd.van AS StartTime,
+            vd.tot AS EndTime,
+            CONCAT_WS(' ', person.voornaam, NULLIF(person.tussenvoegsel, ''), person.achternaam) AS Volunteer,
+            COALESCE(NULLIF(contact.telefoon_mobiel, ''), NULLIF(contact.telefoon_vast, ''), '') AS PhoneNumber
+        FROM amusing.planner_vrijwilligersdiensten vd
+        INNER JOIN amusing.ah_podia pod
+                ON pod.podium_id = vd.podium_id
+        INNER JOIN amusing.ah_personen person
+                ON person.persoon_id = vd.persoon_id
+        LEFT JOIN amusing.ah_contactgegevens contact
+               ON contact.persoon_id = person.persoon_id
+        WHERE vd.festival_id = @FestivalId
+          AND vd.taak IS NULL
+          AND pod.kaart_nummer IS NOT NULL
+          AND pod.kaart_nummer > 0
+        ORDER BY pod.naam, vd.van, Volunteer;";
     public static readonly string GetPlanningPerformancesOverview = @"
         SELECT 
             s.kaart_nummer AS SortOrder,

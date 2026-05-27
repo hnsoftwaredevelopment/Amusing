@@ -1,4 +1,8 @@
 using Amusing.Helpers;
+using Amusing.Models;
+using Amusing.Services;
+
+using DocumentFormat.OpenXml.Packaging;
 
 using System.Runtime.CompilerServices;
 
@@ -204,6 +208,54 @@ public class QueryDefinitionsTests
         Assert.Contains("ah_podia", query);
         Assert.Contains("vd.taak IS NULL", query);
         Assert.Contains("@FestivalId", query);
+    }
+
+    [Fact]
+    public void PlanningCalamityListQuery_LoadsStageVolunteerContactDataSortedByStageName()
+    {
+        string query = QueryDefinitions.GetPlanningCalamityList;
+
+        Assert.Contains("StageName", query);
+        Assert.Contains("StageNumber", query);
+        Assert.Contains("StartTime", query);
+        Assert.Contains("EndTime", query);
+        Assert.Contains("Volunteer", query);
+        Assert.Contains("PhoneNumber", query);
+        Assert.Contains("planner_vrijwilligersdiensten", query);
+        Assert.Contains("ah_contactgegevens", query);
+        Assert.Contains("vd.taak IS NULL", query);
+        Assert.Contains("@FestivalId", query);
+        Assert.Contains("ORDER BY pod.naam", query);
+    }
+
+    [Fact]
+    public void CalamityListWordExport_CreatesDocxDocument()
+    {
+        List<PlanningCalamityListRow> rows =
+        [
+            new()
+            {
+                StageName = "A Podium",
+                StageNumber = 1,
+                StartTime = new TimeOnly(11, 0),
+                EndTime = new TimeOnly(12, 0),
+                Volunteer = "Ada Lovelace",
+                PhoneNumber = "0612345678"
+            }
+        ];
+
+        byte[] bytes = PlanningService.BuildCalamityListWordDocument("Calamiteitenlijst 2026", rows);
+
+        using var stream = new MemoryStream(bytes);
+        using var document = WordprocessingDocument.Open(stream, false);
+        string text = document.MainDocumentPart!.Document.Body!.InnerText;
+
+        Assert.Equal('P', (char)bytes[0]);
+        Assert.Equal('K', (char)bytes[1]);
+        Assert.Contains("Calamiteitenlijst 2026", text);
+        Assert.Contains("A Podium", text);
+        Assert.Contains("Ada Lovelace", text);
+        Assert.Contains("0612345678", text);
     }
 
     [Fact]

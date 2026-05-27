@@ -7,6 +7,10 @@ using Amusing.Models;
 
 using ClosedXML.Excel;
 
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using W = DocumentFormat.OpenXml.Wordprocessing;
+
 namespace Amusing.Services;
 
 // -------------------------------------------------------
@@ -467,6 +471,98 @@ public class PlanningService(GenericDataService dataService)
                 EndTime = reader.GetMyTime("EndTime"),
                 Fixed = reader.GetMyString("Fixed")
             }, parameters);
+    }
+
+    public Task<List<PlanningCalamityListRow>> GetPlanningCalamityListAsync(int festivalId)
+    {
+        var parameters = new Dictionary<string, object> { { "@FestivalId", festivalId } };
+
+        return _dataService.ExecuteQueryAsync(
+            QueryDefinitions.GetPlanningCalamityList,
+            reader => new PlanningCalamityListRow
+            {
+                StageName = reader.GetMyString("StageName"),
+                StageNumber = reader.GetMyInt("StageNumber"),
+                StartTime = reader.GetMyTime("StartTime"),
+                EndTime = reader.GetMyTime("EndTime"),
+                Volunteer = reader.GetMyString("Volunteer"),
+                PhoneNumber = reader.GetMyString("PhoneNumber")
+            }, parameters);
+    }
+
+    public async Task<byte[]> ExportCalamityListToWordAsync(int festivalId, string title)
+    {
+        var rows = await GetPlanningCalamityListAsync(festivalId);
+        return BuildCalamityListWordDocument(title, rows);
+    }
+
+    public static byte[] BuildCalamityListWordDocument(string title, IEnumerable<PlanningCalamityListRow> rows)
+    {
+        using var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document, true))
+        {
+            var mainPart = document.AddMainDocumentPart();
+            mainPart.Document = new W.Document(new W.Body());
+
+            var body = mainPart.Document.Body!;
+            body.Append(
+                new W.Paragraph(
+                    new W.ParagraphProperties(new W.ParagraphStyleId { Val = "Title" }),
+                    new W.Run(new W.Text(title))));
+
+            var table = new W.Table();
+            table.AppendChild(new W.TableProperties(
+                new W.TableBorders(
+                    new W.TopBorder { Val = W.BorderValues.Single, Size = 4 },
+                    new W.BottomBorder { Val = W.BorderValues.Single, Size = 4 },
+                    new W.LeftBorder { Val = W.BorderValues.Single, Size = 4 },
+                    new W.RightBorder { Val = W.BorderValues.Single, Size = 4 },
+                    new W.InsideHorizontalBorder { Val = W.BorderValues.Single, Size = 4 },
+                    new W.InsideVerticalBorder { Val = W.BorderValues.Single, Size = 4 }),
+                new W.TableWidth { Width = "100%", Type = W.TableWidthUnitValues.Pct }));
+
+            table.Append(CreateWordRow(["Podiumnaam", "Podiumnummer", "Van", "Tot", "Vrijwilliger", "Telefoonnummer"], isHeader: true));
+
+            foreach (var row in rows)
+            {
+                table.Append(CreateWordRow(
+                [
+                    row.StageName,
+                    row.StageNumber.ToString(),
+                    row.StartTime.ToString("HH:mm"),
+                    row.EndTime.ToString("HH:mm"),
+                    row.Volunteer,
+                    row.PhoneNumber
+                ]));
+            }
+
+            body.Append(table);
+            body.Append(new W.SectionProperties(
+                new W.PageSize { Width = 16838, Height = 11906, Orient = W.PageOrientationValues.Landscape },
+                new W.PageMargin { Top = 720, Right = 720, Bottom = 720, Left = 720 }));
+
+            mainPart.Document.Save();
+        }
+
+        return stream.ToArray();
+    }
+
+    private static W.TableRow CreateWordRow(IEnumerable<string> values, bool isHeader = false)
+    {
+        var row = new W.TableRow();
+
+        foreach (var value in values)
+        {
+            var run = new W.Run(new W.Text(value ?? string.Empty));
+            if (isHeader)
+                run.PrependChild(new W.RunProperties(new W.Bold()));
+
+            row.Append(new W.TableCell(
+                new W.TableCellProperties(new W.TableCellWidth { Type = W.TableWidthUnitValues.Auto }),
+                new W.Paragraph(run)));
+        }
+
+        return row;
     }
     #endregion
 

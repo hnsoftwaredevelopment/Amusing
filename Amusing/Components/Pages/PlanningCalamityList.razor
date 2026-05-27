@@ -1,0 +1,116 @@
+@page "/Planning-CalamityList"
+@using Amusing.Models
+@using Amusing.Services
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Navigations
+
+<AuthorizeView>
+    <Authorized>
+        <div class="overview-grid">
+            <div class="row row1">
+                <h3>
+                    Calamiteitenlijst
+                    @if (!string.IsNullOrWhiteSpace(SelectedEditionId))
+                    {
+                        <span class="edition-label">@SelectedEditionText</span>
+                    }
+                </h3>
+            </div>
+
+            <div class="row row2">
+                <div class="col left toolbar">
+                    <SfComboBox class="sf-combobox"
+                                TValue="string"
+                                TItem="Edition"
+                                Placeholder="Kies een editie"
+                                Value="@SelectedEditionId"
+                                ValueChanged="OnEditionChanged"
+                                DataSource="@Editions"
+                                Width="175px">
+                        <ComboBoxFieldSettings Value="ID" Text="Text"></ComboBoxFieldSettings>
+                    </SfComboBox>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(SelectedEditionId))
+            {
+                <div class="row">
+                    <div class="col left">
+                        <div class="titles-container">
+                            <div class="title">Calamiteitenlijst per podium</div>
+                            <SfGrid @ref="GridRef"
+                                    DataSource="@Rows"
+                                    AllowExcelExport="true"
+                                    AllowPdfExport="true"
+                                    AllowResizing="true"
+                                    AllowSorting="true"
+                                    AllowPaging="false"
+                                    CssClass="amusing-grid">
+                                <GridEvents TValue="PlanningCalamityListRow"
+                                            DataBound="OnGridDataBound"
+                                            OnActionComplete="OnGridActionComplete" />
+
+                                <SfToolbar>
+                                    <ToolbarItems>
+                                        <ToolbarItem Type="ItemType.Button">
+                                            <Template>
+                                                <button class="custom-toolbar-btn" @onclick="ExportToExcel" title="Exporteer naar een Excel bestand">
+                                                    <img src="icons/excel.svg" class="icon" alt="Excel" />
+                                                </button>
+                                            </Template>
+                                        </ToolbarItem>
+                                        <ToolbarItem Type="ItemType.Button">
+                                            <Template>
+                                                <button class="custom-toolbar-btn" @onclick="ExportToWord" title="Exporteer naar een Word bestand">
+                                                    <img src="icons/word.svg" class="icon" alt="Word" />
+                                                </button>
+                                            </Template>
+                                        </ToolbarItem>
+                                        <ToolbarItem Type="ItemType.Button">
+                                            <Template>
+                                                <button class="custom-toolbar-btn" @onclick="ExportToPdf" title="Maak een PDF bestand">
+                                                    <img src="icons/pdf.svg" class="icon" alt="PDF" />
+                                                </button>
+                                            </Template>
+                                        </ToolbarItem>
+                                        <ToolbarItem Type="ItemType.Button">
+                                            <Template>
+                                                <button class="custom-toolbar-btn" @onclick="Print" title="Druk de lijst af">
+                                                    <span class="fa-solid fa-print fs-5" aria-hidden="true"></span>
+                                                </button>
+                                            </Template>
+                                        </ToolbarItem>
+                                        <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Center">
+                                            <Template>
+                                                <span class="toolbar-count">Regels: @VisibleRowCount</span>
+                                            </Template>
+                                        </ToolbarItem>
+                                        <ToolbarItem Type="ItemType.Input" Align="Syncfusion.Blazor.Navigations.ItemAlign.Right">
+                                            <Template>
+                                                <SfTextBox Placeholder="Zoek" Input="OnInput"></SfTextBox>
+                                            </Template>
+                                        </ToolbarItem>
+                                    </ToolbarItems>
+                                </SfToolbar>
+
+                                <GridColumns>
+                                    <GridColumn Field="StageName" HeaderText="Podium" Width="180"></GridColumn>
+                                    <GridColumn Field="StageNumber" HeaderText="Nr" Width="55" TextAlign="TextAlign.Left"></GridColumn>
+                                    <GridColumn Field="StartTime" HeaderText="Van" Width="70" Format="t"></GridColumn>
+                                    <GridColumn Field="EndTime" HeaderText="Tot" Width="70" Format="t"></GridColumn>
+                                    <GridColumn Field="Volunteer" HeaderText="Vrijwilliger" Width="180"></GridColumn>
+                                    <GridColumn Field="PhoneNumber" HeaderText="Telefoonnummer" Width="140"></GridColumn>
+                                </GridColumns>
+                            </SfGrid>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <p class="text-danger">Je hebt alleen toegang tot deze pagina wanneer je bent ingelogt</p>
+    </NotAuthorized>
+</AuthorizeView>
