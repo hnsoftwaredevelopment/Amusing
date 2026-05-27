@@ -234,7 +234,8 @@ public class QueryDefinitionsTests
         string query = QueryDefinitions.GetPlanningFestivals;
 
         Assert.Contains("f.festival_id AS FestivalId", query);
-        Assert.Contains("CONCAT('Amusing Hengelo ', YEAR(f.festivaldatum)) AS Festival", query);
+        Assert.Contains("AS Festival", query);
+        Assert.DoesNotContain("CONCAT('Amusing Hengelo '", query);
         Assert.Contains("f.festivaldatum AS FestivalDate", query);
         Assert.Contains("f.duuroptreden AS PerformanceLength", query);
         Assert.Contains("TIME_FORMAT(f.start_festivaldag, '%H:%i') AS StartFestivalday", query);

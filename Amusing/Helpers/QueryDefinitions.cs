@@ -1780,7 +1780,7 @@ public static class QueryDefinitions
     public static readonly string GetPlanningFestivals = @"
         SELECT 
 	        f.festival_id AS FestivalId,
-	        CONCAT('Amusing Hengelo ', YEAR(f.festivaldatum)) AS Festival,
+	        YEAR(f.festivaldatum) AS Festival,
             f.festivaldatum AS FestivalDate,
             f.duuroptreden AS PerformanceLength,
 	        TIME_FORMAT(f.start_festivaldag, '%H:%i') AS StartFestivalday,
