@@ -16,7 +16,7 @@ public class MobilePlanningService(
 
     public async Task<MobileFestivalPlanningDto?> GetCurrentPlanningAsync()
     {
-        int festivalId = await _festivalService.GetLatestFestivalAsync();
+        int festivalId = await _festivalService.GetLatestFestivalIdAsync();
         if (festivalId <= 0)
             return null;
 

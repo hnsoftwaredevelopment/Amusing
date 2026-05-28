@@ -134,6 +134,16 @@ public class QueryDefinitionsTests
     }
 
     [Fact]
+    public void GetCurrentFestivalIdQuery_ReturnsFestivalIdNotYear()
+    {
+        string query = QueryDefinitions.GetCurrentFestivalId;
+
+        Assert.Contains("MAX(festival_id)", query);
+        Assert.Contains("AS Huidige", query);
+        Assert.DoesNotContain("YEAR(festivaldatum)", query);
+    }
+
+    [Fact]
     public void GetNewlyAddedEmailAddressesQuery_DoesNotHardcodeDutchCountry()
     {
         string query = QueryDefinitions.GetNewlyAddedEmailAddresses;

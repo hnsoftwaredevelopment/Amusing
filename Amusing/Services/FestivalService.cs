@@ -11,6 +11,8 @@ public class FestivalService( GenericDataService dataService )
 
     public async Task<int> GetLatestFestivalAsync() => await _dataService.ExecuteScalarAsync<int>( QueryDefinitions.GetCurrentFestival );
 
+    public async Task<int> GetLatestFestivalIdAsync() => await _dataService.ExecuteScalarAsync<int>( QueryDefinitions.GetCurrentFestivalId );
+
     public Task<List<FestivalModel>> GetFestivalOverviewAsync()
     {
         return _dataService.ExecuteQueryAsync( QueryDefinitions.GetFestivals,
