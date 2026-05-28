@@ -125,6 +125,7 @@ builder.Services.AddScoped<VolunteerService>();
 builder.Services.AddScoped<FieldMappingService>();
 builder.Services.AddScoped<UserContextHelper>();
 builder.Services.AddScoped<PlanningService>();
+builder.Services.AddScoped<MobilePlanningService>();
 builder.Services.AddScoped<ToastService>();
 
 builder.Services.AddBlazoredSessionStorage();
@@ -184,6 +185,22 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapGet("/api/mobile/current-performances", async (MobilePlanningService mobilePlanningService) =>
+{
+    var planning = await mobilePlanningService.GetCurrentPlanningAsync();
+    return planning is null ? Results.NotFound() : Results.Ok(planning);
+})
+.AllowAnonymous()
+.WithName("GetCurrentMobilePerformances");
+
+app.MapGet("/api/mobile/current-festival", async (MobilePlanningService mobilePlanningService) =>
+{
+    var planning = await mobilePlanningService.GetCurrentPlanningAsync();
+    return planning is null ? Results.NotFound() : Results.Ok(planning.Festival);
+})
+.AllowAnonymous()
+.WithName("GetCurrentMobileFestival");
 
 app.MapRazorPages();
 app.MapBlazorHub();

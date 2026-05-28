@@ -21,5 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\\Amusing\\Amusing.csproj" />
+    <ProjectReference Include="..\Amusing.Mobile.Shared\Amusing.Mobile.Shared.csproj" />
   </ItemGroup>
 </Project>

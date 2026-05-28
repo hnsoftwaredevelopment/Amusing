@@ -1779,14 +1779,15 @@ public static class QueryDefinitions
         WHERE pv.festival_id = @FestivalId;";
     public static readonly string GetPlanningFestivals = @"
         SELECT 
-	        f.festival_id AS festival_id,
-	        CONCAT ('Amusing Hengelo ',YEAR(f.festivaldatum )) AS naam,
-            f.duuroptreden AS duuroptreden,
-	        TIME_FORMAT(f.start_festivaldag, '%H:%i') AS start_festivaldag,
-	        TIME_FORMAT(f.einde_festivaldag, '%H:%i') AS einde_festivaldag,
-	        TIME_FORMAT(f.begin_pauze, '%H:%i') AS begin_pauze,
-	        TIME_FORMAT(f.einde_pauze, '%H:%i') AS einde_pauze,
-	        TIME_FORMAT(f.einde_ervaren_reserve, '%H:%i') AS einde_ervaren_reserve
+	        f.festival_id AS FestivalId,
+	        YEAR(f.festivaldatum) AS Festival,
+            f.festivaldatum AS FestivalDate,
+            f.duuroptreden AS PerformanceLength,
+	        TIME_FORMAT(f.start_festivaldag, '%H:%i') AS StartFestivalday,
+	        TIME_FORMAT(f.einde_festivaldag, '%H:%i') AS EndFestivalday,
+	        TIME_FORMAT(f.begin_pauze, '%H:%i') AS StartPause,
+	        TIME_FORMAT(f.einde_pauze, '%H:%i') AS EndPause,
+	        TIME_FORMAT(f.einde_ervaren_reserve, '%H:%i') AS EndExperiencedSubstitude
         FROM amusing.ah_festivals f
         WHERE f.festival_id = @FestivalId;";
     public static readonly string GetPlanningGenres = @"
@@ -1819,6 +1820,21 @@ public static class QueryDefinitions
         GROUP BY podium_id, po.tijdvak
         ORDER BY podium_id, po.tijdvak;
         ";
+    public static readonly string GetMobileCurrentPerformances = @"
+        SELECT
+            po.festival_id AS FestivalId,
+            po.zanggroep_id AS GroupId,
+            g.naam AS GroupName,
+            po.podium_id AS StageId,
+            p.naam AS StageName,
+            TIME_FORMAT(t.`from`, '%H:%i') AS `From`,
+            TIME_FORMAT(t.`to`, '%H:%i') AS `To`
+        FROM amusing.planner_optredens po
+        JOIN amusing.ah_podia p ON po.podium_id = p.podium_id
+        JOIN amusing.ah_zanggroepen g ON g.zanggroep_id = po.zanggroep_id
+        JOIN amusing.ah_timetable t ON po.tijdvak = t.timeslot_id
+        WHERE po.festival_id = @FestivalId
+        ORDER BY t.`from`, g.naam, p.naam;";
     public static readonly string GetPlanningPersonRoles = @"
         SELECT 
 	        r.persoon_id AS persoon_id,

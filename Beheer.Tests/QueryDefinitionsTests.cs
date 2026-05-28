@@ -134,6 +134,16 @@ public class QueryDefinitionsTests
     }
 
     [Fact]
+    public void GetCurrentFestivalIdQuery_ReturnsFestivalIdNotYear()
+    {
+        string query = QueryDefinitions.GetCurrentFestivalId;
+
+        Assert.Contains("MAX(festival_id)", query);
+        Assert.Contains("AS Huidige", query);
+        Assert.DoesNotContain("YEAR(festivaldatum)", query);
+    }
+
+    [Fact]
     public void GetNewlyAddedEmailAddressesQuery_DoesNotHardcodeDutchCountry()
     {
         string query = QueryDefinitions.GetNewlyAddedEmailAddresses;
@@ -226,6 +236,41 @@ public class QueryDefinitionsTests
         Assert.Contains("vd.taak IS NULL", query);
         Assert.Contains("@FestivalId", query);
         Assert.Contains("ORDER BY pod.naam", query);
+    }
+
+    [Fact]
+    public void GetPlanningFestivalsQuery_UsesAliasesReadByPlanningService()
+    {
+        string query = QueryDefinitions.GetPlanningFestivals;
+
+        Assert.Contains("f.festival_id AS FestivalId", query);
+        Assert.Contains("YEAR(f.festivaldatum) AS Festival", query);
+        Assert.DoesNotContain("CONCAT('Amusing Hengelo '", query);
+        Assert.Contains("f.festivaldatum AS FestivalDate", query);
+        Assert.Contains("f.duuroptreden AS PerformanceLength", query);
+        Assert.Contains("TIME_FORMAT(f.start_festivaldag, '%H:%i') AS StartFestivalday", query);
+        Assert.Contains("TIME_FORMAT(f.einde_festivaldag, '%H:%i') AS EndFestivalday", query);
+        Assert.Contains("TIME_FORMAT(f.begin_pauze, '%H:%i') AS StartPause", query);
+        Assert.Contains("TIME_FORMAT(f.einde_pauze, '%H:%i') AS EndPause", query);
+        Assert.Contains("TIME_FORMAT(f.einde_ervaren_reserve, '%H:%i') AS EndExperiencedSubstitude", query);
+    }
+
+    [Fact]
+    public void MobileCurrentPerformancesQuery_LoadsPublicMobileFields()
+    {
+        string query = QueryDefinitions.GetMobileCurrentPerformances;
+
+        Assert.Contains("FestivalId", query);
+        Assert.Contains("GroupId", query);
+        Assert.Contains("GroupName", query);
+        Assert.Contains("StageId", query);
+        Assert.Contains("StageName", query);
+        Assert.Contains("AS `From`", query);
+        Assert.Contains("AS `To`", query);
+        Assert.Contains("@FestivalId", query);
+        Assert.DoesNotContain("email", query, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("telefoon", query, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("phone", query, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

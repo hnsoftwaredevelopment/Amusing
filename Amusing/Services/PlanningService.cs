@@ -103,6 +103,7 @@ public class PlanningService(GenericDataService dataService)
             {
                 FestivalId = reader.GetMyUInt("FestivalId"),
                 Festival = $"Amusing Hengelo {reader.GetMyString("Festival")}",
+                FestivalDate = reader.GetMyDate("FestivalDate"),
                 PerformanceLength = 30,
                 StartFestivalday = reader.GetMyTime("StartFestivalday"),
                 EndFestivalday = reader.GetMyTime("EndFestivalday"),
