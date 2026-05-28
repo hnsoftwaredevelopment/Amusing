@@ -1,5 +1,159 @@
-﻿@page "/"
+@page "/"
+@using Amusing.Mobile.Models
+@using Amusing.Mobile.Shared.Models
+@inject Amusing.Mobile.Services.MobilePlanningApiClient ApiClient
+@inject Amusing.Mobile.Services.MobilePlanningCache Cache
+@inject Amusing.Mobile.Services.ChoirSelectionStore SelectionStore
 
-<h1>Hello, world!</h1>
+<main class="mobile-shell">
+    <header class="app-header">
+        <div>
+            <p class="eyebrow">Amusing Hengelo</p>
+            <h1>@FestivalTitle</h1>
+            <p class="festival-date">@FestivalDateText</p>
+        </div>
+        <button class="icon-button" @onclick="LoadPlanningAsync" disabled="@_state.IsLoading" title="Ververs planning" aria-label="Ververs planning">Ververs</button>
+    </header>
 
-Welcome to your new app.
+    @if (_state.IsLoading)
+    {
+        <section class="status-panel">Planning wordt geladen...</section>
+    }
+    else if (_state.Planning is null)
+    {
+        <section class="status-panel error">
+            <strong>Geen planning beschikbaar</strong>
+            <span>@_state.ErrorMessage</span>
+            <button @onclick="LoadPlanningAsync">Opnieuw proberen</button>
+        </section>
+    }
+    else
+    {
+        @if (_state.IsUsingCache)
+        {
+            <section class="status-panel warning">Laatste opgeslagen planning wordt getoond.</section>
+        }
+
+        <section class="controls">
+            <input type="search" placeholder="Zoek koor" @bind="_state.SearchText" @bind:event="oninput" />
+            <div class="segment" aria-label="Filter koren">
+                <button class="@ModeClass(false)" @onclick="() => _state.ShowSelectionOnly = false">Alle koren</button>
+                <button class="@ModeClass(true)" @onclick="() => _state.ShowSelectionOnly = true">Mijn selectie</button>
+            </div>
+        </section>
+
+        <section class="choir-list">
+            @foreach (var choir in VisibleChoirs)
+            {
+                bool selected = _state.SelectedChoirIds.Contains(choir.GroupId);
+                <article class="choir-card">
+                    <div class="choir-heading">
+                        <h2>@choir.GroupName</h2>
+                        <button class="select-button @(selected ? "selected" : "")" @onclick="() => ToggleSelection(choir.GroupId)">
+                            @(selected ? "Geselecteerd" : "Selecteer")
+                        </button>
+                    </div>
+                    <div class="performance-list">
+                        @foreach (var performance in choir.Performances)
+                        {
+                            <div class="performance-row">
+                                <span class="time">@performance.From.ToString("HH:mm") - @performance.To.ToString("HH:mm")</span>
+                                <span class="stage">@performance.StageName</span>
+                            </div>
+                        }
+                    </div>
+                </article>
+            }
+        </section>
+    }
+</main>
+
+@code {
+    private readonly MobilePlanningState _state = new();
+
+    private string FestivalTitle => _state.Planning?.Festival.FestivalName ?? "Festivalplanning";
+
+    private string FestivalDateText => _state.Planning is null
+        ? string.Empty
+        : _state.Planning.Festival.FestivalDate.ToString("dddd d MMMM yyyy");
+
+    private IEnumerable<ChoirGroup> VisibleChoirs
+    {
+        get
+        {
+            if (_state.Planning is null)
+                return [];
+
+            IEnumerable<ChoirGroup> choirs = _state.Planning.Performances
+                .GroupBy(performance => new { performance.GroupId, performance.GroupName })
+                .Select(group => new ChoirGroup(
+                    group.Key.GroupId,
+                    group.Key.GroupName,
+                    [.. group.OrderBy(performance => performance.From).ThenBy(performance => performance.StageName)]))
+                .OrderBy(group => group.GroupName);
+
+            if (_state.ShowSelectionOnly)
+                choirs = choirs.Where(group => _state.SelectedChoirIds.Contains(group.GroupId));
+
+            if (!string.IsNullOrWhiteSpace(_state.SearchText))
+                choirs = choirs.Where(group => group.GroupName.Contains(_state.SearchText, StringComparison.CurrentCultureIgnoreCase));
+
+            return choirs;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _state.SelectedChoirIds = SelectionStore.ReadSelectedChoirIds();
+        await LoadPlanningAsync();
+    }
+
+    private async Task LoadPlanningAsync()
+    {
+        _state.IsLoading = true;
+        _state.ErrorMessage = null;
+        _state.IsUsingCache = false;
+        _state.Planning = null;
+
+        try
+        {
+            MobileFestivalPlanningDto? planning = await ApiClient.GetCurrentPlanningAsync();
+            if (planning is not null)
+            {
+                _state.Planning = planning;
+                await Cache.WriteAsync(planning);
+                return;
+            }
+
+            _state.ErrorMessage = "De actuele planning kon niet worden opgehaald.";
+        }
+        catch
+        {
+            _state.ErrorMessage = "Er is geen internetverbinding of de planning is tijdelijk niet bereikbaar.";
+        }
+        finally
+        {
+            if (_state.Planning is null)
+            {
+                MobileFestivalPlanningDto? cached = await Cache.ReadAsync();
+                if (cached is not null)
+                {
+                    _state.Planning = cached;
+                    _state.IsUsingCache = true;
+                }
+            }
+
+            _state.IsLoading = false;
+        }
+    }
+
+    private void ToggleSelection(uint groupId)
+    {
+        SelectionStore.Toggle(groupId);
+        _state.SelectedChoirIds = SelectionStore.ReadSelectedChoirIds();
+    }
+
+    private string ModeClass(bool selectionMode) => _state.ShowSelectionOnly == selectionMode ? "active" : string.Empty;
+
+    private sealed record ChoirGroup(uint GroupId, string GroupName, IReadOnlyList<MobilePerformanceDto> Performances);
+}
