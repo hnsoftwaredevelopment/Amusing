@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+using Amusing.Mobile.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Amusing.Mobile;
 
@@ -15,6 +16,13 @@ public static class MauiProgram
 			});
 
 		builder.Services.AddMauiBlazorWebView();
+		builder.Services.AddSingleton(new HttpClient
+		{
+			BaseAddress = new Uri("https://amusing-hengelo.nl/")
+		});
+		builder.Services.AddSingleton<MobilePlanningApiClient>();
+		builder.Services.AddSingleton<MobilePlanningCache>();
+		builder.Services.AddSingleton<ChoirSelectionStore>();
 
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();
