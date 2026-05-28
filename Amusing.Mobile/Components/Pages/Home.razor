@@ -1,4 +1,5 @@
 @page "/"
+@layout EmptyLayout
 @using Amusing.Mobile.Models
 @using Amusing.Mobile.Shared.Models
 @inject Amusing.Mobile.Services.MobilePlanningApiClient ApiClient
@@ -35,7 +36,7 @@
         }
 
         <section class="controls">
-            <input type="search" placeholder="Zoek koor" @bind="_state.SearchText" @bind:event="oninput" />
+            <input type="search" placeholder="Zoek koor" aria-label="Zoek koor" @bind="_state.SearchText" @bind:event="oninput" />
             <div class="segment" aria-label="Filter koren">
                 <button class="@ModeClass(false)" @onclick="() => _state.ShowSelectionOnly = false">Alle koren</button>
                 <button class="@ModeClass(true)" @onclick="() => _state.ShowSelectionOnly = true">Mijn selectie</button>
