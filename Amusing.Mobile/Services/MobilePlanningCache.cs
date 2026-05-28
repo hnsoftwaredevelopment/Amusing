@@ -13,13 +13,30 @@ public class MobilePlanningCache
         if (!File.Exists(_cachePath))
             return null;
 
-        await using FileStream stream = File.OpenRead(_cachePath);
-        return await JsonSerializer.DeserializeAsync<MobileFestivalPlanningDto>(stream, JsonOptions, cancellationToken);
+        try
+        {
+            await using FileStream stream = File.OpenRead(_cachePath);
+            return await JsonSerializer.DeserializeAsync<MobileFestivalPlanningDto>(stream, JsonOptions, cancellationToken);
+        }
+        catch (JsonException)
+        {
+            return null;
+        }
+        catch (IOException)
+        {
+            return null;
+        }
     }
 
     public async Task WriteAsync(MobileFestivalPlanningDto planning, CancellationToken cancellationToken = default)
     {
-        await using FileStream stream = File.Create(_cachePath);
-        await JsonSerializer.SerializeAsync(stream, planning, JsonOptions, cancellationToken);
+        string tempPath = Path.Combine(FileSystem.AppDataDirectory, $"{Path.GetFileName(_cachePath)}.tmp");
+
+        await using (FileStream stream = File.Create(tempPath))
+        {
+            await JsonSerializer.SerializeAsync(stream, planning, JsonOptions, cancellationToken);
+        }
+
+        File.Move(tempPath, _cachePath, overwrite: true);
     }
 }

@@ -10,8 +10,15 @@ public class ChoirSelectionStore
     public IReadOnlySet<uint> ReadSelectedChoirIds()
     {
         string json = Preferences.Get(PreferenceKey, "[]");
-        uint[]? ids = JsonSerializer.Deserialize<uint[]>(json, JsonOptions);
-        return new HashSet<uint>(ids ?? []);
+        try
+        {
+            uint[]? ids = JsonSerializer.Deserialize<uint[]>(json, JsonOptions);
+            return new HashSet<uint>(ids ?? []);
+        }
+        catch (JsonException)
+        {
+            return new HashSet<uint>();
+        }
     }
 
     public void WriteSelectedChoirIds(IEnumerable<uint> choirIds)
