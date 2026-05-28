@@ -16,10 +16,10 @@ public static class MauiProgram
 			});
 
 		builder.Services.AddMauiBlazorWebView();
-		builder.Services.AddSingleton(new HttpClient
-		{
-			BaseAddress = new Uri("https://amusing-hengelo.nl/")
-		});
+builder.Services.AddSingleton(new HttpClient
+{
+    BaseAddress = new Uri("https://blazor.beheer.amusing-hengelo.nl/")
+});
 		builder.Services.AddSingleton<MobilePlanningApiClient>();
 		builder.Services.AddSingleton<MobilePlanningCache>();
 		builder.Services.AddSingleton<ChoirSelectionStore>();
