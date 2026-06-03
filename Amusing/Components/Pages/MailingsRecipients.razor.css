@@ -52,6 +52,17 @@
     padding-right: 2px;
 }
 
+.mailing-recipients-page {
+    height: auto;
+    min-height: calc(100vh - 80px);
+    overflow-y: auto;
+    padding-bottom: 24px;
+}
+
+.mailing-recipients-page .fixed-header {
+    position: static;
+}
+
 .mailing-recipients-page .scrollable-content {
     background-color: transparent;
     flex: 0 0 auto;
@@ -78,6 +89,15 @@
     color: #555;
     font-size: 0.95rem;
     font-weight: 600;
+}
+
+.recipient-status {
+    color: #1f6d42;
+    font-weight: 600;
+}
+
+.recipient-status--incorrect {
+    color: #b32121;
 }
 
 .export-grid-container {

@@ -11,9 +11,16 @@ using MimeKit;
 
 namespace Amusing.Services;
 
-public record MailingSendResult(int Requested, int Sent, int Failed)
+public record MailingFailure(string Recipient, string Reason);
+
+public record MailingSendResult(int Requested, int Sent, int Failed, IReadOnlyList<MailingFailure> Failures)
 {
     public bool HasFailures => Failed > 0;
+
+    public MailingSendResult(int requested, int sent, int failed)
+        : this(requested, sent, failed, [])
+    {
+    }
 }
 
 public class MailingService
@@ -52,7 +59,7 @@ public class MailingService
 
     #region Send Mail Core
 
-    private async Task<bool> SendMimeMessageAsync(MimeMessage message)
+    private async Task<string?> SendMimeMessageAsync(MimeMessage message)
     {
         try
         {
@@ -65,7 +72,7 @@ public class MailingService
             await client.DisconnectAsync(true);
 
             await _logger.LogMailSentAsync(message.To.ToString(), message.Subject, success: true);
-            return true;
+            return null;
         }
         catch (Exception smtpEx)
         {
@@ -76,7 +83,7 @@ public class MailingService
                 message.Subject,
                 success: false,
                 errorMessage: smtpEx.Message);
-            return false;
+            return smtpEx.Message;
         }
     }
 
@@ -90,6 +97,7 @@ public class MailingService
         int requested = 0;
         int sent = 0;
         int failed = 0;
+        List<MailingFailure> failures = [];
 
         foreach (var recipient in toSend)
         {
@@ -98,19 +106,30 @@ public class MailingService
                 continue;
 
             requested++;
+            if (!MailboxAddress.TryParse(testEmail, out MailboxAddress? mailboxAddress))
+            {
+                failed++;
+                failures.Add(new MailingFailure(testEmail, "Ongeldig e-mailadres"));
+                continue;
+            }
+
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderAddress));
-            message.To.Add(MailboxAddress.Parse(testEmail));
+            message.To.Add(mailboxAddress);
             message.Subject = ReplaceTemplateFields(template.TemplateSubject, dict);
             message.Body = new TextPart("html") { Text = ReplaceTemplateFields(template.TemplateContent ?? "", dict) };
 
-            if ( await SendMimeMessageAsync(message) )
+            string? errorMessage = await SendMimeMessageAsync(message);
+            if ( string.IsNullOrWhiteSpace(errorMessage) )
                 sent++;
             else
+            {
                 failed++;
+                failures.Add(new MailingFailure(testEmail, errorMessage));
+            }
         }
 
-        return new MailingSendResult(requested, sent, failed);
+        return new MailingSendResult(requested, sent, failed, failures);
     }
 
     public async Task<MailingSendResult> SendBulkMailAsync(TemplatesListModel template, List<ExpandoObject> recipients)
@@ -118,6 +137,7 @@ public class MailingService
         int requested = 0;
         int sent = 0;
         int failed = 0;
+        List<MailingFailure> failures = [];
 
         foreach (var recipient in recipients)
         {
@@ -126,19 +146,61 @@ public class MailingService
                 continue;
 
             requested++;
+            string email = emailObj.ToString()!;
+            if (!MailboxAddress.TryParse(email, out MailboxAddress? mailboxAddress))
+            {
+                failed++;
+                failures.Add(new MailingFailure(email, "Ongeldig e-mailadres"));
+                continue;
+            }
+
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderAddress));
-            message.To.Add(MailboxAddress.Parse(emailObj.ToString()!));
+            message.To.Add(mailboxAddress);
             message.Subject = ReplaceTemplateFields(template.TemplateSubject, dict);
             message.Body = new TextPart("html") { Text = ReplaceTemplateFields(template.TemplateContent ?? "", dict) };
 
-            if ( await SendMimeMessageAsync(message) )
+            string? errorMessage = await SendMimeMessageAsync(message);
+            if ( string.IsNullOrWhiteSpace(errorMessage) )
                 sent++;
             else
+            {
                 failed++;
+                failures.Add(new MailingFailure(email, errorMessage));
+            }
         }
 
-        return new MailingSendResult(requested, sent, failed);
+        return new MailingSendResult(requested, sent, failed, failures);
+    }
+
+    public Task<MailingSendResult> SimulateBulkMailAsync(TemplatesListModel template, List<ExpandoObject> recipients)
+    {
+        int requested = 0;
+        int valid = 0;
+        int failed = 0;
+        List<MailingFailure> failures = [];
+
+        foreach (var recipient in recipients)
+        {
+            var dict = recipient as IDictionary<string, object>;
+            if (dict == null || !dict.TryGetValue("Email", out var emailObj) || string.IsNullOrWhiteSpace(emailObj?.ToString()))
+                continue;
+
+            requested++;
+            string email = emailObj.ToString()!;
+            if (!MailboxAddress.TryParse(email, out _))
+            {
+                failed++;
+                failures.Add(new MailingFailure(email, "Ongeldig e-mailadres"));
+                continue;
+            }
+
+            _ = ReplaceTemplateFields(template.TemplateSubject, dict);
+            _ = ReplaceTemplateFields(template.TemplateContent ?? "", dict);
+            valid++;
+        }
+
+        return Task.FromResult(new MailingSendResult(requested, valid, failed, failures));
     }
 
     public async Task<List<(string Recipient, string Subject, string Body)>> GeneratePreviewAsync(

@@ -1,22 +1,11 @@
 ﻿@page "/MailTemplates"
 @using Amusing.Models
-@using Amusing.Services
-@using Amusing.Helpers
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.DropDowns
-@using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Navigations
-@using System.ComponentModel.DataAnnotations
-@using Syncfusion.Blazor.Notifications
 @using Syncfusion.Blazor.Popups
-@using Syncfusion.Blazor.QueryBuilder
 @using Syncfusion.Blazor.RichTextEditor
-@using Microsoft.AspNetCore.Components.Forms
-@using Syncfusion.Blazor.SplitButtons
-@using System.Dynamic
-@using System.Text.Json
-@using System.Text.Json.Serialization
 
 @if ( _isLoading )
 {
@@ -125,7 +114,10 @@ else
 					</ToolbarItem>
 					<ToolbarItem Type="ItemType.Button">
 						<Template>
-							<button class="custom-toolbar-btn" @onclick="MailSend" title="Verstuur de mail uit het geselecteerde sjabloon naar alle e-mail adressen uit de ontvangerslijst">
+							<button class="custom-toolbar-btn @(_isSendingMail ? "disabled" : string.Empty)"
+									@onclick="MailSend"
+									disabled="@_isSendingMail"
+									title="Verstuur de mail uit het geselecteerde sjabloon naar alle e-mail adressen uit de ontvangerslijst">
 								<img src="icons/send.svg" class="icon" alt="MAILSEND" Height="25"/>
 							</button>
 						</Template>

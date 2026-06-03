@@ -1,4 +1,5 @@
 using System.Dynamic;
+using System.Net.Mail;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -36,6 +37,7 @@ public class MailingsRecipientsBase : ComponentBase
     protected EditContext? editContext;
     protected int VisibleRowCount = 0;
     protected int SelectedListRowCount = 0;
+    protected bool RecipientListChecked = false;
     protected List<ExpandoObject> DynamicRecipients { get; set; } = new List<ExpandoObject>();
     protected List<ExpandoObject> DynamicExportRecipients { get; set; } = new List<ExpandoObject>();
     protected List<IDictionary<string, object>> DynamicRecipientsDict { get; set; } = new();
@@ -887,6 +889,7 @@ public class MailingsRecipientsBase : ComponentBase
 
     protected async Task GenerateMailList()
     {
+        RecipientListChecked = false;
         RuleModel? rules = personsQueryBuilder?.GetRules();
         if (rules == null)
         {
@@ -943,6 +946,52 @@ public class MailingsRecipientsBase : ComponentBase
         await InvokeAsync(StateHasChanged);
     }
 
+    protected async Task CheckRecipientsList()
+    {
+        await GenerateMailList();
+
+        if (DynamicRecipients.Count == 0)
+        {
+            await ToastService.ShowWarningAsync("Er zijn geen ontvangers om te controleren.");
+            return;
+        }
+
+        List<string> invalidRecipients = [];
+
+        foreach (ExpandoObject recipient in DynamicRecipients)
+        {
+            IDictionary<string, object?> row = recipient;
+            string email = GetExpandoString(recipient, "Email");
+            string status = GetEmailValidationStatus(email);
+            row["Status"] = status;
+
+            if (!string.Equals(status, "correct", StringComparison.OrdinalIgnoreCase))
+            {
+                string name = GetExpandoString(recipient, "Name");
+                string groupName = GetExpandoString(recipient, "GroupName");
+                invalidRecipients.Add($"{email} ({name}, {groupName}): {status}");
+            }
+        }
+
+        RecipientListChecked = true;
+
+        if (SelectedListGridRef is not null)
+        {
+            await SelectedListGridRef.Refresh();
+        }
+
+        await LogRecipientListCheckAsync(invalidRecipients);
+
+        if (invalidRecipients.Count == 0)
+        {
+            await ToastService.ShowSuccessAsync($"Alle {DynamicRecipients.Count} e-mail adressen in de ontvangerslijst zijn correct.");
+        }
+        else
+        {
+            await ToastService.ShowWarningAsync($"{invalidRecipients.Count} van {DynamicRecipients.Count} e-mail adressen zijn incorrect. Zie de controlelijst en het logboek voor details.");
+        }
+    }
+
     protected static ExpandoObject ToSelectedListRecipient(ExpandoObject row)
     {
         var source = (IDictionary<string, object?>)row;
@@ -951,6 +1000,7 @@ public class MailingsRecipientsBase : ComponentBase
         recipient["Name"] = GetFirstValue(source, "Name", "FullName") ?? string.Empty;
         recipient["GroupName"] = GetFirstValue(source, "GroupName") ?? string.Empty;
         recipient["Email"] = GetFirstValue(source, "Email", "PersonEmail", "GroupEmail") ?? string.Empty;
+        recipient["Status"] = string.Empty;
 
         return (ExpandoObject)recipient;
     }
@@ -995,6 +1045,75 @@ public class MailingsRecipientsBase : ComponentBase
         }
 
         return null;
+    }
+
+    protected static string GetExpandoString(ExpandoObject row, string field)
+    {
+        IDictionary<string, object?> values = row;
+        return values.TryGetValue(field, out object? value)
+            ? value?.ToString() ?? string.Empty
+            : string.Empty;
+    }
+
+    protected static string GetRecipientStatusCss(ExpandoObject row)
+    {
+        string status = GetExpandoString(row, "Status");
+        return status.StartsWith("incorrect", StringComparison.OrdinalIgnoreCase)
+            ? "recipient-status recipient-status--incorrect"
+            : "recipient-status";
+    }
+
+    protected static string GetEmailValidationStatus(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return "incorrect: e-mailadres ontbreekt";
+
+        string normalized = email.Trim();
+
+        if (normalized.Contains(" "))
+            return "incorrect: bevat spaties";
+
+        try
+        {
+            MailAddress address = new(normalized);
+            if (!string.Equals(address.Address, normalized, StringComparison.OrdinalIgnoreCase))
+                return "incorrect: ongeldig formaat";
+
+            string domain = address.Host;
+            if (!domain.Contains(".") || domain.EndsWith(".", StringComparison.Ordinal))
+                return "incorrect: domein mist punt";
+
+            return "correct";
+        }
+        catch (FormatException)
+        {
+            return "incorrect: ongeldig formaat";
+        }
+    }
+
+    private async Task LogRecipientListCheckAsync(List<string> invalidRecipients)
+    {
+        string listName = SelectedRecipientsList?.ListName ?? "onbekende ontvangerslijst";
+        string logMessage = invalidRecipients.Count == 0
+            ? $"<_userName> heeft de ontvangerslijst {listName} gecontroleerd. Alle {DynamicRecipients.Count} e-mail adressen zijn correct."
+            : $"<_userName> heeft de ontvangerslijst {listName} gecontroleerd. {invalidRecipients.Count} van {DynamicRecipients.Count} e-mail adressen zijn incorrect:{Environment.NewLine}{string.Join(Environment.NewLine, invalidRecipients.Select(item => $"- {item}"))}";
+
+        if (SelectedRecipientsList?.ListId > 0)
+        {
+            await LoggingService.WriteUserActionRecipientListAsync(
+                SelectedRecipientsList.ListId,
+                "Mailing",
+                "Ontvangerslijsten",
+                invalidRecipients.Count == 0 ? "success" : "warning",
+                logMessage);
+            return;
+        }
+
+        await LoggingService.WriteUserActionAsync(
+            "Mailing",
+            "Ontvangerslijsten",
+            invalidRecipients.Count == 0 ? "success" : "warning",
+            logMessage);
     }
 
     protected string TranslateToDutch(string field)

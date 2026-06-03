@@ -53,6 +53,7 @@
                                 EnableStickyHeader="true"
                                 Height="100%"
                                 Width="100%">
+                            <GridEvents TValue="LogModel" DataBound="OnGridDataBound" />
                             <GridSearchSettings IgnoreAccent="true" Fields="@_searchFields" />
                             <GridGroupSettings Columns="@_groupedColumns" ExpandAllGroups="false" />
                             <GridSortSettings>

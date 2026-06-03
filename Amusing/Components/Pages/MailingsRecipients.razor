@@ -194,6 +194,14 @@ else
                         <ToolbarItem Type="ItemType.Separator"/>
                         <ToolbarItem Type="ItemType.Button">
                             <Template>
+                                <button class="custom-toolbar-btn" @onclick="CheckRecipientsList" title="Controleer de e-mail adressen in de geselecteerde ontvangerslijst">
+                                    <img src="icons/button-check.svg" class="icon" alt="CHECKRECIPIENTSLIST" />
+                                </button>
+                            </Template>
+                        </ToolbarItem>
+                        <ToolbarItem Type="ItemType.Separator"/>
+                        <ToolbarItem Type="ItemType.Button">
+                            <Template>
                                 <button class="custom-toolbar-btn" @onclick="ExportToExcel" title="Exporteer naar een Excel bestand">
                                     <img src="icons/excel.svg" class="icon" alt="Excel" />
                                 </button>
@@ -281,6 +289,14 @@ else
                     <GridColumn Field="Name" HeaderText="Volledige naam" TextAlign="TextAlign.Left" Width="300px"></GridColumn>
                     <GridColumn Field="GroupName" HeaderText="Groep" TextAlign="TextAlign.Left" Width="300px"></GridColumn>
                     <GridColumn Field="Email" HeaderText="E-Mail" TextAlign="TextAlign.Left" Width="270px"></GridColumn>
+                    <GridColumn Field="Status" HeaderText="Status" TextAlign="TextAlign.Left" Width="220px" Visible="@RecipientListChecked">
+                        <Template>
+                            @{
+                                var row = (ExpandoObject)context;
+                            }
+                            <span class="@GetRecipientStatusCss(row)">@GetExpandoString(row, "Status")</span>
+                        </Template>
+                    </GridColumn>
                 </GridColumns>
             </SfGrid>
         </div>

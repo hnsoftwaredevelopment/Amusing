@@ -9,6 +9,7 @@ using Amusing.Services;
 
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.JSInterop;
 
 using Syncfusion.Blazor.DropDowns;
@@ -21,6 +22,7 @@ namespace Amusing.Components.Pages;
 public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : ComponentBase, IDisposable
 {
     private bool _isLoading = false;
+    private bool _isSendingMail = false;
     private bool _disposed = false;
     private bool showSavedMessage = false;
     private string _testEmailAddress = "";
@@ -152,6 +154,22 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
     [Inject] public LoggingService LoggingService { get; set; } = default!;
     [Inject] public IJSRuntime JSRuntime { get; set; } = default!;
     [Inject] public ToastService ToastService { get; set; } = default!;
+    [Inject] public IConfiguration Configuration { get; set; } = default!;
+    [Inject] public IWebHostEnvironment HostEnvironment { get; set; } = default!;
+
+    private bool ShouldSendRealBulkMail
+    {
+        get
+        {
+            string? configuredEnvironment = Configuration["Amusing:EnvironmentName"];
+            if (!string.IsNullOrWhiteSpace(configuredEnvironment))
+            {
+                return string.Equals(configuredEnvironment, "Production", StringComparison.OrdinalIgnoreCase);
+            }
+
+            return HostEnvironment.IsProduction();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -783,32 +801,81 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
     protected async Task MailSend()
     {
-        Console.WriteLine("Test");
+        if (_isSendingMail)
+            return;
+
         // Send mail from selected template to recipients of the selected recipientlist
         try
         {
             if (_selectedTemplatesList?.RecipientListId == null)
                 return;
 
-            var _tempTemplateList = _selectedTemplatesList;
+            _isSendingMail = true;
+            bool sendRealMail = ShouldSendRealBulkMail;
+            string startMessage = sendRealMail
+                ? $"Mailing met sjabloon {_selectedTemplatesList.TemplateName} wordt verstuurd."
+                : $"TESTOMGEVING: mailing met sjabloon {_selectedTemplatesList.TemplateName} wordt gecontroleerd, maar niet echt verzonden.";
+            await ToastService.ShowAsync(startMessage);
+            await InvokeAsync(StateHasChanged);
 
-            _tempTemplateList.TemplateSubject = _mappingService.ReplaceLabelsWithKeys(_tempTemplateList.TemplateSubject);
-            _tempTemplateList.TemplateContent = _mappingService.ReplaceLabelsWithKeys(_tempTemplateList.TemplateContent);
+            string? originalSubject = _selectedTemplatesList.TemplateSubject;
+            string? originalContent = _selectedTemplatesList.TemplateContent;
+
+            TemplatesListModel _tempTemplateList = new()
+            {
+                TemplateId = _selectedTemplatesList.TemplateId,
+                TemplateName = _selectedTemplatesList.TemplateName,
+                TemplateSubject = _mappingService.ReplaceLabelsWithKeys(originalSubject),
+                TemplateContent = _mappingService.ReplaceLabelsWithKeys(originalContent),
+                RecipientListId = _selectedTemplatesList.RecipientListId
+            };
+
+            if (string.IsNullOrWhiteSpace(_currentRecipientQuery))
+            {
+                await LoadRecipientDataAsync(_selectedTemplatesList.RecipientListId);
+            }
+
+            if (string.IsNullOrWhiteSpace(_currentRecipientQuery))
+            {
+                await ToastService.ShowWarningAsync("Er is geen ontvangersquery beschikbaar voor deze mailing.");
+                return;
+            }
 
             _recipientData = await MailingService.GetDynamicRecipientsAsync(_currentRecipientQuery);
 
-            MailingSendResult sendResult = await MailingService.SendBulkMailAsync(
-                _tempTemplateList,
-                _recipientData
-            );
+            MailingSendResult sendResult = sendRealMail
+                ? await MailingService.SendBulkMailAsync(
+                    _tempTemplateList,
+                    _recipientData
+                )
+                : await MailingService.SimulateBulkMailAsync(
+                    _tempTemplateList,
+                    _recipientData
+                );
 
-            Debug.WriteLine("Bulkmailing verzonden.");
-            string logMessage = $"<_userName> heeft een mailing verstuurd met sjabloon {_selectedTemplatesList.TemplateName}.";
-            await LoggingService.WriteUserActionTemplateAsync( _selectedTemplatesList.TemplateId, "Mailing", "Sjablonen", "success", logMessage );
+            Debug.WriteLine(sendRealMail ? "Bulkmailing verzonden." : "Bulkmailing gesimuleerd.");
+            string logMessage = BuildBulkMailLogMessage(sendResult, sendRealMail);
+            await LoggingService.WriteUserActionTemplateAsync(
+                _selectedTemplatesList.TemplateId,
+                "Mailing",
+                "Sjablonen",
+                sendResult.HasFailures ? "unsuccessful" : "success",
+                logMessage);
+
             if ( sendResult.HasFailures )
-                await ToastService.ShowErrorAsync( $"Mailing met sjabloon {_selectedTemplatesList.TemplateName}: {sendResult.Failed} van {sendResult.Requested} berichten kon niet worden verzonden." );
+            {
+                string failureMessage = sendRealMail
+                    ? $"Mailing met sjabloon {_selectedTemplatesList.TemplateName}: {sendResult.Failed} van {sendResult.Requested} berichten kon niet worden verzonden. Zie het logboek voor de adressen en reden."
+                    : $"TESTOMGEVING: mailing met sjabloon {_selectedTemplatesList.TemplateName} is niet verzonden. {sendResult.Failed} van {sendResult.Requested} adressen zijn ongeldig. Zie het logboek voor details.";
+                await ToastService.ShowErrorAsync(failureMessage);
+            }
             else
-                await ToastService.ShowSuccessAsync( $"Mailing met sjabloon {_selectedTemplatesList.TemplateName} is verzonden." );
+            {
+                string successMessage = sendRealMail
+                    ? $"Mailing met sjabloon {_selectedTemplatesList.TemplateName} is verzonden."
+                    : $"TESTOMGEVING: mailing met sjabloon {_selectedTemplatesList.TemplateName} is getest en niet echt verzonden.";
+                await ToastService.ShowSuccessAsync(successMessage);
+            }
         }
         catch (Exception ex)
         {
@@ -822,6 +889,34 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
                 await LoggingService.WriteUserActionAsync( "Mailing", "Sjablonen", "unsuccessful", logMessage );
             await ToastService.ShowErrorAsync( $"Mailing met sjabloon {templateName} kon niet worden verzonden." );
         }
+        finally
+        {
+            _isSendingMail = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private string BuildBulkMailLogMessage(MailingSendResult sendResult, bool sendRealMail)
+    {
+        string templateName = _selectedTemplatesList?.TemplateName ?? "onbekend sjabloon";
+        string action = sendRealMail
+            ? "heeft een mailing verstuurd"
+            : "heeft in de testomgeving een mailing gesimuleerd zonder deze echt te verzenden";
+        string sentLabel = sendRealMail ? "Verzonden" : "Zou verzonden worden";
+        string message = $"<_userName> {action} met sjabloon {templateName}. {sentLabel}: {sendResult.Sent}, mislukt: {sendResult.Failed}, totaal: {sendResult.Requested}.";
+
+        if (!sendResult.HasFailures)
+            return message;
+
+        string failures = string.Join(
+            Environment.NewLine,
+            sendResult.Failures.Select(f => $"- {f.Recipient}: {f.Reason}"));
+
+        string failureHeader = sendRealMail
+            ? "Niet verzonden naar:"
+            : "Zou niet verzonden worden naar:";
+
+        return $"{message}{Environment.NewLine}{failureHeader}{Environment.NewLine}{failures}";
     }
 
     private void UpdatePreview(ExpandoObject recipient)

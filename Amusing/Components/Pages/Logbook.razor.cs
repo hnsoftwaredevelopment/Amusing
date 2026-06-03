@@ -15,6 +15,7 @@ public partial class Logbook : ComponentBase
     private bool _isLoading;
     private SfGrid<LogModel>? _grid;
     private List<LogModel> _logs = [];
+    private bool _groupsCollapsedAfterBind;
     private readonly string[] _groupedColumns = [ "LogArea", "LogAction" ];
     private readonly string[] _searchFields = [ "LogDate", "LogUsername", "LogArea", "LogAction", "LogReport", "LogStatus" ];
 
@@ -46,6 +47,15 @@ public partial class Logbook : ComponentBase
         if ( _grid is null )
             return;
 
+        await _grid.CollapseAllGroupAsync();
+    }
+
+    private async Task OnGridDataBound()
+    {
+        if ( _grid is null || _groupsCollapsedAfterBind )
+            return;
+
+        _groupsCollapsedAfterBind = true;
         await _grid.CollapseAllGroupAsync();
     }
 }
