@@ -166,7 +166,7 @@ else
 
             <!-- Toolbar -->
             <div style="overflow-x:auto; padding-left: 2px; padding-right: 2px">
-                <SfToolbar Width="940px">
+                <SfToolbar Width="870px">
                     <ToolbarItems>
                         <ToolbarItem Type="ItemType.Button">
                             <Template>
@@ -188,14 +188,6 @@ else
                             <Template>
                                 <button class="custom-toolbar-btn" @onclick="Delete" title="verwijder de geselecteerde gebruiker">
                                     <img src="icons/button-del.svg" class="icon" alt="DELETE" />
-                                </button>
-                            </Template>
-                        </ToolbarItem>
-                        <ToolbarItem Type="ItemType.Separator"/>
-                        <ToolbarItem Type="ItemType.Button">
-                            <Template>
-                                <button class="custom-toolbar-btn" @onclick="CheckRecipientsList" title="Controleer de e-mail adressen in de geselecteerde ontvangerslijst">
-                                    <img src="icons/button-check.svg" class="icon" alt="CHECKRECIPIENTSLIST" />
                                 </button>
                             </Template>
                         </ToolbarItem>
@@ -273,8 +265,14 @@ else
 
         <div class="selected-list-grid">
             <div class="selected-list-grid-header">
-                <h5>E-mail adressen in de geselecteerde lijst</h5>
-                <span class="selected-list-count">Er staan @SelectedListRowCount e-mail adressen in deze lijst</span>
+                <div>
+                    <h5>E-mail adressen in de geselecteerde lijst</h5>
+                    <span class="selected-list-count">Er staan @SelectedListRowCount e-mail adressen in deze lijst</span>
+                </div>
+                <button class="recipient-check-button" @onclick="CheckRecipientsList" title="Controleer de e-mail adressen in de geselecteerde ontvangerslijst">
+                    <img src="icons/button-check.svg" class="recipient-check-button__icon" alt="" />
+                    <span>Controleer e-mailadressen</span>
+                </button>
             </div>
             <SfGrid @ref="SelectedListGridRef"
                     TValue="ExpandoObject"

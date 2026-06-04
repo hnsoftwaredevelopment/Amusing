@@ -42,6 +42,15 @@ public class MailingService
         _mappingService = mappingService;
     }
 
+    public string GetBulkMailThrottleDescription()
+    {
+        int batchSize = Math.Max(1, _emailSettings.BulkMailBatchSize);
+        int batchDelaySeconds = Math.Max(1, _emailSettings.BulkMailBatchDelaySeconds);
+        int hourlyLimit = Math.Max(1, _emailSettings.BulkMailHourlyLimit);
+        int hourlyWindowSeconds = Math.Max(1, _emailSettings.BulkMailHourlyWindowSeconds);
+        return $"maximaal {batchSize} mails per {batchDelaySeconds} seconden en {hourlyLimit} mails per {hourlyWindowSeconds} seconden";
+    }
+
     #region Template Replacement
 
     private string ReplaceTemplateFields(string templateText, IDictionary<string, object> recipient)
@@ -138,6 +147,14 @@ public class MailingService
         int sent = 0;
         int failed = 0;
         List<MailingFailure> failures = [];
+        int smtpAttemptsInBatch = 0;
+        int batchSize = Math.Max(1, _emailSettings.BulkMailBatchSize);
+        TimeSpan batchDelay = TimeSpan.FromSeconds(Math.Max(1, _emailSettings.BulkMailBatchDelaySeconds));
+        Stopwatch batchTimer = Stopwatch.StartNew();
+        int smtpAttemptsInHour = 0;
+        int hourlyLimit = Math.Max(1, _emailSettings.BulkMailHourlyLimit);
+        TimeSpan hourlyWindow = TimeSpan.FromSeconds(Math.Max(1, _emailSettings.BulkMailHourlyWindowSeconds));
+        Stopwatch hourlyTimer = Stopwatch.StartNew();
 
         foreach (var recipient in recipients)
         {
@@ -154,6 +171,32 @@ public class MailingService
                 continue;
             }
 
+            if (smtpAttemptsInBatch >= batchSize)
+            {
+                TimeSpan remainingDelay = batchDelay - batchTimer.Elapsed;
+                if (remainingDelay > TimeSpan.Zero)
+                {
+                    await Task.Delay(remainingDelay);
+                }
+
+                smtpAttemptsInBatch = 0;
+                batchTimer.Restart();
+            }
+
+            if (smtpAttemptsInHour >= hourlyLimit)
+            {
+                TimeSpan remainingDelay = hourlyWindow - hourlyTimer.Elapsed;
+                if (remainingDelay > TimeSpan.Zero)
+                {
+                    await Task.Delay(remainingDelay);
+                }
+
+                smtpAttemptsInHour = 0;
+                hourlyTimer.Restart();
+                smtpAttemptsInBatch = 0;
+                batchTimer.Restart();
+            }
+
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderAddress));
             message.To.Add(mailboxAddress);
@@ -161,6 +204,8 @@ public class MailingService
             message.Body = new TextPart("html") { Text = ReplaceTemplateFields(template.TemplateContent ?? "", dict) };
 
             string? errorMessage = await SendMimeMessageAsync(message);
+            smtpAttemptsInBatch++;
+            smtpAttemptsInHour++;
             if ( string.IsNullOrWhiteSpace(errorMessage) )
                 sent++;
             else

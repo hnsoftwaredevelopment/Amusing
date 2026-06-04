@@ -71,7 +71,7 @@
 }
 
 .selected-list-grid-header {
-    align-items: baseline;
+    align-items: center;
     display: flex;
     gap: 16px;
     justify-content: space-between;
@@ -87,8 +87,41 @@
 
 .selected-list-count {
     color: #555;
+    display: block;
     font-size: 0.95rem;
     font-weight: 600;
+    margin-top: 2px;
+}
+
+.recipient-check-button {
+    align-items: center;
+    background: #1f6d42;
+    border: 1px solid #165230;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    font-size: 0.92rem;
+    font-weight: 700;
+    gap: 8px;
+    min-height: 36px;
+    padding: 6px 12px;
+    white-space: nowrap;
+}
+
+.recipient-check-button:hover,
+.recipient-check-button:focus {
+    background: #185734;
+}
+
+.recipient-check-button:focus-visible {
+    outline: 2px solid #258cfb;
+    outline-offset: 2px;
+}
+
+.recipient-check-button__icon {
+    height: 20px;
+    width: 20px;
 }
 
 .recipient-status {

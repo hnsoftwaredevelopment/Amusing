@@ -813,7 +813,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             _isSendingMail = true;
             bool sendRealMail = ShouldSendRealBulkMail;
             string startMessage = sendRealMail
-                ? $"Mailing met sjabloon {_selectedTemplatesList.TemplateName} wordt verstuurd."
+                ? $"Mailing met sjabloon {_selectedTemplatesList.TemplateName} wordt gedoseerd verstuurd ({MailingService.GetBulkMailThrottleDescription()}). Dit kan enkele minuten duren."
                 : $"TESTOMGEVING: mailing met sjabloon {_selectedTemplatesList.TemplateName} wordt gecontroleerd, maar niet echt verzonden.";
             await ToastService.ShowAsync(startMessage);
             await InvokeAsync(StateHasChanged);
@@ -904,6 +904,10 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             : "heeft in de testomgeving een mailing gesimuleerd zonder deze echt te verzenden";
         string sentLabel = sendRealMail ? "Verzonden" : "Zou verzonden worden";
         string message = $"<_userName> {action} met sjabloon {templateName}. {sentLabel}: {sendResult.Sent}, mislukt: {sendResult.Failed}, totaal: {sendResult.Requested}.";
+        if (sendRealMail)
+        {
+            message += $" De verzending is gedoseerd uitgevoerd met {MailingService.GetBulkMailThrottleDescription()}.";
+        }
 
         if (!sendResult.HasFailures)
             return message;
