@@ -35,6 +35,7 @@ public partial class MaintenancePeople : ComponentBase
     private bool _isLoading = false;
     private PersonModel? SelectedPerson;
     private PersonModel? SelectedPersonOriginal;
+    private int currentTabIndex = 0;
     private int _visibleRowCount = 0;
     private List<PersonModel> Persons = [];
     private List<PersonModel> FilteredPersons = new();
@@ -144,21 +145,35 @@ public partial class MaintenancePeople : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         _isLoading = true;
+        await Task.CompletedTask;
+    }
 
-        Persons = await PersonService.GetAllPersonsAsync();
-        PersonRoleOptions = await PersonService.GetPersonRoleOptionsAsync();
-        GroupOptions = ( await GroupService.GetAllGroupsAsync() )
+    protected override async Task OnAfterRenderAsync( bool firstRender )
+    {
+        if ( !firstRender )
+            return;
+
+        Task<List<PersonModel>> personsTask = PersonService.GetAllPersonsAsync();
+        Task<List<string>> roleOptionsTask = PersonService.GetPersonRoleOptionsAsync();
+        Task<List<GroupModel>> groupOptionsTask = GroupService.GetAllGroupsAsync();
+        Task<PersonFestivalModel?> latestFestivalTask = PersonService.GetLatestFestivalForPersonMaintenanceAsync();
+
+        await Task.WhenAll( personsTask, roleOptionsTask, groupOptionsTask, latestFestivalTask );
+
+        Persons = await personsTask;
+        PersonRoleOptions = await roleOptionsTask;
+        GroupOptions = ( await groupOptionsTask )
             .Where( group => group.Active == 1 )
             .OrderBy( group => group.Name )
             .ToList();
-        LatestFestival = await PersonService.GetLatestFestivalForPersonMaintenanceAsync();
+        LatestFestival = await latestFestivalTask;
 
         SelectedPerson = Persons.FirstOrDefault();
         SelectedPersonOriginal = ClonePerson( SelectedPerson );
-        await LoadSelectedPersonDetailsAsync();
         await ApplyFilterAsync();
 
         _isLoading = false;
+        StateHasChanged();
     }
 
     private async Task OnGridDataBound()
@@ -175,9 +190,23 @@ public partial class MaintenancePeople : ComponentBase
     {
         SelectedPerson = args.Data;
         SelectedPersonOriginal = ClonePerson( args.Data );
-        await LoadSelectedPersonDetailsAsync();
+
+        if ( currentTabIndex == 1 )
+        {
+            await LoadSelectedPersonDetailsAsync();
+        }
 
         StateHasChanged();
+    }
+
+    private async Task OnTabSelected( SelectEventArgs args )
+    {
+        currentTabIndex = args.SelectedIndex;
+
+        if ( currentTabIndex == 1 )
+        {
+            await LoadSelectedPersonDetailsAsync();
+        }
     }
 
     private async Task LoadSelectedPersonDetailsAsync()
@@ -199,13 +228,8 @@ public partial class MaintenancePeople : ComponentBase
 
     private async Task UpdateVisibleRowCountAsync()
     {
-        if ( GridRef is not null )
-        {
-            var records = await GridRef.GetCurrentViewRecordsAsync();
-            await Task.Delay( 150 );
-            _visibleRowCount = records?.Count ?? 0;
-            StateHasChanged();
-        }
+        _visibleRowCount = FilteredPersons?.Count ?? 0;
+        await InvokeAsync(StateHasChanged);
     }
 
     public async Task OnInput( InputEventArgs args )
@@ -224,8 +248,6 @@ public partial class MaintenancePeople : ComponentBase
             "Inactive" => Persons.Where( p => p.Active == 0 ).ToList(),
             _ => Persons.ToList()
         };
-
-        await Task.Delay( 50 );
         await UpdateVisibleRowCountAsync();
     }
 

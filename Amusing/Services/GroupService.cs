@@ -24,13 +24,44 @@ public class GroupService( GenericDataService dataService )
                 Country = CultureInfo.CurrentCulture.TextInfo.ToTitleCase( reader [ "Country" ].ToString()?.ToLower() ?? "" ),
                 Website = reader [ "Website" ].ToString(),
                 Email = reader [ "Email" ].ToString(),
-                Photo = reader [ "Photo" ] != DBNull.Value ? ( byte [ ] ) reader [ "Photo" ] : null,
-                Logo = reader [ "Logo" ] != DBNull.Value ? ( byte [ ] ) reader [ "Logo" ] : null,
+                Photo = [],
+                Logo = [],
                 Description = reader [ "Description" ].ToString(),
                 BankAccount = reader [ "BankAccount" ].ToString(),
                 Active = Convert.ToInt16( reader [ "Active" ] ),
             };
         } );
+    }
+
+    public async Task<GroupModel?> GetGroupByIdAsync( uint groupId )
+    {
+        Dictionary<string, object> parameters = new()
+        {
+            { "@GroupId", groupId }
+        };
+
+        List<GroupModel> groups = await _dataService.ExecuteQueryAsync( QueryDefinitions.GetGroupById, reader =>
+        {
+            return new GroupModel
+            {
+                GroupId = Convert.ToUInt16( reader [ "GroupId" ] ),
+                Name = reader [ "Name" ]?.ToString(),
+                GenreId = Convert.ToUInt16( reader [ "GenreId" ] ),
+                Genre = reader [ "Genre" ].ToString(),
+                City = reader [ "City" ].ToString(),
+                CountryId = reader [ "CountryId" ].ToString()?.ToLower(),
+                Country = CultureInfo.CurrentCulture.TextInfo.ToTitleCase( reader [ "Country" ].ToString()?.ToLower() ?? "" ),
+                Website = reader [ "Website" ].ToString(),
+                Email = reader [ "Email" ].ToString(),
+                Photo = reader [ "Photo" ] != DBNull.Value ? ( byte [ ] ) reader [ "Photo" ] : [],
+                Logo = reader [ "Logo" ] != DBNull.Value ? ( byte [ ] ) reader [ "Logo" ] : [],
+                Description = reader [ "Description" ].ToString(),
+                BankAccount = reader [ "BankAccount" ].ToString(),
+                Active = Convert.ToInt16( reader [ "Active" ] ),
+            };
+        }, parameters );
+
+        return groups.FirstOrDefault();
     }
     public Task<List<GroupModel>> GetInactiveGroupsAsync()
     {

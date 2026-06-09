@@ -980,8 +980,6 @@ public static class QueryDefinitions
             cou.naam 			AS Country,
             grp.website 		AS Website,
             det.email 			AS Email,
-            grp.foto 			AS Photo,
-            grp.logo 			AS Logo,
             grp.beschrijving 	AS Description,
             grp.rekeningnr 		AS BankAccount,
             grp.actief 			AS Active
@@ -991,6 +989,27 @@ public static class QueryDefinitions
         JOIN amusing.ah_landen cou ON grp.land COLLATE utf8mb3_unicode_ci = cou.code
         WHERE grp.actief = 1
         ORDER BY grp.naam;";
+    public static readonly string GetGroupById = @"
+        SELECT
+            grp.zanggroep_id	AS GroupId,
+            grp.naam  			AS Name,
+            grp.genre_id 		AS GenreId,
+            gen.nl 				AS Genre,
+            grp.standplaats 	AS City,
+            grp.land 			AS CountryId,
+            cou.naam 			AS Country,
+            grp.website 		AS Website,
+            det.email 			AS Email,
+            grp.foto 			AS Photo,
+            grp.logo 			AS Logo,
+            grp.beschrijving 	AS Description,
+            grp.rekeningnr 		AS BankAccount,
+            grp.actief 			AS Active
+        FROM amusing.ah_zanggroepen grp
+        LEFT JOIN amusing.ah_zanggroep_details det ON grp.zanggroep_id = det.id
+        JOIN amusing.ah_genres gen ON grp.genre_id = gen.genre_id
+        JOIN amusing.ah_landen cou ON grp.land COLLATE utf8mb3_unicode_ci = cou.code
+        WHERE grp.zanggroep_id = @GroupId;";
     public static readonly string GetInactiveGroups = @"
         SELECT 
             grp.zanggroep_id	AS GroupId,

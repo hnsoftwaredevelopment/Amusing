@@ -31,12 +31,15 @@ public class MailingsRecipientsBase : ComponentBase
     protected bool FestivalSelected = false;
     protected bool HasActiveRules { get; set; }
     protected bool IsLoading = false;
+    protected bool IsExportGridPrepared = false;
+    protected bool IsSelectedListLoading = false;
     protected bool RoleSelected = false;
     protected bool rulesPending;
     protected string? pendingRulesJson;
     protected EditContext? editContext;
     protected int VisibleRowCount = 0;
     protected int SelectedListRowCount = 0;
+    protected int SelectedListLoadVersion = 0;
     protected bool RecipientListChecked = false;
     protected List<ExpandoObject> DynamicRecipients { get; set; } = new List<ExpandoObject>();
     protected List<ExpandoObject> DynamicExportRecipients { get; set; } = new List<ExpandoObject>();
@@ -104,7 +107,11 @@ public class MailingsRecipientsBase : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         IsLoading = true;
+        await Task.CompletedTask;
+    }
 
+    protected async Task LoadRecipientListsAsync()
+    {
         //Get all recipientlists
         RecipientsList = await MailingService.GetRecipientListsAsync();
         SelectedRecipientsList = RecipientsList.FirstOrDefault();
@@ -123,10 +130,12 @@ public class MailingsRecipientsBase : ComponentBase
                 SelectedRecipientsList.ListQuery = QueryBuilderJsonConverter.OldToNew(SelectedRecipientsList.ListFilter);
             }
 
-            LoadRulesIntoQueryBuilder(SelectedRecipientsList.ListQuery);
+            pendingRulesJson = SelectedRecipientsList.ListQuery;
+            rulesPending = true;
         }
 
         IsLoading = false;
+        await InvokeAsync(StateHasChanged);
     }
 
     public string SelectedRecipientsListName
@@ -146,17 +155,7 @@ public class MailingsRecipientsBase : ComponentBase
             _initialLoadDone = true;
             await UpdateVisibleRowCountAsync();
 
-            // Select first row in the SfGrid
-            if (GridRef != null)
-            {
-                await GridRef.SelectRowAsync(0);
-            }
-
-            // filll QueryBuilder with query data from selected row
-            if (RecipientsList.Count > 0)
-            {
-                await SelectRecipientListAsync(RecipientsList[0]);
-            }
+            // Keep opening lightweight. The result grid is filled after an explicit row selection.
         }
     }
 
@@ -203,8 +202,25 @@ public class MailingsRecipientsBase : ComponentBase
             //queryBuilder.RuleAdded += ( sender, args ) => FixInFields( new [ ] { args.Rule } );
         }
 
-        await GenerateMailList();
+        int loadVersion = ++SelectedListLoadVersion;
+        IsSelectedListLoading = true;
+        DynamicRecipients = [];
+        DynamicExportRecipients = [];
+        SelectedListRowCount = 0;
         await InvokeAsync(StateHasChanged);
+
+        try
+        {
+            await GenerateMailList(loadVersion);
+        }
+        finally
+        {
+            if (loadVersion == SelectedListLoadVersion)
+            {
+                IsSelectedListLoading = false;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
     }
 
     #region FixInFields
@@ -578,7 +594,13 @@ public class MailingsRecipientsBase : ComponentBase
     {
         if (firstRender)
         {
+            await LoadRecipientListsAsync();
             await UpdateVisibleRowCountAsync();
+        }
+        else if (rulesPending && personsQueryBuilder is not null)
+        {
+            rulesPending = false;
+            await LoadRulesAsync(pendingRulesJson);
         }
     }
 
@@ -793,6 +815,11 @@ public class MailingsRecipientsBase : ComponentBase
             await ShowToast($"Export naar Excel mislukt: {ex.Message}", "error");
             await LogRecipientListExportAsync( "Excel", exportProps.FileName, "unsuccessful" );
         }
+        finally
+        {
+            IsExportGridPrepared = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     protected async Task ExportToCsv()
@@ -822,6 +849,11 @@ public class MailingsRecipientsBase : ComponentBase
         {
             await ShowToast($"Export naar CSF mislukt: {ex.Message}", "error");
             await LogRecipientListExportAsync( "CSV", exportProps.FileName, "unsuccessful" );
+        }
+        finally
+        {
+            IsExportGridPrepared = false;
+            await InvokeAsync(StateHasChanged);
         }
     }
 
@@ -856,15 +888,30 @@ public class MailingsRecipientsBase : ComponentBase
             await ShowToast($"Export naar PDF mislukt: {ex.Message}", "error");
             await LogRecipientListExportAsync( "PDF", exportProps.FileName, "unsuccessful" );
         }
+        finally
+        {
+            IsExportGridPrepared = false;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     protected async Task<bool> PrepareExport()
     {
         await GenerateMailList();
 
-        if (ExportGridRef == null || DynamicExportRecipients == null || DynamicExportRecipients.Count == 0)
+        if (DynamicExportRecipients == null || DynamicExportRecipients.Count == 0)
         {
             await ShowToast("Geen gegevens beschikbaar om te exporteren.", "warning");
+            return false;
+        }
+
+        IsExportGridPrepared = true;
+        await InvokeAsync(StateHasChanged);
+        await Task.Delay(50);
+
+        if (ExportGridRef == null)
+        {
+            await ShowToast("Export grid kon niet worden voorbereid.", "warning");
             return false;
         }
 
@@ -887,9 +934,15 @@ public class MailingsRecipientsBase : ComponentBase
         await LoggingService.WriteUserActionAsync( "Mailing", "Ontvangerslijsten", status, logMessage );
     }
 
-    protected async Task GenerateMailList()
+    protected async Task GenerateMailList(int? loadVersion = null)
     {
+        if (loadVersion.HasValue && loadVersion.Value != SelectedListLoadVersion)
+        {
+            return;
+        }
+
         RecipientListChecked = false;
+        IsExportGridPrepared = false;
         RuleModel? rules = personsQueryBuilder?.GetRules();
         if (rules == null)
         {
@@ -904,6 +957,10 @@ public class MailingsRecipientsBase : ComponentBase
 
         string fullQuery = QueryBuilderHelper.DetermineQueryFromRules(rules, SourceChecked);
         List<ExpandoObject> result = await MailingService.GetDynamicRecipientsAsync(fullQuery) ?? [];
+        if (loadVersion.HasValue && loadVersion.Value != SelectedListLoadVersion)
+        {
+            return;
+        }
 
         HashSet<string> jaNeeVelden = new(
         [

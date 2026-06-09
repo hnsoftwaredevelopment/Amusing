@@ -27,7 +27,8 @@ else
         <!-- Static detail fields-->
         <div class="fixed-header maintenance-page__header">
             <h3>Onderhoud @FileName</h3>
-            <SfTab>
+            <SfTab @bind-SelectedItem="currentTabIndex">
+                <TabEvents Selected="OnTabSelected" />
                 <TabItems>
                     <TabItem>
                         <ChildContent>
@@ -186,9 +187,11 @@ else
                         CssClass="maintenance-grid"
                         AllowResizing="true"
                         Height="100%"
+                        AllowPaging="true"
                         AllowSorting="true"
                         AllowMultiSorting="true"
                         AllowSelection="true">
+                    <GridPageSettings PageSize="50" PageSizes="@(new int[] { 25, 50, 100 })" />
                     <GridEvents TValue="PersonModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
                     <GridEditSettings AllowAdding="true" NewRowPosition="NewRowPosition.Top"></GridEditSettings>
                     <GridColumns>

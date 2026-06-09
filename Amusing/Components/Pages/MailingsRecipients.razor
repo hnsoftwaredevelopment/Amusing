@@ -269,11 +269,18 @@ else
                     <h5>E-mail adressen in de geselecteerde lijst</h5>
                     <span class="selected-list-count">Er staan @SelectedListRowCount e-mail adressen in deze lijst</span>
                 </div>
-                <button class="recipient-check-button" @onclick="CheckRecipientsList" title="Controleer de e-mail adressen in de geselecteerde ontvangerslijst">
+                <button class="recipient-check-button" @onclick="CheckRecipientsList" disabled="@IsSelectedListLoading" title="Controleer de e-mail adressen in de geselecteerde ontvangerslijst">
                     <img src="icons/button-check.svg" class="recipient-check-button__icon" alt="" />
                     <span>Controleer e-mailadressen</span>
                 </button>
             </div>
+            @if ( IsSelectedListLoading )
+            {
+                <div class="text-center p-2">
+                    <SfSpinner CssClass="e-spin-center" />
+                    <p>Ontvangers worden geladen...</p>
+                </div>
+            }
             <SfGrid @ref="SelectedListGridRef"
                     TValue="ExpandoObject"
                     AllowExcelExport="true"
@@ -281,8 +288,10 @@ else
                     DataSource="@DynamicRecipients"
                     Width="870px"
                     Height="300px"
+                    AllowPaging="true"
                     AllowSorting="true"
                     AllowResizing="true">
+                <GridPageSettings PageSize="50" PageSizes="@(new int[] { 25, 50, 100 })" />
                 <GridColumns>
                     <GridColumn Field="Name" HeaderText="Volledige naam" TextAlign="TextAlign.Left" Width="300px"></GridColumn>
                     <GridColumn Field="GroupName" HeaderText="Groep" TextAlign="TextAlign.Left" Width="300px"></GridColumn>
@@ -308,20 +317,23 @@ else
         <ToastEvents Closed="@OnToastClose"></ToastEvents>
     </SfToast>
 
-    <div class="export-grid-container">
-        <SfGrid @ref="ExportGridRef"
-                TValue="ExpandoObject"
-                AllowExcelExport="true"
-                AllowPdfExport="true"
-                DataSource="@DynamicExportRecipients"
-                Width="1600px"
-                Height="300px">
-            <GridColumns>
-                @foreach ( var column in ExportColumns )
-                {
-                    <GridColumn Field="@column.Field" HeaderText="@column.HeaderText" TextAlign="TextAlign.Left"></GridColumn>
-                }
-            </GridColumns>
-        </SfGrid>
-    </div>
+    @if ( IsExportGridPrepared )
+    {
+        <div class="export-grid-container">
+            <SfGrid @ref="ExportGridRef"
+                    TValue="ExpandoObject"
+                    AllowExcelExport="true"
+                    AllowPdfExport="true"
+                    DataSource="@DynamicExportRecipients"
+                    Width="1600px"
+                    Height="300px">
+                <GridColumns>
+                    @foreach ( var column in ExportColumns )
+                    {
+                        <GridColumn Field="@column.Field" HeaderText="@column.HeaderText" TextAlign="TextAlign.Left"></GridColumn>
+                    }
+                </GridColumns>
+            </SfGrid>
+        </div>
+    }
 }

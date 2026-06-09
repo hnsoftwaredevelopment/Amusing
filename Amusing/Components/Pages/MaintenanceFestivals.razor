@@ -25,7 +25,8 @@ else
         <div class="fixed-header maintenance-page__header">
             <h3>Onderhoud Amusing editie: @(SelectedFestival?.Festival ?? "geen editie beschibaar")</h3>
                 @* Detail Fields *@
-                <SfDataForm Model="SelectedFestival" OnValidSubmit="SaveFestival" LabelPosition="FormLabelPosition.Top">
+                <EditForm Model="SelectedFestival" OnValidSubmit="SaveFestival">
+                <DataAnnotationsValidator />
                 <div class="form-floating-switch">
                     <hr />
                     <Syncfusion.Blazor.Calendars.SfDatePicker TValue="DateOnly" @bind-Value="SelectedFestivalDatum" Placeholder="Festival datum" Format="dd-MM-yyyy" FloatLabelType="FloatLabelType.Always" Width="150px" WeekNumber="true" />
@@ -51,13 +52,13 @@ else
                     </div>
                     <hr />
                 </div>
-            </SfDataForm>
+            </EditForm>
         </div>
 
         <div class="scrollable-content maintenance-page__content">
         @* DataGrid *@ 
         <div class="spacer-medium"></div>
-        <div class="maintenance-toolbar-shell">
+        <div class="maintenance-toolbar-shell maintenance-toolbar-shell--festival">
             <SfToolbar Width="550px">
                 <ToolbarItems>
                     <ToolbarItem Type="ItemType.Button">
@@ -117,22 +118,6 @@ else
                     <GridColumn Field="Festivaldatum" HeaderText="Datum" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="80px"/>
                     <GridColumn Field="StartInschrijving" HeaderText="Start inschrijving" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="130px" />
                     <GridColumn Field="EindeInschrijving" HeaderText="Einde inschrijving" TextAlign="TextAlign.Right" AllowSorting=true AllowResizing="true" Width="130px" />
-                    <GridColumn Field="Aktief" HeaderText="Aktief" TextAlign="TextAlign.Center" Width="140px">
-                        <Template>
-                            @{
-                                var festival = (context as FestivalModel);
-                                    var activeState = SelectedFestivalActive == 1 ? "Gebruikt" : "Niet gebruikt";
-                                    var activeStateColor = SelectedFestivalActive == 1 ? "e-success" : "e-danger";
-                                <div class="template_checkbox">
-                                    <SfChip id="chip">
-                                        <ChipItems>
-                                            <ChipItem Text="@activeState" CssClass="@($"{activeStateColor} custom-chip")" Width="120px" />
-                                        </ChipItems>
-                                    </SfChip>
-                                </div>
-                            }
-                        </Template>
-                    </GridColumn>
                 </GridColumns>          
             </SfGrid>
         </div>

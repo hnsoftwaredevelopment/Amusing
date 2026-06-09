@@ -101,6 +101,12 @@ a, .btn-link {
     padding-right: 2px;
 }
 
+.maintenance-toolbar-shell--festival {
+    flex: 0 0 auto;
+    min-height: 48px;
+    padding-bottom: 8px;
+}
+
 .maintenance-grid-shell {
     flex: 1 1 auto;
     min-height: 0;

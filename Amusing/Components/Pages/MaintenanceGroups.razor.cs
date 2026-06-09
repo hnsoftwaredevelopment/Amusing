@@ -35,6 +35,7 @@ public partial class MaintenanceGroups : ComponentBase
     private bool _initialLoadDone = false;
     private bool _selectFirstRowActivePending;
     private bool _selectFirstRowUnrelatedPending;
+    private readonly HashSet<uint> _loadedGroupDetailIds = [];
 
     private bool IsDeleteEnabled => SelectedGroup?.GroupId != 0;
 
@@ -252,10 +253,17 @@ public partial class MaintenanceGroups : ComponentBase
     {
         IsLoading = true;
 
-        Groups = await GroupService.GetAllGroupsAsync();
-        Genres = await GenreService.GetGenresAsync();
-        Countries = await CountryService.GetActiveCountriesAsync();
-        LatestFestival = await RegistrationService.GetLatestFestivalForMaintenanceAsync();
+        Task<List<GroupModel>> groupsTask = GroupService.GetAllGroupsAsync();
+        Task<List<GenreModel>> genresTask = GenreService.GetGenresAsync();
+        Task<List<CountryModel>> countriesTask = CountryService.GetActiveCountriesAsync();
+        Task<PersonFestivalModel?> latestFestivalTask = RegistrationService.GetLatestFestivalForMaintenanceAsync();
+
+        await Task.WhenAll( groupsTask, genresTask, countriesTask, latestFestivalTask );
+
+        Groups = await groupsTask;
+        Genres = await genresTask;
+        Countries = await countriesTask;
+        LatestFestival = await latestFestivalTask;
 
         SelectedGroup = Groups.FirstOrDefault();
         SelectedGroupOriginal = CloneGroup( SelectedGroup );
@@ -329,7 +337,8 @@ public partial class MaintenanceGroups : ComponentBase
     private async Task OnRowSelected(RowSelectEventArgs<GroupModel> args)
     {
         SelectedGroup = args.Data;
-        SelectedGroupOriginal = CloneGroup( args.Data );
+        await EnsureSelectedGroupDetailsLoadedAsync();
+        SelectedGroupOriginal = CloneGroup( SelectedGroup );
 
 
         if (currentTabIndex == 2)
@@ -372,6 +381,8 @@ public partial class MaintenanceGroups : ComponentBase
     {
         if (SelectedGroup is null)
             return;
+
+        await EnsureSelectedGroupDetailsLoadedAsync();
 
         if (SelectedGroup.GroupId != 0)
         {
@@ -474,7 +485,11 @@ public partial class MaintenanceGroups : ComponentBase
     {
         currentTabIndex = args.SelectedIndex;
 
-        if (currentTabIndex == 2) // 2 = Personstab'
+        if ( currentTabIndex == 1 )
+        {
+            await EnsureSelectedGroupDetailsLoadedAsync();
+        }
+        else if (currentTabIndex == 2) // 2 = Personstab'
         {
             await SetupPersonTabAsync();
         }
@@ -545,6 +560,26 @@ public partial class MaintenanceGroups : ComponentBase
         _selectFirstRowUnrelatedPending = UnrelatedPersonsList.Count > 0;
 
         StateHasChanged(); // let the two person grids re-render with new data & menus
+    }
+
+    private async Task EnsureSelectedGroupDetailsLoadedAsync()
+    {
+        if ( SelectedGroup is null || SelectedGroup.GroupId == 0 || _loadedGroupDetailIds.Contains( SelectedGroup.GroupId ) )
+            return;
+
+        GroupModel? fullGroup = await GroupService.GetGroupByIdAsync( SelectedGroup.GroupId );
+        if ( fullGroup is null )
+            return;
+
+        int index = Groups.FindIndex( group => group.GroupId == fullGroup.GroupId );
+        if ( index >= 0 )
+        {
+            Groups [ index ] = fullGroup;
+        }
+
+        SelectedGroup = fullGroup;
+        _loadedGroupDetailIds.Add( fullGroup.GroupId );
+        StateHasChanged();
     }
 
     private async Task LogGroupChangesAsync()
