@@ -2,14 +2,85 @@
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @using Amusing.Mijn.Services
 @using System.Security.Claims
-@inject ChoirAccounts Accounts
+@inject ChoirProfiles Profiles
 @inject IHttpContextAccessor Context
-<PageTitle>Koor — Mijn Amusing</PageTitle>
-@if (group is null) { <h1>Koor niet beschikbaar</h1><p>Dit koor is niet aan je account gekoppeld.</p> }
-else { <h1>@group.Name</h1><p>Je bent ingelogd bij dit koor. De koorgegevens en festivalinschrijving volgen in de volgende onderdelen.</p> }
-<a href="/">Terug naar mijn koren</a>
+<PageTitle>Koorprofiel — Mijn Amusing</PageTitle>
+<a href="/">← Mijn koren</a>
+@if (profile is null)
+{
+    <h1>Koor niet beschikbaar</h1><p>Dit koor is niet aan je account gekoppeld.</p>
+}
+else
+{
+    <h1>@profile.Name</h1>
+    <p>De algemene gegevens van je koor.</p>
+    @if (message is not null) { <p role="status" class="@(saved ? "success" : "error")">@message</p> }
+    @if (profile.CanEdit && Input is not null)
+    {
+        <EditForm Model="Input" FormName="choir-profile" OnValidSubmit="SaveAsync" class="profile-card">
+            <DataAnnotationsValidator /><ValidationSummary />
+            <input type="hidden" name="Input.Version" value="@Input.Version" />
+            <div class="form-grid">
+                <div><label for="name">Koornaam *</label><InputText id="name" @bind-Value="Input.Name" maxlength="80" /><ValidationMessage For="()=>Input.Name" /></div>
+                <div><label for="city">Standplaats *</label><InputText id="city" @bind-Value="Input.City" maxlength="50" /><ValidationMessage For="()=>Input.City" /></div>
+                <div><label for="country">Land *</label><InputSelect id="country" @bind-Value="Input.Country"><option value="">Kies een land</option>@foreach(var option in countries) { <option value="@option.Id">@option.Name</option> }</InputSelect></div>
+                <div><label for="genre">Genre *</label><InputSelect id="genre" @bind-Value="Input.GenreId"><option value="0">Kies een genre</option>@foreach(var option in genres) { <option value="@option.Id">@option.Name</option> }</InputSelect></div>
+                <div><label for="website">Website</label><InputText id="website" @bind-Value="Input.Website" maxlength="255" placeholder="https://" /><ValidationMessage For="()=>Input.Website" /></div>
+                <div><label for="email">E-mailadres koor</label><InputText id="email" @bind-Value="Input.Email" maxlength="80" /><ValidationMessage For="()=>Input.Email" /></div>
+            </div>
+            <label for="description">Omschrijving</label><InputTextArea id="description" @bind-Value="Input.Description" rows="6" maxlength="10000" /><ValidationMessage For="()=>Input.Description" />
+            <label for="bank">IBAN</label><InputText id="bank" @bind-Value="Input.BankAccount" maxlength="50" aria-describedby="bank-help" /><small id="bank-help">Alleen zichtbaar voor contactpersonen en de penningmeester.</small><ValidationMessage For="()=>Input.BankAccount" />
+            <p><small>* Verplicht veld. Het IBAN mag voorlopig leeg blijven.</small></p>
+            <button type="submit">Wijzigingen opslaan</button>
+        </EditForm>
+    }
+    else
+    {
+        <p class="notice">Je kunt de koorgegevens bekijken. Alleen contactpersonen kunnen wijzigingen opslaan.</p>
+        <dl class="profile-card">
+            <dt>Standplaats</dt><dd>@profile.City</dd>
+            <dt>Land</dt><dd>@(countries.FirstOrDefault(x=>string.Equals(x.Id,profile.Country,StringComparison.OrdinalIgnoreCase))?.Name ?? profile.Country)</dd>
+            <dt>Genre</dt><dd>@(genres.FirstOrDefault(x=>x.Id==profile.GenreId.ToString())?.Name)</dd>
+            <dt>Website</dt><dd>@profile.Website</dd>
+            <dt>E-mailadres koor</dt><dd>@profile.Email</dd>
+            <dt>Omschrijving</dt><dd class="description">@profile.Description</dd>
+            @if(profile.CanReadBank) { <dt>IBAN</dt><dd>@profile.BankAccount</dd> }
+        </dl>
+    }
+}
 @code {
     [Parameter] public long Id { get; set; }
-    private ChoirSummary? group;
-    protected override async Task OnParametersSetAsync() => group = (await Accounts.GroupsAsync(uint.Parse(Context.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!), (Id > 0 && Id <= uint.MaxValue ? (uint)Id : 0u), Context.HttpContext.RequestAborted)).SingleOrDefault();
+    [SupplyParameterFromForm(FormName="choir-profile")] public ChoirProfileInput? Input { get; set; }
+    private ChoirProfile? profile;
+    private List<ProfileOption> countries=[];
+    private List<ProfileOption> genres=[];
+    private string? message;
+    private bool saved;
+    private uint Actor=>uint.Parse(Context.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    private uint GroupId=>Id>0 && Id<=uint.MaxValue ? (uint)Id : 0;
+    protected override async Task OnParametersSetAsync()
+    {
+        var ct=Context.HttpContext!.RequestAborted;
+        profile=await Profiles.GetAsync(Actor,GroupId,ct);
+        if(profile is null) return;
+        countries=await Profiles.OptionsAsync(true,ct); genres=await Profiles.OptionsAsync(false,ct);
+        Input ??= ChoirProfileInput.From(profile);
+    }
+    private async Task SaveAsync()
+    {
+        var result=await Profiles.SaveAsync(Actor,GroupId,Input!,Context.HttpContext!.RequestAborted);
+        saved=result==ProfileSaveResult.Saved;
+        message=result switch
+        {
+            ProfileSaveResult.Saved=>"De koorgegevens zijn opgeslagen.",
+            ProfileSaveResult.Forbidden=>"Je hebt geen toestemming om dit koor te wijzigen.",
+            ProfileSaveResult.Conflict=>"Iemand heeft het profiel ondertussen gewijzigd. Open het koor opnieuw om de nieuwste gegevens te laden voordat je verdergaat.",
+            _=>"Controleer de ingevulde gegevens en kies een geldig land en genre."
+        };
+        if(saved)
+        {
+            profile=await Profiles.GetAsync(Actor,GroupId,Context.HttpContext.RequestAborted);
+            if(profile is not null) Input=ChoirProfileInput.From(profile);
+        }
+    }
 }

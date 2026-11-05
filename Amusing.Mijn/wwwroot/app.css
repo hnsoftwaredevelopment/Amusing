@@ -17,3 +17,14 @@ footer { text-align: center; padding: 1.5rem; color: #526b52; font-size: .9rem; 
 a { color: #205c4d; }
 
 .test-banner { background: #fff1c4; color: #573d0a; padding: .65rem 1.25rem; text-align: center; font-weight: 600; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,230px),1fr)); gap: 0 1.5rem; }
+.profile-card { background: white; border: 1px solid #d6ded7; border-radius: 10px; padding: clamp(1rem,4vw,2rem); }
+select, textarea { box-sizing: border-box; width: 100%; font: inherit; padding: .7rem; border: 1px solid #718c80; border-radius: 5px; background: white; color: inherit; }
+textarea { resize: vertical; }
+.validation-message, .validation-errors { color: #82251f; }
+.success { background: #e4f2e4; border-left: 4px solid #28723b; padding: 1rem; }
+.notice { background: #e8efeb; padding: 1rem; }
+dt { font-weight: 700; margin-top: 1rem; }
+dd { margin-left: 0; overflow-wrap: anywhere; }
+.description { white-space: pre-wrap; }
+small { color: #526b52; }

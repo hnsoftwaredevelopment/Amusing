@@ -22,6 +22,7 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton(_ => new MySqlDataSource(builder.Configuration.GetConnectionString("Mijn") ?? throw new InvalidOperationException("Configure ConnectionStrings:Mijn using user secrets or environment variables.")));
 builder.Services.AddScoped<ChoirAccounts>();
+builder.Services.AddScoped<ChoirProfiles>();
 builder.Services.AddScoped<IChoirPasswordStore>(sp => new MySqlChoirPasswordStore(sp.GetRequiredService<MySqlDataSource>()));
 builder.Services.AddScoped<ChoirPasswordVerifier>();
 builder.Services.AddScoped<ChoirCredentialService>();
@@ -112,7 +113,7 @@ app.MapPost("/account/logout", async (HttpContext context, IAntiforgery antiforg
     await context.SignOutAsync();
     return Results.LocalRedirect("/account/login");
 }).RequireAuthorization();
-app.MapGet("/health", () => Results.Ok(new { status = "ok", application = "Amusing.Mijn", version = "dev-audit-1" }));
+app.MapGet("/health", () => Results.Ok(new { status = "ok", application = "Amusing.Mijn", version = "dev-profile-1" }));
 app.MapGet("/robots.txt", () => Results.Text("User-agent: *\nDisallow: /\n", "text/plain"));
 app.MapStaticAssets();
 app.MapRazorComponents<App>();

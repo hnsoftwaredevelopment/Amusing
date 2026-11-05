@@ -12,7 +12,7 @@ public sealed class DatabaseFactAttribute : FactAttribute
 {
     public DatabaseFactAttribute() { if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MIJN_TEST_CONNECTION"))) Skip = "Set MIJN_TEST_CONNECTION to an isolated mijn_test_ database."; }
 }
-public class LoginTests : IAsyncLifetime
+public partial class LoginTests : IAsyncLifetime
 {
     private const string Password = "TestKoor-2026!";
     private MySqlDataSource source = null!;
@@ -26,10 +26,11 @@ public class LoginTests : IAsyncLifetime
         var settings = new MySqlConnectionStringBuilder(connection);
         if (!settings.Database.StartsWith("mijn_test_", StringComparison.Ordinal) || settings.Server != "127.0.0.1") throw new InvalidOperationException("Tests require an isolated mijn_test_ schema via loopback.");
         source = new MySqlDataSource(connection);
-        await Execute("CREATE TABLE IF NOT EXISTS ah_personen (persoon_id INT UNSIGNED PRIMARY KEY,voornaam VARCHAR(40),email VARCHAR(80),actief TINYINT); CREATE TABLE IF NOT EXISTS ah_personen_wachtwoorden(id INT UNSIGNED PRIMARY KEY,hash VARCHAR(255) COLLATE utf8mb3_general_ci); CREATE TABLE IF NOT EXISTS ah_zanggroepen(zanggroep_id INT UNSIGNED PRIMARY KEY,naam VARCHAR(100)); CREATE TABLE IF NOT EXISTS ah_personen_rollen(persoon_id INT UNSIGNED,zanggroep_id INT UNSIGNED,rol VARCHAR(30)); DELETE FROM ah_personen_rollen; DELETE FROM ah_zanggroepen; DELETE FROM ah_personen_wachtwoorden; DELETE FROM ah_personen;");
-        await Execute("CREATE TABLE IF NOT EXISTS mijn_audit_log(id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,occurred_at DATETIME(6) NOT NULL,actor_type VARCHAR(20) NOT NULL,actor_id INT UNSIGNED NULL,action VARCHAR(40) NOT NULL); DELETE FROM mijn_audit_log;");
+        await Execute("CREATE TABLE IF NOT EXISTS ah_personen (persoon_id INT UNSIGNED PRIMARY KEY,voornaam VARCHAR(40),email VARCHAR(80),actief TINYINT); CREATE TABLE IF NOT EXISTS ah_personen_wachtwoorden(id INT UNSIGNED PRIMARY KEY,hash VARCHAR(255) COLLATE utf8mb3_general_ci); CREATE TABLE IF NOT EXISTS ah_zanggroepen(zanggroep_id INT UNSIGNED PRIMARY KEY,naam VARCHAR(80),genre_id TINYINT UNSIGNED,standplaats VARCHAR(50),land VARCHAR(3),website VARCHAR(255),beschrijving TEXT,rekeningnr VARCHAR(50)); CREATE TABLE IF NOT EXISTS ah_personen_rollen(persoon_id INT UNSIGNED,zanggroep_id INT UNSIGNED,rol VARCHAR(30)); DELETE FROM ah_personen_rollen; DELETE FROM ah_zanggroepen; DELETE FROM ah_personen_wachtwoorden; DELETE FROM ah_personen;");
+        await Execute("CREATE TABLE IF NOT EXISTS mijn_audit_log(id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,occurred_at DATETIME(6) NOT NULL,actor_type VARCHAR(20) NOT NULL,actor_id INT UNSIGNED NULL,action VARCHAR(40) NOT NULL,group_id INT UNSIGNED NULL,changed_fields VARCHAR(255) NULL); DELETE FROM mijn_audit_log;");
         originalHash = BCrypt.Net.BCrypt.HashPassword(Password, 10).Replace("$2a$", "$2y$");
-        await Execute("INSERT INTO ah_personen VALUES(42,'Testpersoon','koor@example.invalid',1),(43,'Inactief','inactive@example.invalid',0); INSERT INTO ah_personen_wachtwoorden VALUES(42,@hash),(43,@hash); INSERT INTO ah_zanggroepen VALUES(1,'Eigen Testkoor'),(2,'Verborgen Anderkoor'); INSERT INTO ah_personen_rollen VALUES(42,1,'contactpersoon1');", originalHash);
+        await Execute("INSERT INTO ah_personen VALUES(42,'Testpersoon','koor@example.invalid',1),(43,'Inactief','inactive@example.invalid',0); INSERT INTO ah_personen_wachtwoorden VALUES(42,@hash),(43,@hash); INSERT INTO ah_zanggroepen(zanggroep_id,naam) VALUES(1,'Eigen Testkoor'),(2,'Verborgen Anderkoor'); INSERT INTO ah_personen_rollen VALUES(42,1,'contactpersoon1');", originalHash);
+        await Execute("CREATE TABLE IF NOT EXISTS ah_genres(genre_id INT PRIMARY KEY,nl VARCHAR(30)); CREATE TABLE IF NOT EXISTS ah_landen(code VARCHAR(3) PRIMARY KEY,naam VARCHAR(255)); CREATE TABLE IF NOT EXISTS ah_zanggroep_details(id INT UNSIGNED PRIMARY KEY,email VARCHAR(80)); INSERT IGNORE INTO ah_genres VALUES(1,'Gemengd'); INSERT IGNORE INTO ah_landen VALUES('NL','Nederland'); DELETE FROM ah_zanggroep_details; UPDATE ah_zanggroepen SET genre_id=1,standplaats='Hengelo',land='NL',website='',beschrijving='',rekeningnr='';");
         factory = new WebApplicationFactory<Program>().WithWebHostBuilder(b => b.UseEnvironment("Development").ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string,string?> { ["ConnectionStrings:Mijn"] = connection })));
         client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, BaseAddress = new Uri("https://localhost") });
     }

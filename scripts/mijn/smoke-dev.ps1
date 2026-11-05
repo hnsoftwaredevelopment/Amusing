@@ -43,6 +43,8 @@ try {
     if ([int]$response.StatusCode -ne 302 -or $response.Headers.Location.OriginalString -ne '/') { throw 'Second login failed' }
     $second = $client2.GetStringAsync('/').GetAwaiter().GetResult()
     if ($second -notmatch 'Testkoor Buitenblik' -or $second -match 'Testkoor Harmonie') { throw 'Second account scope failed' }
+    $readOnly = $client2.GetStringAsync('/koor/4').GetAwaiter().GetResult()
+    if ($readOnly -notmatch 'Testkoor Leesrechten' -or $readOnly -match 'Wijzigingen opslaan' -or $readOnly -match 'NL91ABNA') { throw 'Read-only profile permissions failed' }
     $form = [Collections.Generic.Dictionary[string,string]]::new()
     $form.Add('__RequestVerificationToken',(Get-Token $homeHtml))
     $response = $client1.PostAsync('/account/logout',[Net.Http.FormUrlEncodedContent]::new($form)).GetAwaiter().GetResult()
