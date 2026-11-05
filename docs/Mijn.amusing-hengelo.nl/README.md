@@ -18,6 +18,7 @@ Nieuwe wensen: beheerder kiest een koor en kan namens de ondersteuning wijziging
 - [Blijvende testomgeving en testinstructies](testomgeving.md)
 - [Koorprofiel: testen, rechten en opslag](koorprofiel.md)
 - [Foto en logo: testen en uploadgrenzen](afbeeldingen.md)
+- [Personen, rollen en uitnodigingen: testen](personen-en-rollen.md)
 - [Wachtwoordcompatibiliteit: testresultaten](wachtwoordcompatibiliteit.md)
 - [Besluit: opslag en migratie koorwachtwoorden](decisions/001-koorwachtwoorden.md)
 - [Plan en beslispunten](tasks/plan.md)

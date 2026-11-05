@@ -66,3 +66,6 @@ Update koorprofiel: bewerken is nu beschikbaar; de eerdere beperking tot alleen 
 
 
 Update afbeeldingen: foto/logo zijn nu te bekijken, te uploaden, te vervangen en te verwijderen volgens de contactrechten. Grotere afbeeldingen en transparante logo's worden ondersteund; zie [afbeeldingen](afbeeldingen.md) voor grenzen en acceptatietests. Bestaande testaccounts zijn behouden.
+
+
+Update personen/rollen: [de nieuwe testinstructies](personen-en-rollen.md) zijn leidend voor de actuele koorkoppelingen. Account 1 is eerste contactpersoon van koor 1 en 4, en tweede van koor 2. Account 2 is eerste contactpersoon van koor 2 en 3, en zanger van koor 4. Uitnodigingen worden in deze testversie via Mijn uitnodigingen aangeboden; echte e-mail blijft uitgeschakeld.

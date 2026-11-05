@@ -1,6 +1,6 @@
 # Rechtenmatrix Mijn Amusing
 
-Datum: 5 november 2026. Herbert heeft het onderstaande basisvoorstel bevestigd. Detailgrenzen bij financiële/persoonsgegevens en accountbeheer blijven expliciet open; er is nog geen implementatie.
+Datum: 5 november 2026. Herbert heeft het onderstaande basisvoorstel bevestigd. Profiel- en personenrechten zijn deels geïmplementeerd; beheerderondersteuning en overige open detailkeuzes volgen later.
 
 ## Bevestigde basisrechten
 
@@ -11,9 +11,10 @@ Alle koorrechten gelden uitsluitend voor gekoppelde koren. Beheerders met toegan
 | Koorinformatie en deelname bekijken | Ja | Ja | Ja | Ja |
 | Koorprofiel, foto en logo wijzigen | Ja | Ja | Nee | Ja |
 | Inschrijving aanmaken, wijzigen en bevestigen | Ja | Ja | Nee | Ja |
+| E-mail/telefoon van gekoppelde personen zien | Ja | Ja | Nee | Ja |
 | Contactpersonen en koorrollen beheren | Ja | Nee | Nee | Ja |
 | Eigen accountgegevens wijzigen | Eigen account | Eigen account | Eigen account | Eigen beheeraccount |
-| Laatste contactpersoon verwijderen zonder vervanging | Nee | Nee | Nee | Nee |
+| Laatste eerste contactpersoon verwijderen zonder vervanging | Nee | Nee | Nee | Nee |
 
 Overige rollen zijn onder andere dirigent, penningmeester, zanger, muzikant en vrijwilliger. Bij meerdere rollen geldt de combinatie van expliciet toegekende rechten binnen dat koor. Dit is het nieuwe afgesproken beleid; niet de claim dat PHP het al overal zo afdwingt.
 
@@ -28,10 +29,10 @@ Overige rollen zijn onder andere dirigent, penningmeester, zanger, muzikant en v
 
 ## Nog vast te stellen
 
-1. IBAN-beleid is bevestigd op 5 november: contactpersonen en penningmeester mogen lezen; alleen contactpersonen wijzigen. Overige rollen ontvangen geen IBAN. Detailrechten voor persoonlijke contactgegevens en nota-PDF blijven open.
+1. IBAN-beleid is bevestigd op 5 november: contactpersonen en penningmeester mogen lezen; alleen contactpersonen wijzigen. Overige rollen ontvangen geen IBAN. Persoonlijke e-mail/telefoon is bevestigd: alleen eerste/tweede contactpersoon ziet die gegevens. Detailrechten voor nota-PDF blijven open.
 2. Ziet een koor zijn wijzigingshistorie, en welke details van andere personen mogen daarin staan?
 3. Welke ondersteuning voor persoonlijke accountgegevens is nodig buiten koorrollenbeheer?
-4. Moet er altijd een eerste contactpersoon zijn, of mag een tweede contactpersoon de enige overblijvende contactpersoon worden na expliciete overdracht?
+4. Bevestigd: er blijft altijd minstens één eerste contactpersoon; de tweede contactpersoon kan die rol niet zonder aanvaarde overdracht vervangen.
 
 ## Verificatie bij implementatie
 

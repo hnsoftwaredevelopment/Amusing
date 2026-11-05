@@ -203,6 +203,16 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 **Verificatie:** Test verlopen uitnodiging, dubbele rol en verlies van laatste beheercontact.
 
+**Slices MIJN-11**
+
+- [x] MIJN-11.1: beleid laatste eerste contactpersoon en contactprivacy met Herbert vastgesteld.
+- [x] MIJN-11.2: personenoverzicht en rollen verwijderen met serverautorisatie en transactionele audit gebouwd.
+- [x] MIJN-11.3: accountgebonden testuitnodigingen, verloop, bevestiging en duplicaatbescherming gebouwd.
+- [x] MIJN-11.4: automatische tests en publieke dev-controle geslaagd; zie [testinstructies](../personen-en-rollen.md).
+- [ ] MIJN-11.5: hands-on acceptatie door Herbert.
+- [ ] MIJN-11.6: echte mailbezorging, intrekken van open uitnodigingen en bewaarbeleid vóór productie uitwerken.
+- [ ] MIJN-11.7: compatibiliteit met volledige gedeelde Beheer/PHP-omgeving aantonen.
+
 ## MIJN-12 — Voor actuele festivaleditie inschrijven
 
 - [ ] Uitvoering en verificatie afgerond.
