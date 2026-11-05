@@ -1,6 +1,6 @@
 # Inschrijven voor de actuele festivaleditie
 
-Status 5 november 2026: eerste inschrijfslice op https://dev.mijn.amusing-hengelo.nl. Technisch getest; hands-on acceptatie door Herbert nog open. Dit is MIJN-12; wijzigen/bevestigen, e-mail, prijsberekening en nota volgen in afzonderlijke slices.
+Status 5 november 2026: eerste inschrijfslice op https://dev.mijn.amusing-hengelo.nl. Technisch getest en hands-on geaccepteerd door Herbert, met de hieronder verwerkte tekstaanpassing. Dit is MIJN-12; wijzigen/bevestigen, e-mail, prijsberekening en nota volgen in afzonderlijke slices.
 
 ## Zelf testen
 
@@ -55,3 +55,9 @@ Terugval: /root/nginx-backups/dev-mijn-20261105T150219Z.
 Databaseback-up vóór uitbreiding: /root/nginx-backups/mijn-enrollment-db-20261105T150205Z.sql.
 
 Nog open: hands-on acceptatie, volledige gedeelde Beheer/PHP-integratie, persoonlijk contactonderhoud, MIJN-13 wijziging/bevestiging en MIJN-15/16/17 berekening/mail/nota. MIJN-12 blijft open totdat de acceptatie en volledige integratie zijn aangetoond.
+
+## Acceptatie en navigatietekst — 5 november 2026
+
+Herbert bevestigt dat de inschrijfslice werkt zoals beschreven en logisch is. Het koorprofiel toont vóór inschrijving nu “Inschrijven voor Amusing <jaar>”, met het jaar uit de actuele festivaldatum. Bij een bestaande inschrijving blijft “Festivalinschrijving bekijken” staan. Zonder actuele editie blijft de neutrale tekst behouden.
+
+De volledige Beheer/PHP-integratie en eerder genoemde vervolgslices blijven open. De beoordeling/competitie wordt later per editie configureerbaar; zie MIJN-21 in de backlog. De huidige optie is in deze slice niet gewijzigd.

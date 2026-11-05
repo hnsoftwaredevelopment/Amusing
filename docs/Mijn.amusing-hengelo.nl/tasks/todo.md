@@ -233,7 +233,7 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 - [x] MIJN-12.2: actuele editie, legacy podiumset en volledigheidscontrole gebouwd.
 - [x] MIJN-12.3: veilige eenmalige inschrijving en transactionele audit gebouwd; dubbele aanvragen en rolverlies getest.
 - [x] MIJN-12.4: geïsoleerde tests en publieke dev-rooktest geslaagd; twee hands-on testkoren beschikbaar.
-- [ ] MIJN-12.5: hands-on acceptatie door Herbert; zie [testinstructies](../festivalinschrijving.md).
+- [x] MIJN-12.5: Herbert accepteert de inschrijfslice; navigatietekst vóór inschrijving aangepast naar Inschrijven voor Amusing <jaar>.
 - [ ] MIJN-12.6: volledige integratie met gedeelde Beheer/PHP-database en persoonlijk telefoononderhoud vóór productie afronden.
 
 ## MIJN-13 — Inschrijving wijzigen en bevestigen
@@ -358,3 +358,19 @@ Stand: zie [eerste Blazor-login](../eerste-blazor-login.md) voor testomgeving, c
 MIJN-19: beveiligingsgebeurtenissen worden duurzaam opgeslagen; brede koormutatie-audit, inzage en bewaarbeleid blijven open. MIJN-20: eerste dev-deployment uitgevoerd met back-up en geverifieerde releasehash; geen productieomschakeling.
 
 Uitgestelde UX-punten uit acceptatie: wachtwoord tonen/verbergen bij MIJN-04; wachtwoord vergeten bij MIJN-06 (bestaande scope); look & feel bij de verdere UI-uitwerking en MIJN-20-acceptatie. Geen blokkade voor de bevestigde basislogin.
+
+## MIJN-21 — Beoordeling/competitie per festival configureerbaar
+
+Status: Backlog, bewust uitgesteld tot het einde van de kernfunctionaliteit op verzoek van Herbert. Raakt zowel Beheer als Mijn en dezelfde database.
+
+**Acceptatiecriteria**
+
+- Beheer kan per festival instellen of beoordeling/competitie beschikbaar is.
+- Beheer kan per festival de bijbehorende tekst instellen. Eerdere tekst was “Wil je meedoen aan de acapella competitie?”. Geen vaste mysteryjurytekst voor alle edities.
+- Mijn toont de optionele keuze uitsluitend wanneer die voor de editie beschikbaar is en gebruikt de ingestelde tekst.
+- De server accepteert geen nieuwe beoordelingskeuze wanneer de mogelijkheid uitstaat, ook niet via een aangepast verzoek.
+- Bestaande keuzegegevens, inschrijvingswijziging, bevestiging en audit blijven consistent; migratiebeleid bij uitschakelen van een bestaande editie bij uitvoering vaststellen.
+
+Herbert geeft aan dat er voor de editie van “dit jaar” geen competitie is. Het bedoelde festival-ID bij uitvoering controleren; niet aannemen dat de synthetische testeditie daarmee gelijk is. Deze toekomstige wens verandert nu geen festivalinstellingen of bestaande inschrijvingen.
+
+**Verificatie:** test twee edities met verschillende teksten, optie uit/aan en een vervalst verzoek bij een uitgeschakelde optie, in zowel Beheer als Mijn.

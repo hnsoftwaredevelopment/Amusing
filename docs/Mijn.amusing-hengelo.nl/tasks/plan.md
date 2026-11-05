@@ -38,3 +38,6 @@ Voor livegang: koor- en beheerderreizen, PDF, logging, back-up, terugval en moni
 ## Grenzen van deze inventarisatie
 
 Geen toezegging dat bestaande login-, mail- of inschrijfstromen volledig werken. API-routering is apart hersteld; Herbert heeft succesvolle productie-login bevestigd. De gemelde vertraging is nog niet verklaard. De eerste backlog moet tijdens implementatie verder worden opgesplitst als een story niet in een gerichte sessie past. Prioriteiten en schattingen volgen na beslispunten en technische spikes.
+
+
+Uitgestelde aanvulling MIJN-21: beoordeling/competitie en bijbehorende tekst per festival instelbaar maken in Beheer en Mijn. Op verzoek van Herbert pas aan het einde van de kernfunctionaliteit uitwerken; de huidige testflow nu niet wijzigen.
