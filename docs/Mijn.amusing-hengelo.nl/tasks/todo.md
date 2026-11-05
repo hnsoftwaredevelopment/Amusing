@@ -78,9 +78,10 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 - [x] MIJN-04.1: BCrypt-verificatie en upgradebeleid testen (oude hash, verkeerde invoer, hogere werklast en lengtegevallen).
 - [x] MIJN-04.2a: credentialservice en databaseadapter met bytevergelijking gebouwd; reset/verwijdering en SQL-semantiek getest. Zie [databasekoppeling](../databasekoppeling.md).
-- [ ] MIJN-04.2b: adapter via .NET-provider end-to-end testen in de geïsoleerde database.
-- [ ] MIJN-04.3: serverlogin, sessie en logout aansluiten; actorsoorten scheiden en uitsluitend gekoppelde koren tonen.
-- [ ] MIJN-04.4: end-to-end controleren met geïsoleerde database, inclusief ongeautoriseerde koortoegang.
+- [x] MIJN-04.2b: adapter via .NET-provider end-to-end testen in de geïsoleerde database.
+- [x] MIJN-04.3a: serverlogin, cookie, logout en uitsluitend gekoppelde koren gebouwd; accountstatus en wachtwoordreset maken sessie ongeldig.
+- [ ] MIJN-04.3b: duurzame audit, gebruiksvriendelijke foutafhandeling en acceptatiecontrole afronden.
+- [x] MIJN-04.4: end-to-end controleren met geïsoleerde database, inclusief ongeautoriseerde koortoegang.
 
 ## MIJN-05 — Account registreren en activeren
 
@@ -308,3 +309,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 
 Implementatiestand 5 november: Amusing.Authentication bevat BCrypt-verificatie en upgrade naar werklast 11; hogere werklast blijft behouden. Zes tests controleren PHP-fixtures, verkeerde wachtwoorden, beschadigde hashes en geen downgrade. Library target net8.0 voor compatibiliteit met bestaande net9.0-code; tests draaien op lokaal aanwezige net10.0-runtime. Nog niet aangesloten op database, sessies, solution of webapp. Geen productieaccount gewijzigd.
+
+
+Stand: zie [eerste Blazor-login](../eerste-blazor-login.md) voor testomgeving, configuratie en grenzen. Databaseprovider en web-login zijn met synthetische accounts getest. MIJN-04 als geheel is nog open.

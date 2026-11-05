@@ -367,3 +367,6 @@ FodyWeavers.xsd
 # Local agent worktrees
 .worktrees/
 
+
+# Mijn uses its own stylesheet; omit unused template Bootstrap assets.
+/Amusing.Mijn/wwwroot/lib/bootstrap/

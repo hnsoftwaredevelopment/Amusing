@@ -1,0 +1,16 @@
+@page "/"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using Amusing.Mijn.Services
+@using System.Security.Claims
+@inject ChoirAccounts Accounts
+@inject IHttpContextAccessor Context
+<PageTitle>Mijn koren — Mijn Amusing</PageTitle>
+<h1>Mijn koren</h1>
+<p>Welkom, @Context.HttpContext!.User.Identity!.Name.</p>
+@if (groups.Count == 0) { <p>Er zijn nog geen koren aan je account gekoppeld.</p> }
+@foreach (var group in groups) { <a class="choir" href="/koor/@group.Id">@group.Name <span aria-hidden="true">→</span></a> }
+<form method="post" action="/account/logout" data-enhance="false"><AntiforgeryToken /><button class="secondary">Uitloggen</button></form>
+@code {
+    private List<ChoirSummary> groups = [];
+    protected override async Task OnInitializedAsync() => groups = await Accounts.GroupsAsync(uint.Parse(Context.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!), null, Context.HttpContext.RequestAborted);
+}

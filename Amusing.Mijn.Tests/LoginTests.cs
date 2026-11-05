@@ -1,0 +1,110 @@
+using System.Net;
+using System.Text.RegularExpressions;
+using Amusing.Authentication.MySql;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
+using MySqlConnector;
+
+namespace Amusing.Mijn.Tests;
+
+public sealed class DatabaseFactAttribute : FactAttribute
+{
+    public DatabaseFactAttribute() { if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MIJN_TEST_CONNECTION"))) Skip = "Set MIJN_TEST_CONNECTION to an isolated mijn_test_ database."; }
+}
+public class LoginTests : IAsyncLifetime
+{
+    private const string Password = "TestKoor-2026!";
+    private MySqlDataSource source = null!;
+    private WebApplicationFactory<Program> factory = null!;
+    private HttpClient client = null!;
+    private string originalHash = "";
+    public async Task InitializeAsync()
+    {
+        var connection = Environment.GetEnvironmentVariable("MIJN_TEST_CONNECTION");
+        if (string.IsNullOrEmpty(connection)) return;
+        var settings = new MySqlConnectionStringBuilder(connection);
+        if (!settings.Database.StartsWith("mijn_test_", StringComparison.Ordinal) || settings.Server != "127.0.0.1") throw new InvalidOperationException("Tests require an isolated mijn_test_ schema via loopback.");
+        source = new MySqlDataSource(connection);
+        await Execute("CREATE TABLE IF NOT EXISTS ah_personen (persoon_id INT UNSIGNED PRIMARY KEY,voornaam VARCHAR(40),email VARCHAR(80),actief TINYINT); CREATE TABLE IF NOT EXISTS ah_personen_wachtwoorden(id INT UNSIGNED PRIMARY KEY,hash VARCHAR(255) COLLATE utf8mb3_general_ci); CREATE TABLE IF NOT EXISTS ah_zanggroepen(zanggroep_id INT UNSIGNED PRIMARY KEY,naam VARCHAR(100)); CREATE TABLE IF NOT EXISTS ah_personen_rollen(persoon_id INT UNSIGNED,zanggroep_id INT UNSIGNED,rol VARCHAR(30)); DELETE FROM ah_personen_rollen; DELETE FROM ah_zanggroepen; DELETE FROM ah_personen_wachtwoorden; DELETE FROM ah_personen;");
+        originalHash = BCrypt.Net.BCrypt.HashPassword(Password, 10).Replace("$2a$", "$2y$");
+        await Execute("INSERT INTO ah_personen VALUES(42,'Testpersoon','koor@example.invalid',1),(43,'Inactief','inactive@example.invalid',0); INSERT INTO ah_personen_wachtwoorden VALUES(42,@hash),(43,@hash); INSERT INTO ah_zanggroepen VALUES(1,'Eigen Testkoor'),(2,'Verborgen Anderkoor'); INSERT INTO ah_personen_rollen VALUES(42,1,'contactpersoon1');", originalHash);
+        factory = new WebApplicationFactory<Program>().WithWebHostBuilder(b => b.UseEnvironment("Development").ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string,string?> { ["ConnectionStrings:Mijn"] = connection })));
+        client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false, BaseAddress = new Uri("https://localhost") });
+    }
+    public async Task DisposeAsync()
+    {
+        client?.Dispose();
+        if (factory is not null) await factory.DisposeAsync();
+        if (source is not null) await source.DisposeAsync();
+    }
+    private async Task Execute(string sql, string? hash = null)
+    {
+        await using var cmd = source.CreateCommand(sql);
+        if (hash is not null) Add(cmd, "@hash", hash);
+        await cmd.ExecuteNonQueryAsync();
+    }
+    private async Task<HttpResponseMessage> Login(string email="koor@example.invalid", string password=Password)
+    {
+        var page = await client.GetStringAsync("/account/login");
+        var token = WebUtility.HtmlDecode(Regex.Match(page, "name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"").Groups[1].Value);
+        Assert.NotEmpty(token);
+        return await client.PostAsync("/account/sign-in", new FormUrlEncodedContent(new Dictionary<string,string> { ["email"]=email,["password"]=password,["__RequestVerificationToken"]=token }));
+    }
+    [DatabaseFact] public async Task LoginUpgradesPhpHashAndOnlyShowsLinkedChoir()
+    {
+        var response = await Login();
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        Assert.Equal("/",response.Headers.Location?.OriginalString);
+        var store = new MySqlChoirPasswordStore(source);
+        var updated = await store.ReadHashAsync(42, default);
+        Assert.NotEqual(originalHash, updated);
+        Assert.True(BCrypt.Net.BCrypt.Verify(Password,updated));
+        var home = await client.GetStringAsync("/");
+        Assert.Contains("Eigen Testkoor",home);
+        Assert.DoesNotContain("Verborgen Anderkoor",home);
+        var forbidden = await client.GetStringAsync("/koor/2");
+        Assert.Contains("Koor niet beschikbaar",forbidden);
+        Assert.DoesNotContain("Verborgen Anderkoor",forbidden);
+        Assert.Contains("Eigen Testkoor",await client.GetStringAsync("/koor/1"));
+    }
+    [DatabaseFact] public async Task WrongPasswordAndInactiveAccountDoNotLogin()
+    {
+        Assert.Contains("failed=1",(await Login(password:"wrong")).Headers.Location!.OriginalString);
+        Assert.Contains("failed=1",(await Login(email:"inactive@example.invalid")).Headers.Location!.OriginalString);
+        Assert.Equal(originalHash, await new MySqlChoirPasswordStore(source).ReadHashAsync(42,default));
+        Assert.Equal(HttpStatusCode.Redirect,(await client.GetAsync("/")).StatusCode);
+    }
+    [DatabaseFact] public async Task AntiforgeryRejectsLoginAndLogoutWithoutToken()
+    {
+        Assert.Equal(HttpStatusCode.BadRequest,(await client.PostAsync("/account/sign-in",new FormUrlEncodedContent(new Dictionary<string,string> { ["email"]="koor@example.invalid",["password"]=Password }))).StatusCode);
+        await Login();
+        Assert.Equal(HttpStatusCode.BadRequest,(await client.PostAsync("/account/logout", new FormUrlEncodedContent(new Dictionary<string,string>()))).StatusCode);
+    }
+    [DatabaseFact] public async Task ResetInvalidatesExistingSession()
+    {
+        await Login();
+        await Execute("UPDATE ah_personen_wachtwoorden SET hash=@hash WHERE id=42",BCrypt.Net.BCrypt.HashPassword("New-2026!",11));
+        Assert.Equal(HttpStatusCode.Redirect,(await client.GetAsync("/")).StatusCode);
+    }
+    [DatabaseFact] public async Task ProviderCompareAndSwapRejectsCaseMismatchAndStaleHash()
+    {
+        var store = new MySqlChoirPasswordStore(source);
+        Assert.False(await store.TryReplaceHashAsync(42,originalHash.ToUpperInvariant(),"replacement",default));
+        Assert.True(await store.TryReplaceHashAsync(42,originalHash,"replacement",default));
+        Assert.False(await store.TryReplaceHashAsync(42,originalHash,"stale",default));
+        Assert.Equal("replacement",await store.ReadHashAsync(42,default));
+        Assert.Equal(originalHash,await store.ReadHashAsync(43,default));
+    }
+    [DatabaseFact] public async Task LogoutEndsSession()
+    {
+        await Login();
+        var home = await client.GetStringAsync("/");
+        var token = WebUtility.HtmlDecode(Regex.Match(home, "name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"").Groups[1].Value);
+        var response = await client.PostAsync("/account/logout",new FormUrlEncodedContent(new Dictionary<string,string>{["__RequestVerificationToken"]=token}));
+        Assert.Equal(HttpStatusCode.Redirect,response.StatusCode);
+        Assert.Equal(HttpStatusCode.Redirect,(await client.GetAsync("/")).StatusCode);
+    }
+
+    private static void Add(System.Data.Common.DbCommand cmd, string name, object value) { var p=cmd.CreateParameter(); p.ParameterName=name; p.Value=value; cmd.Parameters.Add(p); }
+}

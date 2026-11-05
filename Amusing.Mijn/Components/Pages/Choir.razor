@@ -1,0 +1,15 @@
+@page "/koor/{Id:long}"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using Amusing.Mijn.Services
+@using System.Security.Claims
+@inject ChoirAccounts Accounts
+@inject IHttpContextAccessor Context
+<PageTitle>Koor — Mijn Amusing</PageTitle>
+@if (group is null) { <h1>Koor niet beschikbaar</h1><p>Dit koor is niet aan je account gekoppeld.</p> }
+else { <h1>@group.Name</h1><p>Je bent ingelogd bij dit koor. De koorgegevens en festivalinschrijving volgen in de volgende onderdelen.</p> }
+<a href="/">Terug naar mijn koren</a>
+@code {
+    [Parameter] public long Id { get; set; }
+    private ChoirSummary? group;
+    protected override async Task OnParametersSetAsync() => group = (await Accounts.GroupsAsync(uint.Parse(Context.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!), (Id > 0 && Id <= uint.MaxValue ? (uint)Id : 0u), Context.HttpContext.RequestAborted)).SingleOrDefault();
+}

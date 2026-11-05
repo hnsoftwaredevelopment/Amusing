@@ -1,0 +1,17 @@
+:root { color-scheme: light; font-family: system-ui, sans-serif; color: #183c38; background: #f4f4ef; }
+body { margin: 0; font-size: 1.05rem; line-height: 1.6; }
+header { background: #163e38; padding: 1.4rem max(1.4rem, calc((100vw - 960px)/2)); }
+.brand { color: white; text-decoration: none; font-size: 1.3rem; font-weight: 750; }
+.brand span { display: block; color: #c8dcaa; font-size: .85rem; font-weight: 400; }
+main { max-width: 760px; margin: 3rem auto; padding: 0 1.25rem; min-height: 65vh; }
+.card { max-width: 460px; background: white; padding: clamp(1.4rem, 5vw, 3rem); border: 1px solid #d6ded7; border-radius: 12px; }
+h1 { line-height: 1.2; font-size: clamp(1.8rem, 5vw, 2.5rem); }
+.eyebrow { font-size: .85rem; font-weight: 650; color: #526b52; }
+label { display: block; font-weight: 650; margin: 1.2rem 0 .3rem; }
+input { box-sizing: border-box; width: 100%; font: inherit; padding: .7rem; border: 1px solid #718c80; border-radius: 5px; }
+button { font: inherit; font-weight: 650; background: #205c4d; color: white; border: 0; border-radius: 5px; padding: .75rem 1.4rem; margin-top: 1.5rem; cursor: pointer; }
+:focus-visible { outline: 3px solid #b26d18; outline-offset: 4px; }
+.error { padding: .8rem; border-left: 4px solid #a32c25; background: #fff0ed; color: #82251f; }
+.choir { display: flex; justify-content: space-between; padding: 1rem; background: white; border: 1px solid #c9d7cc; border-radius: 6px; margin: 1rem 0; color: #205c4d; }
+footer { text-align: center; padding: 1.5rem; color: #526b52; font-size: .9rem; }
+a { color: #205c4d; }

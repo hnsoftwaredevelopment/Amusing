@@ -1,10 +1,10 @@
 # Plan van aanpak
 
-Status: voorstel op basis van broncode, 5 november 2026. Nog geen bouwopdracht uitgevoerd.
+Status: voorstel op basis van broncode, 5 november 2026. De eerste login-slices zijn gebouwd en met synthetische data getest; zie eerste-blazor-login.md.
 
 ## Werkvolgorde
 
-1. MIJN-01: productiebaseline en afhankelijkheden; echte koorlogin na API-herstel.
+1. MIJN-01: productiebaseline en afhankelijkheden; productie-login bevestigd, vertraging en ontwikkel-API nog open.
 2. MIJN-02/03: solution, gedeelde code, identiteit en rechten. MIJN-19 auditontwerp vanaf het begin meenemen.
 3. MIJN-04 t/m 11: werkende verticale slices voor accounts, eigen koren, profiel, beelden en personen.
 4. MIJN-12 t/m 16: festivalinschrijving, historie/planning, prijsberekening en bevestigingen.
@@ -21,7 +21,7 @@ Tarieven en definitieve notagegevens centraal; web, mail en PDF moeten aantoonba
 
 ## Beslispunten met eigenaar
 
-- Welke beheerrollen krijgen ondersteuningstoegang? Alleen lezen of alle koormutaties, en welke uitzonderingen?
+- Vast uitgangspunt van Herbert: gebruikers met toegang tot Beheer kunnen in Mijn een koor selecteren en wijzigingen uitvoeren. Concrete uitzonderingen op account- en festivalregels nog vaststellen.
 - Wat mogen contact2, dirigent, penningmeester, zanger en muzikant precies? Wie kan de laatste contactpersoon verwijderen?
 - Is historie inclusief afgehaakte/wachtlijst-edities? Moet het koor het auditlog zelf kunnen zien?
 - Zijn NL én DE nodig bij eerste oplevering?
@@ -37,4 +37,4 @@ Voor livegang: koor- en beheerderreizen, PDF, logging, back-up, terugval en moni
 
 ## Grenzen van deze inventarisatie
 
-Geen toezegging dat bestaande login-, mail- of inschrijfstromen volledig werken. API-routering is apart hersteld en zonder geldige gebruiker getest. De eerste backlog moet tijdens implementatie verder worden opgesplitst als een story niet in een gerichte sessie past. Prioriteiten en schattingen volgen na beslispunten en technische spikes.
+Geen toezegging dat bestaande login-, mail- of inschrijfstromen volledig werken. API-routering is apart hersteld; Herbert heeft succesvolle productie-login bevestigd. De gemelde vertraging is nog niet verklaard. De eerste backlog moet tijdens implementatie verder worden opgesplitst als een story niet in een gerichte sessie past. Prioriteiten en schattingen volgen na beslispunten en technische spikes.
