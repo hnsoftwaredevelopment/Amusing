@@ -29,6 +29,17 @@ public class ChoirImageProcessorTests
         Assert.Throws<InvalidDataException>(()=>ChoirImageProcessor.Prepare(new byte[8*1024*1024+1],"logo"));
         Assert.Throws<InvalidDataException>(()=>ChoirImageProcessor.Prepare(Png(6000,5000),"foto"));
     }
+    [Fact] public void SizeAndPixelErrorsExplainTheActualLimit()
+    {
+        var size=Assert.Throws<InvalidDataException>(()=>ChoirImageProcessor.Prepare(new byte[8*1024*1024+1],"logo"));
+        Assert.Contains("MiB",size.Message);
+        Assert.Contains("8.388.608",size.Message);
+        var pixels=Assert.Throws<InvalidDataException>(()=>ChoirImageProcessor.Prepare(Png(6000,5000),"foto"));
+        Assert.Contains("6000 × 5000",pixels.Message);
+        Assert.Contains("30",pixels.Message);
+        Assert.Contains("25 miljoen",pixels.Message);
+        Assert.Equal(pixels.Message,pixels.Data["UserMessage"]);
+    }
     [Fact] public void LegacyBinaryBase64AndDataUrlsRemainReadable()
     {
         var png=Png();

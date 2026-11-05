@@ -47,10 +47,11 @@ else
             @if(profile.CanReadBank) { <dt>IBAN</dt><dd>@profile.BankAccount</dd> }
         </dl>
     }
-    <ChoirImages GroupId="@GroupId" CanEdit="@profile.CanEdit" Status="@ImageStatus" />
+    <ChoirImages GroupId="@GroupId" CanEdit="@profile.CanEdit" Status="@ImageStatus" Detail="@ImageMessage" />
 }
 @code {
     [SupplyParameterFromQuery(Name="afbeelding")] public string? ImageStatus { get; set; }
+    [SupplyParameterFromQuery(Name="uploadmelding")] public string? ImageMessage { get; set; }
     [Parameter] public long Id { get; set; }
     [SupplyParameterFromForm(FormName="choir-profile")] public ChoirProfileInput? Input { get; set; }
     private ChoirProfile? profile;

@@ -28,7 +28,7 @@ public static class ChoirImageEndpoints
             {
                 var file=form.Files.GetFile("image");
                 if(file is null || file.Length==0) return Redirect(id,"invalid");
-                if(file.Length>ChoirImageProcessor.Limit(kind)) return Redirect(id,"size");
+                if(file.Length>ChoirImageProcessor.Limit(kind)) return Redirect(id,"size",ChoirImageProcessor.SizeMessage(file.Length,kind));
                 if(!await ProcessingSlots.WaitAsync(0,ct)) return Redirect(id,"busy");
                 try
                 {
@@ -36,7 +36,7 @@ public static class ChoirImageEndpoints
                     await input.CopyToAsync(buffer,ct);
                     replacement=ChoirImageProcessor.Prepare(buffer.ToArray(),kind).Bytes;
                 }
-                catch(InvalidDataException){return Redirect(id,"invalid");}
+                catch(InvalidDataException error){return Redirect(id,"invalid",error.Data["UserMessage"] as string);}
                 finally {ProcessingSlots.Release();}
             }
             var result=await store.SaveAsync(Actor(context),(uint)id,kind,version,replacement,ct);
@@ -45,5 +45,5 @@ public static class ChoirImageEndpoints
         }).RequireAuthorization();
     }
     private static uint Actor(HttpContext context)=>uint.Parse(context.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-    private static IResult Redirect(long group,string status)=>Results.LocalRedirect($"/koor/{group}?afbeelding={status}#afbeeldingen");
+    private static IResult Redirect(long group,string status,string? message=null)=>Results.LocalRedirect($"/koor/{group}?afbeelding={status}"+(message is null?"":"&uploadmelding="+Uri.EscapeDataString(message))+"#afbeeldingen");
 }

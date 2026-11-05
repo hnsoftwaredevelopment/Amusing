@@ -121,7 +121,7 @@ app.MapPost("/account/logout", async (HttpContext context, IAntiforgery antiforg
     await context.SignOutAsync();
     return Results.LocalRedirect("/account/login");
 }).RequireAuthorization();
-app.MapGet("/health", () => Results.Ok(new { status = "ok", application = "Amusing.Mijn", version = "dev-images-1" }));
+app.MapGet("/health", () => Results.Ok(new { status = "ok", application = "Amusing.Mijn", version = "dev-images-2" }));
 app.MapGet("/robots.txt", () => Results.Text("User-agent: *\nDisallow: /\n", "text/plain"));
 app.MapStaticAssets();
 app.MapChoirImages();

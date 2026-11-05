@@ -8,16 +8,26 @@ public static class ChoirImageProcessor
     public const int PhotoLimit=16*1024*1024, LogoLimit=8*1024*1024;
     public static bool IsKind(string kind)=>kind is "foto" or "logo";
     public static int Limit(string kind)=>kind=="logo"?LogoLimit:PhotoLimit;
+    public static string SizeMessage(long bytes,string kind)
+    {
+        var culture=System.Globalization.CultureInfo.GetCultureInfo("nl-NL");
+        return string.Format(culture,"Het bestand is {0:N0} bytes ({1:N2} MB; {2:N2} MiB). Voor {3} is maximaal {4:N0} bytes ({5} MiB) toegestaan. Verklein het bestand en probeer opnieuw.",bytes,bytes/1_000_000d,bytes/1048576d,kind=="logo"?"een logo":"een koorfoto",Limit(kind),kind=="logo"?8:16);
+    }
+    private static InvalidDataException Invalid(string message)
+    {
+        var error=new InvalidDataException(message);error.Data["UserMessage"]=message;return error;
+    }
     public static ChoirImageData Prepare(byte[] bytes,string kind)
     {
-        if(!IsKind(kind) || bytes.Length==0 || bytes.Length>Limit(kind)) throw new InvalidDataException("Ongeldige bestandsgrootte.");
+        if(!IsKind(kind) || bytes.Length==0) throw Invalid("Kies een niet-leeg afbeeldingsbestand.");
+        if(bytes.Length>Limit(kind)) throw Invalid(SizeMessage(bytes.Length,kind));
         using var data=SKData.CreateCopy(bytes);
         using var codec=SKCodec.Create(data);
-        if(codec is null || codec.EncodedFormat is not (SKEncodedImageFormat.Png or SKEncodedImageFormat.Jpeg or SKEncodedImageFormat.Webp) || codec.FrameCount>1) throw new InvalidDataException("Gebruik een stilstaande PNG-, JPEG- of WebP-afbeelding.");
+        if(codec is null || codec.EncodedFormat is not (SKEncodedImageFormat.Png or SKEncodedImageFormat.Jpeg or SKEncodedImageFormat.Webp) || codec.FrameCount>1) throw Invalid("Dit bestand is niet leesbaar als stilstaande PNG-, JPEG- of WebP-afbeelding. Kies een ander bestand of exporteer de afbeelding opnieuw.");
         int w=codec.Info.Width,h=codec.Info.Height;
-        if(w<=0 || h<=0 || w>12000 || h>12000 || (long)w*h>25_000_000) throw new InvalidDataException("De afbeelding bevat te veel pixels (maximaal 25 miljoen).");
+        if(w<=0 || h<=0 || w>12000 || h>12000 || (long)w*h>25_000_000) throw Invalid($"De afbeelding is {w} × {h} pixels ({((long)w*h/1_000_000d).ToString("0.##",System.Globalization.CultureInfo.GetCultureInfo("nl-NL"))} miljoen pixels). Maximaal 25 miljoen pixels en 12000 pixels per zijde zijn toegestaan, ook als het bestand klein genoeg is. Verklein de afmetingen en probeer opnieuw.");
         using var bitmap=new SKBitmap(new SKImageInfo(w,h,SKColorType.Rgba8888,SKAlphaType.Premul));
-        if(codec.GetPixels(bitmap.Info,bitmap.GetPixels())!=SKCodecResult.Success) throw new InvalidDataException("De afbeelding is beschadigd.");
+        if(codec.GetPixels(bitmap.Info,bitmap.GetPixels())!=SKCodecResult.Success) throw Invalid("De afbeelding kon niet volledig worden gelezen en is mogelijk beschadigd. Exporteer haar opnieuw als PNG, JPEG of WebP.");
         bool swapped=codec.EncodedOrigin is SKEncodedOrigin.LeftTop or SKEncodedOrigin.RightTop or SKEncodedOrigin.RightBottom or SKEncodedOrigin.LeftBottom;
         int orientedW=swapped?h:w,orientedH=swapped?w:h,max=kind=="logo"?1024:2560;
         double ratio=Math.Min(1,(double)max/Math.Max(orientedW,orientedH));
@@ -42,7 +52,7 @@ public static class ChoirImageProcessor
         }
         using var normalized=SKImage.FromBitmap(output);
         using var encoded=normalized.Encode(kind=="logo"?SKEncodedImageFormat.Png:SKEncodedImageFormat.Jpeg,90);
-        if(encoded is null || encoded.Size>12*1024*1024) throw new InvalidDataException("De verwerkte afbeelding is te groot.");
+        if(encoded is null || encoded.Size>12*1024*1024) throw Invalid("De afbeelding blijft na verwerking te groot (maximaal 12 MiB). Verklein de afbeelding of kies een eenvoudiger bestand.");
         return new(encoded.ToArray(),kind=="logo"?"image/png":"image/jpeg");
     }
     public static ChoirImageData? ReadLegacy(byte[]? stored)
