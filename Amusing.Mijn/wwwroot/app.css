@@ -28,3 +28,9 @@ dt { font-weight: 700; margin-top: 1rem; }
 dd { margin-left: 0; overflow-wrap: anywhere; }
 .description { white-space: pre-wrap; }
 small { color: #526b52; }
+.image-section { margin-top: 3rem; }
+.image-grid { display: grid; gap: 1.5rem; }
+.choir-image { display:block; max-width:100%; width:auto; height:auto; max-height:28rem; object-fit:contain; margin:1rem auto; }
+.choir-image.logo { max-height:12rem; }
+.secondary { background:#fff; color:#205c4d; border:1px solid #718c80; }
+.image-grid input[type=file] { font-size:.9rem; }

@@ -1,0 +1,53 @@
+@using Amusing.Mijn.Services
+@using System.Security.Claims
+@inject ChoirImagesStore Store
+@inject IHttpContextAccessor Context
+<section id="afbeeldingen" class="image-section">
+<h2>Foto en logo</h2>
+@if(Status is not null)
+{
+    <p role="status" class="@(Status=="saved"?"success":"error")">@(Status switch {"saved"=>"De afbeelding is opgeslagen.","size"=>"Het bestand is te groot: maximaal 16 MB voor een foto en 8 MB voor een logo.","conflict"=>"De afbeelding is ondertussen gewijzigd. Controleer de nieuwste versie en kies je bestand opnieuw.","busy"=>"Er worden nu andere afbeeldingen verwerkt. Probeer het zo opnieuw.",_=>"Gebruik een geldige, stilstaande PNG-, JPEG- of WebP-afbeelding, met maximaal 25 miljoen pixels."})</p>
+}
+@if(CanEdit){<p>Sla eventuele wijzigingen in de koorgegevens hierboven eerst op. Je kunt de foto en het logo daarna afzonderlijk vervangen.</p>}
+<div class="image-grid">
+@foreach(var kind in new[]{"foto","logo"})
+{
+    var state=states.GetValueOrDefault(kind);
+    if(state is null) continue;
+    var available=ChoirImageProcessor.ReadLegacy(state.Stored) is not null;
+    <section class="profile-card">
+        <h3>@(kind=="foto"?"Koorfoto":"Logo")</h3>
+        @if(available){<img class="choir-image @kind" src="/koor/@GroupId/afbeelding/@kind?v=@state.Version" alt="@(kind=="foto"?"Foto van het koor":"Logo van het koor")" loading="lazy" />}
+        else{<p>Er is nog geen geldige afbeelding beschikbaar.</p>}
+        @if(CanEdit)
+        {
+            <form method="post" enctype="multipart/form-data" action="/koor/@GroupId/afbeelding/@kind" data-enhance="false">
+                <AntiforgeryToken /><input type="hidden" name="version" value="@state.Version" />
+                <label for="upload-@kind">@(available?"Nieuwe afbeelding kiezen":"Afbeelding kiezen")</label>
+                <input id="upload-@kind" name="image" type="file" accept="image/png,image/jpeg,image/webp" required />
+                <small>PNG, JPEG of WebP. Maximaal @(kind=="foto"?"16 MB; lange zijde tot 2560 pixels.":"8 MB; lange zijde tot 1024 pixels.")</small>
+                <button type="submit">@(kind=="foto"?"Foto opslaan":"Logo opslaan")</button>
+            </form>
+            @if(available)
+            {
+                <form method="post" action="/koor/@GroupId/afbeelding/@kind" data-enhance="false">
+                    <AntiforgeryToken /><input type="hidden" name="version" value="@state.Version" /><input type="hidden" name="operation" value="remove" />
+                    <button class="secondary" type="submit">@(kind=="foto"?"Foto verwijderen":"Logo verwijderen")</button>
+                </form>
+            }
+        }
+    </section>
+}
+</div>
+</section>
+@code {
+    [Parameter] public uint GroupId{get;set;}
+    [Parameter] public bool CanEdit{get;set;}
+    [Parameter] public string? Status{get;set;}
+    private readonly Dictionary<string,ChoirImageState?> states=[];
+    protected override async Task OnParametersSetAsync()
+    {
+        var actor=uint.Parse(Context.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        foreach(var kind in new[]{"foto","logo"}) states[kind]=await Store.GetAsync(actor,GroupId,kind,Context.HttpContext.RequestAborted);
+    }
+}

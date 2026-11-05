@@ -23,6 +23,9 @@ builder.Services.AddAuthorization();
 builder.Services.AddSingleton(_ => new MySqlDataSource(builder.Configuration.GetConnectionString("Mijn") ?? throw new InvalidOperationException("Configure ConnectionStrings:Mijn using user secrets or environment variables.")));
 builder.Services.AddScoped<ChoirAccounts>();
 builder.Services.AddScoped<ChoirProfiles>();
+builder.Services.AddScoped<ChoirImagesStore>();
+builder.WebHost.ConfigureKestrel(options=>options.Limits.MaxRequestBodySize=20*1024*1024);
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options=>options.MultipartBodyLengthLimit=20*1024*1024);
 builder.Services.AddScoped<IChoirPasswordStore>(sp => new MySqlChoirPasswordStore(sp.GetRequiredService<MySqlDataSource>()));
 builder.Services.AddScoped<ChoirPasswordVerifier>();
 builder.Services.AddScoped<ChoirCredentialService>();
@@ -46,6 +49,11 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     options.LoginPath = "/account/login";
     options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
     options.SlidingExpiration = false;
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+        return Task.CompletedTask;
+    };
     options.Events.OnValidatePrincipal = async context =>
     {
         if (!await context.HttpContext.RequestServices.GetRequiredService<ChoirAccounts>().IsCurrentAsync(context.Principal!, context.HttpContext.RequestAborted))
@@ -113,9 +121,10 @@ app.MapPost("/account/logout", async (HttpContext context, IAntiforgery antiforg
     await context.SignOutAsync();
     return Results.LocalRedirect("/account/login");
 }).RequireAuthorization();
-app.MapGet("/health", () => Results.Ok(new { status = "ok", application = "Amusing.Mijn", version = "dev-profile-1" }));
+app.MapGet("/health", () => Results.Ok(new { status = "ok", application = "Amusing.Mijn", version = "dev-images-1" }));
 app.MapGet("/robots.txt", () => Results.Text("User-agent: *\nDisallow: /\n", "text/plain"));
 app.MapStaticAssets();
+app.MapChoirImages();
 app.MapRazorComponents<App>();
 app.Run();
 public partial class Program { }
