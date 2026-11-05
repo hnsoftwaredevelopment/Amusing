@@ -24,6 +24,10 @@ Deployment-smoke-tests uitbreiden met zowel Blazor-pagina/WebSocket als legacy A
 
 ## Aanvullend onderzoek inloggen
 
+Uitkomst: Herbert bevestigt dat de eerdere fout op dev.mijn was en dat inloggen op mijn.amusing-hengelo.nl uiteindelijk slaagt, maar traag verloopt. Accesslogs bevestigen HTTP 200 voor POST user/login en GET user, festival/next en user/role. De productie-login is daarmee door de gebruiker getest.
+
+Een losse meting vanaf de VPS gaf circa 0,07 seconde voor de API-authgrens zonder token en 0,06 seconde voor de loginpagina. Dit meet niet de volledige ingelogde gebruikersreis en verklaart de vertraging niet. Nader onderzoek nodig naar de geauthenticeerde keten, sessies en browser/netwerk; er is nog geen bewezen oorzaak.
+
 Herbert meldde opnieuw een inlogfout. De geopende Edge-tab bleek dev.mijn.amusing-hengelo.nl/account/login met melding 'Onbekende fout'. De serverconfiguratie daarvan wijst naar dev.beheer.amusing-hengelo.nl/api/1.0, die nog HTTP 200 text/html retourneert. Dit is een afzonderlijke ontwikkelomgeving; de productiepatch heeft die route niet gewijzigd. De juiste productie-loginpagina is geopend voor een gebruikerstest. Ontwikkel-API herstellen vereist eerst een juiste, gescheiden testbackend; niet omleiden naar productie.
 
 Een aanvullende POST naar de productie-loginroute met het bestaande applicatietoken en een niet-bestaand diagnostisch account retourneerde HTTP 401 application/json met 'Authenticatie mislukt'. Dit bevestigt bereikbaarheid en verwerking van de loginroute, maar geen geslaagde gebruikerslogin. Tokens en wachtwoorden zijn niet in deze documentatie opgenomen.

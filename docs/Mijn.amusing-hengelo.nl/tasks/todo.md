@@ -4,6 +4,8 @@ Datum: 5 november 2026. Alle stories aanvankelijk BACKLOG; de toegangscontrole i
 
 ## MIJN-01 — Productiebaseline en API-afhankelijkheden vastleggen
 
+Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert bevestigt succesvolle productie-login. Nog open: merkbare loginvertraging, ontwikkel-API (dev.mijn gebruikt dev.beheer) en complete backend-/schema-afhankelijkheden. Daarom blijft deze story open.
+
 [ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vd1)
 
 - [ ] Uitvoering en verificatie afgerond.

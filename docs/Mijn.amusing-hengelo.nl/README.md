@@ -36,7 +36,7 @@ Nieuwe wensen: beheerder kiest een koor en kan namens de ondersteuning wijziging
 | ClickUp-toegang | Getest via ingelogde Edge-browser; geen API-koppeling |
 | Broncode Mijn en oude beheer-API | Lokaal gekloond met Git-historie |
 | Vergelijking Mijn met productie | Verschillende commits en twee lokale serverwijzigingen vastgesteld |
-| API-route herstel | Uitgevoerd; JSON 401 zonder token gecontroleerd; echte koorlogin nog te testen |
+| API-route herstel | Uitgevoerd; gebruiker bevestigt succesvolle koorlogin op productie; vertraging nog te onderzoeken |
 | Functionele inventarisatie | Eerste broncode-inventarisatie afgerond; hieronder benoemde open punten blijven bestaan |
 | Stories | Eerste backlog, nog geen implementatie afgerond |
 | Architectuur en planning | Voorstel; geen kalenderplanning of definitieve schatting |
@@ -47,7 +47,7 @@ Definition of Done: acceptatiecriteria aangetoond; autorisatie op server gecontr
 
 ## Eerstvolgende besluiten
 
-1. Echte koorlogin na herstel testen en resterende productieverschillen veilig vastleggen.
+1. Vertraging bij koorlogin en gescheiden ontwikkel-API onderzoeken; resterende productieverschillen vastleggen.
 2. Rollenmatrix, accountmigratie en deelbare services vaststellen.
 3. Historie/logzichtbaarheid, NL/DE-scope en nota-/prijsbeleid met eigenaar afstemmen.
 4. Daarna stories verfijnen en per slice uitvoeren. Geen fictieve einddatum of ureninschatting.
