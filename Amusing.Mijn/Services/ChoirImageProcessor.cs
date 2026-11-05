@@ -25,7 +25,15 @@ public static class ChoirImageProcessor
         using var codec=SKCodec.Create(data);
         if(codec is null || codec.EncodedFormat is not (SKEncodedImageFormat.Png or SKEncodedImageFormat.Jpeg or SKEncodedImageFormat.Webp) || codec.FrameCount>1) throw Invalid("Dit bestand is niet leesbaar als stilstaande PNG-, JPEG- of WebP-afbeelding. Kies een ander bestand of exporteer de afbeelding opnieuw.");
         int w=codec.Info.Width,h=codec.Info.Height;
-        if(w<=0 || h<=0 || w>12000 || h>12000 || (long)w*h>25_000_000) throw Invalid($"De afbeelding is {w} × {h} pixels ({((long)w*h/1_000_000d).ToString("0.##",System.Globalization.CultureInfo.GetCultureInfo("nl-NL"))} miljoen pixels). Maximaal 25 miljoen pixels en 12000 pixels per zijde zijn toegestaan, ook als het bestand klein genoeg is. Verklein de afmetingen en probeer opnieuw.");
+        if(w<=0 || h<=0) throw Invalid("De afmetingen van de afbeelding zijn ongeldig.");
+        if((long)w*h>25_000_000)
+        {
+            var culture=System.Globalization.CultureInfo.GetCultureInfo("nl-NL");
+            double scale=Math.Min(Math.Sqrt(25_000_000d/((long)w*h)),12000d/Math.Max(w,h));
+            int suggestedW=Math.Max(1,(int)(w*scale)),suggestedH=Math.Max(1,(int)(h*scale));
+            throw Invalid(string.Format(culture,"Deze afbeelding bevat {0:N0} pixels: {1} breed × {2} hoog. Dat is meer dan de toegestane 25.000.000 pixels in totaal. Verklein de foto bijvoorbeeld naar {3} × {4} pixels en probeer opnieuw.",(long)w*h,w,h,suggestedW,suggestedH));
+        }
+        if(w>12000 || h>12000) throw Invalid($"Een zijde van deze afbeelding is te lang ({w} × {h} pixels). Elke zijde mag maximaal 12000 pixels zijn. Verklein de afmetingen en probeer opnieuw.");
         using var bitmap=new SKBitmap(new SKImageInfo(w,h,SKColorType.Rgba8888,SKAlphaType.Premul));
         if(codec.GetPixels(bitmap.Info,bitmap.GetPixels())!=SKCodecResult.Success) throw Invalid("De afbeelding kon niet volledig worden gelezen en is mogelijk beschadigd. Exporteer haar opnieuw als PNG, JPEG of WebP.");
         bool swapped=codec.EncodedOrigin is SKEncodedOrigin.LeftTop or SKEncodedOrigin.RightTop or SKEncodedOrigin.RightBottom or SKEncodedOrigin.LeftBottom;

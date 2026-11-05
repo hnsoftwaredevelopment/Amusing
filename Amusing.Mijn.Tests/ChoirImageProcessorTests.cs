@@ -35,9 +35,9 @@ public class ChoirImageProcessorTests
         Assert.Contains("MiB",size.Message);
         Assert.Contains("8.388.608",size.Message);
         var pixels=Assert.Throws<InvalidDataException>(()=>ChoirImageProcessor.Prepare(Png(6000,5000),"foto"));
-        Assert.Contains("6000 × 5000",pixels.Message);
-        Assert.Contains("30",pixels.Message);
-        Assert.Contains("25 miljoen",pixels.Message);
+        Assert.Contains("6000 breed × 5000 hoog",pixels.Message);
+        Assert.Contains("30.000.000",pixels.Message);
+        Assert.Contains("25.000.000 pixels in totaal",pixels.Message);
         Assert.Equal(pixels.Message,pixels.Data["UserMessage"]);
     }
     [Fact] public void LegacyBinaryBase64AndDataUrlsRemainReadable()
