@@ -209,7 +209,7 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 - [x] MIJN-11.2: personenoverzicht en rollen verwijderen met serverautorisatie en transactionele audit gebouwd.
 - [x] MIJN-11.3: accountgebonden testuitnodigingen, verloop, bevestiging en duplicaatbescherming gebouwd.
 - [x] MIJN-11.4: automatische tests en publieke dev-controle geslaagd; zie [testinstructies](../personen-en-rollen.md).
-- [ ] MIJN-11.5: hands-on acceptatie door Herbert.
+- [x] MIJN-11.5: Herbert bevestigt op 5 november 2026 dat de aangeboden personen-/rollen-/testuitnodigingsflow goed werkt.
 - [ ] MIJN-11.6: echte mailbezorging, intrekken van open uitnodigingen en bewaarbeleid vóór productie uitwerken.
 - [ ] MIJN-11.7: compatibiliteit met volledige gedeelde Beheer/PHP-omgeving aantonen.
 

@@ -1,6 +1,6 @@
 # Personen, rollen en uitnodigingen
 
-Status 5 november 2026: eerste testbare versie op dev.mijn. Technisch getest; hands-on acceptatie door Herbert nog open. Geen productiewijziging en geen echte e-mailverzending.
+Status 5 november 2026: eerste testbare versie op dev.mijn. Technisch getest en hands-on geaccepteerd door Herbert. Geen productiewijziging en geen echte e-mailverzending.
 
 ## Zelf testen
 
@@ -56,3 +56,8 @@ Databaseback-up vóór migratie: /root/nginx-backups/mijn-people-db-20261105T135
 ## Nog open vóór afronding MIJN-11
 
 Hands-on acceptatie, mailbezorging in de echte uitnodigingsflow, beleid/bediening voor intrekken van nog openstaande uitnodigingen, bewaartermijnen en volledige compatibiliteitscontrole met Beheer/PHP. De huidige versie heeft nog geen annuleerknop voor een open uitnodiging; die vervalt na 24 uur. De mijlpaal blijft open en de testversie wordt niet als productieklare mailflow beschouwd.
+
+
+## Acceptatie — 5 november 2026
+
+Herbert bevestigt na het testen dat de aangeboden personen-, rollen- en testuitnodigingsflow goed werkt. De hands-on acceptatie van deze testversie is afgerond. Productiemailbezorging, intrekken van openstaande uitnodigingen, bewaarbeleid en volledige Beheer/PHP-compatibiliteit blijven afzonderlijk open; MIJN-11 is nog niet als geheel afgerond.
