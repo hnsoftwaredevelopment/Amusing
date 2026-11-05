@@ -56,3 +56,8 @@ De actuele versie onderscheidt nu de werkelijke bestandsgrootte (exacte bytes, M
 Een nieuwe regressietest voor grootte- en pixelmeldingen is eerst falend en daarna succesvol uitgevoerd. Alle zes beeldverwerkingstests slagen. Op de publieke dev-omgeving zijn vervolgens afzonderlijk een logo van 8.388.609 bytes, een ongeldig bestand en een foto van 6000 × 5000 pixels aangeboden. In alle drie gevallen kwamen de specifieke reden en limiet zichtbaar terug; bestaande afbeeldingen zijn daarbij niet gewijzigd.
 
 Actuele release: /opt/amusing-mijn-dev/releases/20261105T125000Z. Terugval: /root/nginx-backups/dev-mijn-20261105T125000Z. De functionele uploadfeedback is vastgelegd; acceptatie van de verbeterde meldingen door Herbert staat nog open.
+
+
+## Verduidelijking totaal aantal pixels
+
+Bij feedback over 8160 × 6120 pixels is de afwijzing het totaal: 49.939.200 > 25.000.000. Dat beide zijden onder 12000 blijven, is een andere voorwaarde. De melding benoemt nu uitsluitend de overschreden grens, schrijft de vermenigvuldiging en het totaal uit en geeft passende kleinere afmetingen met dezelfde verhouding. Zes beeldverwerkingstests slagen. Het persoonlijke voorbeeldbestand is niet naar de testserver geüpload of in de repository opgeslagen.
