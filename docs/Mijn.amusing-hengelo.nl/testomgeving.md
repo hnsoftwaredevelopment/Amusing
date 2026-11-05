@@ -54,3 +54,9 @@ Voor terugkeer naar de vorige dev-PHP-routering: kopieer die Nginx-back-up terug
 - Rechten op configuratie en sessiestate gecontroleerd. Productie Mijn-loginpagina en Beheer-homepage geven nog HTTPS 200; dit is geen volledige productie-regressietest.
 
 De omgeving is nu beschikbaar voor hands-on acceptatie. Browserbediening en visuele acceptatie door Herbert staan nog open. De blijvende testgegevens en auditrecords worden niet automatisch gewist.
+
+## Hands-on acceptatie door Herbert — 5 november 2026
+
+Herbert bevestigt dat beide testaccounts kunnen inloggen, verkeerde credentials de verwachte foutmelding geven en uitsluitend de juiste gekoppelde koren worden getoond. Een rechtstreekse URL-aanpassing als gebruiker 1 gaf geen toegang tot het koor van de andere gebruiker. Deze basislogin en koorscheiding zijn daarmee door de eigenaar geaccepteerd.
+
+Voor later genoteerd: wachtwoord tonen/verbergen, wachtwoord vergeten en de look & feel van de pagina. Deze punten blokkeren de geaccepteerde basislogin niet; zij blijven afzonderlijk onderdeel van de verdere uitwerking.

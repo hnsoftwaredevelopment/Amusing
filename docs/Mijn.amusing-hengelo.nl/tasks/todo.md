@@ -82,7 +82,8 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 - [x] MIJN-04.3a: serverlogin, cookie, logout en uitsluitend gekoppelde koren gebouwd; accountstatus en wachtwoordreset maken sessie ongeldig.
 - [x] MIJN-04.3b1: duurzame authenticatielogging en transactionele wachtwoordupgrade gerealiseerd.
 - [x] MIJN-04.3b2: blijvende testomgeving beschikbaar; zie [testinstructies](../testomgeving.md).
-- [ ] MIJN-04.3b3: hands-on acceptatie en verdere foutafhandeling afronden.
+- [x] MIJN-04.3b3a: Herbert accepteert beide logins, credentialfouten, gekoppelde koren en weigering van vreemde koor-URL op 5 november 2026.
+- [ ] MIJN-04.3b3b: verdere foutafhandeling en login-UX uitwerken; wachtwoord tonen/verbergen meenemen.
 - [x] MIJN-04.4: end-to-end controleren met geïsoleerde database, inclusief ongeautoriseerde koortoegang.
 
 ## MIJN-05 — Account registreren en activeren
@@ -317,3 +318,5 @@ Stand: zie [eerste Blazor-login](../eerste-blazor-login.md) voor testomgeving, c
 
 
 MIJN-19: beveiligingsgebeurtenissen worden duurzaam opgeslagen; brede koormutatie-audit, inzage en bewaarbeleid blijven open. MIJN-20: eerste dev-deployment uitgevoerd met back-up en geverifieerde releasehash; geen productieomschakeling.
+
+Uitgestelde UX-punten uit acceptatie: wachtwoord tonen/verbergen bij MIJN-04; wachtwoord vergeten bij MIJN-06 (bestaande scope); look & feel bij de verdere UI-uitwerking en MIJN-20-acceptatie. Geen blokkade voor de bevestigde basislogin.
