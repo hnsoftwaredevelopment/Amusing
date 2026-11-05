@@ -3,6 +3,7 @@
 @using Amusing.Mijn.Services
 @using System.Security.Claims
 @inject ChoirProfiles Profiles
+@inject ChoirEnrollments Enrollments
 @inject IHttpContextAccessor Context
 <PageTitle>Koorprofiel — Mijn Amusing</PageTitle>
 <a href="/">← Mijn koren</a>
@@ -15,7 +16,7 @@ else
     <h1>@profile.Name</h1>
     <p>De algemene gegevens van je koor.</p>
     <p><a href="/koor/@Id/personen">Personen en rollen bekijken</a></p>
-    <p><a href="/koor/@Id/inschrijven">Festivalinschrijving bekijken</a></p>
+    <p><a href="/koor/@Id/inschrijven">@(enrollment?.Registration is null && enrollment?.Festival is { } edition ? $"Inschrijven voor Amusing {edition.Date.Year}" : "Festivalinschrijving bekijken")</a></p>
     @if (message is not null) { <p role="status" class="@(saved ? "success" : "error")">@message</p> }
     @if (profile.CanEdit && Input is not null)
     {
@@ -57,6 +58,7 @@ else
     [Parameter] public long Id { get; set; }
     [SupplyParameterFromForm(FormName="choir-profile")] public ChoirProfileInput? Input { get; set; }
     private ChoirProfile? profile;
+    private EnrollmentView? enrollment;
     private List<ProfileOption> countries=[];
     private List<ProfileOption> genres=[];
     private string? message;
@@ -68,6 +70,7 @@ else
         var ct=Context.HttpContext!.RequestAborted;
         profile=await Profiles.GetAsync(Actor,GroupId,ct);
         if(profile is null) return;
+        enrollment=await Enrollments.ViewAsync(Actor,GroupId,ct);
         countries=await Profiles.OptionsAsync(true,ct); genres=await Profiles.OptionsAsync(false,ct);
         Input ??= ChoirProfileInput.From(profile);
     }

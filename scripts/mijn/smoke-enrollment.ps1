@@ -30,6 +30,8 @@ try{
  $created=$true
  Login $a 'herbert.test@example.invalid' $passwords[0];Login $b 'tweede.test@example.invalid' $passwords[1]
  $path="/koor/$taskGroupId/inschrijven"
+ $profile=$a.GetStringAsync("/koor/$taskGroupId").GetAwaiter().GetResult()
+ if($profile -notmatch 'Inschrijven voor Amusing 2027'){throw 'Unregistered choir has the wrong navigation label'}
  $html=$a.GetStringAsync($path).GetAwaiter().GetResult()
  $festival=[regex]::Match($html,'name="Input.FestivalId"[^>]*value="([0-9]+)"').Groups[1].Value
  if($festival -ne '2027'){throw 'Unexpected current festival or incomplete test choir'}
@@ -37,6 +39,8 @@ try{
  $response=Post $a $path $fields
  $body=$response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
  if([int]$response.StatusCode -ne 200 -or $body -notmatch 'De aanmelding is opgeslagen'){throw 'Public enrollment failed'}
+ $profile=$a.GetStringAsync("/koor/$taskGroupId").GetAwaiter().GetResult()
+ if($profile -notmatch 'Festivalinschrijving bekijken' -or $profile -match 'Inschrijven voor Amusing 2027'){throw 'Registered choir has the wrong navigation label'}
  $fields['Input.Headcount']='99'
  $response=Post $a $path $fields
  if($response.Content.ReadAsStringAsync().GetAwaiter().GetResult() -notmatch 'al aangemeld'){throw 'Repeated submission not handled'}
