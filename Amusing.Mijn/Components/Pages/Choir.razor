@@ -14,6 +14,7 @@ else
 {
     <h1>@profile.Name</h1>
     <p>De algemene gegevens van je koor.</p>
+    <p><a href="/koor/@Id/personen">Personen en rollen bekijken</a></p>
     @if (message is not null) { <p role="status" class="@(saved ? "success" : "error")">@message</p> }
     @if (profile.CanEdit && Input is not null)
     {

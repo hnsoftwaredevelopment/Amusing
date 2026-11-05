@@ -1,0 +1,22 @@
+@page "/account/uitnodigingen"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using System.Security.Claims
+@using Amusing.Mijn.Services
+@inject ChoirPeople Service
+@inject IHttpContextAccessor Context
+<PageTitle>Mijn uitnodigingen — Mijn Amusing</PageTitle>
+<a href="/">← Mijn koren</a><h1>Mijn uitnodigingen</h1>
+@if(Status is not null){<p role="status" class="@(Status=="accepted"?"success":"error")">@(Status=="accepted"?"De uitnodiging is verwerkt. Ga naar Mijn koren om je gekoppelde koren te bekijken.":"Deze uitnodiging is niet meer beschikbaar. Vraag de eerste contactpersoon om een nieuwe uitnodiging.")</p>}
+@if(invitations.Count==0){<p>Er zijn geen openstaande uitnodigingen voor je account.</p>}
+@foreach(var invitation in invitations)
+{
+    <section class="profile-card person-card"><h2>@invitation.GroupName</h2><p>Je bent uitgenodigd als <strong>@ChoirPeople.Roles.GetValueOrDefault(invitation.Role,invitation.Role)</strong>.</p>
+    <p>Geldig tot @invitation.ExpiresAt.ToLocalTime().ToString("dd-MM-yyyy HH:mm").</p>
+    <form method="post" action="/account/uitnodigingen/@invitation.Id/accepteren" data-enhance="false"><AntiforgeryToken/><button>Uitnodiging aannemen</button></form>
+    </section>
+}
+@code{
+    [SupplyParameterFromQuery(Name="status")] public string? Status{get;set;}
+    private List<RoleInvitation> invitations=[];
+    protected override async Task OnParametersSetAsync()=>invitations=await Service.IncomingAsync(uint.Parse(Context.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!),Context.HttpContext.RequestAborted);
+}

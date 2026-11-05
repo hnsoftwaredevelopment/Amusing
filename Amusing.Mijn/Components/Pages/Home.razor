@@ -7,6 +7,7 @@
 <PageTitle>Mijn koren — Mijn Amusing</PageTitle>
 <h1>Mijn koren</h1>
 <p>Welkom, @Context.HttpContext!.User.Identity!.Name.</p>
+<p><a href="/account/uitnodigingen">Mijn uitnodigingen</a></p>
 @if (groups.Count == 0) { <p>Er zijn nog geen koren aan je account gekoppeld.</p> }
 @foreach (var group in groups) { <a class="choir" href="/koor/@group.Id">@group.Name <span aria-hidden="true">→</span></a> }
 <form method="post" action="/account/logout" data-enhance="false"><AntiforgeryToken /><button class="secondary">Uitloggen</button></form>

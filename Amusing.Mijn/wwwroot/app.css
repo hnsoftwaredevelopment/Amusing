@@ -34,3 +34,6 @@ small { color: #526b52; }
 .choir-image.logo { max-height:12rem; }
 .secondary { background:#fff; color:#205c4d; border:1px solid #718c80; }
 .image-grid input[type=file] { font-size:.9rem; }
+.person-card { margin:1.5rem 0; }
+.role-action { display:inline-block; margin:0 0 .5rem 1rem; }
+.role-action button { margin-top:.3rem; padding:.3rem .7rem; font-size:.9rem; }
