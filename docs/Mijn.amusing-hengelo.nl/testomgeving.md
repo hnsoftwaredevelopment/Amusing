@@ -60,3 +60,6 @@ De omgeving is nu beschikbaar voor hands-on acceptatie. Browserbediening en visu
 Herbert bevestigt dat beide testaccounts kunnen inloggen, verkeerde credentials de verwachte foutmelding geven en uitsluitend de juiste gekoppelde koren worden getoond. Een rechtstreekse URL-aanpassing als gebruiker 1 gaf geen toegang tot het koor van de andere gebruiker. Deze basislogin en koorscheiding zijn daarmee door de eigenaar geaccepteerd.
 
 Voor later genoteerd: wachtwoord tonen/verbergen, wachtwoord vergeten en de look & feel van de pagina. Deze punten blokkeren de geaccepteerde basislogin niet; zij blijven afzonderlijk onderdeel van de verdere uitwerking.
+
+
+Update koorprofiel: bewerken is nu beschikbaar; de eerdere beperking tot alleen een koornaam is vervallen. Account 2 ziet daarnaast Testkoor Leesrechten met alleen leesrechten en zonder IBAN. Zie [koorprofiel](koorprofiel.md) voor de actuele teststappen en release. De overige nog niet gebouwde functies blijven open.

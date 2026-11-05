@@ -30,7 +30,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Upload failed' }
 ssh @sshArgs $targetHost 'sudo bash /home/herbert/mijn-dev-deploy/deploy-dev.sh'
 if ($LASTEXITCODE -ne 0) { throw 'Deployment failed; consult the backup and service status' }
 $expected = (Get-FileHash (Join-Path $publish 'Amusing.Mijn.dll')).Hash.ToLowerInvariant()
-$actual = ssh @sshArgs $targetHost 'sha256sum /opt/amusing-mijn-dev/current/Amusing.Mijn.dll'
+$actual = ssh @sshArgs $targetHost 'sudo sha256sum /opt/amusing-mijn-dev/current/Amusing.Mijn.dll'
 if ($LASTEXITCODE -ne 0 -or ($actual -split '\s+')[0] -ne $expected) { throw 'Remote binary mismatch' }
 $health = Invoke-RestMethod 'https://dev.mijn.amusing-hengelo.nl/health'
 if ($health.application -ne 'Amusing.Mijn') { throw 'Unexpected health response' }

@@ -1,6 +1,6 @@
 # Backlog Mijn Amusing
 
-Datum: 5 november 2026. MIJN-01 t/m MIJN-20 zijn zelfstandige mijlpalen met slices eronder. Statussen: Backlog, In uitvoering, Ter beoordeling, Afgerond. MIJN-01 is In uitvoering; MIJN-02/03 zijn In uitvoering (ontwerpvoorstel); overige mijlpalen staan in Backlog. Documentatie alleen maakt een implementatiemijlpaal niet afgerond.
+Datum: 5 november 2026. MIJN-01 t/m MIJN-20 zijn zelfstandige mijlpalen met slices eronder. Statussen: Backlog, In uitvoering, Ter beoordeling, Afgerond. MIJN-01/02/03/04/09/19/20 bevatten lopende slices; overige mijlpalen staan in Backlog. Zie de afzonderlijke slices voor het daadwerkelijke resultaat. Documentatie alleen maakt een implementatiemijlpaal niet afgerond.
 
 ## MIJN-01 — Productiebaseline en API-afhankelijkheden vastleggen
 
@@ -155,6 +155,14 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 - wijzigingen zijn zichtbaar in beheer en auditlog.
 
 **Verificatie:** Test validatie, rechten en gedeelde gegevens met beheer.
+
+**Slices MIJN-09**
+
+- [x] MIJN-09.1: algemene profielvelden en IBAN volgens bevestigde lees-/schrijfrechten gebouwd.
+- [x] MIJN-09.2: servervalidatie, bescherming tegen gelijktijdig opslaan en transactionele audit getest.
+- [x] MIJN-09.3: naar blijvende dev-omgeving gepubliceerd met bestaande testaccounts en aanvullend leeskoor.
+- [ ] MIJN-09.4: hands-on acceptatie door Herbert; zie [testinstructies](../koorprofiel.md).
+- [ ] MIJN-09.5: integratie en compatibiliteit met de volledige gedeelde Beheer-database in test aantonen.
 
 ## MIJN-10 — Koorfoto en logo beheren
 

@@ -28,7 +28,7 @@ Overige rollen zijn onder andere dirigent, penningmeester, zanger, muzikant en v
 
 ## Nog vast te stellen
 
-1. Mogen alle leesrollen ook IBAN, persoonlijke contactgegevens en nota-PDF zien, of alleen contactpersonen/penningmeester? Tot dit is vastgesteld geen brede toegang tot die gegevens implementeren.
+1. IBAN-beleid is bevestigd op 5 november: contactpersonen en penningmeester mogen lezen; alleen contactpersonen wijzigen. Overige rollen ontvangen geen IBAN. Detailrechten voor persoonlijke contactgegevens en nota-PDF blijven open.
 2. Ziet een koor zijn wijzigingshistorie, en welke details van andere personen mogen daarin staan?
 3. Welke ondersteuning voor persoonlijke accountgegevens is nodig buiten koorrollenbeheer?
 4. Moet er altijd een eerste contactpersoon zijn, of mag een tweede contactpersoon de enige overblijvende contactpersoon worden na expliciete overdracht?

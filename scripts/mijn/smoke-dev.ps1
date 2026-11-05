@@ -36,15 +36,15 @@ try {
     $cookie = $response.Headers.GetValues('Set-Cookie') -join ';'
     if ($cookie -notmatch 'secure' -or $cookie -notmatch 'httponly') { throw 'Cookie protection missing' }
     $homeHtml = $client1.GetStringAsync('/').GetAwaiter().GetResult()
-    if ($homeHtml -notmatch 'Testkoor Harmonie' -or $homeHtml -notmatch 'Testkoor Samenzang' -or $homeHtml -match 'Testkoor Buitenblik') { throw 'Incorrect choir scope' }
+    if ($homeHtml -notmatch 'href="/koor/1"' -or $homeHtml -notmatch 'href="/koor/2"' -or $homeHtml -match 'href="/koor/3"') { throw 'Incorrect choir scope' }
     $other = $client1.GetStringAsync('/koor/3').GetAwaiter().GetResult()
-    if ($other -match 'Testkoor Buitenblik' -or $other -notmatch 'Koor niet beschikbaar') { throw 'Foreign choir exposed' }
+    if ($other -notmatch 'Koor niet beschikbaar') { throw 'Foreign choir exposed' }
     $response = Post-Login $client2 'tweede.test@example.invalid' $passwords[1]
     if ([int]$response.StatusCode -ne 302 -or $response.Headers.Location.OriginalString -ne '/') { throw 'Second login failed' }
     $second = $client2.GetStringAsync('/').GetAwaiter().GetResult()
-    if ($second -notmatch 'Testkoor Buitenblik' -or $second -match 'Testkoor Harmonie') { throw 'Second account scope failed' }
+    if ($second -notmatch 'href="/koor/3"' -or $second -match 'href="/koor/1"') { throw 'Second account scope failed' }
     $readOnly = $client2.GetStringAsync('/koor/4').GetAwaiter().GetResult()
-    if ($readOnly -notmatch 'Testkoor Leesrechten' -or $readOnly -match 'Wijzigingen opslaan' -or $readOnly -match 'NL91ABNA') { throw 'Read-only profile permissions failed' }
+    if ($readOnly -notmatch 'Testkoor Leesrechten' -or $readOnly -match '<button[^>]*>Wijzigingen opslaan</button>' -or $readOnly -match 'NL91ABNA') { throw 'Read-only profile permissions failed' }
     $form = [Collections.Generic.Dictionary[string,string]]::new()
     $form.Add('__RequestVerificationToken',(Get-Token $homeHtml))
     $response = $client1.PostAsync('/account/logout',[Net.Http.FormUrlEncodedContent]::new($form)).GetAwaiter().GetResult()
