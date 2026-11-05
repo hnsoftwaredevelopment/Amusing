@@ -23,4 +23,7 @@
     <ProjectReference Include="..\Amusing.Mijn\Amusing.Mijn.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\database\mijn\enrollment-schema.sql" Link="enrollment-schema.sql" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

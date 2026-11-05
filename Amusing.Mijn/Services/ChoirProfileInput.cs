@@ -27,7 +27,7 @@ public sealed class ChoirProfileInput : IValidatableObject
             yield return new("Gebruik een volledig webadres met https:// of http://.",[nameof(Website)]);
         if (!string.IsNullOrEmpty(BankAccount) && !IsIban(string.Concat(BankAccount.Where(c=>!char.IsWhiteSpace(c))).ToUpperInvariant())) yield return new("Vul een geldig IBAN in, of laat dit veld leeg.",[nameof(BankAccount)]);
     }
-    private static bool IsIban(string value)
+    public static bool IsIban(string value)
     {
         if(value.Length is <15 or >34 || !char.IsAsciiLetterUpper(value[0]) || !char.IsAsciiLetterUpper(value[1]) || !char.IsAsciiDigit(value[2]) || !char.IsAsciiDigit(value[3])) return false;
         int remainder=0;

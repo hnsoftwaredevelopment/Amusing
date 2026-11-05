@@ -1,0 +1,100 @@
+@page "/koor/{Id:long}/inschrijven"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using System.Security.Claims
+@using Amusing.Mijn.Services
+@inject ChoirEnrollments Service
+@inject IHttpContextAccessor Context
+@inject IConfiguration Configuration
+<PageTitle>Festivalinschrijving — Mijn Amusing</PageTitle>
+<a href="/koor/@Id">← Koorprofiel</a>
+@if(view is null){<h1>Koor niet beschikbaar</h1><p>Dit koor is niet aan je account gekoppeld.</p>}
+else
+{
+ <h1>Festivalinschrijving</h1><p>@view.GroupName</p>
+ @if(message is not null){<p role="status" class="@(success?"success":"error")">@message</p>}
+ @if(view.Festival is not { } festival){<p>Er is nog geen actuele festivaleditie beschikbaar. Probeer het later opnieuw.</p>}
+ else
+ {
+  <section class="profile-card">
+   <h2>@(Configuration.GetValue<bool>("Mijn:IsTestEnvironment")?"Testfestival":"Festival") op @festival.Date.ToString("dd-MM-yyyy")</h2>
+   <p>Inschrijven van @festival.Start.ToString("dd-MM-yyyy") tot en met @festival.End.ToString("dd-MM-yyyy").</p>
+   @if(view.Registration is { } registered)
+   {
+    <h3>@(registered.Cancelled?"Deelname afgemeld":registered.Waitlisted?"Op de wachtlijst":"Inschrijving opgeslagen")</h3>
+    <dl>
+     <dt>Aantal deelnemers</dt><dd>@registered.Headcount</dd>
+     <dt>Podiumtype</dt><dd>@registered.PodiumType</dd>
+     <dt>Voorkeur optredens</dt><dd>@PreferenceLabel(registered.Indoors,registered.Outdoors)</dd>
+     <dt>Jurybeoordeling gewenst</dt><dd>@(registered.Review?"Ja":"Nee")</dd>
+    </dl>
+    <p>@(registered.Cancelled?"Neem contact op met de organisatie als je opnieuw wilt deelnemen.":"Het koor kan niet nogmaals voor deze editie worden ingeschreven.")</p>
+   }
+   else if(!view.IsContact){<p>Alleen een eerste of tweede contactpersoon kan het koor inschrijven.</p>}
+   else if(!view.WindowOpen){<p>De inschrijving voor deze editie is op dit moment gesloten.</p>}
+   else if(view.Missing.Count>0)
+   {
+    <h3>Vul eerst deze gegevens aan</h3><ul>@foreach(var issue in view.Missing){<li>@issue</li>}</ul>
+    <p><a href="/koor/@Id">Koorprofiel</a> · <a href="/koor/@Id/personen">Personen en rollen</a></p>
+   }
+   else if(view.Stages.Count==0){<p>Er zijn nog geen podiumtypen beschikbaar. Neem contact op met de organisatie.</p>}
+   @if(view.Registration is null && view.CanSubmit && festival.WaitingList){<p class="notice">Deze editie werkt met een wachtlijst. Je aanmelding komt op de wachtlijst; deelname is daarmee nog niet toegezegd.</p>}
+   @if(Input is not null)
+   {
+    <EditForm Model="Input" FormName="festival-enrollment" OnValidSubmit="RegisterAsync">
+     <DataAnnotationsValidator/>
+     @if(view.CanSubmit)
+     {
+      <ValidationSummary/>
+      <input type="hidden" name="Input.FestivalId" value="@Input.FestivalId"/>
+      <label for="headcount">Aantal deelnemers *</label>
+      <InputNumber id="headcount" @bind-Value="Input.Headcount" min="1" max="@int.MaxValue"/>
+      <small>Iedereen die optreedt, inclusief dirigent en muzikanten.</small>
+      <ValidationMessage For="()=>Input.Headcount"/>
+      <label for="stage">Podiumtype *</label>
+      <InputSelect id="stage" @bind-Value="Input.PodiumType"><option value="">Kies een podiumtype</option>@foreach(var stage in view.Stages){<option value="@stage.Id">Type @stage.Id</option>}</InputSelect>
+      <ValidationMessage For="()=>Input.PodiumType"/>
+      <details><summary>Wat hoort bij de podiumtypen?</summary>@foreach(var stage in view.Stages){<h3>Type @stage.Id</h3><p class="description">@stage.Description</p>}</details>
+      <label for="preference">Voorkeur voor optredens *</label>
+      <InputSelect id="preference" @bind-Value="Input.Preference"><option value="11">Eén binnen, één buiten</option><option value="02">Twee buiten</option><option value="20">Twee binnen</option></InputSelect>
+      <small>Dit is een voorkeur; de organisatie kan geen garantie geven.</small>
+      <ValidationMessage For="()=>Input.Preference"/>
+      <label class="checkbox-label"><InputCheckbox @bind-Value="Input.Review"/> Beoordeling door de mysteryjury gewenst</label>
+      <small>Er is geen garantie dat de jury het koor kan beoordelen.</small>
+      @if(Configuration.GetValue<bool>("Mijn:IsTestEnvironment")){<p>Deze testinschrijving verstuurt geen e-mail of betaalverzoek.</p>}
+      <button type="submit">@(festival.WaitingList?"Aanmelden voor de wachtlijst":"Koor inschrijven")</button>
+     }
+    </EditForm>
+   }
+  </section>
+ }
+}
+@code {
+ [Parameter] public long Id{get;set;}
+ [SupplyParameterFromForm(FormName="festival-enrollment")] public EnrollmentInput? Input{get;set;}
+ private EnrollmentView? view;
+ private string? message;
+ private bool success;
+ private uint Actor=>uint.Parse(Context.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+ private uint Group=>Id>0&&Id<=uint.MaxValue?(uint)Id:0;
+ protected override async Task OnParametersSetAsync()
+ {
+  view=await Service.ViewAsync(Actor,Group,Context.HttpContext!.RequestAborted);
+  if(view?.Festival is { } festival) Input??=new(){FestivalId=festival.Id};
+ }
+ private async Task RegisterAsync()
+ {
+  var result=await Service.RegisterAsync(Actor,Group,Input!,Context.HttpContext!.RequestAborted);
+  success=result is EnrollmentResult.Saved or EnrollmentResult.AlreadyRegistered;
+  message=result switch {
+   EnrollmentResult.Saved=>"De aanmelding is opgeslagen.",
+   EnrollmentResult.AlreadyRegistered=>"Dit koor is al aangemeld voor deze editie. De bestaande gegevens zijn behouden.",
+   EnrollmentResult.Forbidden=>"Je hebt geen toestemming om dit koor in te schrijven.",
+   EnrollmentResult.Closed=>"De inschrijfperiode is gesloten. Je aanmelding is niet opgeslagen.",
+   EnrollmentResult.Incomplete=>"De gegevens van het koor zijn nog niet compleet. Vul de onderstaande punten eerst aan.",
+   EnrollmentResult.Invalid=>"Controleer het aantal deelnemers, het podiumtype en de voorkeur voor optredens.",
+   _=>"De actuele festivaleditie is gewijzigd of niet meer beschikbaar. Open deze pagina opnieuw."
+  };
+  view=await Service.ViewAsync(Actor,Group,Context.HttpContext.RequestAborted);
+ }
+ private static string PreferenceLabel(int inside,int outside)=>(inside,outside) switch{(1,1)=>"Eén binnen, één buiten",(0,2)=>"Twee buiten",(2,0)=>"Twee binnen",_=>"Niet vastgelegd"};
+}

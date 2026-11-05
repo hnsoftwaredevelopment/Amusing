@@ -25,6 +25,8 @@ builder.Services.AddScoped<ChoirAccounts>();
 builder.Services.AddScoped<ChoirProfiles>();
 builder.Services.AddScoped<ChoirImagesStore>();
 builder.Services.AddScoped<ChoirPeople>();
+builder.Services.AddSingleton<IFestivalClock,FestivalClock>();
+builder.Services.AddScoped<ChoirEnrollments>();
 builder.WebHost.ConfigureKestrel(options=>options.Limits.MaxRequestBodySize=20*1024*1024);
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options=>options.MultipartBodyLengthLimit=20*1024*1024);
 builder.Services.AddScoped<IChoirPasswordStore>(sp => new MySqlChoirPasswordStore(sp.GetRequiredService<MySqlDataSource>()));
@@ -122,7 +124,7 @@ app.MapPost("/account/logout", async (HttpContext context, IAntiforgery antiforg
     await context.SignOutAsync();
     return Results.LocalRedirect("/account/login");
 }).RequireAuthorization();
-app.MapGet("/health", () => Results.Ok(new { status = "ok", application = "Amusing.Mijn", version = "dev-people-1" }));
+app.MapGet("/health", () => Results.Ok(new { status = "ok", application = "Amusing.Mijn", version = "dev-enrollment-1" }));
 app.MapGet("/robots.txt", () => Results.Text("User-agent: *\nDisallow: /\n", "text/plain"));
 app.MapStaticAssets();
 app.MapChoirImages();
