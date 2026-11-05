@@ -184,7 +184,9 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 - [x] MIJN-10.2: Herbert kiest grotere afbeeldingen; foto max. 2560 px lange zijde, logo 1024 px, met passende schermvoorbeelden en bestaande uploadlimieten.
 - [x] MIJN-10.3: tonen, uploaden/vervangen en verwijderen met contactrechten, validatie, conflictbescherming en transactionele audit gebouwd.
 - [x] MIJN-10.4a: tests en dev-publicatie geslaagd; publieke Linux-upload gecontroleerd. Zie [afbeeldingen](../afbeeldingen.md).
-- [ ] MIJN-10.4b: hands-on acceptatie door Herbert.
+- [x] MIJN-10.4b1: Herbert bevestigt toevoegen/bewerken; onduidelijke foutmelding voor grote afbeelding gemeld.
+- [x] MIJN-10.4b2: specifieke grootte-/pixel-/formaatmeldingen gebouwd en op publieke dev getest.
+- [ ] MIJN-10.4b3: Herbert controleert de verbeterde meldingen; verdere hands-on acceptatie afronden.
 - [ ] MIJN-10.5: volledige compatibiliteitscontrole met Beheer/PHP en historische afbeeldingen in de gedeelde testdatabase.
 
 ## MIJN-11 — Personen uitnodigen en koorrollen beheren

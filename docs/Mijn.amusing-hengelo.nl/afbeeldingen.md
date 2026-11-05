@@ -15,7 +15,7 @@ Een synthetische testfoto staat lokaal in C:\Users\hnijk\.codex\private\Amusing-
 
 ## Afmetingen en opslag
 
-Herbert koos voor grotere afbeeldingen met passende voorbeelden op het scherm. Foto: maximaal 16 MB aanleveren; lange zijde maximaal 2560 pixels, opgeslagen als JPEG met kwaliteit 90. Eventuele transparantie van een foto krijgt een witte achtergrond. Logo: maximaal 8 MB aanleveren; lange zijde maximaal 1024 pixels, opgeslagen als PNG met transparantie. Kleinere afbeeldingen worden niet vergroot en er wordt niet bijgesneden.
+Herbert koos voor grotere afbeeldingen met passende voorbeelden op het scherm. Foto: maximaal 16 MiB (16.777.216 bytes; circa 16,8 MB) aanleveren; lange zijde maximaal 2560 pixels, opgeslagen als JPEG met kwaliteit 90. Eventuele transparantie van een foto krijgt een witte achtergrond. Logo: maximaal 8 MiB (8.388.608 bytes; circa 8,4 MB) aanleveren; lange zijde maximaal 1024 pixels, opgeslagen als PNG met transparantie. Kleinere afbeeldingen worden niet vergroot en er wordt niet bijgesneden.
 
 Er wordt een geoptimaliseerde grotere afbeelding opgeslagen, niet daarnaast het volledige originele uploadbestand. Uploads bevatten maximaal 25 miljoen pixels en geen zijde boven 12000 pixels. De verwerkte afbeelding mag maximaal 12 MB zijn. Het totale HTTP-verzoek is begrensd op 20 MB. Er worden maximaal twee uploads tegelijk gedecodeerd per app-proces.
 
@@ -46,3 +46,13 @@ Nginx-/releaseback-up: /root/nginx-backups/dev-mijn-20261105T111618Z.
 Databaseback-up vooraf: /root/nginx-backups/mijn-images-db-20261105T111548Z.sql.
 
 scripts/mijn/smoke-images.ps1 herhaalt de schrijvende dev-controle met de lokale synthetische testfoto en testcredentials. Het script weigert een bestaande foto te overschrijven. Het vereist de gebouwde Windows-testdependencies voor controle van het teruggelezen beeld en verwijdert uitsluitend zijn herkenbare testfoto met een versiecontrole.
+
+## Feedback en verbeterde foutmeldingen — 5 november 2026
+
+Herbert bevestigt dat toevoegen en bewerken werken, maar de melding bij een grote afbeelding was onduidelijk. De gemelde waarden 15,9 en 16,6 MB bewijzen op zichzelf niet welke grens geraakt is: bestandskiezers gebruiken verschillende eenheden, en pixelafmetingen hebben een onafhankelijke grens. Het oorspronkelijke bestand is niet onderzocht.
+
+De actuele versie onderscheidt nu de werkelijke bestandsgrootte (exacte bytes, MB en MiB met toegestane grens), te veel pixels (werkelijke breedte/hoogte en megapixels), een niet-leesbaar/niet-ondersteund bestand, beschadigde beeldinhoud en een te grote verwerkte afbeelding. Het uploadveld benoemt MiB én de benadering in MB. Ook een door Nginx geweigerd verzoek boven 20 MiB krijgt een Nederlandse uitleg.
+
+Een nieuwe regressietest voor grootte- en pixelmeldingen is eerst falend en daarna succesvol uitgevoerd. Alle zes beeldverwerkingstests slagen. Op de publieke dev-omgeving zijn vervolgens afzonderlijk een logo van 8.388.609 bytes, een ongeldig bestand en een foto van 6000 × 5000 pixels aangeboden. In alle drie gevallen kwamen de specifieke reden en limiet zichtbaar terug; bestaande afbeeldingen zijn daarbij niet gewijzigd.
+
+Actuele release: /opt/amusing-mijn-dev/releases/20261105T125000Z. Terugval: /root/nginx-backups/dev-mijn-20261105T125000Z. De functionele uploadfeedback is vastgelegd; acceptatie van de verbeterde meldingen door Herbert staat nog open.
