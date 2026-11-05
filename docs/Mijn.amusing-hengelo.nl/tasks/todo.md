@@ -1,12 +1,10 @@
 # Backlog Mijn Amusing
 
-Datum: 5 november 2026. Alle stories aanvankelijk BACKLOG; de toegangscontrole is een afzonderlijke afgeronde proef. MIJN-01 is deels onderzocht, niet voltooid. Eén projectmilestone bevat deze stories; geen story wordt voltooid gezet op basis van alleen het schrijven van dit plan.
+Datum: 5 november 2026. MIJN-01 t/m MIJN-20 zijn zelfstandige mijlpalen met slices eronder. Statussen: Backlog, In uitvoering, Ter beoordeling, Afgerond. MIJN-01 is In uitvoering; MIJN-02/03 zijn In uitvoering (ontwerpvoorstel); overige mijlpalen staan in Backlog. Documentatie alleen maakt een implementatiemijlpaal niet afgerond.
 
 ## MIJN-01 — Productiebaseline en API-afhankelijkheden vastleggen
 
 Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert bevestigt succesvolle productie-login. Nog open: merkbare loginvertraging, ontwikkel-API (dev.mijn gebruikt dev.beheer) en complete backend-/schema-afhankelijkheden. Daarom blijft deze story open.
-
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vd1)
 
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Inventarisatie.
@@ -22,8 +20,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 ## MIJN-02 — Gedeelde projectstructuur en datatoegang vaststellen
 
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vd2)
-
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Fundament.
 - Afhankelijkheden: MIJN-01.
@@ -36,9 +32,13 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 **Verificatie:** Architectuurreview en build van beide apps na implementatie.
 
-## MIJN-03 — Rechtenmatrix en accountmigratie vaststellen
+**Slices**
 
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vd3)
+- [x] MIJN-02.1: bestaande datatoegang en servicekoppelingen onderzoeken; voorstel in [architectuur](../architectuur.md).
+- [ ] MIJN-02.2: projectgrenzen, sessieaanpak en testomgeving vaststellen.
+- [ ] MIJN-02.3: minimale app toevoegen, gedeelde code gericht ontsluiten en beide apps bouwen.
+
+## MIJN-03 — Rechtenmatrix en accountmigratie vaststellen
 
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Fundament.
@@ -52,9 +52,15 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 **Verificatie:** Review rechtenmatrix; fixtures met bestaande hashformaten.
 
-## MIJN-04 — Inloggen met een bestaand kooraccount
+**Slices**
 
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vd4)
+- [x] MIJN-03.1: accountbronnen onderscheiden en [rechtenvoorstel](../rechtenmatrix.md) opstellen.
+- [x] MIJN-03.2a: basisrechten met Herbert vastgesteld op 5 november 2026; zie rechtenmatrix.
+- [ ] MIJN-03.2b: detailrechten voor financiële/persoonsgegevens en overdracht laatste contact vaststellen.
+- [x] MIJN-03.3: hashcompatibiliteit getest; productieformaten/schema/webpool gecontroleerd; opslag en resets vastgelegd in [ADR-001](../decisions/001-koorwachtwoorden.md).
+- [ ] MIJN-03.4: autorisatie en auditcontract voor koor- en beheeridentiteiten vastleggen.
+
+## MIJN-04 — Inloggen met een bestaand kooraccount
 
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Accounts.
@@ -68,9 +74,15 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 **Verificatie:** Integratietest login, logout en toegang tot een ander koor.
 
-## MIJN-05 — Account registreren en activeren
+**Slices**
 
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vd5)
+- [x] MIJN-04.1: BCrypt-verificatie en upgradebeleid testen (oude hash, verkeerde invoer, hogere werklast en lengtegevallen).
+- [x] MIJN-04.2a: credentialservice en databaseadapter met bytevergelijking gebouwd; reset/verwijdering en SQL-semantiek getest. Zie [databasekoppeling](../databasekoppeling.md).
+- [ ] MIJN-04.2b: adapter via .NET-provider end-to-end testen in de geïsoleerde database.
+- [ ] MIJN-04.3: serverlogin, sessie en logout aansluiten; actorsoorten scheiden en uitsluitend gekoppelde koren tonen.
+- [ ] MIJN-04.4: end-to-end controleren met geïsoleerde database, inclusief ongeautoriseerde koortoegang.
+
+## MIJN-05 — Account registreren en activeren
 
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Accounts.
@@ -86,8 +98,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 ## MIJN-06 — Wachtwoord herstellen en wijzigen
 
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vd6)
-
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Accounts.
 - Afhankelijkheden: MIJN-04.
@@ -101,8 +111,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 **Verificatie:** Test tokenverloop, hergebruik en oude/nieuwe wachtwoorden.
 
 ## MIJN-07 — Eigen contactgegevens onderhouden
-
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vd7)
 
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Accounts.
@@ -118,8 +126,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 ## MIJN-08 — Een koor aanmaken en eigen koren kiezen
 
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vd8)
-
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Koren.
 - Afhankelijkheden: MIJN-04.
@@ -133,8 +139,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 **Verificatie:** Test nieuw koor, meerdere koren en ongeautoriseerde koor-ID.
 
 ## MIJN-09 — Koorprofiel en bankgegevens onderhouden
-
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vd9)
 
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Koren.
@@ -150,8 +154,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 ## MIJN-10 — Koorfoto en logo beheren
 
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vdd)
-
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Koren.
 - Afhankelijkheden: MIJN-09.
@@ -165,8 +167,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 **Verificatie:** Test geldige/ongeldige bestanden en bestaande afbeeldingen.
 
 ## MIJN-11 — Personen uitnodigen en koorrollen beheren
-
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vde)
 
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Koren.
@@ -182,8 +182,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 ## MIJN-12 — Voor actuele festivaleditie inschrijven
 
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vdf)
-
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Festival.
 - Afhankelijkheden: MIJN-09, MIJN-11.
@@ -197,8 +195,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 **Verificatie:** Test datumgrenzen, ontbrekend telefoon/IBAN/dirigent en gelijktijdige aanvragen.
 
 ## MIJN-13 — Inschrijving wijzigen en bevestigen
-
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vdg)
 
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Festival.
@@ -214,8 +210,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 ## MIJN-14 — Deelnamehistorie en gepubliceerde optredens bekijken
 
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vdh)
-
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Festival.
 - Afhankelijkheden: MIJN-08.
@@ -229,8 +223,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 **Verificatie:** Vergelijk historische testdata en toggel publicatie in testomgeving.
 
 ## MIJN-15 — Deelnamebedrag centraal berekenen
-
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vdj)
 
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Nota.
@@ -246,8 +238,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 ## MIJN-16 — Inschrijfbevestiging betrouwbaar versturen
 
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vdk)
-
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Festival.
 - Afhankelijkheden: MIJN-12, MIJN-15.
@@ -261,8 +251,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 **Verificatie:** Mailopvangtest met geslaagde verzending, fout en retry.
 
 ## MIJN-17 — Deelname-nota als PDF beschikbaar maken
-
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vdm)
 
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Nota.
@@ -278,8 +266,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 ## MIJN-18 — Beheerder kan een koor ondersteunen
 
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vdn)
-
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Ondersteuning.
 - Afhankelijkheden: MIJN-03, MIJN-09.
@@ -293,8 +279,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 **Verificatie:** Test toegang, wisselen/verlaten koorcontext en auditspoor van beheerwijzigingen.
 
 ## MIJN-19 — Wijzigingen herleidbaar loggen
-
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vdp)
 
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Audit.
@@ -310,8 +294,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 ## MIJN-20 — Acceptatie en omschakeling voorbereiden
 
-[ClickUp-taak](https://app.clickup.com/t/4601294/123jzzc6vdq)
-
 - [ ] Uitvoering en verificatie afgerond.
 - Gebied: Oplevering.
 - Afhankelijkheden: MIJN-04 t/m MIJN-19.
@@ -323,3 +305,6 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 - deployment, monitoring, back-up en terugval zijn aantoonbaar voorbereid.
 
 **Verificatie:** Doorloop koor- en beheerderreizen; staging smoke-test en terugvaloefening.
+
+
+Implementatiestand 5 november: Amusing.Authentication bevat BCrypt-verificatie en upgrade naar werklast 11; hogere werklast blijft behouden. Zes tests controleren PHP-fixtures, verkeerde wachtwoorden, beschadigde hashes en geen downgrade. Library target net8.0 voor compatibiliteit met bestaande net9.0-code; tests draaien op lokaal aanwezige net10.0-runtime. Nog niet aangesloten op database, sessies, solution of webapp. Geen productieaccount gewijzigd.
