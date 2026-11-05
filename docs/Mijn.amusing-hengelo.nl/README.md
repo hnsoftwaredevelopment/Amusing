@@ -17,6 +17,7 @@ Nieuwe wensen: beheerder kiest een koor en kan namens de ondersteuning wijziging
 - [Eerste Blazor-login en lokaal starten](eerste-blazor-login.md)
 - [Blijvende testomgeving en testinstructies](testomgeving.md)
 - [Koorprofiel: testen, rechten en opslag](koorprofiel.md)
+- [Foto en logo: testen en uploadgrenzen](afbeeldingen.md)
 - [Wachtwoordcompatibiliteit: testresultaten](wachtwoordcompatibiliteit.md)
 - [Besluit: opslag en migratie koorwachtwoorden](decisions/001-koorwachtwoorden.md)
 - [Plan en beslispunten](tasks/plan.md)

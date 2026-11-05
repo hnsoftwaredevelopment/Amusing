@@ -181,9 +181,11 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 **Slices MIJN-10**
 
 - [x] MIJN-10.1: opslag en leesgedrag onderzocht: foto/logo staan in MEDIUMBLOB-kolommen; Beheer leest binaire afbeeldingsdata, PHP ondersteunt daarnaast historische base64/data-URL-opslag. Nieuwe opslag moet hiermee compatibel blijven.
-- [ ] MIJN-10.2: gewenste afmetingen vaststellen met Herbert (oude Mijn maximaal 185 × 147; bestaande Beheer-uploadlimieten 8 MB logo en 16 MB foto).
-- [ ] MIJN-10.3: bestaande afbeeldingen tonen en beveiligde upload/vervanging met contactrechten, validatie en transactionele audit bouwen.
-- [ ] MIJN-10.4: integratietests, dev-publicatie en hands-on acceptatie.
+- [x] MIJN-10.2: Herbert kiest grotere afbeeldingen; foto max. 2560 px lange zijde, logo 1024 px, met passende schermvoorbeelden en bestaande uploadlimieten.
+- [x] MIJN-10.3: tonen, uploaden/vervangen en verwijderen met contactrechten, validatie, conflictbescherming en transactionele audit gebouwd.
+- [x] MIJN-10.4a: tests en dev-publicatie geslaagd; publieke Linux-upload gecontroleerd. Zie [afbeeldingen](../afbeeldingen.md).
+- [ ] MIJN-10.4b: hands-on acceptatie door Herbert.
+- [ ] MIJN-10.5: volledige compatibiliteitscontrole met Beheer/PHP en historische afbeeldingen in de gedeelde testdatabase.
 
 ## MIJN-11 — Personen uitnodigen en koorrollen beheren
 

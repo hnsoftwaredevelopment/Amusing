@@ -63,3 +63,6 @@ Voor later genoteerd: wachtwoord tonen/verbergen, wachtwoord vergeten en de look
 
 
 Update koorprofiel: bewerken is nu beschikbaar; de eerdere beperking tot alleen een koornaam is vervallen. Account 2 ziet daarnaast Testkoor Leesrechten met alleen leesrechten en zonder IBAN. Zie [koorprofiel](koorprofiel.md) voor de actuele teststappen en release. De overige nog niet gebouwde functies blijven open.
+
+
+Update afbeeldingen: foto/logo zijn nu te bekijken, te uploaden, te vervangen en te verwijderen volgens de contactrechten. Grotere afbeeldingen en transparante logo's worden ondersteund; zie [afbeeldingen](afbeeldingen.md) voor grenzen en acceptatietests. Bestaande testaccounts zijn behouden.
