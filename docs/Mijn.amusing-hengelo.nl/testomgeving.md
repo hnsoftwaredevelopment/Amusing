@@ -69,3 +69,6 @@ Update afbeeldingen: foto/logo zijn nu te bekijken, te uploaden, te vervangen en
 
 
 Update personen/rollen: [de nieuwe testinstructies](personen-en-rollen.md) zijn leidend voor de actuele koorkoppelingen. Account 1 is eerste contactpersoon van koor 1 en 4, en tweede van koor 2. Account 2 is eerste contactpersoon van koor 2 en 3, en zanger van koor 4. Uitnodigingen worden in deze testversie via Mijn uitnodigingen aangeboden; echte e-mail blijft uitgeschakeld.
+
+
+Update festivalinschrijving: koor 5 (Testkoor Inschrijving) en koor 6 (Testkoor Nog aanvullen) zijn toegevoegd voor [de inschrijftests](festivalinschrijving.md). Account 1 kan beide inschrijven zodra de gegevens compleet zijn; account 2 is alleen zanger van koor 5. De editie en podiuminformatie zijn synthetisch. Er wordt geen e-mail of betaalverzoek verstuurd.

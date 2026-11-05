@@ -227,6 +227,15 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 **Verificatie:** Test datumgrenzen, ontbrekend telefoon/IBAN/dirigent en gelijktijdige aanvragen.
 
+**Slices MIJN-12**
+
+- [x] MIJN-12.1: kalenderdagen inclusief einddatum en wachtlijstbeleid met Herbert bevestigd.
+- [x] MIJN-12.2: actuele editie, legacy podiumset en volledigheidscontrole gebouwd.
+- [x] MIJN-12.3: veilige eenmalige inschrijving en transactionele audit gebouwd; dubbele aanvragen en rolverlies getest.
+- [x] MIJN-12.4: geïsoleerde tests en publieke dev-rooktest geslaagd; twee hands-on testkoren beschikbaar.
+- [ ] MIJN-12.5: hands-on acceptatie door Herbert; zie [testinstructies](../festivalinschrijving.md).
+- [ ] MIJN-12.6: volledige integratie met gedeelde Beheer/PHP-database en persoonlijk telefoononderhoud vóór productie afronden.
+
 ## MIJN-13 — Inschrijving wijzigen en bevestigen
 
 - [ ] Uitvoering en verificatie afgerond.
