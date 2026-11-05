@@ -233,7 +233,7 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 - [x] MIJN-12.2: actuele editie, legacy podiumset en volledigheidscontrole gebouwd.
 - [x] MIJN-12.3: veilige eenmalige inschrijving en transactionele audit gebouwd; dubbele aanvragen en rolverlies getest.
 - [x] MIJN-12.4: geïsoleerde tests en publieke dev-rooktest geslaagd; twee hands-on testkoren beschikbaar.
-- [x] MIJN-12.5: Herbert accepteert de inschrijfslice; navigatietekst vóór inschrijving aangepast naar Inschrijven voor Amusing <jaar>.
+- [x] MIJN-12.5: Herbert accepteert de inschrijfslice én bevestigt na hertest de gewijzigde navigatietekst vóór/na inschrijving (5 november 2026).
 - [ ] MIJN-12.6: volledige integratie met gedeelde Beheer/PHP-database en persoonlijk telefoononderhoud vóór productie afronden.
 
 ## MIJN-13 — Inschrijving wijzigen en bevestigen

@@ -61,3 +61,6 @@ Nog open: hands-on acceptatie, volledige gedeelde Beheer/PHP-integratie, persoon
 Herbert bevestigt dat de inschrijfslice werkt zoals beschreven en logisch is. Het koorprofiel toont vóór inschrijving nu “Inschrijven voor Amusing <jaar>”, met het jaar uit de actuele festivaldatum. Bij een bestaande inschrijving blijft “Festivalinschrijving bekijken” staan. Zonder actuele editie blijft de neutrale tekst behouden.
 
 De volledige Beheer/PHP-integratie en eerder genoemde vervolgslices blijven open. De beoordeling/competitie wordt later per editie configureerbaar; zie MIJN-21 in de backlog. De huidige optie is in deze slice niet gewijzigd.
+
+
+Herbert heeft op 5 november 2026 ook de aangepaste navigatietekst getest en expliciet goedgekeurd: vóór inschrijving Inschrijven voor Amusing <jaar>, daarna Festivalinschrijving bekijken. De acceptatie van deze tekstwijziging is afgerond.
