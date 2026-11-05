@@ -1,6 +1,6 @@
 # Koorprofiel bekijken en bewerken
 
-Status 5 november 2026: gepubliceerd op dev.mijn; technische controles geslaagd, hands-on acceptatie nog open. MIJN-09 is hiermee niet als geheel afgerond: compatibiliteit met de volledige Beheer-omgeving en verdere acceptatie blijven open.
+Status 5 november 2026: gepubliceerd op dev.mijn; technische controles geslaagd en hands-on geaccepteerd door Herbert. MIJN-09 is hiermee niet als geheel afgerond: compatibiliteit met de volledige Beheer-omgeving en verdere acceptatie blijven open.
 
 ## Zelf testen
 
@@ -34,3 +34,8 @@ Migratie: database/mijn/002-profiel.sql. De aanvullende synthetische fixtures en
 De publieke HTTPS-controle bevestigt beide logins, gekoppelde koor-IDs, de leesrechtenpagina zonder opslaanknop/IBAN en uitloggen. Op de blijvende dev-omgeving is geen profielwijziging door de rooktest gedaan; schrijven is getest via de HTTP-testhost tegen de aparte wegwerpdatabase. De rooktest gebruikt koor-IDs zodat legitiem wijzigen van testkoornamen hem niet onterecht laat falen.
 
 Release: /opt/amusing-mijn-dev/releases/20261105T104238Z; Nginx-/releaseback-up: /root/nginx-backups/dev-mijn-20261105T104238Z. Databaseback-up vóór uitbreiding: /root/nginx-backups/mijn-profile-db-20261105T104225Z.sql. Productie is niet gewijzigd.
+
+
+## Acceptatie door Herbert — 5 november 2026
+
+Herbert bevestigt na uitvoering van de aangeboden tests dat alles werkt zoals verwacht. De profielbewerking, leesrechten/IBAN-afscherming en conflictmelding zijn daarmee geaccepteerd. De integratiecontrole met de volledige gedeelde Beheer-database blijft een afzonderlijk open punt; MIJN-09 is nog niet als geheel afgerond.

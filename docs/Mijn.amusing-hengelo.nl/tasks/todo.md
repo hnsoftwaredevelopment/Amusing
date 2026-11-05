@@ -161,7 +161,7 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 - [x] MIJN-09.1: algemene profielvelden en IBAN volgens bevestigde lees-/schrijfrechten gebouwd.
 - [x] MIJN-09.2: servervalidatie, bescherming tegen gelijktijdig opslaan en transactionele audit getest.
 - [x] MIJN-09.3: naar blijvende dev-omgeving gepubliceerd met bestaande testaccounts en aanvullend leeskoor.
-- [ ] MIJN-09.4: hands-on acceptatie door Herbert; zie [testinstructies](../koorprofiel.md).
+- [x] MIJN-09.4: Herbert bevestigt op 5 november 2026 dat alle aangeboden profieltests werken zoals verwacht; zie [acceptatie](../koorprofiel.md).
 - [ ] MIJN-09.5: integratie en compatibiliteit met de volledige gedeelde Beheer-database in test aantonen.
 
 ## MIJN-10 — Koorfoto en logo beheren
