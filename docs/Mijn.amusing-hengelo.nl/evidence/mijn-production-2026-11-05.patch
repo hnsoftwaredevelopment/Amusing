@@ -1,0 +1,57 @@
+diff --git a/html/index.php b/html/index.php
+index 7b23f4f..3a1ff06 100644
+--- a/html/index.php
++++ b/html/index.php
+@@ -39,9 +39,15 @@ if (count($groups)) {
+ 			return rolename($role);
+ 		}, $group->roles)));
+ 		$tpl->setVar('id', $id);
+-		$tpl->setVar('link_group', _('Details'));
+-		$tpl->parse('group');
++		$tpl->setVar('link_details', sprintf('<a href="%sgroup?id=%d">%s</a>', root(), $id, _('Details')));
++		if (($festival->enrollment_start <= date('Y-m-d')) &&
++ 		   ($festival->enrollment_end   >= date('Y-m-d'))) {
++    		   $tpl->parse('enrollment');
++		}
++
++		$tpl->parse('group');	
+ 	}
++	$tpl->setVar('link_enrollment', '&nbsp;');
+ 	$tpl->setVar('label_yourgroups', _('Your account is linked to the following groups:'));
+ 	$tpl->parse('hasgroups');
+ }
+@@ -55,4 +61,4 @@ if (($festival->enrollment_start<=date('Y-m-d')) &&
+ }
+ 
+ $title = _('My Amusing Hengelo');
+-return ['content'=>$tpl->get()];
++return ['content'=>$tpl->get()];
+\ No newline at end of file
+diff --git a/templates/overview.html b/templates/overview.html
+index 6b3f3cd..9e5f9a5 100644
+--- a/templates/overview.html
++++ b/templates/overview.html
+@@ -24,7 +24,12 @@
+ 					<td>{name}</td>
+ 					<td>{city}</td>
+ 					<td>{roles}</td>
+-					<td><a href="{root}group?id={id}">{link_group}</a></td>
++					<td>
++						<a href="{root}group?id={id}">{link_details}</a>
++						<!-- BEGIN enrollment -->
++ 						| <a href="{root}group/enrollment?id={id}">Inschrijving</a>
++						<!-- END enrollment -->
++					</td>
+ 				</tr>
+ 				<!-- END group -->
+ 			</tbody>
+@@ -40,9 +45,5 @@
+ 			<li>{link_link_group}</li>
+ 			<li>{link_create_group}</li>
+ 		</ul>
+-		<!-- BEGIN enroll -->
+-		<p>{label_click_details}</p>
+-		<!-- END enroll -->
+ 	</div>
+-
+ </div>
