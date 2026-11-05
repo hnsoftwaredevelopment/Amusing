@@ -18,13 +18,19 @@ public sealed class MySqlChoirPasswordStore(DbDataSource dataSource) : IChoirPas
     public async Task<bool> TryReplaceHashAsync(uint personId, string expectedHash, string replacementHash, CancellationToken cancellationToken)
     {
         await using var connection = await dataSource.OpenConnectionAsync(cancellationToken);
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
         await using var command = connection.CreateCommand();
+        command.Transaction = transaction;
         // The legacy column has a case-insensitive collation; hashes must match byte-for-byte.
         command.CommandText = "UPDATE ah_personen_wachtwoorden SET hash = @replacementHash WHERE id = @id AND BINARY hash = BINARY @expectedHash";
         AddParameter(command, "@id", personId);
         AddParameter(command, "@expectedHash", expectedHash);
         AddParameter(command, "@replacementHash", replacementHash);
-        return await command.ExecuteNonQueryAsync(cancellationToken) == 1;
+        var updated = await command.ExecuteNonQueryAsync(cancellationToken) == 1;
+        if (updated)
+            await MySqlChoirAuditLog.InsertAsync(connection, transaction, ChoirAuditAction.PasswordUpgraded, personId, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return updated;
     }
 
     private static void AddParameter(DbCommand command, string name, object value)

@@ -1,4 +1,6 @@
+@inject IConfiguration Configuration
 @inherits LayoutComponentBase
 <header><a href="/" class="brand">Amusing Hengelo <span>Mijn koor</span></a></header>
+@if (Configuration.GetValue<bool>("Mijn:IsTestEnvironment")) { <aside class="test-banner">Testomgeving — gebruik alleen testgegevens. Er worden geen e-mails verzonden.</aside> }
 <main id="main">@Body</main>
 <footer>Samen zingen in Hengelo</footer>

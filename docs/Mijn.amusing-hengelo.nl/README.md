@@ -1,6 +1,6 @@
 # Mijn Amusing — projectoverzicht
 
-Laatst bijgewerkt: 5 november 2026. Status: eerste Blazor-login geïmplementeerd en in geïsoleerde testomgeving getest; geen publicatie.
+Laatst bijgewerkt: 5 november 2026. Status: eerste Blazor-login geïmplementeerd en in geïsoleerde testomgeving getest; gepubliceerd naar de afzonderlijke dev.mijn-testomgeving.
 Eigenaar: Herbert Nijkamp. Werkadministratie: deze Markdown-documenten, gespiegeld naar Obsidian.
 
 ## Doel en vaste uitgangspunten
@@ -15,6 +15,7 @@ Nieuwe wensen: beheerder kiest een koor en kan namens de ondersteuning wijziging
 - [Architectuurvoorstel](architectuur.md)
 - [Rechtenmatrix](rechtenmatrix.md)
 - [Eerste Blazor-login en lokaal starten](eerste-blazor-login.md)
+- [Blijvende testomgeving en testinstructies](testomgeving.md)
 - [Wachtwoordcompatibiliteit: testresultaten](wachtwoordcompatibiliteit.md)
 - [Besluit: opslag en migratie koorwachtwoorden](decisions/001-koorwachtwoorden.md)
 - [Plan en beslispunten](tasks/plan.md)
@@ -43,6 +44,7 @@ ClickUp wordt op verzoek van Herbert niet meer gebruikt of bijgewerkt vanwege he
 | API-route herstel | Uitgevoerd; gebruiker bevestigt succesvolle koorlogin op productie; vertraging nog te onderzoeken |
 | Functionele inventarisatie | Eerste broncode-inventarisatie afgerond; hieronder benoemde open punten blijven bestaan |
 | Stories | Eerste login-slices gebouwd; MIJN-04 blijft open voor audit en acceptatie |
+| Blazor-testomgeving | dev.mijn beschikbaar met synthetische accounts en duurzaam beveiligingslog |
 | Architectuur en planning | Voorstel; geen kalenderplanning of definitieve schatting |
 
 Dit overzicht en tasks/todo.md zijn leidend voor scope en voortgang. Werk alleen de betrokken mijlpalen en besluiten bij wanneer het werk verandert. Spiegel gewijzigde Markdown naar Obsidian; er is geen externe synchronisatie of achtergrondmonitor.

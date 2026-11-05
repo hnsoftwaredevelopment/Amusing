@@ -1,0 +1,28 @@
+[Unit]
+Description=Amusing Mijn Blazor testomgeving
+After=network.target mariadb.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/amusing-mijn-dev/current
+ExecStart=/opt/amusing-mijn-dev/current/Amusing.Mijn --urls http://127.0.0.1:5002
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=Mijn__IsTestEnvironment=true
+Environment=Mijn__DataProtectionPath=/var/lib/amusing-mijn-dev/keys
+Environment=AllowedHosts=dev.mijn.amusing-hengelo.nl
+EnvironmentFile=/etc/amusing-mijn-dev.env
+StateDirectory=amusing-mijn-dev
+StateDirectoryMode=0700
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/amusing-mijn-dev
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -5,11 +5,17 @@ using Amusing.Authentication.MySql;
 using Amusing.Mijn.Components;
 using Amusing.Mijn.Services;
 using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.HttpOverrides;
+using System.Net;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using MySqlConnector;
 
 var builder = WebApplication.CreateBuilder(args);
+var protection = builder.Services.AddDataProtection().SetApplicationName("Amusing.Mijn");
+if (builder.Configuration["Mijn:DataProtectionPath"] is string keyPath)
+    protection.PersistKeysToFileSystem(new DirectoryInfo(keyPath));
 builder.Services.AddRazorComponents();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddCascadingAuthenticationState();
@@ -19,7 +25,17 @@ builder.Services.AddScoped<ChoirAccounts>();
 builder.Services.AddScoped<IChoirPasswordStore>(sp => new MySqlChoirPasswordStore(sp.GetRequiredService<MySqlDataSource>()));
 builder.Services.AddScoped<ChoirPasswordVerifier>();
 builder.Services.AddScoped<ChoirCredentialService>();
+builder.Services.AddScoped<MySqlChoirAuditLog>(sp => new MySqlChoirAuditLog(sp.GetRequiredService<MySqlDataSource>()));
 builder.Services.AddAntiforgery();
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+    options.KnownProxies.Add(IPAddress.Loopback);
+    options.KnownProxies.Add(IPAddress.IPv6Loopback);
+    options.ForwardLimit = 1;
+});
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie(options =>
 {
     options.Cookie.Name = "Amusing.Mijn.Session";
@@ -33,6 +49,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         if (!await context.HttpContext.RequestServices.GetRequiredService<ChoirAccounts>().IsCurrentAsync(context.Principal!, context.HttpContext.RequestAborted))
         {
+            var actor = uint.TryParse(context.Principal!.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? (uint?)id : null;
+            await context.HttpContext.RequestServices.GetRequiredService<MySqlChoirAuditLog>().RecordAsync(ChoirAuditAction.SessionInvalidated, actor, context.HttpContext.RequestAborted);
             context.RejectPrincipal();
             await context.HttpContext.SignOutAsync();
         }
@@ -45,11 +63,13 @@ builder.Services.AddRateLimiter(options =>
 });
 var dummyHash = BCrypt.Net.BCrypt.HashPassword("Synthetic-timing-fixture", 11);
 var app = builder.Build();
+app.UseForwardedHeaders();
 if (!app.Environment.IsDevelopment()) { app.UseExceptionHandler("/Error"); app.UseHsts(); app.UseHttpsRedirection(); }
 app.Use(async (context, next) =>
 {
     context.Response.Headers["X-Content-Type-Options"] = "nosniff";
     context.Response.Headers["X-Frame-Options"] = "DENY";
+    if (app.Configuration.GetValue<bool>("Mijn:IsTestEnvironment")) context.Response.Headers["X-Robots-Tag"] = "noindex, nofollow";
     context.Response.Headers["Referrer-Policy"] = "same-origin";
     context.Response.Headers.CacheControl = "no-store";
     await next();
@@ -58,7 +78,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseRateLimiter();
 app.UseAntiforgery();
-app.MapPost("/account/sign-in", async (HttpContext context, IAntiforgery antiforgery, ChoirAccounts accounts, ChoirCredentialService credentials, IChoirPasswordStore store, ILoggerFactory logs) =>
+app.MapPost("/account/sign-in", async (HttpContext context, IAntiforgery antiforgery, ChoirAccounts accounts, ChoirCredentialService credentials, IChoirPasswordStore store, MySqlChoirAuditLog audit, ILoggerFactory logs) =>
 {
     try { await antiforgery.ValidateRequestAsync(context); }
     catch (AntiforgeryValidationException) { return Results.BadRequest(); }
@@ -70,6 +90,7 @@ app.MapPost("/account/sign-in", async (HttpContext context, IAntiforgery antifor
     var valid = account is not null ? await credentials.VerifyAsync(account.Id, password, context.RequestAborted) : BCrypt.Net.BCrypt.Verify(password, dummyHash);
     if (account is null || !valid)
     {
+        await audit.RecordAsync(ChoirAuditAction.LoginRejected, account?.Id, context.RequestAborted);
         logs.CreateLogger("ChoirLogin").LogInformation("Choir login rejected");
         return Results.LocalRedirect("/account/login?failed=1");
     }
@@ -78,17 +99,21 @@ app.MapPost("/account/sign-in", async (HttpContext context, IAntiforgery antifor
     if (hash is null || !BCrypt.Net.BCrypt.Verify(password, hash)) return Results.LocalRedirect("/account/login?failed=1");
     var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { new Claim(ClaimTypes.NameIdentifier, account.Id.ToString()), new Claim(ClaimTypes.Name, account.Name), new Claim("actor_type", "choir_person"), new Claim("credential_stamp", ChoirAccounts.Stamp(hash)) }, CookieAuthenticationDefaults.AuthenticationScheme));
     if (!await accounts.IsCurrentAsync(principal, context.RequestAborted)) return Results.LocalRedirect("/account/login?failed=1");
+    await audit.RecordAsync(ChoirAuditAction.LoginSucceeded, account.Id, context.RequestAborted);
     await context.SignInAsync(principal, new AuthenticationProperties { IsPersistent = false });
     logs.CreateLogger("ChoirLogin").LogInformation("Choir person {PersonId} logged in", account.Id);
     return Results.LocalRedirect("/");
 }).RequireRateLimiting("login");
-app.MapPost("/account/logout", async (HttpContext context, IAntiforgery antiforgery) =>
+app.MapPost("/account/logout", async (HttpContext context, IAntiforgery antiforgery, MySqlChoirAuditLog audit) =>
 {
     try { await antiforgery.ValidateRequestAsync(context); }
     catch (AntiforgeryValidationException) { return Results.BadRequest(); }
+    await audit.RecordAsync(ChoirAuditAction.LoggedOut, uint.Parse(context.User.FindFirstValue(ClaimTypes.NameIdentifier)!), context.RequestAborted);
     await context.SignOutAsync();
     return Results.LocalRedirect("/account/login");
 }).RequireAuthorization();
+app.MapGet("/health", () => Results.Ok(new { status = "ok", application = "Amusing.Mijn", version = "dev-audit-1" }));
+app.MapGet("/robots.txt", () => Results.Text("User-agent: *\nDisallow: /\n", "text/plain"));
 app.MapStaticAssets();
 app.MapRazorComponents<App>();
 app.Run();

@@ -27,6 +27,7 @@ public class LoginTests : IAsyncLifetime
         if (!settings.Database.StartsWith("mijn_test_", StringComparison.Ordinal) || settings.Server != "127.0.0.1") throw new InvalidOperationException("Tests require an isolated mijn_test_ schema via loopback.");
         source = new MySqlDataSource(connection);
         await Execute("CREATE TABLE IF NOT EXISTS ah_personen (persoon_id INT UNSIGNED PRIMARY KEY,voornaam VARCHAR(40),email VARCHAR(80),actief TINYINT); CREATE TABLE IF NOT EXISTS ah_personen_wachtwoorden(id INT UNSIGNED PRIMARY KEY,hash VARCHAR(255) COLLATE utf8mb3_general_ci); CREATE TABLE IF NOT EXISTS ah_zanggroepen(zanggroep_id INT UNSIGNED PRIMARY KEY,naam VARCHAR(100)); CREATE TABLE IF NOT EXISTS ah_personen_rollen(persoon_id INT UNSIGNED,zanggroep_id INT UNSIGNED,rol VARCHAR(30)); DELETE FROM ah_personen_rollen; DELETE FROM ah_zanggroepen; DELETE FROM ah_personen_wachtwoorden; DELETE FROM ah_personen;");
+        await Execute("CREATE TABLE IF NOT EXISTS mijn_audit_log(id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,occurred_at DATETIME(6) NOT NULL,actor_type VARCHAR(20) NOT NULL,actor_id INT UNSIGNED NULL,action VARCHAR(40) NOT NULL); DELETE FROM mijn_audit_log;");
         originalHash = BCrypt.Net.BCrypt.HashPassword(Password, 10).Replace("$2a$", "$2y$");
         await Execute("INSERT INTO ah_personen VALUES(42,'Testpersoon','koor@example.invalid',1),(43,'Inactief','inactive@example.invalid',0); INSERT INTO ah_personen_wachtwoorden VALUES(42,@hash),(43,@hash); INSERT INTO ah_zanggroepen VALUES(1,'Eigen Testkoor'),(2,'Verborgen Anderkoor'); INSERT INTO ah_personen_rollen VALUES(42,1,'contactpersoon1');", originalHash);
         factory = new WebApplicationFactory<Program>().WithWebHostBuilder(b => b.UseEnvironment("Development").ConfigureAppConfiguration((_, config) => config.AddInMemoryCollection(new Dictionary<string,string?> { ["ConnectionStrings:Mijn"] = connection })));
@@ -106,5 +107,25 @@ public class LoginTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.Redirect,(await client.GetAsync("/")).StatusCode);
     }
 
+    [DatabaseFact] public async Task AuditContainsUpgradeAndLoginWithActor()
+    {
+        await Login();
+        await using var command = source.CreateCommand("SELECT action,actor_type,actor_id FROM mijn_audit_log ORDER BY id");
+        await using var reader = await command.ExecuteReaderAsync();
+        Assert.True(await reader.ReadAsync());
+        Assert.Equal("PasswordUpgraded",reader.GetString(0));
+        Assert.Equal("choir_person",reader.GetString(1));
+        Assert.Equal(42u,reader.GetFieldValue<uint>(2));
+        Assert.True(await reader.ReadAsync());
+        Assert.Equal("LoginSucceeded",reader.GetString(0));
+        Assert.False(await reader.ReadAsync());
+    }
+    [DatabaseFact] public async Task AuditFailureRollsBackPasswordUpgrade()
+    {
+        await Execute("DROP TABLE mijn_audit_log");
+        var store = new MySqlChoirPasswordStore(source);
+        await Assert.ThrowsAsync<MySqlException>(() => store.TryReplaceHashAsync(42,originalHash,"replacement",default));
+        Assert.Equal(originalHash,await store.ReadHashAsync(42,default));
+    }
     private static void Add(System.Data.Common.DbCommand cmd, string name, object value) { var p=cmd.CreateParameter(); p.ParameterName=name; p.Value=value; cmd.Parameters.Add(p); }
 }
