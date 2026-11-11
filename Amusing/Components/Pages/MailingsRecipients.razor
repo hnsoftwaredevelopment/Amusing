@@ -63,7 +63,7 @@ else
                         <QueryBuilderTemplates>
                             <ValueTemplate>
                                 @{
-                                    var selected = context.Value as string[] ?? Array.Empty<string>();
+                                    var selected = RecipientRuleValues.ToSelection(context.Value);
                                 }
                                 <SfMultiSelect TItem="string"
                                                 TValue="string[]"
@@ -123,7 +123,7 @@ else
                             <QueryBuilderTemplates>
                                 <ValueTemplate>
                                     @{
-                                        var selected = context.Value as string[] ?? Array.Empty<string>();
+                                        var selected = RecipientRuleValues.ToSelection(context.Value);
                                     }
                                     <SfMultiSelect TItem="string"
                                     TValue="string[]"
@@ -149,7 +149,7 @@ else
                             <QueryBuilderTemplates>
                                 <ValueTemplate>
                                     @{
-                                        var selected = context.Value as string[] ?? Array.Empty<string>();
+                                        var selected = RecipientRuleValues.ToSelection(context.Value);
                                     }
                                     <SfMultiSelect TItem="string"
                                     TValue="string[]"
@@ -249,7 +249,6 @@ else
                         AllowMultiSorting="true"
                         AllowSelection="true">
                     <GridEvents TValue="RecipientListModel" DataBound="OnGridDataBound" RowSelected="OnRowSelected" />
-                    <GridEditSettings AllowAdding="true" NewRowPosition="NewRowPosition.Top"></GridEditSettings>
                     <GridColumns>
                         <GridColumn Field="@nameof(RecipientListModel.ListId)" IsPrimaryKey="true" Visible="false" />
                         <GridColumn Field="@nameof(RecipientListModel.ListName)" HeaderText="Lijst" TextAlign="TextAlign.Left" AllowSorting=true AllowResizing="true" Width="350px" />
