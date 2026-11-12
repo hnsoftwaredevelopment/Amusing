@@ -41,12 +41,12 @@ public sealed record ParticipationInvoice(uint GroupId, uint FestivalId, string 
                 <p>Hierbij ontvangt u opnieuw de factuur voor de inschrijving van {group} voor het Korenfestival Amusing Hengelo {Year}.</p>
                 <p>De totale kosten voor de inschrijving bedragen {Money(Total)}.</p>
                 <table style="border-collapse:collapse;width:100%" cellpadding="8" border="1">
-                <thead><tr><th scope="col">Omschrijving</th><th scope="col">Bedrag</th></tr></thead>
+                <thead><tr><th scope="col" align="left" style="text-align:left">Omschrijving</th><th scope="col" align="left" style="text-align:left">Bedrag</th></tr></thead>
                 <tbody><tr><td colspan="2">Deelname aan Korenfestival Amusing Hengelo {Year}</td></tr>
-                <tr><td>Groepsgrootte {Singers} personen</td><td>{Money(ParticipantsNet)}</td></tr>
-                <tr><td>Podium type {stage}</td><td>{Money(StageNet)}</td></tr>
-                <tr><td>BTW 9%</td><td>{Money(Vat)}</td></tr>
-                <tr><th scope="row">Totaal</th><td><strong>{Money(Total)}</strong></td></tr></tbody></table>
+                <tr><td>Groepsgrootte {Singers} personen</td><td align="right" style="text-align:right;white-space:nowrap">{Money(ParticipantsNet)}</td></tr>
+                <tr><td>Podium type {stage}</td><td align="right" style="text-align:right;white-space:nowrap">{Money(StageNet)}</td></tr>
+                <tr><td>BTW 9%</td><td align="right" style="text-align:right;white-space:nowrap">{Money(Vat)}</td></tr>
+                <tr><th scope="row" align="left" style="text-align:left">Totaal</th><td align="right" style="text-align:right;white-space:nowrap"><strong>{Money(Total)}</strong></td></tr></tbody></table>
                 <p>Gelieve het verschuldigde bedrag ter hoogte van {Money(Total)} te betalen op rekening
                 NL22RABO0125893922 (BIC RABONL2U) ten name van Stichting Vocale Promotie in Hengelo,
                 onder vermelding van &quot;{group} {Year}&quot;.</p>

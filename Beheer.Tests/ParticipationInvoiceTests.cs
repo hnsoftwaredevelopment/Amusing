@@ -41,8 +41,8 @@ public class ParticipationInvoiceTests
         Assert.Equal(45.87m, invoice.ParticipantsNet);
         Assert.Equal(22.94m, invoice.StageNet);
         Assert.Equal(6.19m, invoice.Vat);
-        Assert.Contains("Groepsgrootte 1 personen</td><td>€ 45,87", invoice.Html);
-        Assert.Contains("Podium type B</td><td>€ 22,94", invoice.Html);
+        Assert.Contains("Groepsgrootte 1 personen</td><td align=\"right\" style=\"text-align:right;white-space:nowrap\">€ 45,87", invoice.Html);
+        Assert.Contains("Podium type B</td><td align=\"right\" style=\"text-align:right;white-space:nowrap\">€ 22,94", invoice.Html);
         Assert.DoesNotContain("<script>", invoice.Html);
         Assert.Contains("&lt;script&gt;", invoice.Html);
     }
