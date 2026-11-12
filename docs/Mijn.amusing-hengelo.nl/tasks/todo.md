@@ -278,6 +278,12 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 **Verificatie:** Test grenzen 20/21, 50/51, 100/101 en verschillende podiumtypen.
 
+**Databasevoorbereiding 12 november 2026**
+
+Migratie `database/mijn/006-deelnemerstarieven.sql` is toegepast en gecontroleerd in `amusing` en `amusing_mijn_dev`. In `ah_deelnemerstarieven` staan de ondergrenzen 1, 21, 51 en 101 met bedragen inclusief btw van € 50, € 75, € 100 en € 125. Kies bij berekening de hoogste ondergrens die het deelnemersaantal niet overschrijdt. In `ah_btw_tarieven` staat voor `deelname` het percentage 9,00. De startwaarden zijn overgenomen uit de PHP-berekening. Opnieuw uitvoeren behoudt bestaande waarden.
+
+Beheerformulieren, koppeling met de berekening en het vastleggen van toegepaste tarieven per nota horen bij de verdere uitwerking.
+
 ## MIJN-16 — Inschrijfbevestiging betrouwbaar versturen
 
 - [ ] Uitvoering en verificatie afgerond.
