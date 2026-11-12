@@ -86,3 +86,5 @@ De bevestiging onder de inschrijvingen vermeldt nu ook de rol: De kopie van de f
 Herbert heeft de laatste opmaakwijziging op dev goedgekeurd. De kop Bedrag staat rechts boven de bedragen. Omschrijving en Totaal staan links. Alle 87 tests van versie 47764e5 slagen.
 
 De goedgekeurde versie is op 12 november 2026 om 18:46:53 CET gepubliceerd naar productie. De DLL-hash op dev en productie komt overeen (83b5fd83f789adb4e8c95f8de28dd91a219ef210e9a90e0085049f8d704448c0). De bestaande productieconfiguratie is overgenomen. De vorige applicatie staat als back-up in `/home/groups/svp/blazor.beheer.amusing-hengelo.nl/www/Amusing_backup_20261112-184647`. De productieservice draait met PID 1952085. Ontvangerslijsten en groepsbeheer geven HTTP 200 op beide Beheer-domeinen.
+
+Herbert heeft de wijzigingen op productie getest en op 12 november 2026 akkoord gegeven. De productieacceptatie is afgerond.
