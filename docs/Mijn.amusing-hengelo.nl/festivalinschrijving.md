@@ -16,7 +16,7 @@ Gebruik dezelfde testaccounts. De bestaande testkoren en profielwijzigingen zijn
 5. Open Testkoor Nog aanvullen met account 1. De pagina noemt de ontbrekende gegevens. Vul het IBAN via het koorprofiel in. Nodig jezelf via Personen en rollen uit als dirigent en neem die rol aan via Mijn uitnodigingen. Daarna kan ook dit koor worden ingeschreven.
 6. Probeer een ongeldig deelnemersaantal of geen podiumtype. Je krijgt een validatiemelding zonder inschrijving.
 
-Na opslaan is de inschrijving voor deze editie alleen te bekijken. Wijzigen en bevestigen zijn MIJN-13; er is geen resetknop voor een testinschrijving. De rooktest heeft een afzonderlijk tijdelijk koor gebruikt en koor 5/6 nog niet ingeschreven.
+Na opslaan gelden de regels onder Wijzigen en bevestigen. Een bestaande aanmelding is eenmalig per editie. De rooktest heeft een afzonderlijk tijdelijk koor gebruikt en koor 5/6 nog niet ingeschreven.
 
 ## Bevestigde bedrijfsregels
 
@@ -64,3 +64,13 @@ De volledige Beheer/PHP-integratie en eerder genoemde vervolgslices blijven open
 
 
 Herbert heeft op 5 november 2026 ook de aangepaste navigatietekst getest en expliciet goedgekeurd: vóór inschrijving Inschrijven voor Amusing <jaar>, daarna Festivalinschrijving bekijken. De acceptatie van deze tekstwijziging is afgerond.
+
+## Wijzigen en bevestigen
+
+Een actieve eerste of tweede contactpersoon mag deelnemersaantal, podiumtype, locatievoorkeur en jurywens aanpassen zolang de inschrijving onbetaald, onbevestigd en actief is. Dit geldt ook na de sluitingsdatum. Een door Beheer toegewezen podiumtype blijft staan. Een wachtlijstkoor mag zijn gegevens wijzigen volgens dezelfde regels.
+
+Bevestigen kan vanaf de dag na de sluitingsdatum volgens de Nederlandse kalender. Een wachtlijstkoor kan dat zodra Beheer het heeft geplaatst. Een contactpersoon mag een betaalde inschrijving nog bevestigen. Bij afmelding zijn beide acties geblokkeerd. Een bevestigde inschrijving kan alleen via de organisatie worden gewijzigd.
+
+Opslaan controleert de actuele rol en de versie van de getoonde gegevens. Een oud formulier kan geen recentere wijziging bevestigen of overschrijven. Een tweede bevestigingsverzoek behoudt de eerste bevestiging en schrijft geen tweede auditrecord. Wijziging of bevestiging en de bijbehorende logregel worden samen opgeslagen.
+
+Open een bestaande inschrijving op dev.mijn en kies **Wijzigingen opslaan**. Open dezelfde pagina in twee tabbladen om de controle op verouderde gegevens te proberen. De bevestigingsknop verschijnt pas na de sluitingsdatum van de editie. De gerichte tests controleren het bevestigingsformulier met een testdatum na sluiting, inclusief wachtlijst, betaling, afmelding en terugdraaien bij een auditfout.

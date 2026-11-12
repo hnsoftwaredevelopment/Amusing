@@ -250,6 +250,10 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 **Verificatie:** Test statusovergangen en wijzigingen die verboden moeten worden.
 
+- [x] MIJN-13.1 Wijzigen na sluiting en bevestigen na plaatsing van wachtlijstkoren afgestemd.
+- [x] MIJN-13.2 Wijzigen en bevestigen gebouwd en gericht getest. Zie [festivalinschrijving](../festivalinschrijving.md).
+- [ ] MIJN-13.3 Hands-on acceptatie en compatibiliteitscontrole met de gedeelde Beheer/PHP-database.
+
 ## MIJN-14 — Deelnamehistorie en gepubliceerde optredens bekijken
 
 - [ ] Uitvoering en verificatie afgerond.
