@@ -5,6 +5,13 @@ namespace Beheer.Tests;
 
 public class ParticipationInvoiceTests
 {
+    [Theory]
+    [InlineData("penningmeester", "Factuur is verstuurd naar Penningmeester")]
+    [InlineData("contactpersoon1", "Factuur is verstuurd naar contactpersoon 1")]
+    public void SuccessMessageNamesActualRecipientRole(string role, string expected)
+    {
+        Assert.Equal(expected, (Sample() with { RecipientRole = role }).SuccessMessage);
+    }
     [Fact]
     public void GroupInvoicePageRequiresAuthentication()
     {

@@ -11,6 +11,11 @@ public partial class MaintenanceGroups
     private ParticipationInvoice? InvoicePreview;
     private bool InvoiceBusy;
     private string? InvoiceMessage;
+    private bool InvoiceDialogVisible
+    {
+        get => InvoicePreview is not null;
+        set { if (!value && !InvoiceBusy) InvoicePreview = null; }
+    }
 
     private async Task PreviewInvoiceAsync(GroupRegistrationModel registration)
     {
@@ -49,6 +54,7 @@ public partial class MaintenanceGroups
             }
             InvoicePreview = null;
             InvoiceMessage = $"De kopie van de factuur voor {preview.GroupName} ({preview.Year}) is verstuurd naar {preview.RecipientEmail}.";
+            await ToastService.ShowSuccessAsync(preview.SuccessMessage, "Factuur verzonden");
             try
             {
                 await LoggingService.WriteUserActionGroupAsync(preview.GroupId, "Beheer", "Factuur opnieuw verzenden", "success",

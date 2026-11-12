@@ -239,15 +239,23 @@ else
                                 }
                                 @if (InvoicePreview is { } invoice && invoice.GroupId == SelectedGroup?.GroupId)
                                 {
-                                    <section class="border rounded p-3 my-3" aria-label="Factuur controleren">
-                                        <h5>Factuur controleren — @invoice.GroupName (@invoice.Year)</h5>
-                                        <p>Ontvanger: <strong>@invoice.RecipientEmail</strong> (@invoice.RecipientRole)</p>
-                                        <div class="border rounded p-3 mb-3" style="max-height:340px;overflow:auto">
-                                            @((MarkupString)invoice.Html)
-                                        </div>
-                                        <button type="button" class="btn btn-primary" disabled="@InvoiceBusy" @onclick="SendInvoiceAsync">Verstuur kopie factuur</button>
-                                        <button type="button" class="btn btn-secondary ms-2" disabled="@InvoiceBusy" @onclick="() => InvoicePreview = null">Annuleren</button>
-                                    </section>
+                                    <SfDialog Width="740px" IsModal="true" ShowCloseIcon="false" CloseOnEscape="false" @bind-Visible="InvoiceDialogVisible">
+                                        <DialogTemplates>
+                                            <Header>Factuur controleren — @invoice.GroupName (@invoice.Year)</Header>
+                                            <Content>
+                                                <p>Ontvanger: <strong>@invoice.RecipientEmail</strong> (@invoice.RecipientDisplayRole)</p>
+                                                @if (!string.IsNullOrWhiteSpace(InvoiceMessage))
+                                                {
+                                                    <p role="alert" class="alert alert-warning">@InvoiceMessage</p>
+                                                }
+                                                <div style="max-height:50vh;overflow:auto">@((MarkupString)invoice.Html)</div>
+                                            </Content>
+                                            <FooterTemplate>
+                                                <button type="button" class="btn btn-primary" disabled="@InvoiceBusy" @onclick="SendInvoiceAsync">@(InvoiceBusy ? "Bezig met versturen…" : "Verstuur kopie factuur")</button>
+                                                <button type="button" class="btn btn-secondary ms-2" disabled="@InvoiceBusy" @onclick="() => InvoicePreview = null">Annuleren</button>
+                                            </FooterTemplate>
+                                        </DialogTemplates>
+                                    </SfDialog>
                                 }
 
                                 @if (LatestFestival is not null && !IsRegisteredForLatestFestival)

@@ -25,6 +25,8 @@ public sealed record ParticipationInvoice(uint GroupId, uint FestivalId, string 
     // Keep displayed lines and total equal, including any rounding cent.
     public decimal Vat => Total - ParticipantsNet - StageNet;
     public static string Money(decimal amount) => "€ " + amount.ToString("N2", CultureInfo.GetCultureInfo("nl-NL"));
+    public string RecipientDisplayRole => RecipientRole == "penningmeester" ? "Penningmeester" : "contactpersoon 1";
+    public string SuccessMessage => $"Factuur is verstuurd naar {RecipientDisplayRole}";
     public string Subject => $"Kopie factuur Korenfestival Amusing Hengelo {Year} – {GroupName.Replace('\r', ' ').Replace('\n', ' ')}";
     public string Html
     {
