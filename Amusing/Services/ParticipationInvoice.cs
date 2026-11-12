@@ -41,7 +41,7 @@ public sealed record ParticipationInvoice(uint GroupId, uint FestivalId, string 
                 <p>Hierbij ontvangt u opnieuw de factuur voor de inschrijving van {group} voor het Korenfestival Amusing Hengelo {Year}.</p>
                 <p>De totale kosten voor de inschrijving bedragen {Money(Total)}.</p>
                 <table style="border-collapse:collapse;width:100%" cellpadding="8" border="1">
-                <thead><tr><th scope="col" align="left" style="text-align:left">Omschrijving</th><th scope="col" align="left" style="text-align:left">Bedrag</th></tr></thead>
+                <thead><tr><th scope="col" align="left" style="text-align:left">Omschrijving</th><th scope="col" align="right" style="text-align:right">Bedrag</th></tr></thead>
                 <tbody><tr><td colspan="2">Deelname aan Korenfestival Amusing Hengelo {Year}</td></tr>
                 <tr><td>Groepsgrootte {Singers} personen</td><td align="right" style="text-align:right;white-space:nowrap">{Money(ParticipantsNet)}</td></tr>
                 <tr><td>Podium type {stage}</td><td align="right" style="text-align:right;white-space:nowrap">{Money(StageNet)}</td></tr>
