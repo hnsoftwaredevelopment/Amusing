@@ -336,6 +336,8 @@ public partial class MaintenanceGroups : ComponentBase
 
     private async Task OnRowSelected(RowSelectEventArgs<GroupModel> args)
     {
+        InvoicePreview = null;
+        InvoiceMessage = null;
         SelectedGroup = args.Data;
         await EnsureSelectedGroupDetailsLoadedAsync();
         SelectedGroupOriginal = CloneGroup( SelectedGroup );
@@ -422,6 +424,8 @@ public partial class MaintenanceGroups : ComponentBase
 
     private async Task AddNewGroup()
     {
+        InvoicePreview = null;
+        InvoiceMessage = null;
         var newGroup = new GroupModel
         {
             GroupId = 0,

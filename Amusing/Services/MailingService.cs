@@ -23,7 +23,7 @@ public record MailingSendResult(int Requested, int Sent, int Failed, IReadOnlyLi
     }
 }
 
-public class MailingService
+public class MailingService : IParticipationInvoiceSender
 {
     private readonly EmailSettings _emailSettings;
     private readonly IMailingLogger _logger;
@@ -400,6 +400,16 @@ public class MailingService
         message.Body = new MimeKit.TextPart("html") { Text = body };
 
         await SendMimeMessageAsync(message);
+    }
+
+    public Task<string?> SendInvoiceAsync(string recipient, string subject, string html)
+    {
+        var message = new MimeMessage();
+        message.From.Add(new MailboxAddress(_emailSettings.SenderName, _emailSettings.SenderAddress));
+        message.To.Add(MailboxAddress.Parse(recipient));
+        message.Subject = subject;
+        message.Body = new TextPart("html") { Text = html };
+        return SendMimeMessageAsync(message);
     }
 
     #region Templates

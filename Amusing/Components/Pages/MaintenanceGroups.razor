@@ -1,5 +1,6 @@
 ﻿@page "/Maintenance-Groups"
 @using Amusing.Models
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @using Amusing.Services
 @using Bit.BlazorUI
 @using Bit.BlazorUI.Extras
@@ -214,8 +215,40 @@ else
                                         <GridColumn Field="Paid" HeaderText="Betaald" Width="90px" />
                                         <GridColumn Field="Confirmed" HeaderText="Bevestigd" Width="100px" />
                                         <GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100px" />
+                                        <GridColumn HeaderText="Factuur" Width="210px">
+                                            <Template>
+                                                @if (context is GroupRegistrationModel registration)
+                                                {
+                                                    <button type="button" class="btn btn-outline-primary btn-sm"
+                                                            disabled="@InvoiceBusy" @onclick="() => PreviewInvoiceAsync(registration)">
+                                                        Factuur opnieuw verzenden
+                                                    </button>
+                                                }
+                                            </Template>
+                                        </GridColumn>
                                     </GridColumns>
                                 </SfGrid>
+
+                                @if (InvoiceBusy)
+                                {
+                                    <p role="status">Bezig met de factuur…</p>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(InvoiceMessage))
+                                {
+                                    <p role="status" class="alert alert-info">@InvoiceMessage</p>
+                                }
+                                @if (InvoicePreview is { } invoice && invoice.GroupId == SelectedGroup?.GroupId)
+                                {
+                                    <section class="border rounded p-3 my-3" aria-label="Factuur controleren">
+                                        <h5>Factuur controleren — @invoice.GroupName (@invoice.Year)</h5>
+                                        <p>Ontvanger: <strong>@invoice.RecipientEmail</strong> (@invoice.RecipientRole)</p>
+                                        <div class="border rounded p-3 mb-3" style="max-height:340px;overflow:auto">
+                                            @((MarkupString)invoice.Html)
+                                        </div>
+                                        <button type="button" class="btn btn-primary" disabled="@InvoiceBusy" @onclick="SendInvoiceAsync">Verstuur kopie factuur</button>
+                                        <button type="button" class="btn btn-secondary ms-2" disabled="@InvoiceBusy" @onclick="() => InvoicePreview = null">Annuleren</button>
+                                    </section>
+                                }
 
                                 @if (LatestFestival is not null && !IsRegisteredForLatestFestival)
                                 {

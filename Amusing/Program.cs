@@ -133,6 +133,9 @@ builder.Services.AddBlazoredSessionStorage();
 // Email + HTTP related
 //builder.Services.AddScoped<TransipMailingService>();
 builder.Services.AddScoped<MailingService>();
+builder.Services.AddScoped<IParticipationInvoiceSender>(sp => sp.GetRequiredService<MailingService>());
+builder.Services.AddScoped<IParticipationInvoiceData, ParticipationInvoiceData>();
+builder.Services.AddScoped<ParticipationInvoiceService>();
 builder.Services.AddSingleton<IMailingLogger, ConsoleMailingLogger>();
 
 // Identity
