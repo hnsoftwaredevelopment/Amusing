@@ -43,3 +43,7 @@ Op 11 november heeft de gebruiker aangegeven de actuele staffels en de vraag of 
 Herbert bevestigt de gevonden staffels (t/m 20: 50 euro; t/m 50: 75 euro; t/m 100: 100 euro; daarboven: 125 euro), plus het podiumtarief en 9% btw zoals in de bestaande berekening. De omgekeerde regelbedragen zijn een bekende legacy-bug en mogen in de opnieuw gegenereerde factuur worden hersteld. De ontvanger blijft penningmeester, anders contactpersoon 1. De tariefvraag is daarmee afgehandeld; de factuurknop moet nog worden gebouwd.
 
 Zodra de nieuwe mijn.amusing-hengelo.nl klaar is, moeten de deelnemersstaffels en het te hanteren btw-percentage naar de database. Alleen het podiumtarief staat daar nu al. Dit vervolgwerk moet met de nieuwe Mijn-site worden afgestemd, zodat Mijn en Beheer dezelfde berekening en tarieven gebruiken.
+
+### Dev-publicatie 12 november 2026
+
+De ontvangerslijstfix uit commit 90d44a9 is gepubliceerd naar dev.beheer.amusing-hengelo.nl. Vooraf is de bestaande applicatie geback-upt. De database amusingdev en bestaande serverconfiguratie zijn behouden. De SHA256 van de gedeployde Amusing.dll komt overeen met het lokale publicatiepakket (0b3eee65d7ab548caef237020fe40711928af256fde0d4e833d8506f824b68b1). De dev-service is opnieuw gestart om 08:32:32 CET, PID 1949160; /Recipients geeft HTTP 200. De bestaande dev-tab in Edge is herladen en toont de ingelogde ontvangerspagina met TESTOMGEVING. Functionele acceptatie door Herbert staat nog open. De factuurknop maakt geen deel uit van deze publicatie.
