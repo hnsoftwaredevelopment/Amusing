@@ -37,3 +37,9 @@ De aangeleverde voorbeeldmail bevat groepsnaam, festivaljaar, deelnemersaantal, 
 De legacy-code in Amusing.Beheer.Legacy/api/1.0/group/enrollment-put.php bevat staffels t/m 20 / 50 / 100 / daarboven met bedragen 50 / 75 / 100 / 125 plus podiumprijs. In de vervanging van templatevelden worden priceheadcount en pricepodiumtype daadwerkelijk verwisseld. De voorbeeldmail past bij een totaal van 75 maar toont daardoor omgekeerde regelbedragen.
 
 Op 11 november heeft de gebruiker aangegeven de actuele staffels en de vraag of prijzen inclusief de genoemde btw zijn na te vragen. De implementatie van factuurberekening en verzendknop wacht op dat antwoord. Er zijn geen facturen verzonden en er is geen factuurfunctionaliteit gepubliceerd.
+
+## Bevestiging 12 november 2026
+
+Herbert bevestigt de gevonden staffels (t/m 20: 50 euro; t/m 50: 75 euro; t/m 100: 100 euro; daarboven: 125 euro), plus het podiumtarief en 9% btw zoals in de bestaande berekening. De omgekeerde regelbedragen zijn een bekende legacy-bug en mogen in de opnieuw gegenereerde factuur worden hersteld. De ontvanger blijft penningmeester, anders contactpersoon 1. De tariefvraag is daarmee afgehandeld; de factuurknop moet nog worden gebouwd.
+
+Zodra de nieuwe mijn.amusing-hengelo.nl klaar is, moeten de deelnemersstaffels en het te hanteren btw-percentage naar de database. Alleen het podiumtarief staat daar nu al. Dit vervolgwerk moet met de nieuwe Mijn-site worden afgestemd, zodat Mijn en Beheer dezelfde berekening en tarieven gebruiken.
