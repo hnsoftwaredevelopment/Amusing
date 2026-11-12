@@ -3,7 +3,7 @@ using System.Data.Common;
 using System.Text.RegularExpressions;
 using MySqlConnector;
 namespace Amusing.Mijn.Services;
-public sealed class ChoirEnrollments(MySqlDataSource source,IFestivalClock clock)
+public sealed partial class ChoirEnrollments(MySqlDataSource source,IFestivalClock clock)
 {
     private sealed record Role(uint Person,string Name,bool Active,string Phone,string Mobile);
     private sealed record Group(string Name,string City,string Country,int Genre,string Iban,bool Active);
@@ -40,11 +40,18 @@ public sealed class ChoirEnrollments(MySqlDataSource source,IFestivalClock clock
         while(await reader.ReadAsync(ct)) stages.Add(new(reader.GetString(0),reader.IsDBNull(1)?"":reader.GetString(1)));
         return stages;
     }
-    private static async Task<FestivalRegistration?> RegistrationAsync(DbConnection connection,DbTransaction? tx,uint festival,uint group,CancellationToken ct)
+    private static async Task<FestivalRegistration?> RegistrationAsync(DbConnection connection,DbTransaction? tx,uint festival,uint group,CancellationToken ct,bool locked=false)
     {
-        await using var cmd=Command(connection,tx,"SELECT aantal_deelnemers,podiumsoort,wens_4,binnenoptredens,buitenoptredens,wachtlijst,afgehaakt IS NOT NULL FROM ah_inschrijvingen WHERE festival_id=@festival AND zanggroep_id=@group");
+        await using var cmd=Command(connection,tx,"""
+            SELECT aantal_deelnemers,podiumsoort,wens_4,binnenoptredens,buitenoptredens,wachtlijst,
+                   COALESCE(CAST(afgehaakt AS CHAR) NOT LIKE '0000-%',0),
+                   COALESCE(CAST(betaald AS CHAR) NOT LIKE '0000-%',0),
+                   COALESCE(CAST(bevestigd AS CHAR) >= '2000-01-01',0),
+                   podiumkeuze_geforceerd
+            FROM ah_inschrijvingen WHERE festival_id=@festival AND zanggroep_id=@group
+            """+(locked?" FOR UPDATE":""));
         Add(cmd,"@festival",festival);Add(cmd,"@group",group);await using var reader=await cmd.ExecuteReaderAsync(ct);
-        return await reader.ReadAsync(ct)?new(reader.GetFieldValue<uint>(0),reader.GetString(1),reader.GetString(2)=="ja",Convert.ToInt32(reader.GetValue(3)),Convert.ToInt32(reader.GetValue(4)),reader.GetBoolean(5),reader.GetBoolean(6)):null;
+        return await reader.ReadAsync(ct)?new(reader.GetFieldValue<uint>(0),reader.GetString(1),reader.GetString(2)=="ja",Convert.ToInt32(reader.GetValue(3)),Convert.ToInt32(reader.GetValue(4)),reader.GetBoolean(5),reader.GetBoolean(6),reader.GetBoolean(7),reader.GetBoolean(8),reader.GetBoolean(9)):null;
     }
     private static bool Contact(List<Role> roles,uint actor)=>roles.Any(r=>r.Person==actor && r.Active && r.Name is "contactpersoon1" or "contactpersoon2");
     private static List<string> Missing(Group group,List<Role> roles)
@@ -70,7 +77,11 @@ public sealed class ChoirEnrollments(MySqlDataSource source,IFestivalClock clock
         var today=DateOnly.FromDateTime(clock.Now);var festival=await FestivalAsync(connection,null,today,false,ct);
         var stages=festival is null?[]:await StagesAsync(connection,null,festival.Id,ct);
         var registration=festival is null?null:await RegistrationAsync(connection,null,festival.Id,group,ct);
-        return new(info.Name,Contact(roles,actor),festival,stages,registration,Missing(info,roles),festival?.IsOpen(today)==true);
+        return new(info.Name,Contact(roles,actor),festival,stages,registration,Missing(info,roles),festival?.IsOpen(today)==true)
+        {
+            AfterClosing = festival is not null && today > festival.End,
+            GroupActive = info.Active
+        };
     }
     public async Task<EnrollmentResult> RegisterAsync(uint actor,uint group,EnrollmentInput input,CancellationToken ct)
     {

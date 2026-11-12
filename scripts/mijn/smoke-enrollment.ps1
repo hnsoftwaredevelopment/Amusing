@@ -51,6 +51,19 @@ try{
  if($response.Content.ReadAsStringAsync().GetAwaiter().GetResult() -notmatch 'geen toestemming'){throw 'Ordinary member could enroll'}
  if((Sql "SELECT CONCAT(COUNT(*),':',MIN(aantal_deelnemers)) FROM ah_inschrijvingen WHERE festival_id=2027 AND zanggroep_id=$taskGroupId") -ne '1:37'){throw 'Duplicate or overwritten enrollment'}
  if((Sql "SELECT COUNT(*) FROM mijn_audit_log WHERE action='FestivalEnrolled' AND festival_id=2027 AND group_id=$taskGroupId AND actor_id=42") -ne '1'){throw 'Expected one enrollment audit record'}
+ $editPage=$a.GetStringAsync($path).GetAwaiter().GetResult()
+ $version=[regex]::Match($editPage,'name="Input.Version"[^>]*value="([^"]+)"').Groups[1].Value
+ if(!$version -or $editPage -notmatch 'Wijzigingen opslaan'){throw 'Missing edit form'}
+ $fields['__RequestVerificationToken']=Token $editPage
+ $fields['Input.Version']=$version
+ $fields['Input.Headcount']='38'
+ $response=Post $a $path $fields
+ if($response.Content.ReadAsStringAsync().GetAwaiter().GetResult() -notmatch 'De wijzigingen zijn opgeslagen'){throw 'Edit failed'}
+ $fields['Input.Headcount']='39'
+ $response=Post $a $path $fields
+ if($response.Content.ReadAsStringAsync().GetAwaiter().GetResult() -notmatch 'inmiddels gewijzigd'){throw 'Stale edit accepted'}
+ if((Sql "SELECT aantal_deelnemers FROM ah_inschrijvingen WHERE festival_id=2027 AND zanggroep_id=$taskGroupId") -ne '38'){throw 'Unexpected participant count'}
+ if((Sql "SELECT COUNT(*) FROM mijn_audit_log WHERE action='FestivalEnrollmentUpdated' AND festival_id=2027 AND group_id=$taskGroupId AND actor_id=42") -ne '1'){throw 'Expected one update audit record'}
  Write-Output 'PASS: publieke inschrijving, herhaald indienen zonder overschrijven, leesrechten en duurzame audit.'
 } finally {
  $a.Dispose();$b.Dispose()
