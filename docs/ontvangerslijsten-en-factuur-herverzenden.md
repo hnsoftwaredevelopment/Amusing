@@ -76,3 +76,7 @@ Commit ed5e5f2 is op 12 november 2026 om 13:43:48 CET actief geworden op dev (PI
 
 Herbert bevestigt dat de kopiefactuur wordt verstuurd. Op zijn verzoek zijn Omschrijving, Bedrag en het label Totaal links uitgelijnd; de vier bedragen (deelnemers, podium, btw en totaal) staan rechts. De mail gebruikt zowel inline text-align als het align-attribuut op de betreffende cellen. Implementatiecommit: 9d928b7. Alle 87 tests slagen. De wijziging geldt voor nieuw gegenereerde mails; eerder verzonden mails veranderen niet.
 Uitlijning gepubliceerd op dev op 12 november 2026 om 13:54:23 CET. DLL-hash lokaal/remote gelijk: 4a876c92e1fce833356135a2a19df260f79aaa9f389f4c089b51bdd5a9741544. Service actief met nieuwe PID 1950812; HTTP 200. Er is voor deze opmaakcontrole geen echte mail verstuurd.
+
+### Ontvangerrol in de blijvende bevestiging
+
+De bevestiging onder de inschrijvingen vermeldt nu ook de rol: De kopie van de factuur voor [groep] ([jaar]) is verstuurd naar Penningmeester ([e-mailadres]), of contactpersoon 1 als dat de ontvanger is. Commit 380600c; alle 87 tests slagen. Op dev gepubliceerd op 12 november 2026 om 13:59:10 CET; DLL-hash lokaal/remote gelijk (95a46f983c093e825bf0ef94fbc425538f9b0c96d47840317bc12e2d6db96cdc), nieuwe PID 1950954 en HTTP 200 gecontroleerd. Geen echte mail verstuurd tijdens deze wijziging.
