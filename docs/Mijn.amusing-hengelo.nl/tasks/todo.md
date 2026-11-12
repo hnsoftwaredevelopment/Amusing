@@ -252,7 +252,8 @@ Stand 5 november: productiepatch vastgelegd en API-route hersteld; Herbert beves
 
 - [x] MIJN-13.1 Wijzigen na sluiting en bevestigen na plaatsing van wachtlijstkoren afgestemd.
 - [x] MIJN-13.2 Wijzigen en bevestigen gebouwd en gericht getest. Zie [festivalinschrijving](../festivalinschrijving.md).
-- [ ] MIJN-13.3 Hands-on acceptatie en compatibiliteitscontrole met de gedeelde Beheer/PHP-database.
+- [x] MIJN-13.3 Herbert bevestigt op 12 november 2026 dat de geteste werking op dev.mijn goed is.
+- [ ] MIJN-13.4 Compatibiliteitscontrole met de gedeelde Beheer/PHP-database.
 
 ## MIJN-14 — Deelnamehistorie en gepubliceerde optredens bekijken
 
