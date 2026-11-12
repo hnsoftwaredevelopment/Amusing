@@ -80,3 +80,9 @@ Uitlijning gepubliceerd op dev op 12 november 2026 om 13:54:23 CET. DLL-hash lok
 ### Ontvangerrol in de blijvende bevestiging
 
 De bevestiging onder de inschrijvingen vermeldt nu ook de rol: De kopie van de factuur voor [groep] ([jaar]) is verstuurd naar Penningmeester ([e-mailadres]), of contactpersoon 1 als dat de ontvanger is. Commit 380600c; alle 87 tests slagen. Op dev gepubliceerd op 12 november 2026 om 13:59:10 CET; DLL-hash lokaal/remote gelijk (95a46f983c093e825bf0ef94fbc425538f9b0c96d47840317bc12e2d6db96cdc), nieuwe PID 1950954 en HTTP 200 gecontroleerd. Geen echte mail verstuurd tijdens deze wijziging.
+
+### Acceptatie en productiepublicatie
+
+Herbert heeft de laatste opmaakwijziging op dev goedgekeurd. De kop Bedrag staat rechts boven de bedragen. Omschrijving en Totaal staan links. Alle 87 tests van versie 47764e5 slagen.
+
+De goedgekeurde versie is op 12 november 2026 om 18:46:53 CET gepubliceerd naar productie. De DLL-hash op dev en productie komt overeen (83b5fd83f789adb4e8c95f8de28dd91a219ef210e9a90e0085049f8d704448c0). De bestaande productieconfiguratie is overgenomen. De vorige applicatie staat als back-up in `/home/groups/svp/blazor.beheer.amusing-hengelo.nl/www/Amusing_backup_20261112-184647`. De productieservice draait met PID 1952085. Ontvangerslijsten en groepsbeheer geven HTTP 200 op beide Beheer-domeinen.
