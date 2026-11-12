@@ -53,7 +53,7 @@ public partial class MaintenanceGroups
                 return;
             }
             InvoicePreview = null;
-            InvoiceMessage = $"De kopie van de factuur voor {preview.GroupName} ({preview.Year}) is verstuurd naar {preview.RecipientEmail}.";
+            InvoiceMessage = $"De kopie van de factuur voor {preview.GroupName} ({preview.Year}) is verstuurd naar {preview.RecipientDisplayRole} ({preview.RecipientEmail}).";
             await ToastService.ShowSuccessAsync(preview.SuccessMessage, "Factuur verzonden");
             try
             {
