@@ -13,6 +13,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using MySqlConnector;
 
 var builder = WebApplication.CreateBuilder(args);
+if (builder.Configuration["Syncfusion:License"] is { Length: > 0 } pdfLicense)
+    Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(pdfLicense);
 var protection = builder.Services.AddDataProtection().SetApplicationName("Amusing.Mijn");
 if (builder.Configuration["Mijn:DataProtectionPath"] is string keyPath)
     protection.PersistKeysToFileSystem(new DirectoryInfo(keyPath));
@@ -22,11 +24,20 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton(_ => new MySqlDataSource(builder.Configuration.GetConnectionString("Mijn") ?? throw new InvalidOperationException("Configure ConnectionStrings:Mijn using user secrets or environment variables.")));
 builder.Services.AddScoped<ChoirAccounts>();
+builder.Services.AddScoped<SiteLanguage>();
+builder.Services.AddScoped<AccountRegistration>();
+builder.Services.AddScoped<AccountPasswords>();
+builder.Services.AddScoped<PersonalContacts>();
+builder.Services.AddScoped<AccountEmailChange>();
+builder.Services.AddScoped<ChoirAudit>();
+builder.Services.AddScoped<SupportAccounts>();
 builder.Services.AddScoped<ChoirProfiles>();
 builder.Services.AddScoped<ChoirImagesStore>();
 builder.Services.AddScoped<ChoirPeople>();
 builder.Services.AddSingleton<IFestivalClock,FestivalClock>();
 builder.Services.AddScoped<ChoirEnrollments>();
+builder.Services.AddHostedService<EnrollmentMailWorker>();
+builder.Services.AddHostedService<WaitlistPlacementWorker>();
 builder.WebHost.ConfigureKestrel(options=>options.Limits.MaxRequestBodySize=20*1024*1024);
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options=>options.MultipartBodyLengthLimit=20*1024*1024);
 builder.Services.AddScoped<IChoirPasswordStore>(sp => new MySqlChoirPasswordStore(sp.GetRequiredService<MySqlDataSource>()));
@@ -59,10 +70,15 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     };
     options.Events.OnValidatePrincipal = async context =>
     {
-        if (!await context.HttpContext.RequestServices.GetRequiredService<ChoirAccounts>().IsCurrentAsync(context.Principal!, context.HttpContext.RequestAborted))
+        var services = context.HttpContext.RequestServices;
+        var ct = context.HttpContext.RequestAborted;
+        var current = context.Principal.IsAdministrator()
+            ? await services.GetRequiredService<SupportAccounts>().IsCurrentAsync(context.Principal!, ct)
+            : await services.GetRequiredService<ChoirAccounts>().IsCurrentAsync(context.Principal!, ct);
+        if (!current)
         {
             var actor = uint.TryParse(context.Principal!.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? (uint?)id : null;
-            await context.HttpContext.RequestServices.GetRequiredService<MySqlChoirAuditLog>().RecordAsync(ChoirAuditAction.SessionInvalidated, actor, context.HttpContext.RequestAborted);
+            if (!context.Principal.IsAdministrator()) await context.HttpContext.RequestServices.GetRequiredService<MySqlChoirAuditLog>().RecordAsync(ChoirAuditAction.SessionInvalidated, actor, context.HttpContext.RequestAborted);
             context.RejectPrincipal();
             await context.HttpContext.SignOutAsync();
         }
@@ -87,6 +103,29 @@ app.Use(async (context, next) =>
     await next();
 });
 app.UseAuthentication();
+app.Use(async (context, next) =>
+{
+    if (context.User.IsAdministrator())
+    {
+        var path = context.Request.Path;
+        if (path.StartsWithSegments("/koor", out var remaining))
+        {
+            var groupSegment = remaining.Value?.Split('/', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+            if (!uint.TryParse(groupSegment, out var group) ||
+                context.User.FindFirstValue(SupportMode.GroupClaim) != group.ToString())
+            {
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                return;
+            }
+        }
+        if (path.StartsWithSegments("/account/uitnodigingen") || path.StartsWithSegments("/uitnodigingen"))
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return;
+        }
+    }
+    await next();
+});
 app.UseAuthorization();
 app.UseRateLimiter();
 app.UseAntiforgery();
@@ -120,15 +159,43 @@ app.MapPost("/account/logout", async (HttpContext context, IAntiforgery antiforg
 {
     try { await antiforgery.ValidateRequestAsync(context); }
     catch (AntiforgeryValidationException) { return Results.BadRequest(); }
-    await audit.RecordAsync(ChoirAuditAction.LoggedOut, uint.Parse(context.User.FindFirstValue(ClaimTypes.NameIdentifier)!), context.RequestAborted);
+    if (!context.User.IsAdministrator()) await audit.RecordAsync(ChoirAuditAction.LoggedOut, uint.Parse(context.User.FindFirstValue(ClaimTypes.NameIdentifier)!), context.RequestAborted);
     await context.SignOutAsync();
     return Results.LocalRedirect("/account/login");
 }).RequireAuthorization();
 app.MapGet("/health", () => Results.Ok(new { status = "ok", application = "Amusing.Mijn", version = "dev-enrollment-1" }));
 app.MapGet("/robots.txt", () => Results.Text("User-agent: *\nDisallow: /\n", "text/plain"));
 app.MapStaticAssets();
+app.MapPost("/account/taal", async (HttpContext context, IAntiforgery csrf, ChoirAccounts accounts) =>
+{
+    if (!await csrf.IsRequestValidAsync(context)) return Results.BadRequest();
+    var form = await context.Request.ReadFormAsync(context.RequestAborted);
+    var language = form["taal"].ToString();
+    if (!SiteLanguage.IsSupported(language)) return Results.BadRequest();
+    var target = form["terug"].ToString();
+    if (target.Length == 0 || target[0] != '/' || target.StartsWith("//") ||
+        target.Contains('\\') || target.Any(char.IsControl))
+        target = "/";
+
+    if (context.User.FindFirstValue("actor_type") == "choir_person" &&
+        uint.TryParse(context.User.FindFirstValue(ClaimTypes.NameIdentifier), out var actor))
+        await accounts.SaveLanguageAsync(actor, language, context.RequestAborted);
+
+    context.Response.Cookies.Append(SiteLanguage.CookieName, language, new CookieOptions
+    {
+        HttpOnly = true, Secure = context.Request.IsHttps, SameSite = SameSiteMode.Lax,
+        MaxAge = TimeSpan.FromDays(365), Path = "/"
+    });
+    return Results.LocalRedirect(target);
+});
+
 app.MapChoirImages();
 app.MapChoirPeople();
+app.MapSupport();
+AccountRegistration.Map(app);
+AccountEmailChange.Map(app);
+app.MapAccountPasswords();
+app.MapParticipationNotes();
 app.MapRazorComponents<App>();
 app.Run();
 public partial class Program { }

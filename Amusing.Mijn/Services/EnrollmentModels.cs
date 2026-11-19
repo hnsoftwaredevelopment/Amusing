@@ -37,6 +37,7 @@ public sealed record EnrollmentView(string GroupName,bool IsContact,FestivalEdit
     public bool CanSubmit=>IsContact && Festival is not null && WindowOpen && Registration is null && Missing.Count==0 && Stages.Count>0;
     public bool CanEdit => IsContact && GroupActive && Registration?.CanEdit == true;
     public bool CanConfirm => IsContact && GroupActive && Registration?.CanConfirm == true && AfterClosing;
+    public Amusing.Facturatie.Deelnamebedrag? ParticipationAmount { get; init; }
     public bool GroupActive { get; init; }
     public bool AfterClosing { get; init; }
 }

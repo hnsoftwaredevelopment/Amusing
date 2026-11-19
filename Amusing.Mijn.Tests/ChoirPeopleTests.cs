@@ -16,11 +16,64 @@ public partial class LoginTests
     {
         await Execute("UPDATE ah_personen SET actief=1 WHERE persoon_id=43");
         var service=new ChoirPeople(source);
-        Assert.Equal(PeopleResult.Done,await service.InviteAsync(42,1,"unknown@example.invalid","zanger",default));
+        Assert.Equal(PeopleResult.UnknownAccount,await service.InviteAsync(42,1,"unknown@example.invalid","zanger",default));
         await service.InviteAsync(42,1,"inactive@example.invalid","zanger",default);
         await service.InviteAsync(42,1,"inactive@example.invalid","zanger",default);
         Assert.Single(await service.IncomingAsync(43,default));
         Assert.Equal(PeopleResult.Invalid,await service.InviteAsync(42,1,"inactive@example.invalid","admin",default));
+    }
+    [DatabaseFact] public async Task ExclusiveRoleChecksPendingInvitationsAndAcceptance()
+    {
+        await Execute("UPDATE ah_personen SET actief=1 WHERE persoon_id=43");
+        var service = new ChoirPeople(source);
+        Assert.Equal(PeopleResult.RoleOccupied, await service.InviteAsync(42,1,"inactive@example.invalid","contactpersoon1",default));
+        Assert.Equal(PeopleResult.Done, await service.InviteAsync(42,1,"inactive@example.invalid","penningmeester",default));
+        Assert.Equal(PeopleResult.RoleOccupied, await service.InviteAsync(42,1,"koor@example.invalid","penningmeester",default));
+        var invitation = (await service.IncomingAsync(43,default)).Single();
+        await Execute("INSERT INTO ah_personen_rollen VALUES(42,1,'penningmeester')");
+        Assert.Equal(PeopleResult.RoleOccupied, await service.AcceptAsync(43,invitation.Id,default));
+    }
+
+    [DatabaseFact] public async Task FirstContactTransferRetainsOldContactUntilAcceptance()
+    {
+        await Execute("UPDATE ah_personen SET actief=1 WHERE persoon_id=43");
+        var service = new ChoirPeople(source);
+        Assert.Equal(PeopleResult.Done, await service.InviteAsync(42,1,"inactive@example.invalid",ChoirPeople.FirstContactTransfer,default));
+        Assert.True((await service.RosterAsync(42,1,default))!.CanManage);
+        var invitation = (await service.IncomingAsync(43,default)).Single();
+        Assert.Equal(PeopleResult.Unavailable, await service.AcceptAsync(42,invitation.Id,default));
+        Assert.Equal(PeopleResult.Done, await service.AcceptAsync(43,invitation.Id,default));
+        var roster = (await service.RosterAsync(43,1,default))!;
+        Assert.True(roster.CanManage);
+        Assert.Single(roster.People.SelectMany(p=>p.Roles).Where(r=>r=="contactpersoon1"));
+        Assert.Equal(PeopleResult.Done, await service.AcceptAsync(43,invitation.Id,default));
+        Assert.Equal(PeopleResult.LastContact, await service.RemoveAsync(43,1,43,"contactpersoon1",default));
+    }
+
+    [DatabaseFact] public async Task CancelledInvitationCannotGrantRoleAndOutgoingListIsPrivate()
+    {
+        await Execute("UPDATE ah_personen SET actief=1 WHERE persoon_id=43");
+        var service = new ChoirPeople(source);
+        await service.InviteAsync(42,1,"inactive@example.invalid","zanger",default);
+        Assert.Empty(await service.OutgoingAsync(43,1,default));
+        var invitation = (await service.OutgoingAsync(42,1,default)).Single();
+        Assert.True(invitation.AccountActive);
+        Assert.Equal(PeopleResult.Forbidden, await service.CancelInvitationAsync(43,1,invitation.Id,default));
+        Assert.Equal(PeopleResult.Done, await service.CancelInvitationAsync(42,1,invitation.Id,default));
+        Assert.Equal(PeopleResult.Unavailable, await service.AcceptAsync(43,invitation.Id,default));
+    }
+
+    [DatabaseFact] public async Task MusicianAndConductorCountDistinctChoirsAtInvitationAndAcceptance()
+    {
+        await Execute("UPDATE ah_personen SET actief=1 WHERE persoon_id=43; INSERT INTO ah_personen_rollen VALUES(43,2,'dirigent')");
+        var service = new ChoirPeople(source);
+        await service.InviteAsync(42,1,"inactive@example.invalid","muzikant",default);
+        var invitation = (await service.IncomingAsync(43,default)).Single();
+        await Execute("INSERT INTO ah_zanggroepen(zanggroep_id,naam) VALUES(3,'Derde koor'); INSERT INTO ah_personen_rollen VALUES(43,3,'muzikant')");
+        Assert.Equal(PeopleResult.ChoirLimit, await service.AcceptAsync(43,invitation.Id,default));
+        Assert.Equal(PeopleResult.ChoirLimit, await service.InviteAsync(42,1,"inactive@example.invalid","dirigent",default));
+        await Execute("DELETE FROM ah_personen_rollen WHERE zanggroep_id=3; INSERT INTO ah_personen_rollen VALUES(43,2,'muzikant')");
+        Assert.Equal(PeopleResult.Done, await service.AcceptAsync(43,invitation.Id,default));
     }
     [DatabaseFact] public async Task WebInvitationRequiresCsrfAndRecipientConfirmation()
     {

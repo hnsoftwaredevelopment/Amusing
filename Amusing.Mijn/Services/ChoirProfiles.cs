@@ -3,26 +3,26 @@ using System.Data.Common;
 using MySqlConnector;
 namespace Amusing.Mijn.Services;
 
-public sealed class ChoirProfiles(MySqlDataSource source)
+public sealed partial class ChoirProfiles(MySqlDataSource source, IHttpContextAccessor? supportContext = null)
 {
     private const string SelectProfile = """
         SELECT g.naam,g.standplaats,g.land,g.genre_id,g.website,COALESCE(d.email,''),g.beschrijving,
-        CASE WHEN EXISTS(SELECT 1 FROM ah_personen_rollen r WHERE r.zanggroep_id=g.zanggroep_id AND r.persoon_id=@actor AND r.rol IN ('contactpersoon1','contactpersoon2','penningmeester')) THEN g.rekeningnr ELSE NULL END,
-        EXISTS(SELECT 1 FROM ah_personen_rollen r WHERE r.zanggroep_id=g.zanggroep_id AND r.persoon_id=@actor AND r.rol IN ('contactpersoon1','contactpersoon2')),
-        EXISTS(SELECT 1 FROM ah_personen_rollen r WHERE r.zanggroep_id=g.zanggroep_id AND r.persoon_id=@actor AND r.rol IN ('contactpersoon1','contactpersoon2','penningmeester'))
+        CASE WHEN @support OR EXISTS(SELECT 1 FROM ah_personen_rollen r WHERE r.zanggroep_id=g.zanggroep_id AND r.persoon_id=@actor AND r.rol IN ('contactpersoon1','contactpersoon2','penningmeester')) THEN g.rekeningnr ELSE NULL END,
+        @support OR EXISTS(SELECT 1 FROM ah_personen_rollen r WHERE r.zanggroep_id=g.zanggroep_id AND r.persoon_id=@actor AND r.rol IN ('contactpersoon1','contactpersoon2')),
+        @support OR EXISTS(SELECT 1 FROM ah_personen_rollen r WHERE r.zanggroep_id=g.zanggroep_id AND r.persoon_id=@actor AND r.rol IN ('contactpersoon1','contactpersoon2','penningmeester'))
         FROM ah_zanggroepen g LEFT JOIN ah_zanggroep_details d ON d.id=g.zanggroep_id
-        WHERE g.zanggroep_id=@group AND EXISTS(SELECT 1 FROM ah_personen_rollen r WHERE r.zanggroep_id=g.zanggroep_id AND r.persoon_id=@actor)
+        WHERE g.zanggroep_id=@group AND (@support OR EXISTS(SELECT 1 FROM ah_personen_rollen r WHERE r.zanggroep_id=g.zanggroep_id AND r.persoon_id=@actor))
         """;
     public async Task<ChoirProfile?> GetAsync(uint actor,uint group,CancellationToken ct)
     {
         await using var connection=await source.OpenConnectionAsync(ct);
         return await LoadAsync(connection,null,actor,group,false,ct);
     }
-    private static async Task<ChoirProfile?> LoadAsync(DbConnection connection,DbTransaction? tx,uint actor,uint group,bool locked,CancellationToken ct)
+    private async Task<ChoirProfile?> LoadAsync(DbConnection connection,DbTransaction? tx,uint actor,uint group,bool locked,CancellationToken ct)
     {
         await using var cmd=connection.CreateCommand(); cmd.Transaction=tx;
         cmd.CommandText=SelectProfile+(locked ? " FOR UPDATE" : "");
-        Add(cmd,"@actor",actor); Add(cmd,"@group",group);
+        Add(cmd,"@actor",actor); Add(cmd,"@group",group); Add(cmd,"@support",SupportMode.CanSupport(supportContext,actor,group));
         await using var reader=await cmd.ExecuteReaderAsync(ct);
         if(!await reader.ReadAsync(ct)) return null;
         string Text(int i)=>reader.IsDBNull(i) ? "" : reader.GetString(i);
@@ -42,6 +42,7 @@ public sealed class ChoirProfiles(MySqlDataSource source)
         await using var connection=await source.OpenConnectionAsync(ct);
         await using var tx=await connection.BeginTransactionAsync(ct);
         // Lock the membership rows so a concurrent revocation cannot race this mutation.
+        if (!SupportMode.CanSupport(supportContext,actor,group))
         await using(var roles=connection.CreateCommand())
         {
             roles.Transaction=tx; roles.CommandText="SELECT rol FROM ah_personen_rollen WHERE persoon_id=@actor AND zanggroep_id=@group FOR UPDATE";
@@ -77,7 +78,8 @@ public sealed class ChoirProfiles(MySqlDataSource source)
         {
             cmd.Transaction=tx;
             cmd.CommandText="UPDATE ah_zanggroepen SET naam=@name,standplaats=@city,land=@country,genre_id=@genre,website=@website,beschrijving=@description,rekeningnr=@bank WHERE zanggroep_id=@group";
-            Add(cmd,"@name",input.Name); Add(cmd,"@city",input.City); Add(cmd,"@country",input.Country); Add(cmd,"@genre",input.GenreId); Add(cmd,"@website",input.Website); Add(cmd,"@description",input.Description); Add(cmd,"@bank",input.BankAccount); Add(cmd,"@group",group);
+            var description = changes.Contains(nameof(input.Description)) ? input.Description : current.Description;
+            Add(cmd,"@name",input.Name); Add(cmd,"@city",input.City); Add(cmd,"@country",input.Country); Add(cmd,"@genre",input.GenreId); Add(cmd,"@website",input.Website); Add(cmd,"@description",description); Add(cmd,"@bank",input.BankAccount); Add(cmd,"@group",group);
             await cmd.ExecuteNonQueryAsync(ct);
         }
         await using(var cmd=connection.CreateCommand())
@@ -88,8 +90,8 @@ public sealed class ChoirProfiles(MySqlDataSource source)
         await using(var cmd=connection.CreateCommand())
         {
             cmd.Transaction=tx;
-            cmd.CommandText="INSERT INTO mijn_audit_log(occurred_at,actor_type,actor_id,action,group_id,changed_fields) VALUES(UTC_TIMESTAMP(6),'choir_person',@actor,'ChoirProfileChanged',@group,@fields)";
-            Add(cmd,"@actor",actor); Add(cmd,"@group",group); Add(cmd,"@fields",string.Join(',',changes)); await cmd.ExecuteNonQueryAsync(ct);
+            cmd.CommandText="INSERT INTO mijn_audit_log(occurred_at,actor_type,actor_id,action,group_id,changed_fields) VALUES(UTC_TIMESTAMP(6),@actorType,@actor,'ChoirProfileChanged',@group,@fields)";
+            Add(cmd,"@actor",actor); Add(cmd,"@group",group); Add(cmd,"@actorType",SupportMode.AuditType(supportContext,actor,group)); Add(cmd,"@fields",string.Join(',',changes)); await cmd.ExecuteNonQueryAsync(ct);
         }
         await tx.CommitAsync(ct);
         return ProfileSaveResult.Saved;

@@ -3,74 +3,88 @@
 @using Amusing.Mijn.Services
 @using System.Security.Claims
 @inject ChoirProfiles Profiles
-@inject ChoirEnrollments Enrollments
+@inject ChoirAccounts Accounts
+
 @inject IHttpContextAccessor Context
-<PageTitle>Koorprofiel — Mijn Amusing</PageTitle>
-<a href="/">← Mijn koren</a>
+<PageTitle>@T("Koorprofiel") — Mijn Amusing</PageTitle>
+<section class="choir-profile" lang="@language">
+
 @if (profile is null)
 {
-    <h1>Koor niet beschikbaar</h1><p>Dit koor is niet aan je account gekoppeld.</p>
+    <a href="/">← @T("MijnKoren")</a>
+    <h1>@T("KoorNietBeschikbaar")</h1><p>@T("DitKoorIsNietAanJeAccount")</p>
 }
 else
 {
-    <h1>@profile.Name</h1>
-    <p>De algemene gegevens van je koor.</p>
-    <p><a href="/koor/@Id/personen">Personen en rollen bekijken</a></p>
-    <p><a href="/koor/@Id/inschrijven">@(enrollment?.Registration is null && enrollment?.Festival is { } edition ? $"Inschrijven voor Amusing {edition.Date.Year}" : "Festivalinschrijving bekijken")</a></p>
+    <ChoirTabs Id="@Id" Name="@profile.Name" City="@profile.City" Active="@(ImagesTab ? "afbeeldingen" : "algemeen")" />
+    @if (ImagesTab)
+    {
+        <ChoirImages Language="@language" GroupId="@GroupId" CanEdit="@profile.CanEdit" Status="@ImageStatus" Detail="@ImageMessage" />
+    }
+    else
+    {
+
     @if (message is not null) { <p role="status" class="@(saved ? "success" : "error")">@message</p> }
     @if (profile.CanEdit && Input is not null)
     {
-        <EditForm Model="Input" FormName="choir-profile" OnValidSubmit="SaveAsync" class="profile-card">
+        <EditForm Model="Input" FormName="choir-profile" data-choir-profile="" OnValidSubmit="SaveAsync" class="profile-card">
             <DataAnnotationsValidator /><ValidationSummary />
             <input type="hidden" name="Input.Version" value="@Input.Version" />
             <div class="form-grid">
-                <div><label for="name">Koornaam *</label><InputText id="name" @bind-Value="Input.Name" maxlength="80" /><ValidationMessage For="()=>Input.Name" /></div>
-                <div><label for="city">Standplaats *</label><InputText id="city" @bind-Value="Input.City" maxlength="50" /><ValidationMessage For="()=>Input.City" /></div>
-                <div><label for="country">Land *</label><InputSelect id="country" @bind-Value="Input.Country"><option value="">Kies een land</option>@foreach(var option in countries) { <option value="@option.Id">@option.Name</option> }</InputSelect></div>
-                <div><label for="genre">Genre *</label><InputSelect id="genre" @bind-Value="Input.GenreId"><option value="0">Kies een genre</option>@foreach(var option in genres) { <option value="@option.Id">@option.Name</option> }</InputSelect></div>
+                <div><label for="name">@T("Koornaam")</label><InputText id="name" @bind-Value="Input.Name" maxlength="80" /><ValidationMessage For="()=>Input.Name" /></div>
+                <div><label for="city">@T("Standplaats")</label><InputText id="city" @bind-Value="Input.City" maxlength="50" /><ValidationMessage For="()=>Input.City" /></div>
+                <div><label for="country">@T("Land")</label><InputSelect id="country" @bind-Value="Input.Country"><option value="">@T("KiesEenLand")</option>@foreach(var option in countries) { <option value="@option.Id">@option.Name</option> }</InputSelect></div>
+                <div><label for="genre">@T("Genre")</label><InputSelect id="genre" @bind-Value="Input.GenreId"><option value="0">@T("KiesEenGenre")</option>@foreach(var option in genres) { <option value="@option.Id">@option.Name</option> }</InputSelect></div>
                 <div><label for="website">Website</label><InputText id="website" @bind-Value="Input.Website" maxlength="255" placeholder="https://" /><ValidationMessage For="()=>Input.Website" /></div>
-                <div><label for="email">E-mailadres koor</label><InputText id="email" @bind-Value="Input.Email" maxlength="80" /><ValidationMessage For="()=>Input.Email" /></div>
+                <div><label for="email">@T("EmailadresKoor")</label><InputText id="email" @bind-Value="Input.Email" maxlength="80" /><ValidationMessage For="()=>Input.Email" /></div>
             </div>
-            <label for="description">Omschrijving</label><InputTextArea id="description" @bind-Value="Input.Description" rows="6" maxlength="10000" /><ValidationMessage For="()=>Input.Description" />
-            <label for="bank">IBAN</label><InputText id="bank" @bind-Value="Input.BankAccount" maxlength="50" aria-describedby="bank-help" /><small id="bank-help">Alleen zichtbaar voor contactpersonen en de penningmeester.</small><ValidationMessage For="()=>Input.BankAccount" />
-            <p><small>* Verplicht veld. Het IBAN mag voorlopig leeg blijven.</small></p>
-            <button type="submit">Wijzigingen opslaan</button>
+            <label for="description">@T("InformatieOverJeKoorVoorOpDe")</label><InputTextArea id="description" @bind-Value="Input.Description" rows="6" maxlength="10000" /><ValidationMessage For="()=>Input.Description" />
+            <label for="bank">IBAN</label><InputText id="bank" @bind-Value="Input.BankAccount" maxlength="50" aria-describedby="bank-help" /><small id="bank-help">@T("AlleenZichtbaarVoorContactpersonenEnDePenningmeester")</small><ValidationMessage For="()=>Input.BankAccount" />
+            <p><small>@T("VerplichtVeldHetIBANMagVoorlopigLeeg")</small></p>
+            <div class="profile-save-bar" data-profile-save-bar>
+                <span class="unsaved-warning" data-profile-warning role="status" hidden>@T("JeHebtNietopgeslagenWijzigingen")</span>
+                <ChoirIconButton Tooltip="@T("AlgemeneKoorgegevensOpslaan")" Text="@T("Opslaan")" />
+            </div>
         </EditForm>
     }
     else
     {
-        <p class="notice">Je kunt de koorgegevens bekijken. Alleen contactpersonen kunnen wijzigingen opslaan.</p>
+        <p class="notice">@T("JeKuntDeKoorgegevensBekijkenAlleenContactpersonen")</p>
         <dl class="profile-card">
-            <dt>Standplaats</dt><dd>@profile.City</dd>
-            <dt>Land</dt><dd>@(countries.FirstOrDefault(x=>string.Equals(x.Id,profile.Country,StringComparison.OrdinalIgnoreCase))?.Name ?? profile.Country)</dd>
+            <dt>@T("Standplaats2")</dt><dd>@profile.City</dd>
+            <dt>@T("Land2")</dt><dd>@(countries.FirstOrDefault(x=>string.Equals(x.Id,profile.Country,StringComparison.OrdinalIgnoreCase))?.Name ?? profile.Country)</dd>
             <dt>Genre</dt><dd>@(genres.FirstOrDefault(x=>x.Id==profile.GenreId.ToString())?.Name)</dd>
             <dt>Website</dt><dd>@profile.Website</dd>
-            <dt>E-mailadres koor</dt><dd>@profile.Email</dd>
-            <dt>Omschrijving</dt><dd class="description">@profile.Description</dd>
+            <dt>@T("EmailadresKoor")</dt><dd>@profile.Email</dd>
+            <dt>@T("InformatieOverJeKoorVoorOpDe")</dt><dd class="description">@ChoirDescription.ToPlainText(profile.Description)</dd>
             @if(profile.CanReadBank) { <dt>IBAN</dt><dd>@profile.BankAccount</dd> }
         </dl>
     }
-    <ChoirImages GroupId="@GroupId" CanEdit="@profile.CanEdit" Status="@ImageStatus" Detail="@ImageMessage" />
+    }
 }
+</section>
 @code {
+    [SupplyParameterFromQuery] public string? Tab { get; set; }
+    private bool ImagesTab => Tab == "afbeeldingen" || ImageStatus is not null;
     [SupplyParameterFromQuery(Name="afbeelding")] public string? ImageStatus { get; set; }
     [SupplyParameterFromQuery(Name="uploadmelding")] public string? ImageMessage { get; set; }
     [Parameter] public long Id { get; set; }
     [SupplyParameterFromForm(FormName="choir-profile")] public ChoirProfileInput? Input { get; set; }
     private ChoirProfile? profile;
-    private EnrollmentView? enrollment;
     private List<ProfileOption> countries=[];
     private List<ProfileOption> genres=[];
     private string? message;
     private bool saved;
+    private string language = "nl";
+    private string T(string key) => Amusing.Mijn.Services.UiText.Get(key, language);
     private uint Actor=>uint.Parse(Context.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
     private uint GroupId=>Id>0 && Id<=uint.MaxValue ? (uint)Id : 0;
     protected override async Task OnParametersSetAsync()
     {
         var ct=Context.HttpContext!.RequestAborted;
+        if (!Context.HttpContext.User.IsAdministrator()) language = await Accounts.LanguageAsync(Actor, ct);
         profile=await Profiles.GetAsync(Actor,GroupId,ct);
         if(profile is null) return;
-        enrollment=await Enrollments.ViewAsync(Actor,GroupId,ct);
         countries=await Profiles.OptionsAsync(true,ct); genres=await Profiles.OptionsAsync(false,ct);
         Input ??= ChoirProfileInput.From(profile);
     }
@@ -80,10 +94,10 @@ else
         saved=result==ProfileSaveResult.Saved;
         message=result switch
         {
-            ProfileSaveResult.Saved=>"De koorgegevens zijn opgeslagen.",
-            ProfileSaveResult.Forbidden=>"Je hebt geen toestemming om dit koor te wijzigen.",
-            ProfileSaveResult.Conflict=>"Iemand heeft het profiel ondertussen gewijzigd. Open het koor opnieuw om de nieuwste gegevens te laden voordat je verdergaat.",
-            _=>"Controleer de ingevulde gegevens en kies een geldig land en genre."
+            ProfileSaveResult.Saved=>T("DeKoorgegevensZijnOpgeslagen"),
+            ProfileSaveResult.Forbidden=>T("JeHebtGeenToestemmingOmDitKoor"),
+            ProfileSaveResult.Conflict=>T("HetProfielIsOndertussenGewijzigdOpenHet"),
+            _=>T("ControleerDeIngevuldeGegevensEnKiesEen")
         };
         if(saved)
         {

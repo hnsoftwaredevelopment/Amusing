@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -21,9 +21,18 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Amusing.Mijn\Amusing.Mijn.csproj" />
+    <ProjectReference Include="..\Amusing\Amusing.csproj" Aliases="beheer" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\database\mijn\006-deelnemerstarieven.sql;..\database\mijn\007-festivaltarieven.sql;..\database\mijn\008-inschrijfmail.sql;..\database\mijn\009-deelname-notas.sql;..\database\mijn\016-mailroutering.sql;..\database\mijn\017-notamail.sql" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\database\mijn\history-dev-*.sql" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\database\mijn\enrollment-schema.sql" Link="enrollment-schema.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\database\mijn\018-mailingsjablonen.sql" Link="018-mailingsjablonen.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\database\mijn\019-mailopmaak.sql" Link="019-mailopmaak.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\database\mijn\020-emailwijziging.sql" Link="020-emailwijziging.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\database\mijn\021-extra-mailsjablonen.sql" Link="021-extra-mailsjablonen.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\database\mijn\022-wachtlijstplaatsing.sql" Link="022-wachtlijstplaatsing.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\database\mijn\013-password-reset.sql;..\database\mijn\014-beheer-wachtwoordherstel.sql" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

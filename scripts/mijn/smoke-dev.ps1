@@ -38,13 +38,26 @@ try {
     $homeHtml = $client1.GetStringAsync('/').GetAwaiter().GetResult()
     if ($homeHtml -notmatch 'href="/koor/1"' -or $homeHtml -notmatch 'href="/koor/2"' -or $homeHtml -match 'href="/koor/3"') { throw 'Incorrect choir scope' }
     $other = $client1.GetStringAsync('/koor/3').GetAwaiter().GetResult()
-    if ($other -notmatch 'Koor niet beschikbaar') { throw 'Foreign choir exposed' }
+    if ($other -match 'class="choir-tabs"') { throw 'Foreign choir exposed' }
     $response = Post-Login $client2 'tweede.test@example.invalid' $passwords[1]
     if ([int]$response.StatusCode -ne 302 -or $response.Headers.Location.OriginalString -ne '/') { throw 'Second login failed' }
     $second = $client2.GetStringAsync('/').GetAwaiter().GetResult()
     if ($second -notmatch 'href="/koor/3"' -or $second -match 'href="/koor/1"') { throw 'Second account scope failed' }
     $readOnly = $client2.GetStringAsync('/koor/4').GetAwaiter().GetResult()
-    if ($readOnly -notmatch 'Testkoor Leesrechten' -or $readOnly -match '<button[^>]*>Wijzigingen opslaan</button>' -or $readOnly -match 'NL91ABNA') { throw 'Read-only profile permissions failed' }
+    if ($readOnly -notmatch 'Testkoor Leesrechten' -or $readOnly -match 'title="Algemene koorgegevens opslaan"' -or $readOnly -match 'NL91ABNA') { throw 'Read-only profile permissions failed' }
+    $history = $client1.GetStringAsync('/koor/1/deelnamehistorie').GetAwaiter().GetResult()
+    foreach ($expected in @('withdrawn-status','Amusing 2025','Testpodium Markt','Testpodium Bibliotheek')) {
+        if (!$history.Contains($expected)) { throw "History missing $expected" }
+    }
+    if ($history.Contains('Testpodium Concept')) { throw 'Unpublished performance exposed' }
+    $waiting = $client1.GetStringAsync('/koor/2/deelnamehistorie').GetAwaiter().GetResult()
+    if ($waiting -notmatch 'Op de wachtlijst|Auf der Warteliste|On the waiting list' -or $waiting.Contains('Testpodium Concept')) { throw 'Waitlist history incorrect' }
+    $foreign = $client2.GetStringAsync('/koor/1/deelnamehistorie').GetAwaiter().GetResult()
+    if ($foreign -match 'class="choir-tabs"' -or $foreign.Contains('Testpodium Markt')) { throw 'Foreign history exposed' }
+    Write-Output 'PASS: history, published performances, waitlist and choir isolation.'
+    $pricing = $client1.GetStringAsync('/koor/5/inschrijven').GetAwaiter().GetResult()
+    if ($pricing -notmatch 'id="participation-amount"' -or $pricing -notmatch 'class="participation-amount"') { throw 'Participation amount incorrect' }
+    Write-Output 'PASS: participation amount for test choir.'
     $form = [Collections.Generic.Dictionary[string,string]]::new()
     $form.Add('__RequestVerificationToken',(Get-Token $homeHtml))
     $response = $client1.PostAsync('/account/logout',[Net.Http.FormUrlEncodedContent]::new($form)).GetAwaiter().GetResult()

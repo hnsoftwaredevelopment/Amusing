@@ -14,7 +14,7 @@ public sealed class ChoirProfileInput : IValidatableObject
     [StringLength(80), EmailAddress(ErrorMessage="Vul een geldig e-mailadres in.")] public string? Email { get; set; }
     [StringLength(10000)] public string Description { get; set; } = "";
     [StringLength(50)] public string BankAccount { get; set; } = "";
-    [Required] public string Version { get; set; } = "";
+    public string Version { get; set; } = "";
     public void Normalize()
     {
         Name=Name?.Trim() ?? ""; City=City?.Trim() ?? ""; Country=Country?.Trim().ToUpperInvariant() ?? "";
@@ -39,7 +39,7 @@ public sealed class ChoirProfileInput : IValidatableObject
         }
         return remainder==1;
     }
-    public static ChoirProfileInput From(ChoirProfile p)=>new(){Name=p.Name,City=p.City,Country=p.Country,GenreId=p.GenreId,Website=p.Website,Email=p.Email,Description=p.Description,BankAccount=p.BankAccount ?? "",Version=p.Version};
+    public static ChoirProfileInput From(ChoirProfile p)=>new(){Name=p.Name,City=p.City,Country=p.Country,GenreId=p.GenreId,Website=p.Website,Email=p.Email,Description=ChoirDescription.ToPlainText(p.Description),BankAccount=p.BankAccount ?? "",Version=p.Version};
     internal string Stamp()=>Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(new object?[]{Name,City,Country,GenreId,Website,Email ?? "",Description,BankAccount}))));
 }
 public sealed record ChoirProfile(string Name,string City,string Country,int GenreId,string Website,string Email,string Description,string? BankAccount,bool CanEdit,bool CanReadBank,string Version);

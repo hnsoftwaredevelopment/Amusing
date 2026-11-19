@@ -1,0 +1,36 @@
+@page "/account/e-mail-bevestigen"
+@using System.Security.Claims
+@using Amusing.Mijn.Services
+@inject SiteLanguage Language
+@inject IHttpContextAccessor Context
+
+<PageTitle>@T("EmailadresBevestigen") — Mijn Amusing</PageTitle>
+<section class="card sign-in-card account-page" lang="@language">
+    <h1>@T("EmailadresBevestigen")</h1>
+    @if (!AccountPasswords.ValidToken(Token ?? ""))
+    {
+        <p>@T("DezeLinkIsOngeldigVraagEenNieuwe")</p>
+        <a href="/account/contactgegevens">@T("MijnContactgegevens")</a>
+    }
+    else if (Context.HttpContext?.User.FindFirstValue("actor_type") != "choir_person")
+    {
+        <p>@T("LogInMetJeHuidigeEmailadresEn")</p>
+        <a href="/account/login">@T("Inloggen")</a>
+    }
+    else
+    {
+        <form method="post" action="/account/e-mail-wijziging-bevestigen">
+            <AntiforgeryToken />
+            <input type="hidden" name="token" value="@Token" />
+            <p>@T("BevestigJeNieuweAdresDaarnaGebruikJe")</p>
+            <button type="submit">@T("NieuwEmailadresBevestigen")</button>
+        </form>
+    }
+</section>
+
+@code {
+    [SupplyParameterFromQuery(Name = "token")] public string? Token { get; set; }
+    private string language = "nl";
+    protected override async Task OnInitializedAsync() => language = await Language.GetAsync();
+    private string T(string key) => Amusing.Mijn.Services.UiText.Get(key, language);
+}

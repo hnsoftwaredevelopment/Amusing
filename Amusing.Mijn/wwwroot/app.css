@@ -1,8 +1,20 @@
 :root { color-scheme: light; font-family: system-ui, sans-serif; color: #183c38; background: #f4f4ef; }
 body { margin: 0; font-size: 1.05rem; line-height: 1.6; }
-header { background: #163e38; padding: 1.4rem max(1.4rem, calc((100vw - 960px)/2)); }
-.brand { color: white; text-decoration: none; font-size: 1.3rem; font-weight: 750; }
-.brand span { display: block; color: #c8dcaa; font-size: .85rem; font-weight: 400; }
+.site-header {
+    --header-ink: #014983;
+    background: #ffc107;
+    padding: 1rem max(1.25rem, calc((100vw - 960px) / 2));
+}
+.site-header-test {
+    --header-ink: #fff4f4;
+    background: linear-gradient(90deg, #3a0b13 0%, #641725 58%, #3a0647 100%);
+}
+.brand { display: inline-flex; align-items: center; gap: .75rem; color: var(--header-ink); text-decoration: none; font-size: 1.25rem; font-weight: 650; }
+.brand img {
+    flex: none;
+    object-fit: contain;
+}
+.brand:focus-visible { outline-color: var(--header-ink); }
 main { max-width: 760px; margin: 3rem auto; padding: 0 1.25rem; min-height: 65vh; }
 .card { max-width: 460px; background: white; padding: clamp(1.4rem, 5vw, 3rem); border: 1px solid #d6ded7; border-radius: 12px; }
 h1 { line-height: 1.2; font-size: clamp(1.8rem, 5vw, 2.5rem); }
@@ -41,3 +53,114 @@ small { color: #526b52; }
 .checkbox-label input { width:1.2rem; height:1.2rem; }
 details { margin:1rem 0; }
 summary { cursor:pointer; }
+
+.sign-in-card input:not([type="hidden"]) {
+    background: #e7eefb;
+    border-color: #26b050;
+    color: #111;
+}
+
+.sign-in-card input:focus-visible {
+    outline: 2px solid #014983;
+    outline-offset: 2px;
+}
+
+.sign-in-card button[type="submit"] {
+    background: #014983;
+}
+
+.sign-in-card button[type="submit"]:hover {
+    background: #003863;
+}
+
+.choir-icon-button {
+    box-sizing: border-box;
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 3rem;
+    height: 3rem;
+    margin: 0;
+    padding: 0;
+    border: 1px solid currentColor;
+    border-radius: .45rem;
+    background: #f5f9ff;
+    color: #014983;
+}
+.choir-icon-button svg { width: 1.65rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.choir-icon-button:hover { background: #e7eefb; }
+.choir-icon-delete { color: #d10d26; background: #fff7f8; }
+.choir-icon-delete:hover { background: #ffe8ec; }
+.role-action .choir-icon-button { padding: 0; margin: 0; vertical-align: middle; }
+.choir-primary { background: #014983; }
+.choir-primary:hover { background: #003863; }
+.withdrawn-status { color: #bd172c; font-weight: 650; }
+
+.unsaved-warning { color: #a51c2d; font-weight: 650; }
+.profile-save-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .65rem;
+}
+.profile-save-bar.is-dirty {
+    position: fixed;
+    bottom: 0;
+    inset-inline: max(0px, calc((100vw - 760px) / 2));
+    z-index: 2;
+    padding: .6rem .75rem;
+    border-top: 1px solid #b4c7d6;
+    background: white;
+    box-shadow: 0 -.2rem .8rem #183c3820;
+}
+.choir-icon-with-text { display: inline-flex; gap: .45rem; width: auto; padding-inline: .75rem; }
+
+.image-save-bar[hidden] { display: none; }
+
+.site-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .65rem 1rem; }
+.header-language { position: relative; }
+.header-language summary {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    min-height: 2.75rem;
+    padding-inline: .45rem;
+    color: var(--header-ink);
+    cursor: pointer;
+    list-style: none;
+}
+.header-language summary::-webkit-details-marker { display: none; }
+.header-language summary::after {
+    content: "";
+    border-inline: .3rem solid transparent;
+    border-top: .35rem solid currentColor;
+}
+.header-language img { display: block; object-fit: fill; }
+.header-language form {
+    position: absolute;
+    inset-inline-end: 0;
+    top: 100%;
+    z-index: 5;
+    min-width: 10rem;
+    padding: .35rem;
+    border: 1px solid #b4c7d6;
+    border-radius: .45rem;
+    background: white;
+    box-shadow: 0 .35rem 1rem #183c3820;
+}
+.header-language button {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    width: 100%;
+    margin: 0;
+    padding: .5rem .65rem;
+    background: white;
+    color: #014983;
+    text-align: start;
+}
+.header-language button:hover,
+.header-language button[aria-current="true"] { background: #e7eefb; }
+.header-language summary:focus-visible { outline-color: var(--header-ink); }
+.header-language button:focus-visible { outline-color: #014983; outline-offset: -2px; }

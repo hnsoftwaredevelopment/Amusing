@@ -1,9 +1,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
-using System.Text.RegularExpressions;
 using MySqlConnector;
 namespace Amusing.Mijn.Services;
-public sealed partial class ChoirEnrollments(MySqlDataSource source,IFestivalClock clock)
+public sealed partial class ChoirEnrollments(MySqlDataSource source,IFestivalClock clock,
+    IHttpContextAccessor? supportContext = null, IConfiguration? configuration = null)
 {
     private sealed record Role(uint Person,string Name,bool Active,string Phone,string Mobile);
     private sealed record Group(string Name,string City,string Country,int Genre,string Iban,bool Active);
@@ -64,22 +64,23 @@ public sealed partial class ChoirEnrollments(MySqlDataSource source,IFestivalClo
         if(!roles.Any(r=>r.Active&&r.Name=="dirigent")) missing.Add("Koppel een actieve dirigent via Personen en rollen.");
         var primary=roles.Where(r=>r.Active&&r.Name=="contactpersoon1").ToList();
         if(primary.Count==0) missing.Add("Koppel minstens één actieve eerste contactpersoon.");
-        if(primary.Any(r=>!PhoneValid(r.Phone)&&!PhoneValid(r.Mobile))) missing.Add("Iedere eerste contactpersoon moet een geldig vast of mobiel telefoonnummer hebben.");
+        if(primary.Any(r=>!PersonalContactInput.PhoneValid(r.Phone)&&!PersonalContactInput.PhoneValid(r.Mobile))) missing.Add("Iedere eerste contactpersoon moet een geldig vast of mobiel telefoonnummer hebben.");
         return missing;
     }
-    private static bool PhoneValid(string value)=>Regex.IsMatch(value.Trim(),@"^[+0][1-9][0-9\- ]{7,14}$",RegexOptions.CultureInvariant);
     public async Task<EnrollmentView?> ViewAsync(uint actor,uint group,CancellationToken ct)
     {
         await using var connection=await source.OpenConnectionAsync(ct);
         var roles=await RolesAsync(connection,null,group,false,ct);
-        if(!roles.Any(r=>r.Person==actor&&r.Active)) return null;
+        if(!SupportMode.CanSupport(supportContext,actor,group) && !roles.Any(r=>r.Person==actor&&r.Active)) return null;
         var info=await GroupAsync(connection,null,group,false,ct);if(info is null) return null;
         var today=DateOnly.FromDateTime(clock.Now);var festival=await FestivalAsync(connection,null,today,false,ct);
         var stages=festival is null?[]:await StagesAsync(connection,null,festival.Id,ct);
         var registration=festival is null?null:await RegistrationAsync(connection,null,festival.Id,group,ct);
-        return new(info.Name,Contact(roles,actor),festival,stages,registration,Missing(info,roles),festival?.IsOpen(today)==true)
+        return new(info.Name,SupportMode.CanSupport(supportContext,actor,group) || Contact(roles,actor),festival,stages,registration,Missing(info,roles),festival?.IsOpen(today)==true)
         {
             AfterClosing = festival is not null && today > festival.End,
+            ParticipationAmount = festival is not null && registration is { Cancelled: false }
+                ? await ParticipationAmountAsync(connection, festival.Id, registration, ct) : null,
             GroupActive = info.Active
         };
     }
@@ -87,7 +88,7 @@ public sealed partial class ChoirEnrollments(MySqlDataSource source,IFestivalClo
     {
         await using var connection=await source.OpenConnectionAsync(ct);await using var tx=await connection.BeginTransactionAsync(ct);
         var roles=await RolesAsync(connection,tx,group,true,ct);
-        if(!Contact(roles,actor)) return EnrollmentResult.Forbidden;
+        if(!SupportMode.CanSupport(supportContext,actor,group) && !Contact(roles,actor)) return EnrollmentResult.Forbidden;
         var info=await GroupAsync(connection,tx,group,true,ct);if(info is null) return EnrollmentResult.Forbidden;
         var festival=await FestivalAsync(connection,tx,DateOnly.FromDateTime(clock.Now),true,ct);
         if(festival is null) return EnrollmentResult.NoFestival;
@@ -107,10 +108,12 @@ public sealed partial class ChoirEnrollments(MySqlDataSource source,IFestivalClo
             Add(cmd,"@festival",festival.Id);Add(cmd,"@group",group);Add(cmd,"@count",input.Headcount);Add(cmd,"@stage",input.PodiumType);Add(cmd,"@review",input.Review?"ja":"nee");Add(cmd,"@now",now);Add(cmd,"@waiting",festival.WaitingList);Add(cmd,"@inside",input.Preference[0]-'0');Add(cmd,"@outside",input.Preference[1]-'0');
             try{await cmd.ExecuteNonQueryAsync(ct);}catch(MySqlException error) when(error.Number==1062){return EnrollmentResult.AlreadyRegistered;}
         }
-        await using(var cmd=Command(connection,tx,"INSERT INTO mijn_audit_log(occurred_at,actor_type,actor_id,action,group_id,festival_id,changed_fields) VALUES(UTC_TIMESTAMP(6),'choir_person',@actor,'FestivalEnrolled',@group,@festival,'Registration,Headcount,PodiumType,Preference,Review,WaitingList')"))
+        await using(var cmd=Command(connection,tx,"INSERT INTO mijn_audit_log(occurred_at,actor_type,actor_id,action,group_id,festival_id,changed_fields) VALUES(UTC_TIMESTAMP(6),@actorType,@actor,'FestivalEnrolled',@group,@festival,'Registration,Headcount,PodiumType,Preference,Review,WaitingList')"))
         {
-            Add(cmd,"@actor",actor);Add(cmd,"@group",group);Add(cmd,"@festival",festival.Id);await cmd.ExecuteNonQueryAsync(ct);
+            Add(cmd,"@actorType",SupportMode.AuditType(supportContext,actor,group));Add(cmd,"@actor",actor);Add(cmd,"@group",group);Add(cmd,"@festival",festival.Id);await cmd.ExecuteNonQueryAsync(ct);
         }
+        var registration = await RegistrationAsync(connection, tx, festival.Id, group, ct);
+        await QueueEnrollmentMailAsync(connection, tx, festival, group, info.Name, registration!, ct);
         await tx.CommitAsync(ct);return EnrollmentResult.Saved;
     }
 }

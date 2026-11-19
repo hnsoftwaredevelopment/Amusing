@@ -1,0 +1,24 @@
+@page "/account/beheer"
+<PageTitle>Inloggen voor Beheer — Mijn Amusing</PageTitle>
+<section class="card sign-in-card">
+    <h1>Inloggen voor Beheer</h1>
+    <p>Gebruik je gebruikersnaam en wachtwoord van Amusing Beheer.</p>
+    @if (Failed is not null)
+    {
+        <p role="alert" class="error">Inloggen is niet gelukt. Controleer je gebruikersnaam en wachtwoord.</p>
+    }
+    <form method="post" action="/account/beheer-inloggen" data-enhance="false">
+        <AntiforgeryToken />
+        <label for="username">Gebruikersnaam</label>
+        <input id="username" name="username" autocomplete="username" maxlength="100" required />
+        <Amusing.Mijn.Components.LoginPassword />
+        <button type="submit">Inloggen</button>
+    </form>
+    @if (Gewijzigd == "1") { <p role="status">Je wachtwoord is aangepast. Log opnieuw in.</p> }
+    <p><a href="/account/wachtwoord-vergeten?beheer=1">Wachtwoord vergeten?</a></p>
+    <p><a href="/account/login">Inloggen als koorlid</a></p>
+</section>
+@code {
+    [SupplyParameterFromQuery] public string? Gewijzigd { get; set; }
+    [SupplyParameterFromQuery(Name = "failed")] public string? Failed { get; set; }
+}

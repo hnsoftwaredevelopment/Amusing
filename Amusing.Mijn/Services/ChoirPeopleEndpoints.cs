@@ -7,13 +7,23 @@ public static class ChoirPeopleEndpoints
     {
         app.MapPost("/koor/{id:long}/personen/uitnodigen",async(long id,HttpContext context,ChoirPeople people,IAntiforgery csrf)=>
         {
-            if(!app.Configuration.GetValue<bool>("Mijn:IsTestEnvironment")) return Results.StatusCode(503);
+            if(!app.Configuration.GetValue<bool>("Mijn:IsTestEnvironment") && !app.Configuration.GetValue<bool>("InvitationMail:Enabled")) return Results.StatusCode(503);
             if(id<=0 || id>uint.MaxValue) return Results.NotFound();
             if(!await ValidCsrf(context,csrf)) return Results.BadRequest();
             var form=await context.Request.ReadFormAsync(context.RequestAborted);
             var result=await people.InviteAsync(Actor(context),(uint)id,form["email"].ToString(),form["role"].ToString(),context.RequestAborted);
             if(result==PeopleResult.Forbidden) return Results.Forbid();
-            return Results.LocalRedirect($"/koor/{id}/personen?status={(result==PeopleResult.Done?"invited":"invalid")}");
+            var status = result switch { PeopleResult.Done => "invited", PeopleResult.UnknownAccount => "unknown", PeopleResult.RoleOccupied => "occupied", PeopleResult.ChoirLimit => "limit", _ => "invalid" };
+            return Results.LocalRedirect($"/koor/{id}/personen?status={status}");
+        }).RequireAuthorization();
+        app.MapPost("/koor/{id:long}/personen/uitnodiging-intrekken",async(long id,HttpContext context,ChoirPeople people,IAntiforgery csrf)=>
+        {
+            if(id<=0 || id>uint.MaxValue) return Results.NotFound();
+            if(!await ValidCsrf(context,csrf)) return Results.BadRequest();
+            var form=await context.Request.ReadFormAsync(context.RequestAborted);
+            var result=await people.CancelInvitationAsync(Actor(context),(uint)id,form["invitation"].ToString(),context.RequestAborted);
+            if(result==PeopleResult.Forbidden) return Results.Forbid();
+            return Results.LocalRedirect($"/koor/{id}/personen?status={(result==PeopleResult.Done?"cancelled":"invalid")}");
         }).RequireAuthorization();
         app.MapPost("/koor/{id:long}/personen/verwijderen",async(long id,HttpContext context,ChoirPeople people,IAntiforgery csrf)=>
         {
@@ -29,7 +39,7 @@ public static class ChoirPeopleEndpoints
         {
             if(!await ValidCsrf(context,csrf)) return Results.BadRequest();
             var result=await people.AcceptAsync(Actor(context),id,context.RequestAborted);
-            return Results.LocalRedirect("/account/uitnodigingen?status="+(result==PeopleResult.Done?"accepted":"unavailable"));
+            return Results.LocalRedirect("/account/uitnodigingen?status="+(result==PeopleResult.Done?"accepted":result==PeopleResult.ChoirLimit?"limit":"unavailable"));
         }).RequireAuthorization();
     }
     private static uint Actor(HttpContext context)=>uint.Parse(context.User.FindFirstValue(ClaimTypes.NameIdentifier)!);

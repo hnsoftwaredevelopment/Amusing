@@ -1,0 +1,57 @@
+@using Amusing.Mijn.Services
+@using System.Security.Claims
+@inject IHttpContextAccessor Context
+@inject ChoirAccounts Accounts
+@inject ChoirEnrollments Enrollments
+
+<a href="/" data-enhance-nav="false">← @T("MijnKoren")</a>
+<div class="choir-heading">
+    <h1>@Name</h1>
+    @if (!string.IsNullOrWhiteSpace(City)) { <p>@City</p> }
+    <a class="festival-action" data-enhance-nav="false" href="/koor/@Id/inschrijven">@FestivalLabel</a>
+</div>
+<nav data-enhance-nav="false" class="choir-tabs" aria-label="@T("Koornavigatie")">
+    @foreach (var tab in Tabs)
+    {
+        <a href="@tab.Url" aria-current="@(Active == tab.Key ? "page" : null)">@tab.Label</a>
+    }
+</nav>
+
+@code {
+    [Parameter] public long Id { get; set; }
+    [Parameter, EditorRequired] public string Name { get; set; } = "";
+    [Parameter] public string? City { get; set; }
+    [Parameter] public string Active { get; set; } = "";
+    private string language = "nl";
+    private EnrollmentView? enrollment;
+    private string T(string key) => Amusing.Mijn.Services.UiText.Get(key, language);
+    private (string Key, string Url, string Label)[] Tabs =>
+    [
+        ("algemeen", $"/koor/{Id}", T("Algemeen")),
+        ("afbeeldingen", $"/koor/{Id}?tab=afbeeldingen", T("Afbeeldingen")),
+        ("personen", $"/koor/{Id}/personen", T("GekoppeldePersonen")),
+        ("historie", $"/koor/{Id}/deelnamehistorie", T("Deelnamehistorie")),
+        ("logboek", $"/koor/{Id}/logboek", T("Koormutaties"))
+    ];
+    private string FestivalLabel
+    {
+        get
+        {
+            if (enrollment is { Registration: null, Festival: { } edition, WindowOpen: true, IsContact: true, GroupActive: true })
+                return edition.WaitingList
+                    ? T("AanmeldenVoorDeWachtlijst")
+                    : UiText.Format("InschrijvenVoorEditie",language,edition.Date.Year);
+            return enrollment?.Registration is not null
+                ? T("FestivalinschrijvingBekijken")
+                : T("FestivalBekijken");
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var request = Context.HttpContext!;
+        if (!uint.TryParse(request.User.FindFirstValue(ClaimTypes.NameIdentifier), out var actor)) return;
+        if (!request.User.IsAdministrator()) language = await Accounts.LanguageAsync(actor, request.RequestAborted);
+        enrollment = await Enrollments.ViewAsync(actor, (uint)Id, request.RequestAborted);
+    }
+}

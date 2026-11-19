@@ -1,88 +1,134 @@
 @page "/koor/{Id:long}/inschrijven"
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @using System.Security.Claims
+@using System.Globalization
 @using Amusing.Mijn.Services
 @inject ChoirEnrollments Service
+@inject ChoirAccounts Accounts
 @inject IHttpContextAccessor Context
 @inject IConfiguration Configuration
-<PageTitle>Festivalinschrijving — Mijn Amusing</PageTitle>
-<a href="/koor/@Id">← Koorprofiel</a>
-@if(view is null){<h1>Koor niet beschikbaar</h1><p>Dit koor is niet aan je account gekoppeld.</p>}
+<PageTitle>@T("Festivalinschrijving") — Mijn Amusing</PageTitle>
+<div class="enrollment-page" lang="@language">
+@if (showCompletion)
+{
+ <section class="profile-card">
+  <h1>@T("Festivalinschrijving")</h1>
+  <p role="status" class="success">@message</p>
+  @if (view?.Registration?.Waitlisted == true)
+  {
+   <p>@T("JeKoorStaatOpDeWachtlijst")</p>
+  }
+  <form method="get" action="/">
+   <button type="submit">@T("Sluiten")</button>
+  </form>
+ </section>
+}
 else
 {
- <h1>Festivalinschrijving</h1><p>@view.GroupName</p>
+<a href="/koor/@Id">← @T("Koorprofiel")</a>
+@if(view is null){<h1>@T("KoorNietBeschikbaar")</h1><p>@T("DitKoorIsNietAanJeAccount")</p>}
+else
+{
+ <h1>@T("Festivalinschrijving")</h1><p>@view.GroupName</p>
  @if(message is not null){<p role="status" class="@(success?"success":"error")">@message</p>}
- @if(view.Festival is not { } festival){<p>Er is nog geen actuele festivaleditie beschikbaar. Probeer het later opnieuw.</p>}
+ @if(view.Festival is not { } festival){<p>@T("ErIsNogGeenActueleFestivaleditieBeschikbaar")</p>}
  else
  {
   <section class="profile-card">
-   <h2>@(Configuration.GetValue<bool>("Mijn:IsTestEnvironment")?"Testfestival":"Festival") op @festival.Date.ToString("dd-MM-yyyy")</h2>
-   <p>Inschrijven van @festival.Start.ToString("dd-MM-yyyy") tot en met @festival.End.ToString("dd-MM-yyyy").</p>
+   <h2>@(Configuration.GetValue<bool>("Mijn:IsTestEnvironment") ? T("Testfestival") : "Festival") · @festival.Date.ToString("d MMMM yyyy", Culture)</h2>
+   <p>@UiText.Format("Inschrijfperiode",language,festival.Start.ToString("d",Culture),festival.End.ToString("d",Culture))</p>
    @if(view.Registration is { } registered)
    {
-    <h3>@(registered.Cancelled ? "Deelname afgemeld" : registered.Waitlisted ? "Op de wachtlijst" : registered.Confirmed ? "Inschrijving bevestigd" : "Inschrijving opgeslagen")</h3>
+    <h3>@(registered.Cancelled ? T("DeelnameAfgemeld") : registered.Waitlisted ? T("OpDeWachtlijst") : registered.Confirmed ? T("InschrijvingBevestigd") : T("InschrijvingOpgeslagen"))</h3>
     <dl>
-     <dt>Aantal deelnemers</dt><dd>@registered.Headcount</dd>
-     <dt>Podiumtype</dt><dd>@registered.PodiumType</dd>
-     <dt>Voorkeur optredens</dt><dd>@PreferenceLabel(registered.Indoors,registered.Outdoors)</dd>
-     <dt>Jurybeoordeling gewenst</dt><dd>@(registered.Review?"Ja":"Nee")</dd>
-     @if(registered.Paid){<dt>Betaling</dt><dd>Betaald</dd>}
+     <dt>@T("AantalDeelnemers")</dt><dd>@registered.Headcount</dd>
+     <dt>@T("Podiumtype")</dt><dd>@registered.PodiumType</dd>
+     <dt>@T("VoorkeurOptredens")</dt><dd>@PreferenceLabel(registered.Indoors,registered.Outdoors)</dd>
+     @if(registered.Paid){<dt>@T("Betaling")</dt><dd>@T("Betaald")</dd>}
     </dl>
-    @if(registered.Cancelled){<p>Neem contact op met de organisatie als je opnieuw wilt deelnemen.</p>}
+    @if ((note?.Amount ?? view.ParticipationAmount) is { } amount)
+    {
+     <h3 id="participation-amount">@T("Deelnamekosten")</h3>
+     <table class="participation-amount" aria-labelledby="participation-amount">
+      <thead>
+       <tr><th scope="col">@T("Omschrijving")</th><th scope="col">@T("Bedrag")</th></tr>
+      </thead>
+      <tbody>
+       <tr><th scope="row">@T("DeelnemersExclBtw")</th><td>@Money(amount.DeelnemersExclBtw)</td></tr>
+       <tr><th scope="row">@T("PodiumExclBtw")</th><td>@Money(amount.PodiumExclBtw)</td></tr>
+       <tr><th scope="row">@T("Btw") (@amount.BtwPercentage.ToString("0.##", Culture)%)</th><td>@Money(amount.Btw)</td></tr>
+      </tbody>
+      <tfoot>
+       <tr><th scope="row">@T("TotaalInclBtw")</th><td><strong>@Money(amount.TotaalInclBtw)</strong></td></tr>
+      </tfoot>
+     </table>
+    }
+    else if (!registered.Cancelled)
+    {
+     <p>@T("HetDeelnamebedragIsNogNietBeschikbaarNeem")</p>
+    }
+    @if (note is not null)
+    {
+     <p><a href="/koor/@Id/deelname-nota/@festival.Id">@T("DownloadDeelnamenotaPDF")</a></p>
+    }
+    @if(registered.Cancelled){<p>@T("NeemContactOpMetDeOrganisatieAls")</p>}
     else if(view.IsContact && !registered.Confirmed)
     {
-     @if(registered.Waitlisted){<p>Je kunt bevestigen zodra de organisatie je koor heeft geplaatst.</p>}
-     else if(!view.AfterClosing){<p>Je kunt bevestigen vanaf de dag na de sluitingsdatum.</p>}
-     @if(registered.Paid){<p>Voor wijzigingen na betaling kun je contact opnemen met de organisatie.</p>}
+     @if(registered.Waitlisted){<p>@T("JeKuntBevestigenZodraDeOrganisatieJe")</p>}
+     else if(!view.AfterClosing){<p>@T("JeKuntBevestigenVanafDeDagNa")</p>}
+     @if(registered.Paid){<p>@T("VoorWijzigingenNaBetalingKunJeContact")</p>}
     }
    }
-   else if(!view.IsContact){<p>Alleen een eerste of tweede contactpersoon kan het koor inschrijven.</p>}
-   else if(!view.WindowOpen){<p>De inschrijving voor deze editie is op dit moment gesloten.</p>}
+   else if(!view.IsContact){<p>@T("AlleenEenEersteOfTweedeContactpersoonKan")</p>}
+   else if(!view.WindowOpen){<p>@T("DeInschrijvingVoorDezeEditieIsOp")</p>}
    else if(view.Missing.Count>0)
    {
-    <h3>Vul eerst deze gegevens aan</h3><ul>@foreach(var issue in view.Missing){<li>@issue</li>}</ul>
-    <p><a href="/koor/@Id">Koorprofiel</a> · <a href="/koor/@Id/personen">Personen en rollen</a></p>
+    <h3>@T("VulEerstDezeGegevensAan")</h3><ul>@foreach(var issue in view.Missing){<li>@IssueLabel(issue)</li>}</ul>
+    <p><a href="/koor/@Id">@T("Koorprofiel")</a> · <a href="/koor/@Id/personen">@T("PersonenEnRollen")</a></p>
    }
-   else if(view.Stages.Count==0){<p>Er zijn nog geen podiumtypen beschikbaar. Neem contact op met de organisatie.</p>}
-   @if(view.Registration is null && view.CanSubmit && festival.WaitingList){<p class="notice">Deze editie werkt met een wachtlijst. Je aanmelding komt op de wachtlijst; deelname is daarmee nog niet toegezegd.</p>}
+   else if(view.Stages.Count==0){<p>@T("ErZijnNogGeenPodiumtypenBeschikbaarNeem")</p>}
+   @if(view.Registration is null && view.CanSubmit && festival.WaitingList){<p class="notice">@T("DezeEditieWerktMetEenWachtlijstJe")</p>}
    @if(Input is not null)
    {
-    <EditForm Model="Input" FormName="festival-enrollment" OnValidSubmit="RegisterAsync">
+    <EditForm Model="Input" FormName="festival-enrollment" OnSubmit="RegisterAsync">
      <DataAnnotationsValidator/>
      @if(view.CanSubmit || view.CanEdit)
      {
-      <ValidationSummary/>
+      @if (language == "nl") { <ValidationSummary /> }
+      @if (invalidForm && language != "nl") { <p class="error" role="alert">@T("ControleerDeIngevuldeGegevens")</p> }
       <input type="hidden" name="Input.FestivalId" value="@Input.FestivalId"/>
       <input type="hidden" name="Input.Version" value="@Input.Version"/>
-      <label for="headcount">Aantal deelnemers *</label>
+      <label for="headcount">@T("AantalDeelnemers2")</label>
       <InputNumber id="headcount" @bind-Value="Input.Headcount" min="1" max="@int.MaxValue"/>
-      <small>Iedereen die optreedt, inclusief dirigent en muzikanten.</small>
-      <ValidationMessage For="()=>Input.Headcount"/>
+      <small>@T("IedereenDieOptreedtInclusiefDirigentEnMuzikanten")</small>
+      @if (language == "nl") { <ValidationMessage For="()=>Input.Headcount"/> }
       @if(view.Registration?.ForcedStage == true)
       {
-       <p>De organisatie heeft podiumtype @Input.PodiumType toegewezen.</p>
+       <p>@UiText.Format("ToegewezenPodiumtype",language,Input.PodiumType)</p>
        <input type="hidden" name="Input.PodiumType" value="@Input.PodiumType"/>
       }
       else
       {
-       <label for="stage">Podiumtype *</label>
+       <label for="stage">@T("Podiumtype2")</label>
        <InputSelect id="stage" @bind-Value="Input.PodiumType">
-        <option value="">Kies een podiumtype</option>
+        <option value="">@T("KiesEenPodiumtype")</option>
         @if(view.Registration is { } existing && !view.Stages.Any(stage => stage.Id == existing.PodiumType) && !string.IsNullOrEmpty(existing.PodiumType))
-        {<option value="@existing.PodiumType">Type @existing.PodiumType (huidig)</option>}
+        {<option value="@existing.PodiumType">Type @existing.PodiumType (@T("Huidig"))</option>}
         @foreach(var stage in view.Stages){<option value="@stage.Id">Type @stage.Id</option>}
        </InputSelect>
-       <ValidationMessage For="()=>Input.PodiumType"/>
+       @if (language == "nl") { <ValidationMessage For="()=>Input.PodiumType"/> }
       }
-      <details><summary>Wat hoort bij de podiumtypen?</summary>@foreach(var stage in view.Stages){<h3>Type @stage.Id</h3><p class="description">@stage.Description</p>}</details>
-      <label for="preference">Voorkeur voor optredens *</label>
-      <InputSelect id="preference" @bind-Value="Input.Preference"><option value="11">Eén binnen, één buiten</option><option value="02">Twee buiten</option><option value="20">Twee binnen</option></InputSelect>
-      <small>Dit is een voorkeur; de organisatie kan geen garantie geven.</small>
-      <ValidationMessage For="()=>Input.Preference"/>
-      <label class="checkbox-label"><InputCheckbox @bind-Value="Input.Review"/> Beoordeling door de mysteryjury gewenst</label>
-      <small>Er is geen garantie dat de jury het koor kan beoordelen.</small>
-      @if(Configuration.GetValue<bool>("Mijn:IsTestEnvironment")){<p>Deze testinschrijving verstuurt geen e-mail of betaalverzoek.</p>}
-      <button type="submit">@(view.CanEdit ? "Wijzigingen opslaan" : festival.WaitingList ? "Aanmelden voor de wachtlijst" : "Koor inschrijven")</button>
+      <details><summary>@T("WatHoortBijDePodiumtypen")</summary>@foreach(var stage in view.Stages){<h3>Type @stage.Id</h3><p class="description">@stage.Description</p>}</details>
+      <label for="preference">@T("VoorkeurVoorOptredens")</label>
+      <select id="preference" name="Input.Preference">
+       <option value="11" selected="@(Input.Preference == "11")">@T("EenBinnenEenBuiten")</option>
+       <option value="02" selected="@(Input.Preference == "02")">@T("TweeBuiten")</option>
+       <option value="20" selected="@(Input.Preference == "20")">@T("TweeBinnen")</option>
+      </select>
+      <small>@T("DitIsEenVoorkeurDeOrganisatieKan")</small>
+      @if (language == "nl") { <ValidationMessage For="()=>Input.Preference"/> }
+      @if(Configuration.GetValue<bool>("Mijn:IsTestEnvironment")){<p>@T("BijEenNieuweTestinschrijvingGaatDeTestmail")</p>}
+      <button type="submit">@(view.CanEdit ? T("WijzigingenOpslaan") : festival.WaitingList ? T("AanmeldenVoorDeWachtlijst") : T("KoorInschrijven"))</button>
      }
     </EditForm>
    }
@@ -93,27 +139,44 @@ else
      {
       <input type="hidden" name="Confirmation.FestivalId" value="@Confirmation.FestivalId"/>
       <input type="hidden" name="Confirmation.Version" value="@Confirmation.Version"/>
-      <p>Controleer de gegevens hierboven. Na bevestiging kun je ze alleen via de organisatie laten wijzigen.</p>
-      <button type="submit">Inschrijving bevestigen</button>
+      <p>@T("ControleerDeGegevensHierbovenNaBevestigingKun")</p>
+      <button type="submit">@T("InschrijvingBevestigen")</button>
      }
     </EditForm>
    }
   </section>
  }
 }
+}
+</div>
 @code {
  [Parameter] public long Id{get;set;}
  [SupplyParameterFromForm(FormName="festival-enrollment")] public EnrollmentInput? Input{get;set;}
  [SupplyParameterFromForm(FormName="confirm-enrollment")] public EnrollmentConfirmation? Confirmation{get;set;}
+ private string language = "nl";
+ private CultureInfo Culture => CultureInfo.GetCultureInfo(language switch { "de" => "de-DE", "en" => "en-IE", _ => "nl-NL" });
+    private string T(string key) => Amusing.Mijn.Services.UiText.Get(key, language);
+ private string Money(decimal amount) => amount.ToString("C2", Culture);
  private EnrollmentView? view;
  private string? message;
  private bool success;
+ private bool showCompletion;
+ private bool invalidForm;
+ private ParticipationNote? note;
  private uint Actor=>uint.Parse(Context.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
  private uint Group=>Id>0&&Id<=uint.MaxValue?(uint)Id:0;
  protected override async Task OnParametersSetAsync()
  {
-  view=await Service.ViewAsync(Actor,Group,Context.HttpContext!.RequestAborted);
+  await LoadViewAsync();
   InitializeForms();
+ }
+ private async Task LoadViewAsync()
+ {
+  var ct = Context.HttpContext!.RequestAborted;
+  if (!Context.HttpContext.User.IsAdministrator()) language = await Accounts.LanguageAsync(Actor, ct);
+  view = await Service.ViewAsync(Actor, Group, ct);
+  note = view is { Festival: { } edition, Registration: { Confirmed: true, Cancelled: false } }
+      ? await Service.NoteAsync(Actor, Group, edition.Id, ct) : null;
  }
  private void InitializeForms()
  {
@@ -126,9 +189,12 @@ else
   };
   Confirmation??=new(){FestivalId=festival.Id,Version=registration?.Version};
  }
- private async Task RegisterAsync()
+ private async Task RegisterAsync(EditContext editContext)
  {
+  invalidForm = !editContext.Validate();
+  if (invalidForm) return;
   var edit=!string.IsNullOrEmpty(Input!.Version);
+  Input.Review = edit && view?.Registration?.Review == true;
   var ct=Context.HttpContext!.RequestAborted;
   var result=edit ? await Service.UpdateAsync(Actor,Group,Input,ct) : await Service.RegisterAsync(Actor,Group,Input,ct);
   await ShowResultAsync(result,edit);
@@ -142,25 +208,38 @@ else
  {
   success=result is EnrollmentResult.Saved or EnrollmentResult.AlreadyRegistered or EnrollmentResult.Confirmed or EnrollmentResult.AlreadyConfirmed;
   message=result switch {
-   EnrollmentResult.Saved=>edit?"De wijzigingen zijn opgeslagen.":"De aanmelding is opgeslagen.",
-   EnrollmentResult.Confirmed=>"De inschrijving is bevestigd.",
-   EnrollmentResult.AlreadyConfirmed=>"De inschrijving was al bevestigd.",
-   EnrollmentResult.Locked=>"Deze inschrijving kan niet meer worden aangepast. Neem voor een wijziging contact op met de organisatie.",
-   EnrollmentResult.Conflict=>"De inschrijving is inmiddels gewijzigd. Controleer de actuele gegevens en probeer opnieuw.",
-   EnrollmentResult.TooEarly=>"Je kunt bevestigen vanaf de dag na de sluitingsdatum.",
-   EnrollmentResult.Waitlisted=>"Je kunt bevestigen zodra de organisatie je koor heeft geplaatst.",
-   EnrollmentResult.MissingRegistration=>"Er is geen inschrijving voor dit koor gevonden.",
-   EnrollmentResult.AlreadyRegistered=>"Dit koor is al aangemeld voor deze editie. De bestaande gegevens zijn behouden.",
-   EnrollmentResult.Forbidden=>"Je hebt geen toestemming om dit koor in te schrijven.",
-   EnrollmentResult.Closed=>"De inschrijfperiode is gesloten. Je aanmelding is niet opgeslagen.",
-   EnrollmentResult.Incomplete=>"De gegevens van het koor zijn nog niet compleet. Vul de onderstaande punten eerst aan.",
-   EnrollmentResult.Invalid=>"Controleer het aantal deelnemers, het podiumtype en de voorkeur voor optredens.",
-   _=>"De actuele festivaleditie is gewijzigd of niet meer beschikbaar. Open deze pagina opnieuw."
+   EnrollmentResult.Saved=>edit?T("DeWijzigingenZijnOpgeslagen"):T("DeAanmeldingIsOpgeslagen"),
+   EnrollmentResult.Confirmed=>T("DeInschrijvingIsBevestigd"),
+   EnrollmentResult.AlreadyConfirmed=>T("DeInschrijvingWasAlBevestigd"),
+   EnrollmentResult.Locked=>T("DezeInschrijvingKanNietMeerWordenAangepast"),
+   EnrollmentResult.Conflict=>T("DeInschrijvingIsInmiddelsGewijzigdControleerDe"),
+   EnrollmentResult.TooEarly=>T("JeKuntBevestigenVanafDeDagNa"),
+   EnrollmentResult.Waitlisted=>T("JeKuntBevestigenZodraDeOrganisatieJe"),
+   EnrollmentResult.MissingRegistration=>T("ErIsGeenInschrijvingVoorDitKoor"),
+   EnrollmentResult.AlreadyRegistered=>T("DitKoorIsAlAangemeldVoorDeze"),
+   EnrollmentResult.Forbidden=>T("JeHebtGeenToestemmingOmDitKoor2"),
+   EnrollmentResult.Closed=>T("DeInschrijfperiodeIsGeslotenJeAanmeldingIs"),
+   EnrollmentResult.Incomplete=>T("DeGegevensVanHetKoorZijnNog"),
+   EnrollmentResult.Invalid=>T("ControleerHetAantalDeelnemersHetPodiumtypeEn"),
+   _=>T("DeActueleFestivaleditieIsGewijzigdOfNiet")
   };
-  view=await Service.ViewAsync(Actor,Group,Context.HttpContext!.RequestAborted);
+  showCompletion = result is EnrollmentResult.Saved or EnrollmentResult.Confirmed;
+  await LoadViewAsync();
+  if (showCompletion) return;
   Input=null;
   Confirmation=null;
   InitializeForms();
  }
- private static string PreferenceLabel(int inside,int outside)=>(inside,outside) switch{(1,1)=>"Eén binnen, één buiten",(0,2)=>"Twee buiten",(2,0)=>"Twee binnen",_=>"Niet vastgelegd"};
+ private string IssueLabel(string issue) => issue switch
+ {
+    "Dit koor is niet actief. Neem contact op met de organisatie." => T("InschrijvingDitKoorIsNietActief"),
+    "Vul de naam, standplaats, het land en genre in bij het koorprofiel." => T("InschrijvingVulDeNaamStandplaatsHet"),
+    "Vul een geldig IBAN in bij het koorprofiel." => T("InschrijvingVulEenGeldigIBANIn"),
+    "Koppel een actieve dirigent via Personen en rollen." => T("InschrijvingKoppelEenActieveDirigentVia"),
+    "Koppel minstens één actieve eerste contactpersoon." => T("InschrijvingKoppelMinstensNActieveEerste"),
+    "Iedere eerste contactpersoon moet een geldig vast of mobiel telefoonnummer hebben." => T("InschrijvingIedereEersteContactpersoonMoetEen"),
+    _ => issue
+ };
+
+ private string PreferenceLabel(int inside,int outside)=>(inside,outside) switch{(1,1)=>T("EenBinnenEenBuiten"),(0,2)=>T("TweeBuiten"),(2,0)=>T("TweeBinnen"),_=>T("NietVastgelegd")};
 }

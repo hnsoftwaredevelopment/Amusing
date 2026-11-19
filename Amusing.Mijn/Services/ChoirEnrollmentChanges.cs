@@ -14,7 +14,7 @@ public sealed partial class ChoirEnrollments
         await using var connection = await source.OpenConnectionAsync(ct);
         await using var tx = await connection.BeginTransactionAsync(ct);
         var roles = await RolesAsync(connection, tx, group, true, ct);
-        if (!Contact(roles, actor)) return EnrollmentResult.Forbidden;
+        if (!SupportMode.CanSupport(supportContext,actor,group) && !Contact(roles, actor)) return EnrollmentResult.Forbidden;
         var choir = await GroupAsync(connection, tx, group, true, ct);
         if (choir is not { Active: true }) return EnrollmentResult.Forbidden;
 
@@ -49,6 +49,9 @@ public sealed partial class ChoirEnrollments
             Add(confirm, "@festival", festivalId);
             Add(confirm, "@group", group);
             await confirm.ExecuteNonQueryAsync(ct);
+            var amount = await ParticipationAmountAsync(connection, festivalId, current, ct, tx);
+            if (amount is not null)
+                await SaveNoteAsync(connection, tx, group, festival, choir.Name, current, today, amount, ct);
             action = "FestivalEnrollmentConfirmed";
             fields = "Confirmed";
         }
@@ -82,14 +85,21 @@ public sealed partial class ChoirEnrollments
             Add(update, "@festival", festivalId);
             Add(update, "@group", group);
             await update.ExecuteNonQueryAsync(ct);
+            if (changes.Contains("Headcount") || changes.Contains("PodiumType"))
+            {
+                var updated = current with { Headcount = (uint)edit.Headcount, PodiumType = edit.PodiumType,
+                    Review = edit.Review, Indoors = indoors, Outdoors = outdoors };
+                await QueueEnrollmentMailAsync(connection,tx,festival,group,choir.Name,updated,ct,noteOnly:true);
+            }
             action = "FestivalEnrollmentUpdated";
             fields = string.Join(",", changes);
         }
 
         await using var audit = Command(connection, tx, """
             INSERT INTO mijn_audit_log(occurred_at,actor_type,actor_id,action,group_id,festival_id,changed_fields)
-            VALUES(UTC_TIMESTAMP(6),'choir_person',@actor,@action,@group,@festival,@fields)
+            VALUES(UTC_TIMESTAMP(6),@actorType,@actor,@action,@group,@festival,@fields)
             """);
+        Add(audit, "@actorType", SupportMode.AuditType(supportContext,actor,group));
         Add(audit, "@actor", actor);
         Add(audit, "@action", action);
         Add(audit, "@group", group);

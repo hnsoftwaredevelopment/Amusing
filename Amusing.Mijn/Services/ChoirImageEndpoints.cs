@@ -45,5 +45,5 @@ public static class ChoirImageEndpoints
         }).RequireAuthorization();
     }
     private static uint Actor(HttpContext context)=>uint.Parse(context.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-    private static IResult Redirect(long group,string status,string? message=null)=>Results.LocalRedirect($"/koor/{group}?afbeelding={status}"+(message is null?"":"&uploadmelding="+Uri.EscapeDataString(message))+"#afbeeldingen");
+    private static IResult Redirect(long group,string status,string? message=null)=>Results.LocalRedirect($"/koor/{group}?tab=afbeeldingen&afbeelding={status}"+(message is null?"":"&uploadmelding="+Uri.EscapeDataString(message))+"#afbeeldingen");
 }

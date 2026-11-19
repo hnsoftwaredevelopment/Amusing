@@ -7,7 +7,7 @@ public partial class LoginTests
 {
     private async Task<(string Token,string Version)> ImageForm()
     {
-        var html=await client.GetStringAsync("/koor/1");
+        var html=await client.GetStringAsync("/koor/1?tab=afbeeldingen");
         var form=Regex.Match(html,"<form[^>]*action=\"/koor/1/afbeelding/foto\"[^>]*>(.*?)</form>",RegexOptions.Singleline).Groups[1].Value;
         string Value(string name)=>WebUtility.HtmlDecode(Regex.Match(form,"name=\""+name+"\"[^>]*value=\"([^\"]+)\"").Groups[1].Value);
         return (Value("__RequestVerificationToken"),Value("version"));

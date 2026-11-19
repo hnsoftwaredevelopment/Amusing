@@ -5,7 +5,21 @@ public partial class LoginTests
     private async Task InitializeEnrollments()
     {
         await Execute(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory,"enrollment-schema.sql")));
+        await Execute(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "006-deelnemerstarieven.sql")));
         await Execute("DELETE FROM ah_inschrijvingen; DELETE FROM ah_podia_typen; DELETE FROM ah_festivals; INSERT INTO ah_festivals(festival_id,festivaldatum,start_inschrijving,eind_inschrijving,wachtlijst) VALUES(2027,'2027-06-05','2026-11-01 10:00:00','2027-02-28 10:00:00',0); INSERT INTO ah_podia_typen(type,versie,prijs,beschrijving) VALUES('A',2026,0,'Testpodium A'),('B',2026,0,'Testpodium B'),('C',2025,0,'Oud type'),('Z',2028,0,'Toekomstig type');");
+        await Execute(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "008-inschrijfmail.sql")));
+        await Execute(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "009-deelname-notas.sql")));
+        await Execute(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "016-mailroutering.sql")));
+        await Execute(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "017-notamail.sql")));
+        var mailingTemplates = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "018-mailingsjablonen.sql"));
+        await Execute(mailingTemplates);
+        await Execute("DELETE FROM mijn_mailingsjablonen");
+        await Execute(mailingTemplates);
+        await Execute(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "019-mailopmaak.sql")));
+        await Execute(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "022-wachtlijstplaatsing.sql")));
+        await Execute("DELETE FROM mijn_wachtlijstplaatsingen");
+        await Execute("DELETE FROM mijn_inschrijfmail; DELETE FROM mijn_deelname_notas");
+        await Execute(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "007-festivaltarieven.sql")));
     }
     private sealed class FixedFestivalClock : IFestivalClock { public DateTime Now { get; set; } = new(2026,11,5,12,0,0); }
     private static EnrollmentInput ValidEnrollment()=>new(){FestivalId=2027,Headcount=35,PodiumType="A",Preference="11",Review=true};
@@ -104,6 +118,7 @@ public partial class LoginTests
     {
         await ReadyChoir();await Login();
         var html=await client.GetStringAsync("/koor/1/inschrijven");
+        Assert.DoesNotContain("Input.Review", html);
         var token=System.Net.WebUtility.HtmlDecode(System.Text.RegularExpressions.Regex.Match(html,"name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"").Groups[1].Value);
         var fields=new Dictionary<string,string>{["_handler"]="festival-enrollment",["Input.FestivalId"]="2027",["Input.Headcount"]="35",["Input.PodiumType"]="A",["Input.Preference"]="02",["Input.Review"]="true"};
         Assert.Equal(System.Net.HttpStatusCode.BadRequest,(await client.PostAsync("/koor/1/inschrijven",new FormUrlEncodedContent(fields))).StatusCode);
@@ -112,6 +127,14 @@ public partial class LoginTests
         var body=await response.Content.ReadAsStringAsync();
         Assert.Equal(System.Net.HttpStatusCode.OK,response.StatusCode);
         Assert.Contains("De aanmelding is opgeslagen",body);
+        Assert.Contains("action=\"/\"", body);
+        Assert.Contains(">Sluiten</button>", body);
+        Assert.DoesNotContain("Input.Headcount", body);
+        var registration = (await new ChoirEnrollments(source,new FixedFestivalClock()).ViewAsync(42,1,default))!.Registration!;
+        Assert.Equal((0, 2), ((int)registration.Indoors, (int)registration.Outdoors));
+        Assert.False(registration.Review);
+        var reopened = await client.GetStringAsync("/koor/1/inschrijven");
+        Assert.Contains("Twee buiten", reopened);
         fields["Input.Headcount"]="99";
         response=await client.PostAsync("/koor/1/inschrijven",new FormUrlEncodedContent(fields));
         Assert.Contains("al aangemeld",await response.Content.ReadAsStringAsync());

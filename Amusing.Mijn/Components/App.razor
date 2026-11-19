@@ -1,5 +1,7 @@
+@using Amusing.Mijn.Services
+@inject SiteLanguage SiteLanguage
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="@language">
 
 <head>
     <meta charset="utf-8" />
@@ -16,6 +18,13 @@
 <body>
     <Routes />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script src="@Assets["password-toggle.js"]"></script>
+    <script src="@Assets["choir-file.js"]"></script>
 </body>
 
 </html>
+
+@code {
+    private string language = "nl";
+    protected override async Task OnInitializedAsync() => language = await SiteLanguage.GetAsync();
+}
