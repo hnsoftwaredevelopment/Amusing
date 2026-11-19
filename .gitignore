@@ -381,3 +381,8 @@ SynfusionLicense.txt
 !.env.example
 *.eml
 *.sql.gz
+.playwright-cli/
+
+# Versioned source release records
+!docs/releases/
+!docs/releases/**

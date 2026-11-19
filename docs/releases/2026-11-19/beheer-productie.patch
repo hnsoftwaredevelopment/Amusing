@@ -1,0 +1,22 @@
+diff --git a/Amusing/Components/Pages/MaintenanceUsers.razor b/Amusing/Components/Pages/MaintenanceUsers.razor
+index 6fc2fde..e082d09 100644
+--- a/Amusing/Components/Pages/MaintenanceUsers.razor
++++ b/Amusing/Components/Pages/MaintenanceUsers.razor
+@@ -37,8 +37,6 @@ else
+                     <div class="form-left"> 
+                         <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
+                             <SfTextBox Placeholder="Gebruikersnaam" FloatLabelType="FloatLabelType.Always" Width="120px" @bind-Value="UserUsername" />
+-                            <label>Privéhersteladres <input type="email" maxlength="80" @bind="UserRecoveryEmail" /></label>
+-                            <label>Weergavenaam voor koren <input maxlength="100" @bind="UserDisplayName" /></label>
+                             <SfComboBox TValue="string" TItem="UserRoles" FloatLabelType="FloatLabelType.Always"
+                                         Placeholder="Rol" DataSource="@Roles" Width="170px" @bind-Value="UserRole" >
+                                 <ComboBoxFieldSettings Value="Role" Text="Role"></ComboBoxFieldSettings>
+diff --git a/Amusing/Program.cs b/Amusing/Program.cs
+index 5792701..f712d6a 100644
+--- a/Amusing/Program.cs
++++ b/Amusing/Program.cs
+@@ -224,3 +224,4 @@ app.MapBlazorHub();
+ app.MapFallbackToPage("/_Host");
+ 
+ app.Run();
++

@@ -74,3 +74,5 @@ Bevestigen kan vanaf de dag na de sluitingsdatum volgens de Nederlandse kalender
 Opslaan controleert de actuele rol en de versie van de getoonde gegevens. Een oud formulier kan geen recentere wijziging bevestigen of overschrijven. Een tweede bevestigingsverzoek behoudt de eerste bevestiging en schrijft geen tweede auditrecord. Wijziging of bevestiging en de bijbehorende logregel worden samen opgeslagen.
 
 Open een bestaande inschrijving op dev.mijn en kies **Wijzigingen opslaan**. Open dezelfde pagina in twee tabbladen om de controle op verouderde gegevens te proberen. De bevestigingsknop verschijnt pas na de sluitingsdatum van de editie. De gerichte tests controleren het bevestigingsformulier met een testdatum na sluiting, inclusief wachtlijst, betaling, afmelding en terugdraaien bij een auditfout.
+
+Bij de test met Testkoor Mailopvang stonden 20 deelnemers, podium B en twee buitenoptredens vanaf de eerste aanmelding in de database. Het uitklapmenu selecteert nu ook expliciet de opgeslagen voorkeur na opslaan en heropenen.
