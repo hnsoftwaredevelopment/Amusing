@@ -53,7 +53,7 @@ public static class MijnTemplateReference
         "Datum inschrijving" => "Oorspronkelijke datum van inschrijving. Een wijziging van de inschrijving verschuift deze datum niet.",
         "EindeInschrijvingFestival" => "Sluitingsdatum van de inschrijfperiode van de editie.",
         "UitersteBetaaldatum" => "Alleen de uiterste betaaldatum. Normaal de vroegste van zes weken na inschrijving en de sluitingsdatum. Bij wachtlijstplaatsing rekenen we vanaf plaatsing. Na sluiting kiest Beheer de datum. Leeg als benodigde historische datums ontbreken.",
-        "Betaaltermijn" => "Een complete betaalzin met de berekende datum. In het Nederlands wordt vlak voor de vervaldatum ‘Voldoe de nota voor …’ gebruikt, anders ‘Voldoe de nota uiterlijk op …’. Bij kopieën kan deze datum in het verleden liggen.",
+        "Betaaltermijn" => "Een complete betaalzin met zes weken en de berekende uiterste datum. In het Nederlands wordt vlak voor de vervaldatum de korte tekst ‘Voldoe de nota voor …’ gebruikt. Bij kopieën kan deze datum in het verleden liggen.",
         "Kenmerk" => "Betalingskenmerk AM-festivalnummer-koornummer. Het festivalnummer is een database-ID en kan afwijken van het editiejaar.",
         _ => ""
     };

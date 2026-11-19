@@ -65,7 +65,7 @@ Het schermvoorbeeld biedt een aparte situatie voor een wachtlijstinschrijving. G
 | `{Datum inschrijving}` | Oorspronkelijke inschrijfdatum. Een wijziging van de inschrijving verschuift deze datum niet. |
 | `{EindeInschrijvingFestival}` | Sluitingsdatum van de editie. |
 | `{UitersteBetaaldatum}` | Alleen de vroegste datum van inschrijving plus 42 dagen en sluitingsdatum. Leeg als benodigde historische datums ontbreken. |
-| `{Betaaltermijn}` | Een complete vertaalde betaalzin met de berekende datum. Bijvoorbeeld Voldoe de nota uiterlijk op 26 februari 2027. Vlak voor sluiting wordt dit Voldoe de nota voor 1 april 2027. |
+| `{Betaaltermijn}` | Een complete vertaalde betaalzin met de berekende datum. Bijvoorbeeld Voldoe de nota binnen 6 weken; voor u is dit uiterlijk op 26 februari 2027. Vlak voor sluiting wordt dit Voldoe de nota voor 1 april 2027. |
 | `{Kenmerk}` | Betalingskenmerk, bijvoorbeeld AM-23-123. Het eerste nummer is het festival-ID uit de database. Dat kan afwijken van het editiejaar. |
 
 We registreren betaald of onbetaald. Een bedrag voor reeds betaald of een resterend saldo wordt niet berekend. Een kopienota van een eerdere editie kan een historische betaaltermijn bevatten. Gebruik daarvoor de gewenste eigen tekst in het kopiesjabloon. De datum wordt niet automatisch vervangen door een nieuwe betaaltermijn.

@@ -72,7 +72,7 @@ public sealed partial class ChoirEnrollments
         if (placement && (noteMailId is null || primaryContact is null))
             throw new InvalidOperationException("Voor plaatsing ontbreken een nota of contactpersoon.");
         if (noteOnly) return;
-        string[] organisationMailboxes = ["koren", "penningmeester", "voorzitter"];
+        string[] organisationMailboxes = ["koren", "info"];
         ulong? confirmationId = null;
         if (primaryContact is not null)
         {

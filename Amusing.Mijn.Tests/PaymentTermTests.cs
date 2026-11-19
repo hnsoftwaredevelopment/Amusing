@@ -6,6 +6,13 @@ namespace Amusing.Mijn.Tests;
 public sealed class PaymentTermTests
 {
     [Theory]
+    [InlineData("nl", "Voldoe de nota binnen 6 weken; voor u is dit uiterlijk op 31 december 2026.")]
+    [InlineData("de", "Bitte begleichen Sie die Rechnung innerhalb von 6 Wochen, spätestens jedoch bis zum 31 Dezember 2026.")]
+    [InlineData("en", "Please pay the invoice within 6 weeks; your payment deadline is 31 December 2026.")]
+    public void SixWeekPaymentTextIncludesTheConcreteDeadline(string language,string expected) =>
+        Assert.Equal(expected,NotaBetaaltermijn.Tekst(new(2026,11,19),new(2027,4,1),new(2026,11,19),language));
+
+    [Theory]
     [InlineData(2027, 1, 1, 2027, 2, 12)]
     [InlineData(2027, 3, 31, 2027, 4, 1)]
     [InlineData(2027, 4, 1, 2027, 4, 1)]

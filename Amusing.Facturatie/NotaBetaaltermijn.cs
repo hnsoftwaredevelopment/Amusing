@@ -19,9 +19,9 @@ public static class NotaBetaaltermijn
         var date = due.ToString("d MMMM yyyy",culture);
         return taal switch
         {
-            "de" => $"Bitte begleichen Sie die Rechnung bis zum {date}.",
-            "en" => $"Please pay the invoice by {date}.",
-            _ => due.DayNumber - uitgegeven.DayNumber <= 1 ? $"Voldoe de nota voor {date}." : $"Voldoe de nota uiterlijk op {date}."
+            "de" => $"Bitte begleichen Sie die Rechnung innerhalb von 6 Wochen, spätestens jedoch bis zum {date}.",
+            "en" => $"Please pay the invoice within 6 weeks; your payment deadline is {date}.",
+            _ => due.DayNumber - uitgegeven.DayNumber <= 1 ? $"Voldoe de nota voor {date}." : $"Voldoe de nota binnen 6 weken; voor u is dit uiterlijk op {date}."
         };
     }
 }
