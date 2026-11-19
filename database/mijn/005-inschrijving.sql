@@ -4,7 +4,7 @@ INSERT IGNORE INTO ah_festivals(festival_id,festivaldatum,start_inschrijving,ein
  VALUES(2027,'2027-06-05','2026-11-01 00:00:00','2027-02-28 23:59:59',0);
 INSERT IGNORE INTO ah_podia_typen(type,versie,prijs,beschrijving) VALUES
  ('A',2027,0,'Synthetisch testpodium A: basisopstelling. Geen definitieve festivalvoorwaarden.'),
- ('B',2027,0,'Synthetisch testpodium B: uitgebreidere opstelling. Geen definitieve festivalvoorwaarden.');
+ ('B',2027,25,'Synthetisch testpodium B: uitgebreidere opstelling. Geen definitieve festivalvoorwaarden.');
 INSERT IGNORE INTO ah_zanggroepen(zanggroep_id,naam,genre_id,standplaats,land,website,beschrijving,rekeningnr,actief)
  VALUES(5,'Testkoor Inschrijving',1,'Hengelo','NL','','Voor de eerste testinschrijving.','NL91ABNA0417164300',1),
        (6,'Testkoor Nog aanvullen',1,'Hengelo','NL','','Vul eerst IBAN en dirigent aan.','',1);
