@@ -46,6 +46,8 @@ else
 							</DropDownListTemplates>
 						</SfDropDownList>
 
+						@if (SelectedMijnMailType is null)
+						{
 						<SfComboBox TValue="uint?" TItem="RecipientListModel"
 									DataSource="@RecipientsList"
 									Width="32%" FloatLabelType="FloatLabelType.Always"
@@ -54,16 +56,42 @@ else
 									Placeholder="Ontvangerslijst">
 							<ComboBoxFieldSettings Value="ListId" Text="ListName"></ComboBoxFieldSettings>
 						</SfComboBox>
+						}
+						else
+						{
+							<SfDropDownList TValue="string" TItem="MijnMailLanguage" DataSource="MijnMailLanguages"
+										Width="32%" FloatLabelType="FloatLabelType.Always" Placeholder="Taal"
+										@bind-Value="mijnMailLanguage">
+								<DropDownListFieldSettings Value="Code" Text="Label" />
+							</SfDropDownList>
+						}
 					</div>
 				}
+				@if (SelectedMijnMailType is null)
+				{
 				<div class="inline-row template-detail-row">
 					<SfTextBox Placeholder="Sjabloonnaam" FloatLabelType="FloatLabelType.Always" Width="42%" @bind-Value="_selectedTemplatesList.TemplateName" />
 					<SfTextBox Placeholder="Aangemaakt" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="_selectedTemplatesList.TemplateCreated" />
 					<SfTextBox Placeholder="Laatste wijziging" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="_selectedTemplatesList.TemplateChanged" />
 				</div>
+				}
+				else
+				{
+					<div class="inline-row template-detail-row">
+						<SfTextBox Placeholder="Sjabloonnaam" Readonly="true" FloatLabelType="FloatLabelType.Always" Width="42%"
+								   Value="@_selectedTemplatesList.TemplateName" />
+					</div>
+				}
 			</div>
 		</div>
 
+		@if (SelectedMijnMailType is { } mijnMailType)
+		{
+			<MijnMailingTemplates @key="mijnMailType" TemplateType="@mijnMailType" SelectedLanguage="@mijnMailLanguage"
+								  EditorToolbar="_rteToolbarItems" />
+		}
+		else
+		{
 		<!-- Toolbar -->
 		<div class="mail-template-toolbar">
 			@if ( showSavedMessage )
@@ -171,6 +199,7 @@ else
 				</div>
 			</div>
 		</div>
+		}
 	</div>
 
 	<SfDialog @bind-Visible="_showPreviewDialog" Width="1100px">

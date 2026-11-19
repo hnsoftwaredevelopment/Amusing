@@ -1,0 +1,71 @@
+{
+  "project": "KAN",
+  "site": "https://hnsoftwaredevelopment.atlassian.net",
+  "team": "DevTeam",
+  "synchronizationStatus": "synced",
+  "items": [
+    {
+      "acceptanceCriteria": [
+        "Per sjabloon uitleg en fictieve voorbeeldwaarden tonen",
+        "Editorinhoud met passende situaties als schermvoorbeeld tonen",
+        "Onbekende variabelen melden en bij voorbeeldweergave geen gegevens opslaan"
+      ],
+      "subprojectLabel": "Amusing.Mijn",
+      "projectLabel": "amusing",
+      "epic": "Amusing Mijn",
+      "result": "Uitgevoerd op dev.beheer. Negen Beheer-tests, vier betaaltermijntests en browsercontrole geslaagd. Herbert heeft goedgekeurd.",
+      "summary": "Variabelenoverzicht en schermvoorbeeld voor Mijn-mailsjablonen",
+      "commitLinks": [],
+      "pullRequestLinks": [],
+      "desiredStatus": "Done",
+      "subtasks": [
+        {
+          "summary": "Variabelenoverzicht en handleiding",
+          "desiredStatus": "Done",
+          "jiraKey": "KAN-10"
+        },
+        {
+          "summary": "Schermvoorbeeld en voorbeeldsituaties",
+          "desiredStatus": "Done",
+          "jiraKey": "KAN-11"
+        },
+        {
+          "summary": "Testen en praktijkacceptatie",
+          "desiredStatus": "Done",
+          "jiraKey": "KAN-12"
+        }
+      ],
+      "jiraKey": "KAN-5",
+      "epicKey": "KAN-2"
+    },
+    {
+      "acceptanceCriteria": [
+        "Per gekozen Beheer-sjabloon de toepasbare variabelen met uitleg tonen"
+      ],
+      "subprojectLabel": "Amusing.Beheer",
+      "projectLabel": "amusing",
+      "epic": "Amusing Beheer",
+      "summary": "Variabelenoverzicht voor overige Beheer-mailsjablonen",
+      "pullRequestLinks": [],
+      "commitLinks": [],
+      "description": "Gebruikerswens van Herbert. Pas het uitklapbare overzicht met uitleg ook toe op de overige Beheer-sjablonen. Dit wordt later in het Beheer-project opgepakt en valt buiten het Mijn-project.",
+      "desiredStatus": "Todo",
+      "subtasks": [
+        {
+          "summary": "Beschikbare variabelen en betekenis per Beheer-sjabloontype inventariseren",
+          "desiredStatus": "Todo",
+          "jiraKey": "KAN-13"
+        },
+        {
+          "summary": "Uitklapbaar variabelenoverzicht toevoegen en controleren",
+          "desiredStatus": "Todo",
+          "jiraKey": "KAN-14"
+        }
+      ],
+      "jiraKey": "KAN-6",
+      "epicKey": "KAN-3"
+    }
+  ],
+  "reason": "Sjablonenplan eerder gesynchroniseerd; aanvullende backlog is op 19 november 2026 op verzoek van Herbert in deze chat aangemaakt en teruggelezen. Zie openstaande-punten.md.",
+  "date": "2026-11-19"
+}

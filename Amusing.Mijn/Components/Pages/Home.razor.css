@@ -1,0 +1,102 @@
+.dashboard-heading, .choir-actions, .account-actions {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+.dashboard-heading, .choir-actions { justify-content: space-between; }
+.dashboard-heading { margin-bottom: 1rem; }
+.dashboard-heading h1 { margin: 0; }
+.choir-actions { margin-bottom: 1.5rem; }
+.icon-button {
+    position: relative;
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #b4c7d6;
+    border-radius: .5rem;
+    background: white;
+    color: #014983;
+    cursor: pointer;
+    list-style: none;
+}
+.icon-button::-webkit-details-marker { display: none; }
+.icon-button svg { width: 1.35rem; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.icon-button:hover, .choir-button:hover { background: #e7eefb; }
+.account-settings { position: relative; }
+.settings-panel {
+    position: absolute;
+    z-index: 1;
+    top: calc(100% + .5rem);
+    inset-inline-end: -3.5rem;
+    width: min(16rem, calc(100vw - 3rem));
+    padding: 1rem;
+    border: 1px solid #b4c7d6;
+    border-radius: .5rem;
+    background: white;
+    box-shadow: 0 .35rem 1.2rem #183c3820;
+}
+.settings-panel a { display: block; margin-block: .35rem; }
+.settings-panel button, .register-button { background: #014983; }
+.register-button { margin: 0; }
+.invitation-badge {
+    position: absolute;
+    top: -.35rem;
+    inset-inline-end: -.35rem;
+    min-width: 1.2rem;
+    padding: 0 .18rem;
+    border-radius: 1rem;
+    background: #98273b;
+    color: white;
+    font-size: .75rem;
+    line-height: 1.35rem;
+}
+.choir-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: 1rem; }
+.choir-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .65rem;
+    min-height: 6rem;
+    box-sizing: border-box;
+    padding: .85rem;
+    border: 1px solid #b4c7d6;
+    border-radius: .65rem;
+    background: white;
+    color: #014983;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 650;
+    overflow-wrap: anywhere;
+}
+.choir-button img { width: 100%; max-width: 9rem; height: 3.5rem; object-fit: contain; }
+
+.choir-tile { display: flex; flex-direction: column; gap: .55rem; }
+.choir-tile .choir-button { flex: 1; }
+.enrollment-shortcut {
+    background: #014983;
+    color: white;
+    padding: .55rem .7rem;
+    border-radius: .45rem;
+    text-align: center;
+    text-decoration: none;
+    font-size: .9rem;
+    font-weight: 650;
+}
+.enrollment-shortcut:hover { background: #003863; }
+.invitation-notice {
+    position: fixed;
+    inset: 20vh 1rem auto;
+    width: min(32rem, calc(100vw - 2rem));
+    margin-inline: auto;
+    padding: 1.5rem;
+    border: 2px solid #014983;
+    border-radius: .6rem;
+    box-shadow: 0 .6rem 2rem #0003;
+    z-index: 100;
+}
+.invitation-notice h2 { font-size: 1.25rem; }

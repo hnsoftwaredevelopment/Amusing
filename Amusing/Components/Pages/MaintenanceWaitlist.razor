@@ -1,0 +1,118 @@
+@page "/Maintenance-Waitlist"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using Microsoft.AspNetCore.Components.Authorization
+@inject WaitlistService Waitlist
+@inject EditionService EditionService
+@inject AuthenticationStateProvider Authentication
+@inject ILogger<MaintenanceWaitlist> Logger
+
+<PageTitle>Wachtlijst — Amusing Beheer</PageTitle>
+<section class="waitlist-page">
+    <a href="/Maintenance-Subscriptions">← Inschrijvingen</a>
+    <h3>Wachtlijst</h3>
+    <label for="waitlist-edition">Festivaleditie</label>
+    <select id="waitlist-edition" class="form-select" value="@selectedEdition" @onchange="EditionChangedAsync" disabled="@busy">
+        @foreach(var edition in editions){<option value="@edition.ID">@edition.Text</option>}
+    </select>
+    @if(message is not null){<p role="status" class="@(failed?"text-danger":"text-success")">@message</p>}
+    @if(view is null){<p>Kies een beschikbare festivaleditie.</p>}
+    else
+    {
+        <p>Bij plaatsen ontvangt contactpersoon 1 een plaatsingsbericht. De nota gaat naar de penningmeester, met contactpersoon 1 als terugval. De overige koren blijven op de wachtlijst.</p>
+        @if(Waitlist.Today>DateOnly.FromDateTime(view.Festival)){<p>Deze festivaleditie is voorbij. Plaatsen is niet meer mogelijk.</p>}
+        else if(Waitlist.Today>DateOnly.FromDateTime(view.Closing))
+        {
+            <label for="waitlist-due">Uiterste betaaldatum voor deze plaatsingen</label>
+            <InputDate id="waitlist-due" class="form-control" @bind-Value="manualDue" min="@Waitlist.Today.ToString("yyyy-MM-dd")" disabled="@busy" />
+            <p>De inschrijving is gesloten. Kies de uiterste betaaldatum voor de geselecteerde koren.</p>
+        }
+        else
+        {
+            <p>Uiterste betaaldatum bij plaatsing vandaag: <strong>@Amusing.Facturatie.NotaBetaaltermijn.UitersteDatum(Waitlist.Today,DateOnly.FromDateTime(view.Closing))?.ToString("dd-MM-yyyy")</strong>.</p>
+        }
+        <div class="waitlist-actions">
+            <button class="btn btn-primary" type="button" @onclick="PlaceAsync" disabled="@(busy || selected.Count==0 || Waitlist.Today>DateOnly.FromDateTime(view.Festival))">Geselecteerde koren plaatsen (@selected.Count)</button>
+            <button class="btn btn-outline-primary" type="button" @onclick="RefreshAsync" disabled="@busy">Verversen</button>
+        </div>
+        @if(view.Choirs.Count==0){<p>Er staan geen actieve koren op de wachtlijst van deze editie.</p>}
+        else
+        {
+            <div class="waitlist-table"><table class="table table-striped">
+                <thead><tr><th scope="col">Plaatsen</th><th scope="col">Koor</th><th scope="col">Aangemeld</th><th scope="col">Deelnemers</th><th scope="col">Podium</th><th scope="col">Controle</th></tr></thead>
+                <tbody>@foreach(var choir in view.Choirs)
+                {
+                    <tr><td><input type="checkbox" aria-label="@($"{choir.Name} selecteren voor plaatsing")" checked="@selected.Contains(choir.Id)" @onchange="e=>Toggle(choir.Id,e)" disabled="@(busy || choir.Problem is not null)" /></td>
+                        <th scope="row">@choir.Name</th><td>@(choir.Registered?.ToString("dd-MM-yyyy") ?? "Onbekend")</td><td>@choir.Headcount</td><td>@choir.Stage</td><td class="text-danger">@choir.Problem</td></tr>
+                }</tbody>
+            </table></div>
+        }
+        @if(view.Placements.Count>0)
+        {
+            <h4>Recente plaatsingen</h4>
+            <div class="waitlist-table"><table class="table">
+                <thead><tr><th scope="col">Koor</th><th scope="col">Geplaatst</th><th scope="col">Uiterste betaaldatum</th><th scope="col">Bericht en nota</th></tr></thead>
+                <tbody>@foreach(var placement in view.Placements)
+                {
+                    <tr><th scope="row">@placement.Name</th><td>@TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(placement.Placed,DateTimeKind.Utc),TimeZoneInfo.FindSystemTimeZoneById("Europe/Amsterdam")).ToString("dd-MM-yyyy HH:mm")</td><td>@placement.Due.ToString("dd-MM-yyyy")</td><td>@(placement.Queued ? "Klaargezet voor verzending" : placement.Problem ?? "Worden klaargezet")</td></tr>
+                }</tbody>
+            </table></div>
+        }
+    }
+</section>
+
+@code {
+    [SupplyParameterFromQuery(Name="festival")] public string? Festival { get; set; }
+    private List<Edition> editions=[];
+    private WaitlistOverview? view;
+    private uint selectedEdition;
+    private readonly HashSet<uint> selected=[];
+    private DateOnly? manualDue;
+    private bool busy,failed;
+    private string? message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        editions=await EditionService.GetEditionsAsync();
+        selectedEdition=uint.TryParse(Festival,out var requested) ? requested : (uint.TryParse(editions.FirstOrDefault()?.ID,out var id)?id:0);
+        await RefreshAsync();
+    }
+    private void Toggle(uint group,ChangeEventArgs e)
+    {
+        if(e.Value is true) selected.Add(group); else selected.Remove(group);
+    }
+    private async Task EditionChangedAsync(ChangeEventArgs e)
+    {
+        if(!uint.TryParse(e.Value?.ToString(),out selectedEdition)) return;
+        manualDue=null; message=null;
+        await RefreshAsync();
+    }
+    private async Task RefreshAsync()
+    {
+        selected.Clear();
+        try { view=await Waitlist.ReadAsync(selectedEdition); }
+        catch(Exception ex) when(ex is MySqlConnector.MySqlException)
+        {
+            Logger.LogWarning(ex,"De wachtlijst kon niet worden geladen.");
+            failed=true; message="De wachtlijst kon niet worden geladen. Probeer het opnieuw.";
+        }
+    }
+    private async Task PlaceAsync()
+    {
+        if(busy) return;
+        busy=true;
+        try
+        {
+            var user=(await Authentication.GetAuthenticationStateAsync()).User;
+            var result=await Waitlist.PlaceAsync(user,selectedEdition,selected.ToArray(),manualDue);
+            failed=result.Error is not null;
+            message=result.Error ?? $"{result.Placed} koor/koren geplaatst. Het plaatsingsbericht en de nota worden klaargezet. {result.Skipped} inmiddels gewijzigde inschrijving(en) overgeslagen.";
+            await RefreshAsync();
+        }
+        catch(MySqlConnector.MySqlException ex)
+        {
+            Logger.LogWarning(ex,"De wachtlijstplaatsing kon niet worden opgeslagen.");
+            failed=true; message="De plaatsing kon niet worden opgeslagen. Ververs de lijst en probeer het opnieuw.";
+        }
+        finally { busy=false; }
+    }
+}

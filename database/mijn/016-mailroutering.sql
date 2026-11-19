@@ -1,0 +1,3 @@
+ALTER TABLE mijn_inschrijfmail
+    ADD COLUMN IF NOT EXISTS aanvrager_id INT UNSIGNED NULL,
+    ADD COLUMN IF NOT EXISTS aanvrager_type VARCHAR(20) NULL;

@@ -1,0 +1,4 @@
+ALTER TABLE mijn_inschrijfmail
+    ADD COLUMN IF NOT EXISTS nota_gegevens JSON NULL,
+    ADD COLUMN IF NOT EXISTS ontvanger_rol VARCHAR(30) NULL,
+    ADD COLUMN IF NOT EXISTS afhankelijk_van BIGINT UNSIGNED NULL;

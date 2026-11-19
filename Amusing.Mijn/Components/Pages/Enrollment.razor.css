@@ -1,0 +1,44 @@
+.participation-amount {
+    width: 100%;
+    max-width: 30rem;
+    border-collapse: collapse;
+}
+
+.participation-amount th,
+.participation-amount td {
+    padding: .25rem 0;
+    text-align: left;
+}
+
+.participation-amount tbody th {
+    font-weight: normal;
+}
+
+.participation-amount th:last-child,
+.participation-amount td:last-child {
+    padding-inline-start: 1rem;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.participation-amount thead {
+    border-bottom: 1px solid currentColor;
+}
+
+.participation-amount tfoot {
+    border-top: 1px solid currentColor;
+    font-weight: bold;
+}
+
+.participation-amount tfoot strong {
+    text-decoration-line: underline;
+    text-decoration-style: double;
+    text-underline-offset: .2em;
+}
+
+.enrollment-page h1 { margin-block-end: .25rem; }
+.enrollment-page h1 + p { margin-top: 0; }
+.enrollment-page button[type="submit"] { background: #014983; }
+.enrollment-page button[type="submit"]:hover { background: #003863; }
+.enrollment-page .profile-card > form:not(:empty) { margin-block-start: 1.25rem; }

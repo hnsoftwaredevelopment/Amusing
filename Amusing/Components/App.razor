@@ -3,11 +3,28 @@
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof( App ).Assembly">
         <Found Context="routeData">
-            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof( MainLayout )">
-                <NotAuthorized>
-                    <p class="text-danger">Je hebt geen toegang tot deze pagina.</p>
-                </NotAuthorized>
-            </AuthorizeRouteView>
+            @if (routeData.PageType == typeof(Amusing.Components.Pages.Login))
+            {
+                <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+            }
+            else
+            {
+                <AuthorizeView Context="session">
+                    <Authorized>
+                        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                            <NotAuthorized>
+                                <p class="text-danger">Je hebt geen toegang tot deze pagina.</p>
+                            </NotAuthorized>
+                        </AuthorizeRouteView>
+                    </Authorized>
+                    <NotAuthorized>
+                        <LayoutView Layout="@typeof(MainLayout)">
+                            <h1>Beheer Amusing-Hengelo</h1>
+                            <p><a href="/login">Log in om verder te gaan.</a></p>
+                        </LayoutView>
+                    </NotAuthorized>
+                </AuthorizeView>
+            }
         </Found>
         <NotFound>
             <LayoutView Layout="@typeof( MainLayout )">

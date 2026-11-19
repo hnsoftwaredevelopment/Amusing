@@ -1,0 +1,2 @@
+ALTER TABLE mijn_mailingsjablonen ADD COLUMN IF NOT EXISTS opmaak_html MEDIUMTEXT NULL;
+ALTER TABLE mijn_inschrijfmail ADD COLUMN IF NOT EXISTS opmaak_html MEDIUMTEXT NULL;

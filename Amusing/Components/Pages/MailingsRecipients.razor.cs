@@ -682,17 +682,36 @@ public class MailingsRecipientsBase : ComponentBase
         RecipientListModel newRecipientsList = new()
         {
             ListId = 0,
-            ListName = ""
+            ListName = "",
+            ListSource = SourceChecked == "persons"
+                ? MailingService.RecipientListSource.Persons
+                : MailingService.RecipientListSource.Groups
         };
 
+        // A draft is edited above the grid and is only inserted when saved.
+        // Do not select it through the grid: that would query recipients immediately.
+        ++SelectedListLoadVersion;
+        SelectedRecipientsList = newRecipientsList;
+        editContext = new EditContext(newRecipientsList);
+        SourceChecked = newRecipientsList.ListSource == MailingService.RecipientListSource.Persons ? "persons" : "groups";
+        pendingRulesJson = null;
+        rulesPending = false;
+        personsQueryBuilder?.Reset();
+        DynamicRecipients = [];
+        DynamicExportRecipients = [];
+        SelectedListRowCount = 0;
+        IsSelectedListLoading = false;
+        HasActiveRules = false;
+        FestivalSelected = false;
+        RoleSelected = false;
+        RecipientListChecked = false;
+        GeneratedJson = GeneratedSql = OldJson = string.Empty;
+        LastSelectedFestivals = [];
+        IsExportGridPrepared = false;
         if (GridRef != null)
         {
-            await GridRef.AddRecordAsync(newRecipientsList, 0);
-            await GridRef.SelectRowAsync(0);
+            await GridRef.ClearSelectionAsync();
         }
-
-        SelectedRecipientsList = newRecipientsList;
-        editContext = new EditContext(SelectedRecipientsList);
         StateHasChanged();
     }
 
@@ -775,7 +794,7 @@ public class MailingsRecipientsBase : ComponentBase
 
         //Alleen boolean gebruiken om te bepalen of festival geselecteerd is
         HasActiveRules = rootRules.Rules.Count != 0;
-        FestivalSelected = rootRules.Rules.Any(r => r.Field == "Festival" && r.Value is string[] arr && arr.Length > 0);
+        FestivalSelected = rootRules.Rules.Any(r => r.Field == "Festival" && RecipientRuleValues.ToSelection(r.Value).Length > 0);
     }
 
     protected void ChangeValue(MultiSelectChangeEventArgs<string[]> args, RuleModel rule)

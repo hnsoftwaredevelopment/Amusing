@@ -1,94 +1,30 @@
-﻿@page "/login"
-@using Amusing.Services
-@using Amusing.Helpers
-@inject NavigationManager Navigation
-@inject CustomAuthenticationService AuthService
-@inject CustomAuthStateProvider AuthStateProvider
-@inject IHttpContextAccessor HttpContextAccessor
-@inject LoggingService LoggingService
-@inject UserContextHelper UserContextHelper
-@inject Blazored.SessionStorage.ISessionStorageService _sessionStorage
+@page "/login"
 
 <h3>Login</h3>
 
-<EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+<form id="beheer-login-form" method="post" action="/signin">
     <div class="mb-3" style="max-width: 300px;">
-        <InputText @bind-Value="loginModel.Username" placeholder="Gebruikersnaam" class="form-control" />
+        <input name="username" placeholder="Gebruikersnaam" aria-label="Gebruikersnaam" class="form-control"
+               autocomplete="username" required maxlength="100" />
     </div>
     <div class="mb-3 login-password-field">
-        <InputText @bind-Value="loginModel.Password" placeholder="Wachtwoord" type="@PasswordInputType" class="form-control login-password-field__input" />
-        <button class="login-password-field__toggle"
-                type="button"
-                title="@PasswordToggleTitle"
-                aria-label="@PasswordToggleTitle"
-                @onclick="TogglePasswordVisibility">
-            <span class="@PasswordToggleIcon" aria-hidden="true"></span>
+        <input name="password" placeholder="Wachtwoord" aria-label="Wachtwoord" type="@(IsPasswordVisible ? "text" : "password")"
+               class="form-control login-password-field__input" autocomplete="current-password" required />
+        <button class="login-password-field__toggle" type="button" title="@PasswordToggleTitle" aria-label="@PasswordToggleTitle"
+                @onclick="() => IsPasswordVisible = !IsPasswordVisible">
+            <span class="@(IsPasswordVisible ? "fa-solid fa-eye-slash" : "fa-solid fa-eye")" aria-hidden="true"></span>
         </button>
     </div>
     <button class="btn btn-primary" type="submit">Inloggen</button>
-</EditForm>
+</form>
 
-@if ( !string.IsNullOrEmpty( ErrorMessage ) )
+@if (Failed == "1")
 {
-    <p class="text-danger">@ErrorMessage</p>
+    <p class="text-danger" role="alert">Ongeldige gebruikersnaam of wachtwoord</p>
 }
 
-@code
-{
-    private LoginModel loginModel = new();
-    private string ErrorMessage = "";
+@code {
+    [SupplyParameterFromQuery(Name = "failed")] public string? Failed { get; set; }
     private bool IsPasswordVisible;
-
-    private string PasswordInputType => IsPasswordVisible ? "text" : "password";
-    private string PasswordToggleIcon => IsPasswordVisible ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
     private string PasswordToggleTitle => IsPasswordVisible ? "Wachtwoord verbergen" : "Wachtwoord tonen";
-
-    private void TogglePasswordVisibility()
-    {
-        IsPasswordVisible = !IsPasswordVisible;
-    }
-
-    private async Task HandleLogin()
-    {
-        string _report = "";
-        string _status = "failed";
-
-        var user = await AuthService.ValidateUserAsync(loginModel.Username, loginModel.Password);
-
-        if ( user != null )
-        {
-            // Save in SessionStorage
-            await _sessionStorage.SetItemAsync( "UserId", user.UserId );
-            await _sessionStorage.SetItemAsync( "Username", user.Username );
-            await _sessionStorage.SetItemAsync( "UserRole", user.Role );
-
-            //await _sessionStorage.SetItemAsync( "loggedUser", user );
-            
-            // Update authentication state (claims)
-            await AuthStateProvider.MarkUserAsAuthenticated( user );
-
-            // Update helper cache for immediate access
-            UserContextHelper.SetUserContext( user.UserId, user.Username );
-
-            // Log success
-            _report = $"{user.Username} is succesvol ingelogd";
-            _status = "success";
-
-            // Redirect
-            Navigation.NavigateTo( $"/signin?username={user.Username}&role={user.Role}&userid={user.UserId}", true );
-        }
-        else
-        {
-            ErrorMessage = "Ongeldige gebruikersnaam of wachtwoord";
-            _report = $"Toegang geweigerd voor {loginModel.Username}";
-        }
-
-        await LoggingService.WriteUserLoginAttemptAsync ( _status, _report);
-    }
-
-    private class LoginModel
-    {
-        public string Username { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-    }
 }

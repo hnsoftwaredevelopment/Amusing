@@ -47,6 +47,18 @@ public partial class MaintenanceUsers : ComponentBase
         set { if (SelectedUser != null) SelectedUser.UserId = value; }
     }
 
+    public string UserRecoveryEmail
+    {
+        get => SelectedUser?.RecoveryEmail ?? "";
+        set { if (SelectedUser != null) SelectedUser.RecoveryEmail = value; }
+    }
+
+    public string UserDisplayName
+    {
+        get => SelectedUser?.DisplayName ?? "";
+        set { if (SelectedUser != null) SelectedUser.DisplayName = value; }
+    }
+
     public string UserUsername
     {
         get => SelectedUser?.Username ?? string.Empty;
@@ -95,6 +107,8 @@ public partial class MaintenanceUsers : ComponentBase
         {
             UserId = SelectedUser.UserId,
             Username = SelectedUser.Username,
+            DisplayName = SelectedUser.DisplayName,
+            RecoveryEmail = SelectedUser.RecoveryEmail,
             Password = SelectedUser.Password,
             PasswordHash = SelectedUser.PasswordHash,
             Role = SelectedUser.Role
@@ -135,7 +149,7 @@ public partial class MaintenanceUsers : ComponentBase
             var diffOptions = new DiffOptions
             {
                 ExcludedProperties = ["PasswordHash"],
-                MaskedProperties = ["Password"]
+                MaskedProperties = ["Password", "RecoveryEmail"]
             };
 
             // Check the differences between the original and changed version
@@ -163,7 +177,7 @@ public partial class MaintenanceUsers : ComponentBase
             var diffOptions = new DiffOptions
             {
                 ExcludedProperties = ["PasswordHash"],
-                MaskedProperties = ["Password"]
+                MaskedProperties = ["Password", "RecoveryEmail"]
             };
 
             // Check the differences between the original and changed version

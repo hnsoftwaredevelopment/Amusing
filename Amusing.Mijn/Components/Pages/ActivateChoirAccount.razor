@@ -1,0 +1,24 @@
+@page "/account/activeren"
+<PageTitle>Account activeren — Mijn Amusing</PageTitle>
+<h1>Account activeren</h1>
+@if (Token is not { Length: 64 } || !Token.All(Uri.IsHexDigit))
+{
+    <p role="alert">Deze link is ongeldig, verlopen of al gebruikt.</p>
+    <a href="/account/registreren">Nieuwe activatielink aanvragen</a>
+}
+else
+{
+    <p>Kies een wachtwoord van minstens 12 tekens.</p>
+    @if (Status == "wachtwoord") { <p role="alert">Kies een geldig wachtwoord en vul het twee keer hetzelfde in.</p> }
+    <form method="post" action="/account/activering-bevestigen" data-enhance="false" class="profile-card">
+        <AntiforgeryToken />
+        <input type="hidden" name="token" value="@Token" />
+        <label for="password">Wachtwoord</label><input id="password" name="password" type="password" minlength="12" autocomplete="new-password" required />
+        <label for="repeat">Herhaal wachtwoord</label><input id="repeat" name="repeat" type="password" minlength="12" autocomplete="new-password" required />
+        <button>Account activeren</button>
+    </form>
+}
+@code {
+    [SupplyParameterFromQuery] public string? Token { get; set; }
+    [SupplyParameterFromQuery] public string? Status { get; set; }
+}

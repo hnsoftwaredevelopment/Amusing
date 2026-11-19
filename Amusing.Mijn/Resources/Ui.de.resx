@@ -1,0 +1,828 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+  </resheader>
+  <data name="AanmeldenVoorDeWachtlijst" xml:space="preserve">
+    <value>Für die Warteliste anmelden</value>
+  </data>
+  <data name="AanmeldenVoorDeWachtlijst2" xml:space="preserve">
+    <value>Auf die Warteliste setzen</value>
+  </data>
+  <data name="AantalDeelnemers" xml:space="preserve">
+    <value>Teilnehmerzahl</value>
+  </data>
+  <data name="AantalDeelnemers2" xml:space="preserve">
+    <value>Teilnehmerzahl *</value>
+  </data>
+  <data name="AccountAanmaken" xml:space="preserve">
+    <value>Konto erstellen</value>
+  </data>
+  <data name="AccountNietBeschikbaar" xml:space="preserve">
+    <value>Konto nicht verfügbar</value>
+  </data>
+  <data name="Achternaam" xml:space="preserve">
+    <value>Nachname *</value>
+  </data>
+  <data name="Afbeeldingen" xml:space="preserve">
+    <value>Bilder</value>
+  </data>
+  <data name="AfbeeldingenOpslaan" xml:space="preserve">
+    <value>Bilder werden gespeichert…</value>
+  </data>
+  <data name="AfbeeldingGewijzigd" xml:space="preserve">
+    <value>Bild geändert</value>
+  </data>
+  <data name="AfbeeldingOpslaan" xml:space="preserve">
+    <value>Bild speichern</value>
+  </data>
+  <data name="AfbeeldingVerwijderd" xml:space="preserve">
+    <value>Bild entfernt</value>
+  </data>
+  <data name="Afgemeld" xml:space="preserve">
+    <value>Abgemeldet</value>
+  </data>
+  <data name="Algemeen" xml:space="preserve">
+    <value>Allgemein</value>
+  </data>
+  <data name="AlgemeneKoorgegevensOpslaan" xml:space="preserve">
+    <value>Allgemeine Chordaten speichern</value>
+  </data>
+  <data name="AlleenEenEersteContactpersoonKanPersonenUitnodigen" xml:space="preserve">
+    <value>Nur eine erste Kontaktperson kann Personen einladen und Rollen entfernen.</value>
+  </data>
+  <data name="AlleenEenEersteOfTweedeContactpersoonKan" xml:space="preserve">
+    <value>Nur eine erste oder zweite Kontaktperson kann den Chor anmelden.</value>
+  </data>
+  <data name="AlleenZichtbaarVoorContactpersonenEnDePenningmeester" xml:space="preserve">
+    <value>Nur für Kontaktpersonen und Schatzmeister sichtbar.</value>
+  </data>
+  <data name="AlsErEenAccountVoorDitAdres" xml:space="preserve">
+    <value>Falls zu diesen Angaben ein Konto existiert, erhältst du einen Link, um ein neues Passwort zu wählen.</value>
+  </data>
+  <data name="AndereWijzigingenZijnNogNietOpgeslagenWil" xml:space="preserve">
+    <value>Andere Änderungen sind nicht gespeichert. Möchtest du fortfahren?</value>
+  </data>
+  <data name="Bedrag" xml:space="preserve">
+    <value>Betrag</value>
+  </data>
+  <data name="Beheer" xml:space="preserve">
+    <value>Verwaltung</value>
+  </data>
+  <data name="BeheerderAmusingHengelo" xml:space="preserve">
+    <value>Administrator Amusing-Hengelo</value>
+  </data>
+  <data name="BestandKiezen" xml:space="preserve">
+    <value>Datei auswählen</value>
+  </data>
+  <data name="Betaald" xml:space="preserve">
+    <value>Bezahlt</value>
+  </data>
+  <data name="Betaling" xml:space="preserve">
+    <value>Zahlung</value>
+  </data>
+  <data name="BevestigingslinkAanvragen" xml:space="preserve">
+    <value>Bestätigungslink anfordern</value>
+  </data>
+  <data name="BevestigJeNieuweAdresDaarnaGebruikJe" xml:space="preserve">
+    <value>Bestätige deine neue Adresse. Danach meldest du dich mit dieser Adresse an.</value>
+  </data>
+  <data name="BijEenNieuweTestinschrijvingGaatDeTestmail" xml:space="preserve">
+    <value>Bei einer neuen Testanmeldung geht die Testmail nur an die Adresse deines Kontos.</value>
+  </data>
+  <data name="Btw" xml:space="preserve">
+    <value>MwSt.</value>
+  </data>
+  <data name="ContactgegevensOpslaan" xml:space="preserve">
+    <value>Kontaktdaten speichern</value>
+  </data>
+  <data name="Contactpersoon1" xml:space="preserve">
+    <value>Erste Kontaktperson</value>
+  </data>
+  <data name="ControleerDeGegevensHierbovenNaBevestigingKun" xml:space="preserve">
+    <value>Prüfe die Angaben oben. Nach der Bestätigung kann nur die Organisation sie ändern.</value>
+  </data>
+  <data name="ControleerDeIngevuldeGegevens" xml:space="preserve">
+    <value>Prüfe Teilnehmerzahl, Bühnentyp und Auftrittswunsch.</value>
+  </data>
+  <data name="ControleerDeIngevuldeGegevens2" xml:space="preserve">
+    <value>Prüfe die Pflichtfelder und Telefonnummern.</value>
+  </data>
+  <data name="ControleerDeIngevuldeGegevensEnKiesEen" xml:space="preserve">
+    <value>Prüfe deine Angaben und wähle ein gültiges Land und Genre.</value>
+  </data>
+  <data name="ControleerDeIngevuldeGegevensEnProbeerOpnieuw" xml:space="preserve">
+    <value>Prüfe deine Angaben und versuche es erneut.</value>
+  </data>
+  <data name="ControleerHetAantalDeelnemersHetPodiumtypeEn" xml:space="preserve">
+    <value>Prüfe die Teilnehmerzahl, den Bühnentyp und den Auftrittswunsch.</value>
+  </data>
+  <data name="ControleerHetEmailadresEnKiesEenGeldige" xml:space="preserve">
+    <value>Prüfe die E-Mail-Adresse und wähle eine gültige Rolle.</value>
+  </data>
+  <data name="DatEmailadresIsAlInGebruik" xml:space="preserve">
+    <value>Diese E-Mail-Adresse wird bereits verwendet.</value>
+  </data>
+  <data name="DeAanmeldingIsOpgeslagen" xml:space="preserve">
+    <value>Die Anmeldung wurde gespeichert.</value>
+  </data>
+  <data name="DeActueleFestivaleditieIsGewijzigdOfNiet" xml:space="preserve">
+    <value>Die aktuelle Festivalausgabe hat sich geändert oder ist nicht mehr verfügbar. Öffne diese Seite erneut.</value>
+  </data>
+  <data name="DeAfbeeldingIsOndertussenGewijzigdOpenHet" xml:space="preserve">
+    <value>Das Bild wurde inzwischen geändert. Öffne den Tab erneut und versuche es noch einmal.</value>
+  </data>
+  <data name="DeAfbeeldingIsOpgeslagen" xml:space="preserve">
+    <value>Das Bild wurde gespeichert.</value>
+  </data>
+  <data name="DeBevestigingslinkStaatInDeTestmailopvang" xml:space="preserve">
+    <value>Der Bestätigungslink liegt im Testpostfach.</value>
+  </data>
+  <data name="DeBevestigingsmailKonNietWordenVerstuurdProbeer" xml:space="preserve">
+    <value>Die Bestätigungs-E-Mail konnte nicht gesendet werden. Versuche es erneut.</value>
+  </data>
+  <data name="DeContactgegevensKondenNietWordenOpgeslagen" xml:space="preserve">
+    <value>Die Kontaktdaten konnten nicht gespeichert werden.</value>
+  </data>
+  <data name="DeelnameAfgemeld" xml:space="preserve">
+    <value>Teilnahme abgesagt</value>
+  </data>
+  <data name="Deelnamehistorie" xml:space="preserve">
+    <value>Teilnahmen</value>
+  </data>
+  <data name="Deelnamekosten" xml:space="preserve">
+    <value>Teilnahmekosten</value>
+  </data>
+  <data name="DeelnamenotaVerstuurd" xml:space="preserve">
+    <value>Teilnahmerechnung versendet</value>
+  </data>
+  <data name="Deelnamevoorwaarden" xml:space="preserve">
+    <value>Teilnahmebedingungen</value>
+  </data>
+  <data name="DeelnemersExclBtw" xml:space="preserve">
+    <value>Teilnehmende ohne MwSt.</value>
+  </data>
+  <data name="DeGegevensVanHetKoorZijnNog" xml:space="preserve">
+    <value>Die Chordaten sind noch nicht vollständig. Ergänze zuerst die folgenden Angaben.</value>
+  </data>
+  <data name="DeInschrijfperiodeIsGeslotenJeAanmeldingIs" xml:space="preserve">
+    <value>Die Anmeldefrist ist abgelaufen. Deine Anmeldung wurde nicht gespeichert.</value>
+  </data>
+  <data name="DeInschrijvingIsBevestigd" xml:space="preserve">
+    <value>Die Anmeldung wurde bestätigt.</value>
+  </data>
+  <data name="DeInschrijvingIsInmiddelsGewijzigdControleerDe" xml:space="preserve">
+    <value>Die Anmeldung wurde inzwischen geändert. Prüfe die aktuellen Angaben und versuche es erneut.</value>
+  </data>
+  <data name="DeInschrijvingVoorDezeEditieIsOp" xml:space="preserve">
+    <value>Die Anmeldung für diese Ausgabe ist derzeit geschlossen.</value>
+  </data>
+  <data name="DeInschrijvingWasAlBevestigd" xml:space="preserve">
+    <value>Die Anmeldung war bereits bestätigt.</value>
+  </data>
+  <data name="DeKoorgegevensZijnOpgeslagen" xml:space="preserve">
+    <value>Die Chordaten wurden gespeichert.</value>
+  </data>
+  <data name="DeKopienotaIsKlaargezetVoorVerzendingNaar" xml:space="preserve">
+    <value>Die Rechnungskopie wurde für deine Testadresse zum Versand vorgemerkt.</value>
+  </data>
+  <data name="DeKopienotaIsKlaargezetVoorVerzendingNaar2" xml:space="preserve">
+    <value>Die Rechnungskopie wurde für den Schatzmeister zum Versand vorgemerkt.</value>
+  </data>
+  <data name="DeRolIsVerwijderd" xml:space="preserve">
+    <value>Die Rolle wurde entfernt.</value>
+  </data>
+  <data name="DeUitgenodigdePersoonZietDeUitnodigingNa" xml:space="preserve">
+    <value>Die eingeladene Person findet die Einladung nach der Anmeldung über die Umschlagtaste ✉. Die Verknüpfung beginnt nach der Annahme. Bei einer Übergabe bleibt die bisherige erste Kontaktperson bis dahin verantwortlich.</value>
+  </data>
+  <data name="DeUitnodigingIsIngetrokken" xml:space="preserve">
+    <value>Die Einladung wurde zurückgezogen.</value>
+  </data>
+  <data name="DeUitnodigingIsVerwerktGaNaarMijn" xml:space="preserve">
+    <value>Die Einladung wurde angenommen. Unter Meine Chöre findest du deine Chöre.</value>
+  </data>
+  <data name="DeWijzigingenZijnOpgeslagen" xml:space="preserve">
+    <value>Die Änderungen wurden gespeichert.</value>
+  </data>
+  <data name="DezeEditieWerktMetEenWachtlijstJe" xml:space="preserve">
+    <value>Für diese Ausgabe gibt es eine Warteliste. Deine Anmeldung kommt auf die Warteliste. Die Teilnahme ist noch nicht zugesagt.</value>
+  </data>
+  <data name="DezeInschrijvingKanNietMeerWordenAangepast" xml:space="preserve">
+    <value>Diese Anmeldung kann nicht mehr geändert werden. Wende dich an die Organisation.</value>
+  </data>
+  <data name="DezeLinkIsOngeldigVerlopenOfAl" xml:space="preserve">
+    <value>Dieser Link ist ungültig, abgelaufen oder wurde bereits verwendet.</value>
+  </data>
+  <data name="DezeLinkIsOngeldigVraagEenNieuwe" xml:space="preserve">
+    <value>Dieser Link ist ungültig. Fordere unter Meine Kontaktdaten einen neuen an.</value>
+  </data>
+  <data name="DezeLinkIsVerlopenAlGebruiktOf" xml:space="preserve">
+    <value>Dieser Link ist abgelaufen, wurde bereits verwendet oder gehört zu einem anderen Konto. Fordere bei Bedarf einen neuen Link an.</value>
+  </data>
+  <data name="DezeRolIsAlBezetOfEr" xml:space="preserve">
+    <value>Diese Rolle ist bereits besetzt oder eine Einladung ist noch offen. Ziehe die Einladung zurück oder entferne die bisherige Rolle. Nutze für die erste Kontaktperson die Übergabe.</value>
+  </data>
+  <data name="DezeUitnodigingIsNietMeerBeschikbaarVraag" xml:space="preserve">
+    <value>Diese Einladung ist nicht mehr verfügbar. Bitte die erste Kontaktperson um eine neue Einladung.</value>
+  </data>
+  <data name="DitEmailadresIsNietGekoppeldAanEen" xml:space="preserve">
+    <value>Diese E-Mail-Adresse gehört zu keinem aktiven Mein-Amusing-Konto. Die Person muss zuerst ein Konto erstellen und aktivieren.</value>
+  </data>
+  <data name="DitIsEenVoorkeurDeOrganisatieKan" xml:space="preserve">
+    <value>Die Organisation kann den Auftrittswunsch nicht garantieren.</value>
+  </data>
+  <data name="DitIsJeHuidigeEmailadres" xml:space="preserve">
+    <value>Das ist deine aktuelle E-Mail-Adresse.</value>
+  </data>
+  <data name="DitKoorHeeftGeenActievePenningmeesterMet" xml:space="preserve">
+    <value>Dieser Chor hat keinen aktiven Schatzmeister mit gültiger E-Mail-Adresse.</value>
+  </data>
+  <data name="DitKoorIsAlAangemeldVoorDeze" xml:space="preserve">
+    <value>Dieser Chor ist bereits für diese Ausgabe angemeldet. Die vorhandenen Angaben wurden beibehalten.</value>
+  </data>
+  <data name="DitKoorIsNietAanJeAccount" xml:space="preserve">
+    <value>Dieser Chor ist deinem Konto nicht zugeordnet.</value>
+  </data>
+  <data name="DoorDezeUitnodigingAanTeNemenVervang" xml:space="preserve">
+    <value>Wenn du diese Einladung annimmst, ersetzt du die bisherige erste Kontaktperson dieses Chores.</value>
+  </data>
+  <data name="DownloadDeelnamenotaPDF" xml:space="preserve">
+    <value>Teilnahmerechnung herunterladen (PDF)</value>
+  </data>
+  <data name="EenBinnenEenBuiten" xml:space="preserve">
+    <value>Ein Auftritt drinnen, einer draußen</value>
+  </data>
+  <data name="EersteContactpersoonOverdragen" xml:space="preserve">
+    <value>Erste Kontaktperson übergeben</value>
+  </data>
+  <data name="EersteContactpersoonOvergedragen" xml:space="preserve">
+    <value>Erste Kontaktperson übergeben</value>
+  </data>
+  <data name="Emailadres" xml:space="preserve">
+    <value>E-Mail-Adresse</value>
+  </data>
+  <data name="EmailadresBevestigen" xml:space="preserve">
+    <value>E-Mail-Adresse bestätigen</value>
+  </data>
+  <data name="EmailadresKoor" xml:space="preserve">
+    <value>E-Mail-Adresse des Chors</value>
+  </data>
+  <data name="ErIsGeenInschrijvingVoorDitKoor" xml:space="preserve">
+    <value>Für diesen Chor wurde keine Anmeldung gefunden.</value>
+  </data>
+  <data name="ErIsNogGeenActueleFestivaleditieBeschikbaar" xml:space="preserve">
+    <value>Es gibt noch keine aktuelle Festivalausgabe. Versuche es später erneut.</value>
+  </data>
+  <data name="ErIsNogGeenGeldigeAfbeeldingBeschikbaar" xml:space="preserve">
+    <value>Es ist noch kein gültiges Bild verfügbar.</value>
+  </data>
+  <data name="ErMoetAltijdEenEersteContactpersoonBlijven" xml:space="preserve">
+    <value>Es muss immer eine erste Kontaktperson geben. Lass zuerst jemand anderen diese Rolle annehmen.</value>
+  </data>
+  <data name="ErStaatAlEenKopienotaKlaarVoor" xml:space="preserve">
+    <value>Für diese Ausgabe steht bereits eine Rechnungskopie zum Versand bereit.</value>
+  </data>
+  <data name="ErStaatEenUitnodigingKlaarDePersoon" xml:space="preserve">
+    <value>Eine Einladung wurde erstellt. Die Person muss sie zuerst annehmen.</value>
+  </data>
+  <data name="ErWordenNuAndereAfbeeldingenVerwerktProbeer" xml:space="preserve">
+    <value>Andere Bilder werden gerade verarbeitet. Versuche es gleich erneut.</value>
+  </data>
+  <data name="ErZijnGeenOpenstaandeUitnodigingenVoorJe" xml:space="preserve">
+    <value>Für dein Konto gibt es keine offenen Einladungen.</value>
+  </data>
+  <data name="ErZijnGeenWijzigingenOmTeTonen" xml:space="preserve">
+    <value>Es gibt keine Änderungen.</value>
+  </data>
+  <data name="ErZijnNogGeenFestivalinschrijvingenVoorDit" xml:space="preserve">
+    <value>Für diesen Chor gibt es noch keine Festivalanmeldungen.</value>
+  </data>
+  <data name="ErZijnNogGeenKorenAanJe" xml:space="preserve">
+    <value>Deinem Konto sind noch keine Chöre zugeordnet.</value>
+  </data>
+  <data name="ErZijnNogGeenPodiumtypenBeschikbaarNeem" xml:space="preserve">
+    <value>Es sind noch keine Bühnentypen verfügbar. Wende dich an die Organisation.</value>
+  </data>
+  <data name="FestivalBekijken" xml:space="preserve">
+    <value>Festival ansehen</value>
+  </data>
+  <data name="Festivalinschrijving" xml:space="preserve">
+    <value>Festivalanmeldung</value>
+  </data>
+  <data name="FestivalinschrijvingAangemaakt" xml:space="preserve">
+    <value>Festivalanmeldung erstellt</value>
+  </data>
+  <data name="FestivalinschrijvingBekijken" xml:space="preserve">
+    <value>Festivalanmeldung ansehen</value>
+  </data>
+  <data name="FestivalinschrijvingBevestigd" xml:space="preserve">
+    <value>Festivalanmeldung bestätigt</value>
+  </data>
+  <data name="FestivalinschrijvingGewijzigd" xml:space="preserve">
+    <value>Festivalanmeldung geändert</value>
+  </data>
+  <data name="Foto" xml:space="preserve">
+    <value>Foto</value>
+  </data>
+  <data name="FotoVanHetKoor" xml:space="preserve">
+    <value>Foto des Chors</value>
+  </data>
+  <data name="GebruikEenGeldigeStilstaandePNGJPEGOf" xml:space="preserve">
+    <value>Verwende ein gültiges, nicht animiertes PNG-, JPEG- oder WebP-Bild.</value>
+  </data>
+  <data name="Gebruikersnaam" xml:space="preserve">
+    <value>Benutzername</value>
+  </data>
+  <data name="GekoppeldePersonen" xml:space="preserve">
+    <value>Verknüpfte Personen</value>
+  </data>
+  <data name="GeldigTot" xml:space="preserve">
+    <value>Gültig bis</value>
+  </data>
+  <data name="Genre" xml:space="preserve">
+    <value>Genre *</value>
+  </data>
+  <data name="GeselecteerdeAfbeeldingenOpslaan" xml:space="preserve">
+    <value>Ausgewählte Bilder speichern</value>
+  </data>
+  <data name="HerhaalNieuwWachtwoord" xml:space="preserve">
+    <value>Neues Passwort wiederholen</value>
+  </data>
+  <data name="HetBestandIsTeGrootVerkleinDe" xml:space="preserve">
+    <value>Die Datei ist zu groß. Verkleinere das Bild und versuche es erneut.</value>
+  </data>
+  <data name="HetDeelnamebedragIsNogNietBeschikbaarNeem" xml:space="preserve">
+    <value>Der Teilnahmebetrag ist noch nicht verfügbar. Wende dich bei Fragen an die Organisation.</value>
+  </data>
+  <data name="HetProfielIsOndertussenGewijzigdOpenHet" xml:space="preserve">
+    <value>Das Profil wurde inzwischen geändert. Öffne es erneut.</value>
+  </data>
+  <data name="Huidig" xml:space="preserve">
+    <value>aktuell</value>
+  </data>
+  <data name="HuidigEmailadres" xml:space="preserve">
+    <value>Aktuelle E-Mail-Adresse</value>
+  </data>
+  <data name="HuidigWachtwoord" xml:space="preserve">
+    <value>Aktuelles Passwort</value>
+  </data>
+  <data name="IedereenDieOptreedtInclusiefDirigentEnMuzikanten" xml:space="preserve">
+    <value>Alle Mitwirkenden, einschließlich Chorleitung und Musiker.</value>
+  </data>
+  <data name="InformatieOverJeKoorVoorOpDe" xml:space="preserve">
+    <value>Informationen über deinen Chor für die Amusing-Website</value>
+  </data>
+  <data name="Ingeschreven" xml:space="preserve">
+    <value>Angemeldet</value>
+  </data>
+  <data name="Inloggen" xml:space="preserve">
+    <value>Anmelden</value>
+  </data>
+  <data name="InloggenIsNietGeluktControleerJeEmailadres" xml:space="preserve">
+    <value>Die Anmeldung ist fehlgeschlagen. Prüfe deine E-Mail-Adresse und dein Passwort.</value>
+  </data>
+  <data name="InloggenVoorBeheer" xml:space="preserve">
+    <value>Anmeldung für die Verwaltung</value>
+  </data>
+  <data name="InschrijvingBevestigd" xml:space="preserve">
+    <value>Anmeldung bestätigt</value>
+  </data>
+  <data name="InschrijvingBevestigen" xml:space="preserve">
+    <value>Anmeldung bestätigen</value>
+  </data>
+  <data name="InschrijvingOpgeslagen" xml:space="preserve">
+    <value>Anmeldung gespeichert</value>
+  </data>
+  <data name="Instellingen" xml:space="preserve">
+    <value>Einstellungen</value>
+  </data>
+  <data name="JeAccountIsGeactiveerdJeKuntNu" xml:space="preserve">
+    <value>Dein Konto wurde aktiviert. Du kannst dich jetzt anmelden.</value>
+  </data>
+  <data name="JeBentUitgenodigdAls" xml:space="preserve">
+    <value>Du wurdest für folgende Rolle eingeladen:</value>
+  </data>
+  <data name="JeContactgegevensZijnOpgeslagen" xml:space="preserve">
+    <value>Deine Kontaktdaten wurden gespeichert.</value>
+  </data>
+  <data name="JeEmailadresIsGewijzigdGebruikHetNieuwe" xml:space="preserve">
+    <value>Deine E-Mail-Adresse wurde geändert. Melde dich künftig mit der neuen Adresse an.</value>
+  </data>
+  <data name="JeHebtEenOngelezenUitnodiging" xml:space="preserve">
+    <value>Du hast eine ungelesene Einladung.</value>
+  </data>
+  <data name="JeHebtGeenToestemmingOmDitKoor" xml:space="preserve">
+    <value>Du darfst diesen Chor nicht bearbeiten.</value>
+  </data>
+  <data name="JeHebtGeenToestemmingOmDitKoor2" xml:space="preserve">
+    <value>Du darfst diesen Chor nicht anmelden.</value>
+  </data>
+  <data name="JeHebtNietopgeslagenWijzigingen" xml:space="preserve">
+    <value>Du hast ungespeicherte Änderungen</value>
+  </data>
+  <data name="JeHebtOngelezenUitnodigingen" xml:space="preserve">
+    <value>Du hast ungelesene Einladungen.</value>
+  </data>
+  <data name="JeHuidigeAdresBlijftActiefTotdatJe" xml:space="preserve">
+    <value>Deine bisherige Adresse bleibt aktiv, bis du die neue bestätigst.</value>
+  </data>
+  <data name="JeKoorStaatOpDeWachtlijst" xml:space="preserve">
+    <value>Dein Chor steht auf der Warteliste.</value>
+  </data>
+  <data name="JeKuntBevestigenVanafDeDagNa" xml:space="preserve">
+    <value>Du kannst ab dem Tag nach Anmeldeschluss bestätigen.</value>
+  </data>
+  <data name="JeKuntBevestigenZodraDeOrganisatieJe" xml:space="preserve">
+    <value>Du kannst bestätigen, sobald die Organisation deinem Chor einen Platz zugeteilt hat.</value>
+  </data>
+  <data name="JeKuntDeFotoEnHetLogo" xml:space="preserve">
+    <value>Du kannst Foto und Logo einzeln ersetzen.</value>
+  </data>
+  <data name="JeKuntDeKoorgegevensBekijkenAlleenContactpersonen" xml:space="preserve">
+    <value>Du kannst die Chordaten ansehen. Kontaktpersonen können Änderungen speichern.</value>
+  </data>
+  <data name="JeMagVoorDitKoorGeenKopienota" xml:space="preserve">
+    <value>Du darfst für diesen Chor keine Rechnungskopie versenden.</value>
+  </data>
+  <data name="JeWachtwoordIsAangepastLogOpnieuwIn" xml:space="preserve">
+    <value>Dein Passwort wurde geändert. Melde dich erneut an.</value>
+  </data>
+  <data name="Jurybeoordeling" xml:space="preserve">
+    <value>Jurybewertung</value>
+  </data>
+  <data name="KiesEenGenre" xml:space="preserve">
+    <value>Genre auswählen</value>
+  </data>
+  <data name="KiesEenLand" xml:space="preserve">
+    <value>Land auswählen</value>
+  </data>
+  <data name="KiesEenPodiumtype" xml:space="preserve">
+    <value>Wähle einen Bühnentyp</value>
+  </data>
+  <data name="KiesEenRol" xml:space="preserve">
+    <value>Rolle auswählen</value>
+  </data>
+  <data name="KiesMinstens12Tekens" xml:space="preserve">
+    <value>Wähle mindestens 12 Zeichen.</value>
+  </data>
+  <data name="KlikOpOmJeUitnodigingenTeLezen" xml:space="preserve">
+    <value>Klicke auf ✉, um deine Einladungen zu lesen.</value>
+  </data>
+  <data name="KoorAangemaakt" xml:space="preserve">
+    <value>Chor erstellt</value>
+  </data>
+  <data name="Koorfoto" xml:space="preserve">
+    <value>Chorfoto</value>
+  </data>
+  <data name="KoorfotoVerwijderen" xml:space="preserve">
+    <value>Chorfoto entfernen</value>
+  </data>
+  <data name="KoorGewijzigd" xml:space="preserve">
+    <value>Chor geändert</value>
+  </data>
+  <data name="KoorInschrijven" xml:space="preserve">
+    <value>Chor anmelden</value>
+  </data>
+  <data name="Koorlid" xml:space="preserve">
+    <value>Chormitglied</value>
+  </data>
+  <data name="KoorlogoVerwijderen" xml:space="preserve">
+    <value>Chorlogo entfernen</value>
+  </data>
+  <data name="Koormutaties" xml:space="preserve">
+    <value>Choränderungen</value>
+  </data>
+  <data name="Koornaam" xml:space="preserve">
+    <value>Chorname *</value>
+  </data>
+  <data name="Koornaam2" xml:space="preserve">
+    <value>Chorname</value>
+  </data>
+  <data name="Koornavigatie" xml:space="preserve">
+    <value>Chornavigation</value>
+  </data>
+  <data name="KoorNietBeschikbaar" xml:space="preserve">
+    <value>Chor nicht verfügbar</value>
+  </data>
+  <data name="Koorprofiel" xml:space="preserve">
+    <value>Chorprofil</value>
+  </data>
+  <data name="KoorprofielGewijzigd" xml:space="preserve">
+    <value>Chorprofil geändert</value>
+  </data>
+  <data name="KoorrolVerwijderd" xml:space="preserve">
+    <value>Chorrolle entfernt</value>
+  </data>
+  <data name="KopienotaVersturen" xml:space="preserve">
+    <value>Rechnungskopie senden</value>
+  </data>
+  <data name="KopienotaVerstuurd" xml:space="preserve">
+    <value>Rechnungskopie versendet</value>
+  </data>
+  <data name="Land" xml:space="preserve">
+    <value>Land *</value>
+  </data>
+  <data name="Land2" xml:space="preserve">
+    <value>Land</value>
+  </data>
+  <data name="LogInMetJeHuidigeEmailadresEn" xml:space="preserve">
+    <value>Melde dich mit deiner bisherigen E-Mail-Adresse an und öffne diesen Link anschließend erneut.</value>
+  </data>
+  <data name="LogInMetJeKooraccount" xml:space="preserve">
+    <value>Melde dich mit deinem Chorkonto an</value>
+  </data>
+  <data name="LogoVanHetKoor" xml:space="preserve">
+    <value>Logo des Chors</value>
+  </data>
+  <data name="LopendeUitnodigingen" xml:space="preserve">
+    <value>Ausstehende Einladungen</value>
+  </data>
+  <data name="MijnContactgegevens" xml:space="preserve">
+    <value>Meine Kontaktdaten</value>
+  </data>
+  <data name="MijnKoren" xml:space="preserve">
+    <value>Meine Chöre</value>
+  </data>
+  <data name="MijnUitnodigingen" xml:space="preserve">
+    <value>Meine Einladungen</value>
+  </data>
+  <data name="Mobiel" xml:space="preserve">
+    <value>Mobiltelefon</value>
+  </data>
+  <data name="MobielNummer" xml:space="preserve">
+    <value>Mobilnummer</value>
+  </data>
+  <data name="MusiciEnDirigentenMogenInVerbandMet" xml:space="preserve">
+    <value>Musiker und Chorleiter dürfen aus Planungsgründen an höchstens zwei Chören teilnehmen.</value>
+  </data>
+  <data name="NeemContactOpMetDeOrganisatieAls" xml:space="preserve">
+    <value>Wende dich an die Organisation, wenn du wieder teilnehmen möchtest.</value>
+  </data>
+  <data name="NietIngevuld" xml:space="preserve">
+    <value>Nicht angegeben</value>
+  </data>
+  <data name="NietVastgelegd" xml:space="preserve">
+    <value>Nicht angegeben</value>
+  </data>
+  <data name="NieuweLinkAanvragen" xml:space="preserve">
+    <value>Neuen Link anfordern</value>
+  </data>
+  <data name="NieuwEmailadres" xml:space="preserve">
+    <value>Neue E-Mail-Adresse</value>
+  </data>
+  <data name="NieuwEmailadresBevestigen" xml:space="preserve">
+    <value>Neue E-Mail-Adresse bestätigen</value>
+  </data>
+  <data name="NieuwKoorRegistreren" xml:space="preserve">
+    <value>Neuen Chor registrieren</value>
+  </data>
+  <data name="NieuwsteWijzigingen" xml:space="preserve">
+    <value>Neueste Änderungen</value>
+  </data>
+  <data name="NieuwWachtwoord" xml:space="preserve">
+    <value>Neues Passwort</value>
+  </data>
+  <data name="NieuwWachtwoordInstellen" xml:space="preserve">
+    <value>Neues Passwort festlegen</value>
+  </data>
+  <data name="OmIemandAanJeKoorTeKoppelen" xml:space="preserve">
+    <value>Um eine Person mit deinem Chor zu verbinden, braucht sie ein eigenes, aktiviertes Konto auf mijn.amusing-hengelo.nl. Trage unten die E-Mail-Adresse dieses Kontos ein.</value>
+  </data>
+  <data name="OmJeWachtwoordTeWijzigen" xml:space="preserve">
+    <value>, um dein Passwort zu ändern.</value>
+  </data>
+  <data name="Omschrijving" xml:space="preserve">
+    <value>Beschreibung</value>
+  </data>
+  <data name="Ongelezen" xml:space="preserve">
+    <value>ungelesen</value>
+  </data>
+  <data name="OpDeWachtlijst" xml:space="preserve">
+    <value>Auf der Warteliste</value>
+  </data>
+  <data name="Opslaan" xml:space="preserve">
+    <value>Speichern</value>
+  </data>
+  <data name="Optredens" xml:space="preserve">
+    <value>Auftritte</value>
+  </data>
+  <data name="OudereWijzigingen" xml:space="preserve">
+    <value>Ältere Änderungen</value>
+  </data>
+  <data name="Penningmeester" xml:space="preserve">
+    <value>Schatzmeister</value>
+  </data>
+  <data name="PersonenEnRollen" xml:space="preserve">
+    <value>Personen und Rollen</value>
+  </data>
+  <data name="PersoonKoppelenAanKoor" xml:space="preserve">
+    <value>Person mit Chor verbinden</value>
+  </data>
+  <data name="PersoonToevoegen" xml:space="preserve">
+    <value>Person hinzufügen</value>
+  </data>
+  <data name="PodiumExclBtw" xml:space="preserve">
+    <value>Bühne ohne MwSt.</value>
+  </data>
+  <data name="Podiumtype" xml:space="preserve">
+    <value>Bühnentyp</value>
+  </data>
+  <data name="Podiumtype2" xml:space="preserve">
+    <value>Bühnentyp *</value>
+  </data>
+  <data name="Rol" xml:space="preserve">
+    <value>Rolle</value>
+  </data>
+  <data name="RolVerwijderen" xml:space="preserve">
+    <value>Rolle entfernen</value>
+  </data>
+  <data name="SelecteerUwKoorafbeelding" xml:space="preserve">
+    <value>Chorfoto auswählen</value>
+  </data>
+  <data name="SelecteerUwKoorlogo" xml:space="preserve">
+    <value>Chorlogo auswählen</value>
+  </data>
+  <data name="Sluiten" xml:space="preserve">
+    <value>Schließen</value>
+  </data>
+  <data name="Standplaats" xml:space="preserve">
+    <value>Ort *</value>
+  </data>
+  <data name="Standplaats2" xml:space="preserve">
+    <value>Ort</value>
+  </data>
+  <data name="StuurEenHerstellink" xml:space="preserve">
+    <value>Link zum Zurücksetzen senden</value>
+  </data>
+  <data name="Taal" xml:space="preserve">
+    <value>Sprache</value>
+  </data>
+  <data name="TaalOpslaan" xml:space="preserve">
+    <value>Sprache speichern</value>
+  </data>
+  <data name="Telefoon" xml:space="preserve">
+    <value>Telefon</value>
+  </data>
+  <data name="Terug" xml:space="preserve">
+    <value>Zurück</value>
+  </data>
+  <data name="Testfestival" xml:space="preserve">
+    <value>Testfestival</value>
+  </data>
+  <data name="TestomgevingGebruikAlleenTestgegevensMailVolgtDe" xml:space="preserve">
+    <value>Testumgebung – verwende nur Testdaten. E-Mails folgen den Testeinstellungen.</value>
+  </data>
+  <data name="TotaalInclBtw" xml:space="preserve">
+    <value>Gesamt inkl. MwSt.</value>
+  </data>
+  <data name="Tussenvoegsel" xml:space="preserve">
+    <value>Namenszusatz</value>
+  </data>
+  <data name="TweeBinnen" xml:space="preserve">
+    <value>Zwei Auftritte drinnen</value>
+  </data>
+  <data name="TweeBuiten" xml:space="preserve">
+    <value>Zwei Auftritte draußen</value>
+  </data>
+  <data name="Uitloggen" xml:space="preserve">
+    <value>Abmelden</value>
+  </data>
+  <data name="UitnodigingAangemaakt" xml:space="preserve">
+    <value>Einladung erstellt</value>
+  </data>
+  <data name="UitnodigingAannemen" xml:space="preserve">
+    <value>Einladung annehmen</value>
+  </data>
+  <data name="UitnodigingGeaccepteerd" xml:space="preserve">
+    <value>Einladung angenommen</value>
+  </data>
+  <data name="UitnodigingIngetrokken" xml:space="preserve">
+    <value>Einladung zurückgezogen</value>
+  </data>
+  <data name="UitnodigingIntrekken" xml:space="preserve">
+    <value>Einladung zurückziehen</value>
+  </data>
+  <data name="UitnodigingVerlopen" xml:space="preserve">
+    <value>Einladung abgelaufen</value>
+  </data>
+  <data name="VastTelefoonnummer" xml:space="preserve">
+    <value>Festnetznummer</value>
+  </data>
+  <data name="VerplichtVeldHetIBANMagVoorlopigLeeg" xml:space="preserve">
+    <value>* Pflichtfeld. Die IBAN kann vorerst leer bleiben.</value>
+  </data>
+  <data name="VoorbeeldVanDeGeselecteerdeAfbeelding" xml:space="preserve">
+    <value>Vorschau des ausgewählten Bildes</value>
+  </data>
+  <data name="VoorDezeEditieOntbrekenGegevensOmEen" xml:space="preserve">
+    <value>Für diese Ausgabe fehlen Daten zur Berechnung. Wende dich an die Organisation.</value>
+  </data>
+  <data name="VoorDezeInschrijvingIsGeenKopienotaBeschikbaar" xml:space="preserve">
+    <value>Für diese Anmeldung ist keine Rechnungskopie verfügbar.</value>
+  </data>
+  <data name="VoorEenFestivalinschrijvingHeeftIedereEersteContactpersoon" xml:space="preserve">
+    <value>Für die Festivalanmeldung benötigt jede erste Kontaktperson mindestens eine gültige Telefonnummer.</value>
+  </data>
+  <data name="VoorkeurOptredens" xml:space="preserve">
+    <value>Auftrittswunsch</value>
+  </data>
+  <data name="Voorkeurstaal" xml:space="preserve">
+    <value>Bevorzugte Sprache</value>
+  </data>
+  <data name="VoorkeurVoorOptredens" xml:space="preserve">
+    <value>Auftrittswunsch *</value>
+  </data>
+  <data name="Voornaam" xml:space="preserve">
+    <value>Vorname *</value>
+  </data>
+  <data name="VoorWijzigingenNaBetalingKunJeContact" xml:space="preserve">
+    <value>Für Änderungen nach der Zahlung wende dich an die Organisation.</value>
+  </data>
+  <data name="VulEenGeldigEmailadresIn" xml:space="preserve">
+    <value>Gib eine gültige E-Mail-Adresse ein.</value>
+  </data>
+  <data name="VulEerstDezeGegevensAan" xml:space="preserve">
+    <value>Ergänze zuerst diese Angaben</value>
+  </data>
+  <data name="WachtOpAanvaarding" xml:space="preserve">
+    <value>Wartet auf Annahme</value>
+  </data>
+  <data name="Wachtwoord" xml:space="preserve">
+    <value>Passwort</value>
+  </data>
+  <data name="WachtwoordherstelIsMomenteelNietBeschikbaar" xml:space="preserve">
+    <value>Das Zurücksetzen des Passworts ist derzeit nicht verfügbar.</value>
+  </data>
+  <data name="WachtwoordOpslaan" xml:space="preserve">
+    <value>Passwort speichern</value>
+  </data>
+  <data name="WachtwoordTonen" xml:space="preserve">
+    <value>Passwort anzeigen</value>
+  </data>
+  <data name="WachtwoordVerbergen" xml:space="preserve">
+    <value>Passwort ausblenden</value>
+  </data>
+  <data name="WachtwoordVergeten" xml:space="preserve">
+    <value>Passwort vergessen</value>
+  </data>
+  <data name="WachtwoordVergeten2" xml:space="preserve">
+    <value>Passwort vergessen?</value>
+  </data>
+  <data name="WachtwoordWijzigen" xml:space="preserve">
+    <value>Passwort ändern</value>
+  </data>
+  <data name="WatHoortBijDePodiumtypen" xml:space="preserve">
+    <value>Was gehört zu den Bühnentypen?</value>
+  </data>
+  <data name="WeHebbenEenBevestigingslinkNaarJeNieuwe" xml:space="preserve">
+    <value>Wir haben einen Bestätigungslink an deine neue Adresse geschickt. Er ist eine Stunde gültig.</value>
+  </data>
+  <data name="WijzigingenOpslaan" xml:space="preserve">
+    <value>Änderungen speichern</value>
+  </data>
+  <data name="MaximaalTweeKoren">
+    <value>Musiker und Chorleiter dürfen mit höchstens zwei Chören verbunden sein. Entferne zuerst eine bestehende Verknüpfung, bevor du diese Rolle hinzufügst.</value>
+  </data>
+  <data name="InschrijvenVoorEditie">
+    <value>Für Amusing {0} anmelden</value>
+  </data>
+  <data name="Inschrijfperiode">
+    <value>Anmeldung vom {0} bis einschließlich {1}.</value>
+  </data>
+  <data name="ToegewezenPodiumtype">
+    <value>Die Organisation hat Bühnentyp {0} zugewiesen.</value>
+  </data>
+  <data name="Afbeeldingslimieten">
+    <value>PNG, JPEG oder WebP. Maximal {0} MiB und 25 Millionen Pixel, bis zu 12.000 Pixel pro Seite. Die längste Seite wird auf höchstens {1} Pixel verkleinert.</value>
+  </data>
+  <data name="InschrijvingDitKoorIsNietActief">
+    <value>Dieser Chor ist nicht aktiv. Wende dich an die Organisation.</value>
+  </data>
+  <data name="InschrijvingVulDeNaamStandplaatsHet">
+    <value>Ergänze Name, Ort, Land und Genre im Chorprofil.</value>
+  </data>
+  <data name="InschrijvingVulEenGeldigIBANIn">
+    <value>Gib eine gültige IBAN im Chorprofil an.</value>
+  </data>
+  <data name="InschrijvingKoppelEenActieveDirigentVia">
+    <value>Füge unter Personen und Rollen eine aktive Chorleitung hinzu.</value>
+  </data>
+  <data name="InschrijvingKoppelMinstensNActieveEerste">
+    <value>Füge mindestens eine aktive erste Kontaktperson hinzu.</value>
+  </data>
+  <data name="InschrijvingIedereEersteContactpersoonMoetEen">
+    <value>Jede erste Kontaktperson braucht eine gültige Festnetz- oder Mobilnummer.</value>
+  </data>
+  <data name="KoorVanafWachtlijstGeplaatst">
+    <value>Chor von der Warteliste zugelassen</value>
+  </data>
+</root>

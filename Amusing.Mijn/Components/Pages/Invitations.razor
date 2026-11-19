@@ -1,0 +1,64 @@
+@page "/account/uitnodigingen"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using System.Globalization
+@using System.Security.Claims
+@using Amusing.Mijn.Services
+@inject ChoirPeople Service
+@inject SiteLanguage SiteLanguage
+@inject IHttpContextAccessor Context
+
+<PageTitle>@Title — Mijn Amusing</PageTitle>
+<div lang="@language">
+    <a href="/">← @T("MijnKoren")</a>
+    <h1>@Title</h1>
+    @if (Status is not null)
+    {
+        <p role="status" class="@(Status == "accepted" ? "success" : "error")">
+            @(Status == "accepted"
+                ? T("DeUitnodigingIsVerwerktGaNaarMijn")
+                : Status == "limit" ? T("MaximaalTweeKoren") : T("DezeUitnodigingIsNietMeerBeschikbaarVraag"))
+        </p>
+    }
+    @if (invitations.Count == 0)
+    {
+        <p>@T("ErZijnGeenOpenstaandeUitnodigingenVoorJe")</p>
+    }
+    @foreach (var invitation in invitations)
+    {
+        <section class="profile-card person-card">
+            <h2>@invitation.GroupName</h2>
+            <p>@T("JeBentUitgenodigdAls") <strong>@ChoirRoleLabels.Get(invitation.Role, language)</strong>.</p>
+            @if (invitation.Role == ChoirPeople.FirstContactTransfer)
+            {
+                <p>@T("DoorDezeUitnodigingAanTeNemenVervang")</p>
+            }
+            <p>@T("GeldigTot") <time datetime="@invitation.ExpiresAt.ToString("O")">@FormatExpiry(invitation.ExpiresAt)</time>.</p>
+            <form method="post" action="/account/uitnodigingen/@invitation.Id/accepteren" data-enhance="false">
+                <AntiforgeryToken />
+                <button class="choir-primary" type="submit">@T("UitnodigingAannemen")</button>
+            </form>
+        </section>
+    }
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public string? Status { get; set; }
+    private static readonly TimeZoneInfo Amsterdam = TimeZoneInfo.FindSystemTimeZoneById("Europe/Amsterdam");
+    private List<RoleInvitation> invitations = [];
+    private string language = "nl";
+    private string Title => T("MijnUitnodigingen");
+    private string T(string key) => Amusing.Mijn.Services.UiText.Get(key, language);
+
+    private string FormatExpiry(DateTime utc) => TimeZoneInfo.ConvertTimeFromUtc(utc, Amsterdam)
+        .ToString("d MMMM yyyy HH:mm", CultureInfo.GetCultureInfo(language));
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var request = Context.HttpContext!;
+        var actor = uint.Parse(request.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        language = await SiteLanguage.GetAsync();
+        invitations = await Service.IncomingAsync(actor, request.RequestAborted);
+        if (invitations.Count > 0)
+            await Service.MarkSeenAsync(actor, invitations, request.RequestAborted);
+    }
+}

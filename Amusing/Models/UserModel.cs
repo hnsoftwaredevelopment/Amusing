@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Amusing.Models;
 
@@ -8,6 +8,9 @@ public partial class UserModel
 
     [Display( Name = "Gebruikersnaam" )]
     public string Username { get; set; } = null!;
+
+    public string RecoveryEmail { get; set; } = "";
+    public string DisplayName { get; set; } = "";
 
     [Display( Name = "Wachtwoord" )]
     public string Password { get; set; } = null!;

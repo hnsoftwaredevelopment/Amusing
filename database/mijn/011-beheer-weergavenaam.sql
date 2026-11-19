@@ -1,0 +1,2 @@
+ALTER TABLE ah_beheer
+    ADD COLUMN IF NOT EXISTS weergavenaam VARCHAR(100) NULL;

@@ -11,11 +11,13 @@
 
 .mail-template-page {
     height: 88vh;
+    overflow-y: auto;
     padding-top: 0.75rem;
     gap: 0.4rem;
 }
 
-.groupbox {
+.groupbox,
+.mail-template-page ::deep .mijn-template-editor .groupbox {
     position: relative;
     background: #e9f0f6;
     border: 1px solid #ccc;
@@ -27,7 +29,8 @@
 }
 
 /* header */
-.groupbox-header {
+.groupbox-header,
+.mail-template-page ::deep .mijn-template-editor .groupbox-header {
     position: absolute;
     top: -0.6rem;
     left: 0.75rem;
@@ -64,14 +67,32 @@
     min-height: 36px;
 }
 
-.mail-template-toolbar .custom-toolbar-btn {
+.mail-template-toolbar .custom-toolbar-btn,
+.mail-template-page ::deep .mijn-template-editor .custom-toolbar-btn {
     height: 32px;
     min-width: 36px;
     padding: 2px 6px;
 }
 
-.mail-template-toolbar .icon {
+.mail-template-toolbar .icon,
+.mail-template-page ::deep .mijn-template-editor .icon {
     max-height: 26px;
+}
+
+.mail-template-page ::deep .mijn-template-editor .mail-template-toolbar {
+    min-height: 36px;
+    margin-bottom: 0.5rem;
+    padding-inline: 0.4rem;
+    background: #f5f7f9;
+}
+
+.mail-template-page ::deep .mijn-template-editor .mijn-mail-content {
+    padding-top: 0.65rem;
+}
+
+.mail-template-page ::deep .mijn-template-editor .mijn-mail-subject {
+    width: min(600px, 100%);
+    margin-bottom: 0.4rem;
 }
 
 /* RTE section: neemt de overgebleven ruimte.

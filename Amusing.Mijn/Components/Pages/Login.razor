@@ -1,0 +1,24 @@
+@page "/account/login"
+@using Amusing.Mijn.Services
+@inject SiteLanguage SiteLanguage
+<PageTitle>@T("Inloggen") — Mijn Amusing</PageTitle>
+<section class="card sign-in-card" lang="@language">
+<h1>@T("Inloggen")</h1>
+@if (Failed is not null) { <p role="alert" class="error">@T("InloggenIsNietGeluktControleerJeEmailadres")</p> }
+<form method="post" action="/account/sign-in" data-enhance="false">
+    <AntiforgeryToken />
+    <label for="email">@T("Emailadres")</label><input id="email" name="email" type="email" autocomplete="username" maxlength="80" required />
+    <Amusing.Mijn.Components.LoginPassword Label="@T("Wachtwoord")" ShowLabel="@T("WachtwoordTonen")" HideLabel="@T("WachtwoordVerbergen")" />
+    <button type="submit">@T("Inloggen")</button>
+</form>
+@if (Activated is not null) { <p role="status">@T("JeAccountIsGeactiveerdJeKuntNu")</p> }
+@if (Wachtwoord == "gewijzigd") { <p role="status">@T("JeWachtwoordIsAangepastLogOpnieuwIn")</p> }
+<p><a href="/account/wachtwoord-vergeten">@T("WachtwoordVergeten2")</a></p>
+<p><a href="/account/registreren">@T("AccountAanmaken")</a></p>
+<p><a href="/account/beheer">@T("InloggenVoorBeheer")</a></p>
+</section>
+@code {
+    private string language = "nl";
+    protected override async Task OnParametersSetAsync() => language = await SiteLanguage.GetAsync();
+    private string T(string key) => Amusing.Mijn.Services.UiText.Get(key, language);
+ [SupplyParameterFromQuery(Name="failed")] public string? Failed { get; set; } [SupplyParameterFromQuery] public string? Activated { get; set; } [SupplyParameterFromQuery] public string? Wachtwoord { get; set; } }
