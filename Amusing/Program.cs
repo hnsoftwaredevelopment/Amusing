@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Threading.RateLimiting;
 
 using Amusing.Components.Account;
 using Amusing.Data;
@@ -116,6 +117,7 @@ builder.Services.AddScoped<GitHubService>();
 builder.Services.AddScoped<GroupService>();
 builder.Services.AddScoped<PersonService>();
 builder.Services.AddScoped<RegistrationService>();
+builder.Services.AddScoped<WaitlistService>();
 builder.Services.AddScoped<StageService>();
 builder.Services.AddScoped<StageTypeService>();
 builder.Services.AddScoped<TaskService>();
@@ -143,11 +145,22 @@ builder.Services.AddScoped<IEmailSender<ApplicationUser>, SmtpEmailSender<Applic
 builder.Services.AddScoped<IPasswordHasher<ApplicationUser>, LegacyPasswordHasher>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie();
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "Amusing.Beheer.Session.v2";
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.LoginPath = "/login";
+    });
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("beheer-login", context => RateLimitPartition.GetFixedWindowLimiter(
+        context.Connection.RemoteIpAddress?.ToString() ?? "onbekend",
+        _ => new FixedWindowRateLimiterOptions { PermitLimit = 12, Window = TimeSpan.FromMinutes(1) }));
+});
 
 builder.Services.AddScoped<CustomAuthenticationService>();
-builder.Services.AddScoped<CustomAuthStateProvider>();
-builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<ProtectedSessionStorage>();
 
 builder.Services.AddAuthorizationCore();
@@ -185,6 +198,7 @@ app.UseForwardedHeaders( new ForwardedHeadersOptions
 
 app.UseStaticFiles();
 app.UseRouting();
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

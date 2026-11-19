@@ -18,20 +18,15 @@ public class ParticipationInvoiceTests
         Assert.NotEmpty(typeof(Amusing.Components.Pages.MaintenanceGroups)
             .GetCustomAttributes(typeof(Microsoft.AspNetCore.Authorization.AuthorizeAttribute), true));
     }
-    [Theory]
-    [InlineData(1, 50)]
-    [InlineData(20, 50)]
-    [InlineData(21, 75)]
-    [InlineData(50, 75)]
-    [InlineData(51, 100)]
-    [InlineData(100, 100)]
-    [InlineData(101, 125)]
-    public void UsesApprovedGrossBrackets(int count, decimal expected)
+    [Fact]
+    public void UsesConfiguredGrossAmountsAndVat()
     {
-        var invoice = new ParticipationInvoice(1, 2027, "Koor", 2027, count, "B", 25, "test@example.org", "penningmeester");
-        Assert.Equal(expected, invoice.ParticipantsGross);
-        Assert.Equal(expected + 25, invoice.Total);
+        var invoice = Sample() with { Amount = new(100m, 25m, 21m) };
+        Assert.Equal(100m, invoice.ParticipantsGross);
+        Assert.Equal(125m, invoice.Total);
+        Assert.Equal(21.70m, invoice.Vat);
         Assert.Equal(invoice.Total, invoice.ParticipantsNet + invoice.StageNet + invoice.Vat);
+        Assert.Contains("BTW 21%", invoice.Html);
     }
 
     [Fact]
@@ -45,14 +40,6 @@ public class ParticipationInvoiceTests
         Assert.Contains("Podium type B</td><td align=\"right\" style=\"text-align:right;white-space:nowrap\">€ 22,94", invoice.Html);
         Assert.DoesNotContain("<script>", invoice.Html);
         Assert.Contains("&lt;script&gt;", invoice.Html);
-    }
-
-    [Theory]
-    [InlineData(0)]
-    [InlineData(-1)]
-    public void InvalidCountCannotProduceInvoice(int count)
-    {
-        Assert.Throws<InvalidOperationException>(() => (Sample() with { Singers = count }).Html);
     }
 
     [Fact]
@@ -71,7 +58,7 @@ public class ParticipationInvoiceTests
     {
         var expected = Sample();
         var sender = new FakeSender();
-        var service = new ParticipationInvoiceService(new FakeData(expected with { Singers = 21 }), sender);
+        var service = new ParticipationInvoiceService(new FakeData(expected with { Amount = new(50m, 25m, 21m) }), sender);
         await Assert.ThrowsAsync<InvalidOperationException>(() => service.SendAsync(expected));
         Assert.Equal(0, sender.Calls);
     }
@@ -88,7 +75,7 @@ public class ParticipationInvoiceTests
         Assert.Equal(expected.RecipientEmail, sender.Recipient);
     }
 
-    private static ParticipationInvoice Sample() => new(1, 2027, "Herbies piratenkoor", 2027, 1, "B", 25, "finance@example.org", "penningmeester");
+    private static ParticipationInvoice Sample() => new(1, 2027, "Herbies piratenkoor", 2027, 1, "B", new(50m, 25m, 9m), "finance@example.org", "penningmeester");
     private sealed class FakeData(ParticipationInvoice invoice) : IParticipationInvoiceData
     {
         public Task<ParticipationInvoice> LoadAsync(uint groupId, uint festivalId) => Task.FromResult(invoice);

@@ -1,3 +1,4 @@
+using Amusing.Facturatie;
 using System.Globalization;
 using System.Net;
 using System.Net.Mail;
@@ -7,23 +8,13 @@ namespace Amusing.Services;
 public sealed record InvoiceContact(uint PersonId, string Role, string Email);
 
 public sealed record ParticipationInvoice(uint GroupId, uint FestivalId, string GroupName, int Year,
-    int Singers, string StageType, decimal StageGross, string RecipientEmail, string RecipientRole)
+    int Singers, string StageType, Deelnamebedrag Amount, string RecipientEmail, string RecipientRole)
 {
-    // Approved legacy rates. Move together to database configuration after the Mijn migration.
-    public const decimal VatRate = 0.09m;
-    public decimal ParticipantsGross => Singers switch
-    {
-        <= 0 => throw new InvalidOperationException("Vul eerst een geldig deelnemersaantal in bij de inschrijving."),
-        <= 20 => 50m,
-        <= 50 => 75m,
-        <= 100 => 100m,
-        _ => 125m
-    };
-    public decimal Total => ParticipantsGross + StageGross;
-    public decimal ParticipantsNet => decimal.Round(ParticipantsGross / (1 + VatRate), 2, MidpointRounding.AwayFromZero);
-    public decimal StageNet => decimal.Round(StageGross / (1 + VatRate), 2, MidpointRounding.AwayFromZero);
-    // Keep displayed lines and total equal, including any rounding cent.
-    public decimal Vat => Total - ParticipantsNet - StageNet;
+    public decimal ParticipantsGross => Amount.DeelnemersInclBtw;
+    public decimal Total => Amount.TotaalInclBtw;
+    public decimal ParticipantsNet => Amount.DeelnemersExclBtw;
+    public decimal StageNet => Amount.PodiumExclBtw;
+    public decimal Vat => Amount.Btw;
     public static string Money(decimal amount) => "€ " + amount.ToString("N2", CultureInfo.GetCultureInfo("nl-NL"));
     public string RecipientDisplayRole => RecipientRole == "penningmeester" ? "Penningmeester" : "contactpersoon 1";
     public string SuccessMessage => $"Factuur is verstuurd naar {RecipientDisplayRole}";
@@ -45,7 +36,7 @@ public sealed record ParticipationInvoice(uint GroupId, uint FestivalId, string 
                 <tbody><tr><td colspan="2">Deelname aan Korenfestival Amusing Hengelo {Year}</td></tr>
                 <tr><td>Groepsgrootte {Singers} personen</td><td align="right" style="text-align:right;white-space:nowrap">{Money(ParticipantsNet)}</td></tr>
                 <tr><td>Podium type {stage}</td><td align="right" style="text-align:right;white-space:nowrap">{Money(StageNet)}</td></tr>
-                <tr><td>BTW 9%</td><td align="right" style="text-align:right;white-space:nowrap">{Money(Vat)}</td></tr>
+                <tr><td>BTW {Amount.BtwPercentage.ToString("0.##", CultureInfo.GetCultureInfo("nl-NL"))}%</td><td align="right" style="text-align:right;white-space:nowrap">{Money(Vat)}</td></tr>
                 <tr><th scope="row" align="left" style="text-align:left">Totaal</th><td align="right" style="text-align:right;white-space:nowrap"><strong>{Money(Total)}</strong></td></tr></tbody></table>
                 <p>Gelieve het verschuldigde bedrag ter hoogte van {Money(Total)} te betalen op rekening
                 NL22RABO0125893922 (BIC RABONL2U) ten name van Stichting Vocale Promotie in Hengelo,

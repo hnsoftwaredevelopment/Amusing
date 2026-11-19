@@ -29,6 +29,7 @@
 
 			@if ( SelectedEditionId != null )
 			{
+                <a class="btn btn-outline-primary" href="@($"/Maintenance-Waitlist?festival={SelectedEditionId}")">Wachtlijst beheren</a>
 				<div class="scrollable-content maintenance-page__content">
 					<div class="maintenance-grid-shell maintenance-grid-shell--fit">
 						<SfGrid @ref="GridRef"

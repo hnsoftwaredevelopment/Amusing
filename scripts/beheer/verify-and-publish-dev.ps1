@@ -52,8 +52,9 @@ backup="${app}_backup_$(date +%Y%m%d-%H%M%S)"
 test "$(readlink -f "$app")" = "$app"
 test -s "$archive"
 test "$(sha256sum "$archive" | cut -d ' ' -f1)" = '__ARCHIVE_HASH__'
-systemctl cat amusing-dev.service | grep -q 'Database=amusingdev'
 oldpid=$(systemctl show amusing-dev.service -p MainPID --value)
+test "$oldpid" -gt 0
+sudo grep -azqiE '^ConnectionStrings__DefaultConnection=([[:space:]]*[^;]+;)*[[:space:]]*Database[[:space:]]*=[[:space:]]*amusingdev[[:space:]]*(;|$)' "/proc/$oldpid/environ"
 test ! -e "$backup"
 sudo cp -a "$app" "$backup"
 test -f "$backup/Amusing.dll"

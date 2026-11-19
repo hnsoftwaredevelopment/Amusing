@@ -1,3 +1,5 @@
+using Amusing.Facturatie;
+
 namespace Amusing.Services;
 
 public interface IParticipationInvoiceData
@@ -28,14 +30,15 @@ public class ParticipationInvoiceData(GenericDataService data) : IParticipationI
     public async Task<ParticipationInvoice> LoadAsync(uint groupId, uint festivalId)
     {
         var parameters = new Dictionary<string, object> { ["@group"] = groupId, ["@festival"] = festivalId };
-        var invoices = await data.ExecuteQueryAsync("""
+        var invoices = await data.ExecuteQueryAsync($"""
             SELECT g.naam, YEAR(f.festivaldatum) AS jaar, i.aantal_deelnemers, i.podiumsoort,
-                   p.prijs, i.afgehaakt IS NOT NULL AS afgehaakt
+                   p.prijs, f.btw_percentage,
+                   {FestivalTariefSql.Deelnemersprijs} AS deelnemersprijs,
+                   i.afgehaakt IS NOT NULL AS afgehaakt
             FROM amusing.ah_inschrijvingen i
             JOIN amusing.ah_zanggroepen g ON g.zanggroep_id=i.zanggroep_id
             JOIN amusing.ah_festivals f ON f.festival_id=i.festival_id
-            LEFT JOIN amusing.ah_podia_typen p ON p.type=i.podiumsoort
-                AND p.versie=(SELECT MAX(versie) FROM amusing.ah_podia_typen WHERE versie<=i.festival_id)
+            {FestivalTariefSql.PodiumtariefJoin}
             WHERE i.zanggroep_id=@group AND i.festival_id=@festival
             """, reader =>
         {
@@ -43,13 +46,16 @@ public class ParticipationInvoiceData(GenericDataService data) : IParticipationI
                 throw new InvalidOperationException("Deze inschrijving is afgehaakt; hiervoor kan geen deelnamefactuur worden verzonden.");
             if (reader["prijs"] is DBNull)
                 throw new InvalidOperationException("Voor het podiumtype van deze festivaleditie ontbreekt een tarief.");
-            var invoice = new ParticipationInvoice(groupId, festivalId, reader["naam"].ToString()!,
-                Convert.ToInt32(reader["jaar"]), Convert.ToInt32(reader["aantal_deelnemers"]),
-                reader["podiumsoort"].ToString()!, Convert.ToDecimal(reader["prijs"]), "", "");
-            if (invoice.StageGross < 0)
-                throw new InvalidOperationException("Het podiumtarief mag niet negatief zijn.");
-            _ = invoice.Total; // Validate the participant count before offering a preview.
-            return invoice;
+            var singers = Convert.ToInt32(reader["aantal_deelnemers"]);
+            if (singers <= 0)
+                throw new InvalidOperationException("Vul eerst een geldig deelnemersaantal in bij de inschrijving.");
+            if (reader["deelnemersprijs"] is DBNull || reader["btw_percentage"] is DBNull)
+                throw new InvalidOperationException("Voor deze festivaleditie ontbreekt een deelnemersstaffel of het btw-tarief.");
+
+            var amount = new Deelnamebedrag(Convert.ToDecimal(reader["deelnemersprijs"]),
+                Convert.ToDecimal(reader["prijs"]), Convert.ToDecimal(reader["btw_percentage"]));
+            return new ParticipationInvoice(groupId, festivalId, reader["naam"].ToString()!,
+                Convert.ToInt32(reader["jaar"]), singers, reader["podiumsoort"].ToString()!, amount, "", "");
         }, parameters);
         if (invoices.Count != 1)
             throw new InvalidOperationException("De festivalinschrijving of het bijbehorende podiumtarief is niet eenduidig gevonden.");

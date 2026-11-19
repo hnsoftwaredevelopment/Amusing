@@ -1,4 +1,4 @@
-﻿using Amusing.Helpers;
+using Amusing.Helpers;
 using Amusing.Models;
 
 namespace Amusing.Services;
@@ -15,6 +15,8 @@ public class UserService( GenericDataService dataService )
             {
                 UserId = Convert.ToUInt32( reader [ "UserId" ] ),
                 Username = reader [ "UserName" ].ToString() ?? string.Empty,
+                RecoveryEmail = reader["RecoveryEmail"].ToString() ?? "",
+                DisplayName = reader["DisplayName"].ToString() ?? "",
                 Password = "",
                 Role = reader [ "Role" ].ToString() ?? string.Empty,
                 LastLoginDate = reader [ "LastLoginDate" ] == DBNull.Value
@@ -29,6 +31,8 @@ public class UserService( GenericDataService dataService )
         {
             { "@UserId", model.UserId },
             { "@UserName", model.Username },
+            { "@DisplayName", model.DisplayName.Trim() },
+            { "@RecoveryEmail", model.RecoveryEmail.Trim() },
             { "@Role", model.Role }
             };
 
@@ -52,6 +56,8 @@ public class UserService( GenericDataService dataService )
         Dictionary<string, object> parameters = new()
     {
         { "@UserName", model.Username },
+            { "@DisplayName", model.DisplayName.Trim() },
+            { "@RecoveryEmail", model.RecoveryEmail.Trim() },
         { "@Password", model.Password },
         { "@Role", model.Role }
     };

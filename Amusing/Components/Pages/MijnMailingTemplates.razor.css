@@ -1,0 +1,8 @@
+.mijn-variable-reference { margin-block: .75rem; }
+.mijn-variable-reference summary { cursor: pointer; font-weight: 600; padding-block: .35rem; }
+.mijn-variable-table { max-height: 45vh; overflow: auto; }
+.mijn-variable-table table { min-width: 650px; }
+.mijn-variable-table th, .mijn-variable-table td { vertical-align: top; }
+.mijn-variable-table td { min-width: 200px; white-space: pre-wrap; }
+.mijn-variable-table code { white-space: nowrap; }
+.mijn-message-preview { display: block; width: 100%; height: 50vh; min-height: 220px; border: 1px solid #ccd3da; background: white; }
