@@ -7,7 +7,7 @@ public static class QueueState
 public enum MailOutcome { Accepted, TemporaryFailure, PermanentFailure, ConfigurationFailure, Uncertain }
 public sealed record MailAttempt(MailOutcome Outcome, string? Error = null, int? SmtpCode = null, bool Quota = false);
 public sealed record RetryDecision(string State, DateTime? NextAttempt = null, bool PauseQueue = false, bool BlockQueue = false);
-public sealed record QueueMessage(string Recipient, byte[] Mime);
+public sealed record QueueMessage(string Recipient, byte[] Mime, string? ValidationError = null);
 public sealed record CampaignProgress(string Id, string Name, DateTime CreatedAt, int Total, int Accepted, int Waiting, int Failed, int Review);
 public sealed record QueueMessageProgress(string Recipient, string State, int Attempts, DateTime? NextAttempt, string? Error);
 
