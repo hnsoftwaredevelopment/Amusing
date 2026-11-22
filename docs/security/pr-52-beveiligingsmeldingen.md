@@ -62,3 +62,20 @@ KAN-70 is naar de bordkolom Ready for production (native status Production) verp
 KAN-71 blijft Ready to merge: de eindmeldingsimplementatie staat niet in deze merge. Ook overige latere featurebranches zijn hiermee niet automatisch samengevoegd.
 
 De geregistreerde CodeQL-checks zijn geslaagd. GitGuardian Security Checks staat bij deze PR nog op failure; de merge bevestigt op zichzelf geen afhandeling van de twee historische testdatameldingen. KAN-69 blijft daarom open totdat die beoordeling aantoonbaar is afgehandeld.
+
+## Publicatie KAN-70 — 22 november 2026
+
+Gebruiker heeft publicatie van KAN-70 goedgekeurd. De gerichte fix staat op productie van Mijn. Vooraf is bevestigd dat de applicatiebron ten opzichte van de bestaande registratiefix c039729 uitsluitend afwijkt in wwwroot/choir-file.js. De nieuwe publicatie heeft dezelfde deps.json/runtimeconfig.json als de vorige build. Configuratie, bibliotheken en overige bestanden zijn overgenomen uit de vorige release; DLL, statische assets en assetmanifest zijn als samenhangend pakket vervangen. Er is geen databasewijziging uitgevoerd en geen KAN-54- of KAN-60-merge gedaan.
+
+- Vorige release: /opt/amusing-mijn/releases/registratie-20261122.4m8GNtOs.
+- Nieuwe release: /opt/amusing-mijn/releases/preview-security-20261122.Y3njhXTj.
+- Terugvalgegevens: /var/backups/amusing-kan70-production.3IcsHBNp.
+- DLL SHA256: 7e3e99e9b2b74b39787a8a7d51e45b916a34144f80dce391b6b68ee8950c830e.
+- Previewscript SHA256: 975a3d1af97bacefb9509ff58779defd00f86c63e0470750ebd11ecd91186e34.
+- amusing-mijn actief, proces 65275 sinds 22 november 2026 18:34:10 CET.
+
+De eerste automatische controle gebruikte ten onrechte het IP-adres als Host en kreeg HTTP 400 door de bestaande hostbeveiliging. De eerdere release is daarbij automatisch teruggezet en publiek HTTP 200 bevestigd. De controle is gecorrigeerd naar Host: mijn.amusing-hengelo.nl en X-Forwarded-Proto: https; daarna is dezelfde voorbereide release geactiveerd en gecontroleerd. Er was geen applicatiefout in de nieuwe build. De terugvalroute werkte zoals bedoeld.
+
+De publieke inlogpagina verwijst naar /choir-file.dzb799cdl1.js. Deze fingerprint-route geeft met identity, gzip en br telkens HTTP 200 en exact de broncodehash. De herbruikbare controle staat in scripts/mijn/verify-preview-publication.ps1. Een statisch bronbestand alleen vervangen zou onvoldoende zijn geweest vanwege assetmanifest en gecomprimeerde varianten.
+
+KAN-70 is nu gemerged en gepubliceerd: Done. Gebruiker heeft daarnaast KAN-54 en KAN-60 geaccepteerd; hun subtaken zijn naar Ready to merge gezet. De betreffende commits 80d93b1 en c039729 staan niet in origin/master. Er is geen impliciete merge of aanvullende publicatie van deze tickets uitgevoerd. KAN-60 was al als gerichte eerdere fix live; de Git-afhandeling blijft apart nodig.

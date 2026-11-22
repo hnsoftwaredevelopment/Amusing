@@ -27,3 +27,7 @@ Beide services en health-controles zijn actief. Via publieke HTTPS is gecontrole
 De activering gebruikt een transactionele upsert met LAST_INSERT_ID om dezelfde persoon te behouden. Het dedicated dev-account kreeg daarvoor UPDATE(persoon_id) op amusingdev.ah_personen; de uitgevoerde query wijzigt de bestaande ID niet. Productie had het benodigde UPDATE-recht al.
 
 Bij controle van de productielogs is ook het eerder ontbrekende SELECT-recht op amusing.planner_optredens toegekend aan het dedicated Mijn-account. Dat recht is nodig voor gepubliceerde historische optredens. Er zijn geen festival- of koorgegevens aangepast.
+
+## Gebruikersacceptatie
+
+Herbert heeft KAN-60 op 22 november 2026 geaccepteerd. De registratieherstel-slice en bijbehorende subtaken staan nu op Ready to merge. De fix was al live als gerichte publicatie; commit c039729 is nog niet in master opgenomen. Acceptatie is geen extra merge/publicatie geweest.
