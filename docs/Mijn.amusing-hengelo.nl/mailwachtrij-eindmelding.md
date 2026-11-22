@@ -1,6 +1,6 @@
 # KAN-71 — Automatische eindmelding voor de mailwachtrij
 
-Status: gebouwd, gecontroleerd en op dev; door de gebruiker geaccepteerd op 22 november 2026. Nog niet op productie.
+Status: geaccepteerd, samengevoegd en gepubliceerd op productie op 22 november 2026.
 
 ## Gedrag
 
@@ -35,3 +35,26 @@ Dit voorbeeld heeft drie .invalid-adressen met alleen eindstatussen en geen MIME
 ## Resterend
 
 De gebruiker heeft de weergave en detailinformatie op 22 november 2026 goedgekeurd. De slice is daarmee geaccepteerd. Productiepublicatie staat nog open en volgt op verzoek. Beheer van blokkades/controlegevallen, inhoudsopruiming en een gedeeld domeinbudget voor overige Beheer/Mijn-mailstromen blijven afzonderlijke vervolgslices. De beveiligingsmeldingen bij PR #52 vallen onder KAN-68 en zijn niet in deze wijziging opgelost of onderdrukt.
+
+## Productiepublicatie 22 november 2026
+
+- PR https://github.com/hnsoftwaredevelopment/Amusing/pull/53 is samengevoegd; mergecommit f5e971faa2b6bc8007d3460429424b081b95afc0.
+- Alle 127 Beheer-tests slagen. CodeQL, beide analyses, GitGuardian en CodeRabbit hebben status SUCCESS. CodeRabbit SUCCESS betekent niet dat alle reviewopmerkingen zijn opgelost.
+- Gerichte publicatie vanuit de bestaande productievariant; alleen Amusing.dll wijzigt. Hiermee blijven eerder gepubliceerde, nog afzonderlijk te mergen functies behouden.
+- Back-up van DLL en wachtrij/logtabellen: /var/backups/beheer-kan71-prod.dosDzgC5. Alleen migratie 002 op amusing uitgevoerd.
+- SHA256 DLL lokaal en VPS: 30248cb1dfdd1ffb91e3ca949f939fa249baa58f2875eafbaae1b1260dd78a41.
+- Service amusing actief met nieuw proces 66144 sinds 19:18:31 CET; HTTP-controle geslaagd.
+- Productiecontrole: tijdelijke campagne met uitsluitend eindstatus review, geen MIME-inhoud en nul SMTP-pogingen. Worker maakt automatisch een eindmelding; browser opent deze en de juiste campagne via de link. Tijdelijke campagne, logregel en controleaccount zijn daarna verwijderd. Geen proefmail verstuurd.
+
+## Reviewvervolg onder KAN-65
+
+De automatische review kwam na de samenvoeging binnen. De opmerkingen zijn nog niet allemaal gereproduceerd of opgelost. Behandel ze als vervolgonderzoek, niet als een volledige foutvrije verklaring voor de wachtrijbasis:
+
+- Een fout bij opslag van een eindmelding kan verdere verzending blokkeren; isoleer fouten per campagne en behoud een zichtbare herstelbare auditpoging.
+- Een bewaard verzendconcept bij een mislukte enqueue moet aan dezelfde ontvangers/inhoud gekoppeld blijven; gewijzigde invoer mag niet stilzwijgend oude ontvangers gebruiken. Controleer ook templatewisseling tijdens een await en onzekere commits.
+- Hercontroleer de verzendvlag per verwerkingsronde bij herlaadbare configuratie.
+- Onderzoek tijdelijke AUTH- en TLS-fouten en onderscheid afzenderconfiguratiefouten van definitieve ontvangerfouten.
+- Koppel asynchrone ontvangerresultaten aan de actuele campagneselectie.
+- Lege variabelen consistent vervangen; toetsenbordfocus/Escape voor het logdetail; hostveiligheidsgrens afzonderlijk testen; wachten op SSH-tunnelgereedheid in de testhelper.
+
+Bron: inline reviewopmerkingen op PR #53. KAN-63 en KAN-65 blijven open voor deze en eerder afgesproken resterende werkzaamheden.
