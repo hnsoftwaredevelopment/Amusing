@@ -84,6 +84,21 @@ public class SmtpQueueTransportTests
             using var client=await _listener.AcceptTcpClientAsync();using var stream=client.GetStream();
             using var reader=new StreamReader(stream);using var writer=new StreamWriter(stream){NewLine="\r\n",AutoFlush=true};
             await writer.WriteLineAsync("220 localhost test");bool data=false;
+            if(stage.StartsWith("TLS-"))
+            {
+                // A fixed TLS transcript selected by test setup; received commands do not choose authentication.
+                Assert.StartsWith("EHLO",await reader.ReadLineAsync());
+                await writer.WriteLineAsync("250-localhost");await writer.WriteLineAsync("250 STARTTLS");
+                Assert.Equal("STARTTLS",await reader.ReadLineAsync());
+                await writer.WriteLineAsync("220 Begin TLS");
+                if(_certificate is not null)
+                {
+                    using var tls=new SslStream(stream,true);
+                    try{await tls.AuthenticateAsServerAsync(_certificate).WaitAsync(TimeSpan.FromSeconds(5));await tls.ReadAsync(new byte[1]).AsTask().WaitAsync(TimeSpan.FromSeconds(5));}
+                    catch(Exception ex)when(ex is IOException or System.Security.Authentication.AuthenticationException){}
+                }
+                return;
+            }
             while(await reader.ReadLineAsync() is {} line)
             {
                 if(data)
@@ -93,18 +108,7 @@ public class SmtpQueueTransportTests
                     return;
                 }
                 if(stage!="DATA"&&line.StartsWith(stage)){await writer.WriteLineAsync(finalReply);return;}
-                if(line.StartsWith("EHLO")){await writer.WriteLineAsync("250-localhost");if(stage.StartsWith("TLS-"))await writer.WriteLineAsync("250-STARTTLS");await writer.WriteLineAsync("250-AUTH PLAIN");await writer.WriteLineAsync("250 SIZE 1000000");}
-                else if(line=="STARTTLS")
-                {
-                    await writer.WriteLineAsync("220 Begin TLS");
-                    if(_certificate is not null)
-                    {
-                        using var tls=new SslStream(stream,true);
-                        try{await tls.AuthenticateAsServerAsync(_certificate).WaitAsync(TimeSpan.FromSeconds(5));await tls.ReadAsync(new byte[1]).AsTask().WaitAsync(TimeSpan.FromSeconds(5));}
-                        catch(Exception ex)when(ex is IOException or System.Security.Authentication.AuthenticationException){}
-                    }
-                    return;
-                }
+                if(line.StartsWith("EHLO")){await writer.WriteLineAsync("250-localhost");await writer.WriteLineAsync("250-AUTH PLAIN");await writer.WriteLineAsync("250 SIZE 1000000");}
                 else if(line.StartsWith("MAIL")||line.StartsWith("RCPT"))await writer.WriteLineAsync("250 OK");
                 else if(line=="DATA"){await writer.WriteLineAsync("354 Continue");data=true;}
                 else if(line=="QUIT"){await writer.WriteLineAsync("221 Goodbye");return;}
