@@ -1,6 +1,6 @@
 # KAN-71 — Automatische eindmelding voor de mailwachtrij
 
-Status: gebouwd, gecontroleerd en op dev; nog niet op productie.
+Status: gebouwd, gecontroleerd en op dev; door de gebruiker geaccepteerd op 22 november 2026. Nog niet op productie.
 
 ## Gedrag
 
@@ -34,4 +34,4 @@ Dit voorbeeld heeft drie .invalid-adressen met alleen eindstatussen en geen MIME
 
 ## Resterend
 
-Praktijkacceptatie van deze weergave en daarna productiepublicatie op verzoek. Beheer van blokkades/controlegevallen, inhoudsopruiming en een gedeeld domeinbudget voor overige Beheer/Mijn-mailstromen blijven afzonderlijke vervolgslices. De beveiligingsmeldingen bij PR #52 vallen onder KAN-68 en zijn niet in deze wijziging opgelost of onderdrukt.
+De gebruiker heeft de weergave en detailinformatie op 22 november 2026 goedgekeurd. De slice is daarmee geaccepteerd. Productiepublicatie staat nog open en volgt op verzoek. Beheer van blokkades/controlegevallen, inhoudsopruiming en een gedeeld domeinbudget voor overige Beheer/Mijn-mailstromen blijven afzonderlijke vervolgslices. De beveiligingsmeldingen bij PR #52 vallen onder KAN-68 en zijn niet in deze wijziging opgelost of onderdrukt.
