@@ -4,7 +4,7 @@ const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
 
-function setup() {
+function setup(generatedUrl) {
     const listeners = new Map(); const revoked = []; let sequence = 0;
     const name = { dataset: {}, textContent: 'Selecteer afbeelding' };
     class FakeImage {
@@ -28,7 +28,7 @@ function setup() {
     vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../../Amusing.Mijn/wwwroot/choir-file.js'), 'utf8'), {
         document, HTMLInputElement: FakeInput, HTMLImageElement: FakeImage,
         window: { addEventListener() {}, Blazor: null },
-        URL: { createObjectURL() { return 'blob:local-test/' + (++sequence); }, revokeObjectURL(url) { revoked.push(url); } },
+        URL: { createObjectURL() { return generatedUrl ?? 'blob:local-test/' + (++sequence); }, revokeObjectURL(url) { revoked.push(url); } },
         WeakMap, JSON, FormData: class {}, Event: class {}
     });
     const input = new FakeInput();
@@ -59,4 +59,9 @@ test('a non-image element cannot become a preview URL sink', () => {
     const fixture = setup(); const element = { dataset: {}, hidden: true };
     fixture.setPreview(element); fixture.choose({ name: 'photo.png', type: 'image/png' });
     assert.equal(element.src, undefined);
+});
+
+test('only a blob URL can be assigned to the image preview', () => {
+    const fixture = setup('javascript:untrusted'); fixture.choose({ name: 'photo.png', type: 'image/png' });
+    assert.equal(fixture.preview.src, undefined); assert.equal(fixture.preview.hidden, true);
 });
