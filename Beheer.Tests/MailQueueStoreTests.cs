@@ -24,8 +24,9 @@ public class MailQueueStoreTests : IAsyncLifetime
         if(_connection.Length==0)return;
         var builder=new MySqlConnectionStringBuilder(_connection);
         if(!builder.Database.StartsWith("mijn_test_",StringComparison.Ordinal))throw new InvalidOperationException("Only isolated test schemas allowed.");
-        await Sql("DROP TABLE IF EXISTS beheer_mail_message; DROP TABLE IF EXISTS beheer_mail_campaign; DROP TABLE IF EXISTS beheer_mail_gate;");
-        await Sql(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory,"001-mailwachtrij.sql")));
+        await Sql("DROP TABLE IF EXISTS user_log; DROP TABLE IF EXISTS beheer_mail_message; DROP TABLE IF EXISTS beheer_mail_campaign; DROP TABLE IF EXISTS beheer_mail_gate;");
+        await Sql(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory,"001-mailwachtrij.sql")));        await Sql(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory,"002-mailwachtrij-eindmelding.sql")));
+        await Sql("CREATE TABLE user_log(Id INT AUTO_INCREMENT PRIMARY KEY,date DATETIME DEFAULT CURRENT_TIMESTAMP,user_id INT,template_id INT,area VARCHAR(100),action VARCHAR(100),status VARCHAR(100),report TEXT)");
     }
     public Task DisposeAsync()=>Task.CompletedTask;
     private async Task Sql(string sql){await using var db=new MySqlConnection(_connection);await db.OpenAsync();await using var cmd=new MySqlCommand(sql,db);await cmd.ExecuteNonQueryAsync();}
@@ -105,6 +106,48 @@ public class MailQueueStoreTests : IAsyncLifetime
         var id=Guid.NewGuid();await Store.EnqueueAsync(id,22,"Test",1,[new("invalid",[],"Ongeldig e-mailadres"),Message()]);
         var transport=new FakeTransport(new(MailOutcome.Accepted));Assert.True(await Store.ProcessNextAsync(transport));Assert.False(await Store.ProcessNextAsync(transport));
         var progress=(await Store.CampaignsAsync()).Single();Assert.Equal(2,progress.Total);Assert.Equal(1,progress.Accepted);Assert.Equal(1,progress.Failed);Assert.Equal(1,transport.Calls);
+    }
+    private async Task<object?> Scalar(string sql)
+    {await using var db=new MySqlConnection(_connection);await db.OpenAsync();await using var cmd=new MySqlCommand(sql,db);return await cmd.ExecuteScalarAsync();}
+    [QueueDatabaseFact] public async Task CompletionIsLoggedOnceEvenAfterWorkerRestart()
+    {
+        var id=Guid.NewGuid();await Store.EnqueueAsync(id,22,"Test",1,[Message()]);
+        var transport=new FakeTransport(new(MailOutcome.Accepted));await Store.ProcessNextAsync(transport);await Store.ProcessNextAsync(transport);
+        Assert.Equal(1,Convert.ToInt32(await Scalar("SELECT COUNT(*) FROM user_log")));
+        Assert.Contains("Verzonden: 1, mislukt: 0, totaal: 1",(string)(await Scalar("SELECT report FROM user_log LIMIT 1"))!);
+        Assert.Equal(1,transport.Calls);
+    }
+    [QueueDatabaseFact] public async Task WaitingAndQuotaDelayDoNotCreatePrematureCompletion()
+    {
+        await Store.EnqueueAsync(Guid.NewGuid(),22,"Test",1,[Message()]);
+        await Store.ProcessNextAsync(new FakeTransport(new(MailOutcome.TemporaryFailure,"Exceeding quota",451,true)));
+        Assert.Equal(0,Convert.ToInt32(await Scalar("SELECT COUNT(*) FROM user_log")));
+        _clock.Advance(TimeSpan.FromHours(1));await Store.ProcessNextAsync(new FakeTransport(new(MailOutcome.Accepted)));
+        Assert.Equal(1,Convert.ToInt32(await Scalar("SELECT COUNT(*) FROM user_log")));
+    }
+    [QueueDatabaseFact] public async Task OnlyInvalidRecipientsAlsoGetACompletionSummary()
+    {
+        await Store.EnqueueAsync(Guid.NewGuid(),22,"Test",1,[new("invalid",[],"Ongeldig e-mailadres")]);
+        await Store.ProcessNextAsync(new FakeTransport(new(MailOutcome.Accepted)));
+        Assert.Equal(1,Convert.ToInt32(await Scalar("SELECT COUNT(*) FROM user_log")));
+        Assert.Contains("invalid",(string)(await Scalar("SELECT report FROM user_log LIMIT 1"))!);
+        Assert.Equal("unsuccessful",(string)(await Scalar("SELECT status FROM user_log LIMIT 1"))!);
+    }
+    [QueueDatabaseFact] public async Task OrphanedAcceptanceIsReportedAsReviewNotSent()
+    {
+        await Store.EnqueueAsync(Guid.NewGuid(),22,"Test",1,[Message()]);await Sql("UPDATE beheer_mail_message SET state='sending'");
+        var transport=new FakeTransport(new(MailOutcome.Accepted));await Store.ProcessNextAsync(transport);
+        Assert.Equal(0,transport.Calls);Assert.Contains("Controle nodig: 1",(string)(await Scalar("SELECT report FROM user_log LIMIT 1"))!);
+    }
+    [QueueDatabaseFact] public async Task AuditInsertAndCompletionMarkerAreAtomic()
+    {
+        var id=Guid.NewGuid();await Store.EnqueueAsync(id,22,"Test",1,[Message()]);
+        await Sql("ALTER TABLE user_log MODIFY report VARCHAR(1)");
+        var transport=new FakeTransport(new(MailOutcome.Accepted));
+        await Assert.ThrowsAnyAsync<Exception>(()=>Store.ProcessNextAsync(transport));
+        Assert.Equal(DBNull.Value,await Scalar("SELECT finished_logged_at FROM beheer_mail_campaign LIMIT 1"));
+        await Sql("ALTER TABLE user_log MODIFY report TEXT");await Store.ProcessNextAsync(transport);
+        Assert.Equal(1,transport.Calls);Assert.Equal(1,Convert.ToInt32(await Scalar("SELECT COUNT(*) FROM user_log")));
     }
     private sealed class TestClock:TimeProvider
     {
