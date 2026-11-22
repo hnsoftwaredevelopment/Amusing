@@ -12,6 +12,7 @@ public partial class Logbook : ComponentBase
 {
     [Inject] private LoggingService LoggingService { get; set; } = default!;
 
+    private LogModel? _selectedReport;
     private bool _isLoading;
     private SfGrid<LogModel>? _grid;
     private List<LogModel> _logs = [];
@@ -24,6 +25,18 @@ public partial class Logbook : ComponentBase
         _isLoading = true;
         _logs = await LoggingService.GetUsersLogAsync();
         _isLoading = false;
+    }
+
+    private void CloseReport() { _selectedReport = null; StateHasChanged(); }
+
+    private void ShowReport(LogModel entry) { _selectedReport = entry; StateHasChanged(); }
+
+    private static string GetStatusLabel(LogModel entry)
+    {
+        var match = System.Text.RegularExpressions.Regex.Match(entry.LogReport ?? "", @"Verzonden: (\d+), mislukt: (\d+), totaal: (\d+)");
+        if (match.Success && int.TryParse(match.Groups[1].Value, out var sent) && int.TryParse(match.Groups[2].Value, out var failed))
+            return failed > 0 ? (sent > 0 ? "Gedeeltelijk verzonden" : "Niet verzonden") : "Verzonden";
+        return entry.LogStatus switch { "success" or "successful" => "Geslaagd", "unsuccessful" => "Mislukt", _ => entry.LogStatus };
     }
 
     private async Task OnInput( InputEventArgs args )
