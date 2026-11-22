@@ -1,7 +1,14 @@
 (() => {
     const profileStates = new WeakMap();
+    const previewUrls = new WeakMap();
     let submitting = false;
     let savingImages = false;
+
+    function releasePreviewUrl(preview) {
+        const url = previewUrls.get(preview);
+        if (url) URL.revokeObjectURL(url);
+        previewUrls.delete(preview);
+    }
 
     function values(form) {
         return JSON.stringify([...new FormData(form)].filter(([key]) => key.startsWith("Input.")));
@@ -41,13 +48,15 @@
         form.querySelector("[data-image-error]").hidden = true;
         updateImageBar();
         const preview = form.querySelector("[data-image-preview]");
-        if (preview.dataset.url) URL.revokeObjectURL(preview.dataset.url);
+        if (!(preview instanceof HTMLImageElement)) return;
+        releasePreviewUrl(preview);
         preview.removeAttribute("src");
         preview.hidden = true;
-        delete preview.dataset.url;
+
         if (file && /^image\/(png|jpeg|webp)$/.test(file.type)) {
-            preview.dataset.url = URL.createObjectURL(file);
-            preview.src = preview.dataset.url;
+            const url = URL.createObjectURL(file);
+            previewUrls.set(preview, url);
+            preview.src = url;
             preview.hidden = false;
         }
     });
@@ -123,7 +132,7 @@
                         .find(item => item.dataset.imageCard === card.dataset.imageCard);
                     form.removeAttribute("data-unsaved");
                     const preview = form.querySelector("[data-image-preview]");
-                    if (preview.dataset.url) URL.revokeObjectURL(preview.dataset.url);
+                    releasePreviewUrl(preview);
                     if (replacement) card.replaceWith(replacement);
                     else {
                         const input = form.querySelector("[data-choir-file]");
