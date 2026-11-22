@@ -24,4 +24,5 @@
     <ProjectReference Include="..\Amusing.Mobile.Shared\Amusing.Mobile.Shared.csproj" />
   </ItemGroup>
   <ItemGroup><None Include="..\database\beheer\001-mailwachtrij.sql" Link="001-mailwachtrij.sql" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
+  <ItemGroup><None Include="..\database\beheer\002-mailwachtrij-eindmelding.sql" Link="002-mailwachtrij-eindmelding.sql" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
 </Project>

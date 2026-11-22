@@ -6,7 +6,7 @@ using MimeKit;
 namespace Amusing.Services.MailQueue;
 
 /// <summary>Durable bulk outbox. A non-pooled advisory-lock connection serializes all workers in this database.</summary>
-public sealed class MailQueueStore(string connectionString, TimeProvider? clock = null, TimeSpan? minimumSpacing = null)
+public sealed partial class MailQueueStore(string connectionString, TimeProvider? clock = null, TimeSpan? minimumSpacing = null)
 {
     private readonly TimeProvider _clock = clock ?? TimeProvider.System;
     private readonly TimeSpan _spacing = minimumSpacing ?? TimeSpan.FromSeconds(19);
@@ -76,6 +76,7 @@ public sealed class MailQueueStore(string connectionString, TimeProvider? clock 
                 last_error='Verwerking onderbroken; SMTP-acceptatie onbekend. Controleer voor opnieuw verzenden.'
                 WHERE state='sending'
                 """,ct);
+            await LogFinishedCampaignsAsync(db,ct);
             DateTime now=Now;
             await using(var gate=Command(db,"SELECT last_attempt,paused_until,blocked_reason FROM beheer_mail_gate WHERE id=1"))
             await using(var reader=await gate.ExecuteReaderAsync(ct))
@@ -120,7 +121,8 @@ public sealed class MailQueueStore(string connectionString, TimeProvider? clock 
                     ("until",decision.PauseQueue?decision.NextAttempt:null),("reason",decision.BlockQueue?result.Error:null));
                 await pause.ExecuteNonQueryAsync(CancellationToken.None);
             }
-            await tx.CommitAsync(CancellationToken.None);return true;
+            await tx.CommitAsync(CancellationToken.None);
+            await LogFinishedCampaignsAsync(db,CancellationToken.None);return true;
         }
         finally
         {
