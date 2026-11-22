@@ -63,8 +63,22 @@ public class SmtpQueueTransportTests
     {
         private readonly TcpListener _listener=new(IPAddress.Loopback,0);
         private readonly Task _task;
+        private readonly X509Certificate2? _certificate;
         public int Port=>( (IPEndPoint)_listener.LocalEndpoint).Port;
-        public LocalSmtp(string finalReply,string stage="DATA"){_listener.Start();_task=Serve(finalReply,stage);}
+        public LocalSmtp(string finalReply,string stage="DATA")
+        {
+            // Test setup selects the certificate, never an SMTP command received over the socket.
+            if(stage=="TLS-CERT")_certificate=CreateTestCertificate();
+            _listener.Start();_task=Serve(finalReply,stage);
+        }
+        private static X509Certificate2 CreateTestCertificate()
+        {
+            using var rsa=RSA.Create(2048);
+            var request=new CertificateRequest("CN=localhost",rsa,HashAlgorithmName.SHA256,RSASignaturePadding.Pkcs1);
+            using var generated=request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1),DateTimeOffset.UtcNow.AddDays(1));
+            // Windows Schannel cannot use the ephemeral key produced by CreateSelfSigned.
+            return X509CertificateLoader.LoadPkcs12(generated.Export(X509ContentType.Pfx),null,X509KeyStorageFlags.UserKeySet);
+        }
         private async Task Serve(string finalReply,string stage)
         {
             using var client=await _listener.AcceptTcpClientAsync();using var stream=client.GetStream();
@@ -83,15 +97,10 @@ public class SmtpQueueTransportTests
                 else if(line=="STARTTLS")
                 {
                     await writer.WriteLineAsync("220 Begin TLS");
-                    if(stage=="TLS-CERT")
+                    if(_certificate is not null)
                     {
-                        using var rsa=RSA.Create(2048);
-                        var request=new CertificateRequest("CN=localhost",rsa,HashAlgorithmName.SHA256,RSASignaturePadding.Pkcs1);
-                        using var generated=request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1),DateTimeOffset.UtcNow.AddDays(1));
-                        // Windows Schannel cannot use the ephemeral key produced by CreateSelfSigned.
-                        using var cert=X509CertificateLoader.LoadPkcs12(generated.Export(X509ContentType.Pfx),null,X509KeyStorageFlags.UserKeySet);
                         using var tls=new SslStream(stream,true);
-                        try{await tls.AuthenticateAsServerAsync(cert).WaitAsync(TimeSpan.FromSeconds(5));await tls.ReadAsync(new byte[1]).AsTask().WaitAsync(TimeSpan.FromSeconds(5));}
+                        try{await tls.AuthenticateAsServerAsync(_certificate).WaitAsync(TimeSpan.FromSeconds(5));await tls.ReadAsync(new byte[1]).AsTask().WaitAsync(TimeSpan.FromSeconds(5));}
                         catch(Exception ex)when(ex is IOException or System.Security.Authentication.AuthenticationException){}
                     }
                     return;
@@ -102,6 +111,6 @@ public class SmtpQueueTransportTests
                 else await writer.WriteLineAsync("250 OK");
             }
         }
-        public async ValueTask DisposeAsync(){_listener.Stop();await _task.WaitAsync(TimeSpan.FromSeconds(5));}
+        public async ValueTask DisposeAsync(){_listener.Stop();try{await _task.WaitAsync(TimeSpan.FromSeconds(5));}finally{_certificate?.Dispose();}}
     }
 }
