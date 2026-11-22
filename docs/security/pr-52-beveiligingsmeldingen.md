@@ -1,6 +1,6 @@
 # PR #52 — beveiligingsmeldingen KAN-68
 
-Status: bronfixes en lokale controles gereed; CodeQL op GitHub geslaagd. GitGuardian houdt twee historische testdatavondsten open. Er is geen merge, force push of publicatie naar productie uitgevoerd.
+Status: bronfixes en lokale controles gereed; CodeQL op GitHub geslaagd. GitGuardian houdt twee historische testdatavondsten open. PR #52 is inmiddels door de gebruiker gemerged; er is geen force push of productiepublicatie uitgevoerd.
 
 ## GitGuardian: KAN-69
 
@@ -52,3 +52,13 @@ Op PR-head 6650cf82ad253f538cbab6dd3c816238e28a9bdd zijn CodeQL, Analyze (csharp
 GitGuardian Security Checks blijft failure met twee meldingen uit eerdere commits. De incidentafhandeling is niet beschikbaar via de huidige GitHub-koppeling; er is geen GitGuardian-beheeractie uitgevoerd. Daarom blijven KAN-69 en de overkoepelende KAN-68 open voor de historische beoordeling. KAN-70 is technisch afgerond. PR #52 is OPEN/UNSTABLE door de resterende controle en is niet gemerged.
 
 Er is geen productie- of dev-publicatie voor deze beveiligingsfix uitgevoerd. De bronfix is wel via fast-forward push aan de bestaande PR-branch toegevoegd en in de actuele ontwikkelbranch opgenomen.
+
+## Merge bevestigd — 22 november 2026
+
+Gebruiker meldt PR #52 gemerged. GitHub bevestigt MERGED naar master op 22 november 2026 17:09:06 Nederlandse tijd, mergecommit c09424b012c43680230a9d9a3301e94666ccc451. De merge bevat de gecontroleerde PR-head 6650cf82ad253f538cbab6dd3c816238e28a9bdd. Origin/master is opgehaald; de actuele featurebranch is niet stilzwijgend gemerged of gereset.
+
+KAN-70 is naar de bordkolom Ready for production (native status Production) verplaatst. De publieke productieversie van choir-file.js geeft HTTP 200 maar bevat de nieuwe private preview-URL-opslag en blob-schemaguard nog niet. De merge is dus geen bewijs van publicatie. Er is geen deployment gestart.
+
+KAN-71 blijft Ready to merge: de eindmeldingsimplementatie staat niet in deze merge. Ook overige latere featurebranches zijn hiermee niet automatisch samengevoegd.
+
+De geregistreerde CodeQL-checks zijn geslaagd. GitGuardian Security Checks staat bij deze PR nog op failure; de merge bevestigt op zichzelf geen afhandeling van de twee historische testdatameldingen. KAN-69 blijft daarom open totdat die beoordeling aantoonbaar is afgehandeld.
