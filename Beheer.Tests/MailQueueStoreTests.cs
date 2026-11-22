@@ -144,10 +144,38 @@ public class MailQueueStoreTests : IAsyncLifetime
         var id=Guid.NewGuid();await Store.EnqueueAsync(id,22,"Test",1,[Message()]);
         await Sql("ALTER TABLE user_log MODIFY report VARCHAR(1)");
         var transport=new FakeTransport(new(MailOutcome.Accepted));
-        await Assert.ThrowsAnyAsync<Exception>(()=>Store.ProcessNextAsync(transport));
+        await Store.ProcessNextAsync(transport);
         Assert.Equal(DBNull.Value,await Scalar("SELECT finished_logged_at FROM beheer_mail_campaign LIMIT 1"));
         await Sql("ALTER TABLE user_log MODIFY report TEXT");await Store.ProcessNextAsync(transport);
         Assert.Equal(1,transport.Calls);Assert.Equal(1,Convert.ToInt32(await Scalar("SELECT COUNT(*) FROM user_log")));
+    }
+    [QueueDatabaseFact] public async Task FailedAuditDoesNotBlockAnotherCampaignOrLoseItsRetry()
+    {
+        var first=Guid.NewGuid();var second=Guid.NewGuid();
+        await Store.EnqueueAsync(first,22,"Broken audit",1,[new("invalid",[],"Invalid")]);
+        await Store.EnqueueAsync(second,22,"Healthy campaign",1,[Message()]);
+        await Sql("ALTER TABLE user_log ADD CONSTRAINT reject_one_audit CHECK(report NOT LIKE '%Broken audit%')");
+        var transport=new FakeTransport(new(MailOutcome.Accepted));
+        Assert.True(await Store.ProcessNextAsync(transport));
+        Assert.Equal(1,transport.Calls);
+        Assert.Equal(1,Convert.ToInt32(await Scalar("SELECT COUNT(*) FROM user_log")));
+        await Sql("ALTER TABLE user_log DROP CONSTRAINT reject_one_audit");
+        await Store.ProcessNextAsync(transport);await Store.ProcessNextAsync(transport);
+        Assert.Equal(2,Convert.ToInt32(await Scalar("SELECT COUNT(*) FROM user_log")));
+        Assert.Equal(1,transport.Calls);
+    }
+    [QueueDatabaseFact] public async Task FailedAuditBatchDoesNotStarveLaterCompletionLogs()
+    {
+        var store=Store;
+        for(int i=1;i<=26;i++)
+            await store.EnqueueAsync(Guid.ParseExact(i.ToString("x32"),"N"),22,"Broken audit",1,[new("invalid",[],"Invalid")]);
+        await store.EnqueueAsync(Guid.ParseExact(new string('f',32),"N"),22,"Healthy",1,[new("invalid",[],"Invalid")]);
+        await Sql("ALTER TABLE user_log ADD CONSTRAINT reject_one_audit CHECK(report NOT LIKE '%Broken audit%')");
+        var transport=new FakeTransport(new(MailOutcome.Accepted));
+        await store.ProcessNextAsync(transport);await store.ProcessNextAsync(transport);
+        Assert.Equal(1,Convert.ToInt32(await Scalar("SELECT COUNT(*) FROM user_log")));
+        Assert.Contains("Healthy",(string)(await Scalar("SELECT report FROM user_log LIMIT 1"))!);
+        Assert.Equal(0,transport.Calls);
     }
     private sealed class TestClock:TimeProvider
     {

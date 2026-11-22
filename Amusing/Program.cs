@@ -137,7 +137,8 @@ builder.Services.AddBlazoredSessionStorage();
 builder.Services.AddScoped<MailingService>();
 // Disabled until the explicit schema migration and per-environment rollout are completed.
 builder.Services.AddSingleton(sp => new Amusing.Services.MailQueue.MailQueueStore(
-    sp.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection")!));
+    sp.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection")!,
+    logger: sp.GetRequiredService<ILogger<Amusing.Services.MailQueue.MailQueueStore>>()));
 builder.Services.AddSingleton<Amusing.Services.MailQueue.IQueueMailTransport>(sp =>
     new Amusing.Services.MailQueue.SmtpQueueTransport(sp.GetRequiredService<EmailSettings>()));
 builder.Services.AddHostedService<Amusing.Services.MailQueue.MailQueueWorker>();

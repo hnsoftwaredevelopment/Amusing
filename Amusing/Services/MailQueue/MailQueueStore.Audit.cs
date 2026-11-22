@@ -5,62 +5,83 @@ namespace Amusing.Services.MailQueue;
 
 public sealed partial class MailQueueStore
 {
+    // The store is a singleton. Advance past failed audits so one bad batch cannot starve later campaigns.
+    // This cursor needs no persistence: completion markers remain the durable source of truth.
+    private string _auditCursor="";
     private async Task LogFinishedCampaignsAsync(MySqlConnection db,CancellationToken ct)
     {
         var candidates=new List<string>();
+        for(int scan=0;scan<2;scan++)
+        {
         await using(var query=Command(db,"""
             SELECT c.id FROM beheer_mail_campaign c WHERE c.finished_logged_at IS NULL
+            AND c.id>@after
             AND EXISTS(SELECT 1 FROM beheer_mail_message m WHERE m.campaign_id=c.id)
             AND NOT EXISTS(SELECT 1 FROM beheer_mail_message m WHERE m.campaign_id=c.id AND m.state IN ('waiting','sending'))
-            ORDER BY c.created_at,c.id LIMIT 25
-            """))
+            ORDER BY c.id LIMIT 25
+            """,null,("after",_auditCursor)))
         await using(var reader=await query.ExecuteReaderAsync(ct))
             while(await reader.ReadAsync(ct))candidates.Add(reader.GetString(0));
+            if(candidates.Count>0||_auditCursor.Length==0)break;
+            _auditCursor="";
+        }
         foreach(string campaign in candidates)
         {
-            await using var tx=await db.BeginTransactionAsync(ct);
-            string name;uint template,actor;
-            await using(var query=Command(db,"SELECT template_name,template_id,created_by,finished_logged_at FROM beheer_mail_campaign WHERE id=@id FOR UPDATE",tx,("id",campaign)))
-            await using(var reader=await query.ExecuteReaderAsync(ct))
+            _auditCursor=campaign;
+            try { await LogFinishedCampaignAsync(db,campaign,ct); }
+            catch(MySqlException ex) when(!ct.IsCancellationRequested)
             {
-                if(!await reader.ReadAsync(ct)||!reader.IsDBNull(3))continue;
-                name=reader.GetString(0);template=reader.GetUInt32(1);actor=reader.GetUInt32(2);
+                // Keep the completion marker unset. A later pass retries the audit, never the mail.
+                // Do not include provider error text: it can contain recipient data.
+                logger?.LogError("Eindmelding voor campagne {Campaign} kon niet worden opgeslagen (databasecode {Code}); wordt opnieuw geprobeerd.",campaign,ex.Number);
             }
-            int total,accepted,failed,review,waiting;
-            await using(var query=Command(db,"""
-                SELECT COUNT(*),COALESCE(SUM(state='accepted'),0),COALESCE(SUM(state='failed'),0),
-                COALESCE(SUM(state='review'),0),COALESCE(SUM(state IN ('waiting','sending')),0)
-                FROM beheer_mail_message WHERE campaign_id=@id
-                """,tx,("id",campaign)))
-            await using(var reader=await query.ExecuteReaderAsync(ct))
-            {
-                await reader.ReadAsync(ct);total=reader.GetInt32(0);accepted=reader.GetInt32(1);failed=reader.GetInt32(2);review=reader.GetInt32(3);waiting=reader.GetInt32(4);
-            }
-            if(total==0||waiting!=0)continue;
-            var report=new StringBuilder($"Automatische afronding van mailing {name}. Verzonden: {accepted}, mislukt: {failed}, totaal: {total}. Controle nodig: {review}.\nCampagne: {campaign}.\nVerzonden betekent geaccepteerd door de mailserver; inboxontvangst is niet bevestigd.");
-            if(failed+review>0)
-            {
-                report.Append("\nNiet verzonden of te controleren:");
-                await using var query=Command(db,"SELECT recipient,state,last_error FROM beheer_mail_message WHERE campaign_id=@id AND state IN ('failed','review') ORDER BY ordinal_no",tx,("id",campaign));
-                await using var reader=await query.ExecuteReaderAsync(ct);
-                while(await reader.ReadAsync(ct))
-                {
-                    string reason=reader.IsDBNull(2)?"":reader.GetString(2);
-                    string line=$"\n- {reader.GetString(0)} ({(reader.GetString(1)==QueueState.Review?"controle nodig":"mislukt")}): {reason[..Math.Min(200,reason.Length)]}";
-                    if(report.Length+line.Length>12000){report.Append("\nMeer meldingen staan in de campagne bij Verzendwachtrij.");break;}
-                    report.Append(line);
-                }
-            }
-            await using(var insert=Command(db,"""
-                INSERT INTO user_log(date,user_id,template_id,area,action,status,report)
-                VALUES(@now,@actor,@template,'Mailing','Wachtrij afgerond',@status,@report)
-                """,tx,("now",Now),("actor",actor),("template",template),
-                ("status",failed+review==0?"success":"unsuccessful"),("report",report.ToString())))
-                await insert.ExecuteNonQueryAsync(ct);
-            await using(var update=Command(db,"UPDATE beheer_mail_campaign SET finished_logged_at=@now WHERE id=@id",tx,("now",Now),("id",campaign)))
-                await update.ExecuteNonQueryAsync(ct);
-            await tx.CommitAsync(ct);
         }
+    }
+
+    private async Task LogFinishedCampaignAsync(MySqlConnection db,string campaign,CancellationToken ct)
+    {
+        await using var tx=await db.BeginTransactionAsync(ct);
+        string name;uint template,actor;
+        await using(var query=Command(db,"SELECT template_name,template_id,created_by,finished_logged_at FROM beheer_mail_campaign WHERE id=@id FOR UPDATE",tx,("id",campaign)))
+        await using(var reader=await query.ExecuteReaderAsync(ct))
+        {
+            if(!await reader.ReadAsync(ct)||!reader.IsDBNull(3))return;
+            name=reader.GetString(0);template=reader.GetUInt32(1);actor=reader.GetUInt32(2);
+        }
+        int total,accepted,failed,review,waiting;
+        await using(var query=Command(db,"""
+            SELECT COUNT(*),COALESCE(SUM(state='accepted'),0),COALESCE(SUM(state='failed'),0),
+            COALESCE(SUM(state='review'),0),COALESCE(SUM(state IN ('waiting','sending')),0)
+            FROM beheer_mail_message WHERE campaign_id=@id
+            """,tx,("id",campaign)))
+        await using(var reader=await query.ExecuteReaderAsync(ct))
+        {
+            await reader.ReadAsync(ct);total=reader.GetInt32(0);accepted=reader.GetInt32(1);failed=reader.GetInt32(2);review=reader.GetInt32(3);waiting=reader.GetInt32(4);
+        }
+        if(total==0||waiting!=0)return;
+        var report=new StringBuilder($"Automatische afronding van mailing {name}. Verzonden: {accepted}, mislukt: {failed}, totaal: {total}. Controle nodig: {review}.\nCampagne: {campaign}.\nVerzonden betekent geaccepteerd door de mailserver; inboxontvangst is niet bevestigd.");
+        if(failed+review>0)
+        {
+            report.Append("\nNiet verzonden of te controleren:");
+            await using var query=Command(db,"SELECT recipient,state,last_error FROM beheer_mail_message WHERE campaign_id=@id AND state IN ('failed','review') ORDER BY ordinal_no",tx,("id",campaign));
+            await using var reader=await query.ExecuteReaderAsync(ct);
+            while(await reader.ReadAsync(ct))
+            {
+                string reason=reader.IsDBNull(2)?"":reader.GetString(2);
+                string line=$"\n- {reader.GetString(0)} ({(reader.GetString(1)==QueueState.Review?"controle nodig":"mislukt")}): {reason[..Math.Min(200,reason.Length)]}";
+                if(report.Length+line.Length>12000){report.Append("\nMeer meldingen staan in de campagne bij Verzendwachtrij.");break;}
+                report.Append(line);
+            }
+        }
+        await using(var insert=Command(db,"""
+            INSERT INTO user_log(date,user_id,template_id,area,action,status,report)
+            VALUES(@now,@actor,@template,'Mailing','Wachtrij afgerond',@status,@report)
+            """,tx,("now",Now),("actor",actor),("template",template),
+            ("status",failed+review==0?"success":"unsuccessful"),("report",report.ToString())))
+            await insert.ExecuteNonQueryAsync(ct);
+        await using(var update=Command(db,"UPDATE beheer_mail_campaign SET finished_logged_at=@now WHERE id=@id",tx,("now",Now),("id",campaign)))
+            await update.ExecuteNonQueryAsync(ct);
+        await tx.CommitAsync(ct);
     }
 
     public async Task<QueueGateProgress> GateAsync(CancellationToken ct=default)
