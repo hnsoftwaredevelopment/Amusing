@@ -17,6 +17,10 @@ else
 {
     @if(!MailQueueEnvironment.MaySend(Configuration,Environment.EnvironmentName))
     { <div class="alert alert-info">Automatische verzending staat uit. Wachtende berichten blijven bewaard.</div> }
+    @if(_gate?.BlockedReason is {} blocked)
+    { <div class="alert alert-danger" role="alert">De verzending is geblokkeerd. @blocked Neem contact op met de beheerder; berichten blijven bewaard.</div> }
+    else if(_gate?.PausedUntil is {} until && until>DateTime.UtcNow)
+    { <div class="alert alert-warning" role="status">De verzending is tijdelijk gepauzeerd tot @Local(until) (Nederlandse tijd). Wachtende berichten worden daarna opnieuw aangeboden.</div> }
     <SfButton CssClass="e-outline" OnClick="RefreshAsync">Verversen</SfButton>
     @if(_error is not null){<p role="alert" class="text-danger">@_error</p>}
     @if(_campaigns.Count==0){<p>Er staan nog geen mailings in de wachtrij.</p>}
@@ -46,6 +50,9 @@ else
 }
 
 @code {
+    [Parameter,SupplyParameterFromQuery(Name="campaign")] public string? Campaign {get;set;}
+    private string? _requestedCampaign;
+    private QueueGateProgress? _gate;
     private IReadOnlyList<CampaignProgress> _campaigns=[];
     private IReadOnlyList<QueueMessageProgress> _messages=[];
     private string? _selectedId,_error;
@@ -57,6 +64,14 @@ else
         if(!Configuration.GetValue<bool>("MailQueue:Enabled"))return;
         await RefreshAsync();_refresh=RefreshLoopAsync();
     }
+    protected override async Task OnParametersSetAsync()
+    {
+        if(!Configuration.GetValue<bool>("MailQueue:Enabled") || Campaign==_requestedCampaign)return;
+        _requestedCampaign=Campaign;
+        if(Campaign is null)return;
+        if(!Guid.TryParseExact(Campaign,"N",out var id)){_error="De campagneverwijzing is ongeldig.";return;}
+        _selectedId=id.ToString("N");await RefreshAsync();
+    }
     private async Task RefreshLoopAsync()
     {
         using var timer=new PeriodicTimer(TimeSpan.FromSeconds(30));
@@ -66,7 +81,7 @@ else
     private async Task RefreshAsync()
     {
         if(_refreshing)return;_refreshing=true;
-        try{_campaigns=await Queue.CampaignsAsync(_stop.Token);if(_selectedId is not null)_messages=await Queue.MessagesAsync(_selectedId,_stop.Token);_error=null;}
+        try{_gate=await Queue.GateAsync(_stop.Token);_campaigns=await Queue.CampaignsAsync(_stop.Token);if(_selectedId is not null)_messages=await Queue.MessagesAsync(_selectedId,_stop.Token);_error=null;}
         catch(OperationCanceledException)when(_stop.IsCancellationRequested){}
         catch{_error="De wachtrij kan nu niet worden geladen. Probeer opnieuw of neem contact op met de beheerder.";}
         finally{_refreshing=false;}
