@@ -55,8 +55,12 @@
 
         if (file && /^image\/(png|jpeg|webp)$/.test(file.type)) {
             const url = URL.createObjectURL(file);
+            if (!url.startsWith("blob:")) {
+                URL.revokeObjectURL(url);
+                return;
+            }
             previewUrls.set(preview, url);
-            preview.src = url;
+            preview.src = encodeURI(url);
             preview.hidden = false;
         }
     });
