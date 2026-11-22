@@ -16,6 +16,7 @@
             <div class="page-container maintenance-page">
                 <div class="fixed-header maintenance-page__header">
                     <h3>Logboek, toont alle wijzigingen van het afgelopen jaar</h3>
+                    <p>Bij mailings betekent ‘verzonden’ dat de mailserver het bericht accepteerde. De omschrijving toont eventuele niet-verzonden adressen met de foutreden.</p>
 
                     <SfToolbar Width="100%">
                         <ToolbarItems>
@@ -50,6 +51,7 @@
                                 AllowSorting="true"
                                 AllowGrouping="true"
                                 AllowResizing="true"
+                                AllowTextWrap="true"
                                 EnableStickyHeader="true"
                                 Height="100%"
                                 Width="100%">
@@ -66,7 +68,11 @@
                                 <GridColumn Field="LogUsername" HeaderText="Gebruiker" Width="140" />
                                 <GridColumn Field="LogArea" HeaderText="Menu" Width="140" />
                                 <GridColumn Field="LogAction" HeaderText="Submenu/Actie" Width="160" />
-                                <GridColumn Field="LogReport" HeaderText="Omschrijving" Width="520" />
+                                <GridColumn Field="LogReport" HeaderText="Omschrijving" Width="520">
+                                    <Template Context="logEntry">
+                                        <div class="mailing-log-report" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:24rem;overflow:auto">@((logEntry as LogModel)?.LogReport)</div>
+                                    </Template>
+                                </GridColumn>
                                 <GridColumn Field="LogStatus" HeaderText="Status" Width="120" />
                             </GridColumns>
                         </SfGrid>
