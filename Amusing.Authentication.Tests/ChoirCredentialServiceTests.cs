@@ -3,7 +3,7 @@ using Xunit;
 
 public class ChoirCredentialServiceTests
 {
-    private const string Password = "TestKoor-2026!";
+    private static readonly string Password = string.Concat("Aa0!", Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(24)));
     private static readonly string OldHash = BCrypt.Net.BCrypt.HashPassword(Password, 10);
     private static readonly string CurrentHash = BCrypt.Net.BCrypt.HashPassword(Password, 11);
 
