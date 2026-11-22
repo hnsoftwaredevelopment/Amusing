@@ -1,4 +1,4 @@
-﻿@implements IDisposable
+@implements IDisposable
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @using Microsoft.AspNetCore.Components.Authorization
 
@@ -228,6 +228,8 @@
             </ul>
         }
     </div>
+
+    <div class="nav-item px-3"><NavLink class="nav-link" href="MailQueue"><span class="fa-solid fa-envelopes-bulk me-3 fs-5" aria-hidden="true"></span>Verzendwachtrij</NavLink></div>
 
     <div class="nav-item px-3">
         <NavLink class="nav-link" href="Logbook">

@@ -1,10 +1,11 @@
 namespace Amusing.Services.MailQueue;
 
 public sealed class MailQueueWorker(MailQueueStore store, IQueueMailTransport transport,
-    ILogger<MailQueueWorker> logger) : BackgroundService
+    ILogger<MailQueueWorker> logger, IConfiguration configuration, IHostEnvironment environment) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        if(!MailQueueEnvironment.MaySend(configuration,environment.EnvironmentName)) return;
         using var timer=new PeriodicTimer(TimeSpan.FromSeconds(5));
         try
         {

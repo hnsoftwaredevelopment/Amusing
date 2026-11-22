@@ -1,0 +1,79 @@
+@page "/MailQueue"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using Amusing.Services.MailQueue
+@using Syncfusion.Blazor.Buttons
+@inject MailQueueStore Queue
+@inject IConfiguration Configuration
+@inject IWebHostEnvironment Environment
+@implements IAsyncDisposable
+
+<h3>Verzendwachtrij</h3>
+<p>Verzonden betekent dat de mailserver het bericht heeft geaccepteerd. Ontvangst in de inbox is daarmee niet bevestigd.</p>
+@if(!Configuration.GetValue<bool>("MailQueue:Enabled"))
+{
+    <p>De verzendwachtrij is nog niet ingeschakeld.</p>
+}
+else
+{
+    @if(!MailQueueEnvironment.MaySend(Configuration,Environment.EnvironmentName))
+    { <div class="alert alert-info">Automatische verzending staat uit. Wachtende berichten blijven bewaard.</div> }
+    <SfButton CssClass="e-outline" OnClick="RefreshAsync">Verversen</SfButton>
+    @if(_error is not null){<p role="alert" class="text-danger">@_error</p>}
+    @if(_campaigns.Count==0){<p>Er staan nog geen mailings in de wachtrij.</p>}
+    <div style="overflow:auto">
+        <table class="table table-striped">
+            <thead><tr><th>Mailing</th><th>Aangemaakt</th><th>Totaal</th><th>Verzonden</th><th>Wachtend</th><th>Mislukt</th><th>Controle nodig</th><th></th></tr></thead>
+            <tbody>
+                @foreach(var item in _campaigns)
+                {
+                    <tr><td>@item.Name</td><td>@Local(item.CreatedAt)</td><td>@item.Total</td><td>@item.Accepted</td><td>@item.Waiting</td><td>@item.Failed</td><td>@item.Review</td>
+                        <td><SfButton CssClass="e-outline" OnClick="() => SelectAsync(item.Id)">Details bekijken</SfButton></td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @if(_selectedId is not null)
+    {
+        <h4>Ontvangers en voortgang</h4>
+        <p>Tijden zijn weergegeven in Nederlandse tijd. Een quotaweigering wordt later opnieuw geprobeerd; bij controle nodig is de SMTP-uitkomst niet veilig opnieuw te proberen.</p>
+        <div style="overflow:auto"><table class="table"><thead><tr><th>E-mailadres</th><th>Status</th><th>Pogingen</th><th>Volgende poging</th><th>Laatste melding</th></tr></thead><tbody>
+        @foreach(var message in _messages)
+        {
+            <tr><td>@message.Recipient</td><td>@StateLabel(message.State)</td><td>@message.Attempts</td><td>@(message.NextAttempt is {} date?Local(date):"—")</td><td style="white-space:pre-wrap;overflow-wrap:anywhere">@message.Error</td></tr>
+        }
+        </tbody></table></div>
+    }
+}
+
+@code {
+    private IReadOnlyList<CampaignProgress> _campaigns=[];
+    private IReadOnlyList<QueueMessageProgress> _messages=[];
+    private string? _selectedId,_error;
+    private readonly CancellationTokenSource _stop=new();
+    private Task? _refresh;
+    private bool _refreshing;
+    protected override async Task OnInitializedAsync()
+    {
+        if(!Configuration.GetValue<bool>("MailQueue:Enabled"))return;
+        await RefreshAsync();_refresh=RefreshLoopAsync();
+    }
+    private async Task RefreshLoopAsync()
+    {
+        using var timer=new PeriodicTimer(TimeSpan.FromSeconds(30));
+        try{while(await timer.WaitForNextTickAsync(_stop.Token))await InvokeAsync(RefreshAsync);}
+        catch(OperationCanceledException)when(_stop.IsCancellationRequested){}
+    }
+    private async Task RefreshAsync()
+    {
+        if(_refreshing)return;_refreshing=true;
+        try{_campaigns=await Queue.CampaignsAsync(_stop.Token);if(_selectedId is not null)_messages=await Queue.MessagesAsync(_selectedId,_stop.Token);_error=null;}
+        catch(OperationCanceledException)when(_stop.IsCancellationRequested){}
+        catch{_error="De wachtrij kan nu niet worden geladen. Probeer opnieuw of neem contact op met de beheerder.";}
+        finally{_refreshing=false;}
+        if(!_stop.IsCancellationRequested)StateHasChanged();
+    }
+    private async Task SelectAsync(string id){_selectedId=id;await RefreshAsync();}
+    private static string StateLabel(string state)=>state switch {QueueState.Accepted=>"Verzonden",QueueState.Waiting=>"Wacht op verzending",QueueState.Sending=>"Wordt aangeboden",QueueState.Failed=>"Mislukt",QueueState.Review=>"Controle nodig",_=>state};
+    private static string Local(DateTime utc)=>TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(utc,DateTimeKind.Utc),TimeZoneInfo.FindSystemTimeZoneById("Europe/Amsterdam")).ToString("dd-MM-yyyy HH:mm:ss");
+    public async ValueTask DisposeAsync(){_stop.Cancel();if(_refresh is not null)await _refresh;_stop.Dispose();}
+}

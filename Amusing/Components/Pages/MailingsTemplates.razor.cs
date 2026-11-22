@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Dynamic;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -837,7 +837,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
             _isSendingMail = true;
             bool sendRealMail = ShouldSendRealBulkMail;
-            string startMessage = sendRealMail
+            string startMessage = sendRealMail && QueueEnabled ? "Mailing wordt in de wachtrij gezet." : sendRealMail
                 ? $"Mailing met sjabloon {_selectedTemplatesList.TemplateName} wordt gedoseerd verstuurd ({MailingService.GetBulkMailThrottleDescription()}). Dit kan enkele minuten duren."
                 : $"TESTOMGEVING: mailing met sjabloon {_selectedTemplatesList.TemplateName} wordt gecontroleerd, maar niet echt verzonden.";
             await ToastService.ShowAsync(startMessage);
@@ -867,6 +867,12 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             }
 
             _recipientData = await MailingService.GetDynamicRecipientsAsync(_currentRecipientQuery);
+
+            if(sendRealMail && QueueEnabled)
+            {
+                await QueueCampaignAsync(_tempTemplateList,_recipientData);
+                return;
+            }
 
             MailingSendResult sendResult = sendRealMail
                 ? await MailingService.SendBulkMailAsync(
@@ -1099,6 +1105,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
     private async Task OnTemplateChanged(uint? templateId)
     {
+        if(templateId != SelectedTemplatesListId) ResetQueueRequest();
         if (templateId != null && templateId != 0)
         {
             SelectedTemplatesListId = templateId;
