@@ -60,3 +60,22 @@ Nog niet afgerond: auditvoortgang/eindmelding vanuit de worker en verwijzing van
 ## Onderbroken onderzoek groepenoverzicht
 
 KAN-66: gebruiker zag de eerste twee kolommen niet op /Lists-Groups, op dev en productie. Beide gecontroleerde browsers toonden correcte koornamen en plaatsen. Gebruiker bevestigde daarna dat de kolommen terug waren. Er is voor dit scherm niets gewijzigd/gepubliceerd; oorzaak blijft onbevestigd. Bij herhaling schermtoestand en horizontale scroll controleren. Wachtrijwerk is hervat.
+
+## Productiepublicatie — 22 november 2026
+
+Na expliciet akkoord is de goedgekeurde wachtrijkoppeling op productie gezet. De bestaande productiebronvariant is gericht aangevuld; PR #52 is niet gemerged. De vorige DLL kwam vooraf exact overeen met de bestaande productiebuild (f4d683ab992c8294fa0603f7f7c2d0808f1fad33510278d7b884e7ac74e8cd40). Er is geen bulkmailing gestart.
+
+- Back-up vorige DLL en volledige consistente database-export: /var/backups/beheer-kan65-production.DBUfG5AN.
+- Nieuwe DLL lokaal/VPS gelijk: ef79c89f60de4a31e20d01d6bcad55338e246e09b89bca56bcd041f5ac727b27.
+- Alleen nieuwe beheer_mail-tabellen toegevoegd via 001-mailwachtrij.sql; geen oude foutpogingen ingevoerd.
+- /etc/systemd/system/amusing.service.d/65-mailqueue.conf zet Enabled en SendEnabled beide aan. DOTNET_ENVIRONMENT en Amusing:EnvironmentName zijn Production. Dev-configuratie blijft ongewijzigd met SendEnabled=false.
+- amusing.service actief, nieuw proces 61434 sinds 22 november 2026 14:06:41 CET; interne en publieke login geven HTTP 200.
+- De productie-worker is zonder echte SMTP-mail gecontroleerd: één tijdelijk bericht van zes dagen oud ging automatisch van waiting naar review, met attempts=0. Browsercontrole bevestigde aantallen 1/0/0/0/1 en zichtbare ontvangerdetails. Testcampagne, bericht en tijdelijk beheeraccount daarna verwijderd; wachtrij is leeg.
+
+Nieuwe gewone Beheer-bulkmailings worden nu duurzaam opgeslagen en door de worker verwerkt. Quotaweigeringen wachten voor een volgende poging. De bescherming tegen dubbele aanvragen werkt binnen de voorbereide campagne; een bewust nieuwe voorbereiding is een nieuwe campagne. Dit is geen absolute SMTP-garantie van één inboxaflevering.
+
+De resterende punten hierboven (audit-eindmeldingen, blokkade-/reviewbeheer, inhoudsopruiming en gedeeld budget met overige Beheer/Mijn-mailstromen) blijven vervolgwerk. De bestaande Mijn-inschrijfmail houdt zijn eigen wachtrij. De huidige Beheer-wachtrij doseert over haar campagnes en vangt expliciete quotaweigeringen op; andere applicaties zijn nog niet in hetzelfde domeinbudget opgenomen.
+
+## PR #52 blijft ongemerged
+
+Gebruiker meldt GitGuardian-opmerkingen. Gecontroleerd: meldingen wijzen naar twee testbestanden met expliciete testwachtwoordconstanten en naar resultaten van ascii/unicode/grenslengte-wachtwoordproeven. Er zijn geen geheime waarden in dit verslag gekopieerd. Dat is nog geen beoordeling van alle historische repository-inhoud. De PR heeft daarnaast een falende CodeQL-melding DOM text reinterpreted as HTML in Amusing.Mijn/wwwroot/choir-file.js. Beide punten zijn als afzonderlijke opvolging geregistreerd; er is geen merge of history rewrite uitgevoerd.
