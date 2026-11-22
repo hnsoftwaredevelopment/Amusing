@@ -7,13 +7,15 @@ using MySqlConnector;
 
 namespace Amusing.Mijn.Services;
 
+public enum RegistrationRequestResult { Sent, Unavailable, MailFailed }
+
 public sealed class AccountRegistration(MySqlDataSource source, IConfiguration configuration,
     ILogger<AccountRegistration> logger)
 {
-    public async Task RequestAsync(string first, string last, string email, CancellationToken ct)
+    public async Task<RegistrationRequestResult> RequestAsync(string first, string last, string email, CancellationToken ct)
     {
         if (!configuration.GetValue<bool>("AccountRegistration:Enabled"))
-            return;
+            return RegistrationRequestResult.Unavailable;
 
         var origin = new Uri(configuration["AccountRegistration:Origin"]!, UriKind.Absolute);
         if (origin.Scheme != Uri.UriSchemeHttps)
@@ -27,7 +29,9 @@ public sealed class AccountRegistration(MySqlDataSource source, IConfiguration c
         await using var command = new MySqlCommand("""
             INSERT INTO mijn_account_activation(token_hash,email,first_name,last_name,expires_at)
             SELECT @token,@email,@first,@last,DATE_ADD(UTC_TIMESTAMP(6),INTERVAL 24 HOUR)
-            WHERE NOT EXISTS (SELECT 1 FROM ah_personen WHERE email=@email)
+            WHERE NOT EXISTS (
+                SELECT 1 FROM ah_personen p LEFT JOIN ah_personen_wachtwoorden w ON w.id=p.persoon_id
+                WHERE p.email=@email AND (COALESCE(p.actief,0)<>1 OR w.id IS NOT NULL))
             """, connection);
         command.Parameters.AddWithValue("@token", secret);
         command.Parameters.AddWithValue("@email", email);
@@ -35,17 +39,19 @@ public sealed class AccountRegistration(MySqlDataSource source, IConfiguration c
         command.Parameters.AddWithValue("@last", last);
 
         if (await command.ExecuteNonQueryAsync(ct) == 0)
-            return;
+            return RegistrationRequestResult.Unavailable;
 
         try
         {
             var url = new Uri(origin, "/account/activeren?token=" + token);
             await MijnMail.DeliverAsync(configuration, email, "Activeer je Mijn Amusing-account",
                 $"Open {url} en klik op Account activeren. De link is 24 uur geldig.", ct, anonymousAccountMail: true);
+            return RegistrationRequestResult.Sent;
         }
         catch (Exception ex) when (!ct.IsCancellationRequested)
         {
             logger.LogWarning("Accountactivatiemail kon niet worden bezorgd ({ErrorType}).", ex.GetType().Name);
+            return RegistrationRequestResult.MailFailed;
         }
     }
 
@@ -62,14 +68,19 @@ public sealed class AccountRegistration(MySqlDataSource source, IConfiguration c
             INSERT INTO ah_personen(voornaam,achternaam,email,actief)
             SELECT first_name,last_name,email,1 FROM mijn_account_activation
             WHERE token_hash=@token AND expires_at>UTC_TIMESTAMP(6)
+            ON DUPLICATE KEY UPDATE persoon_id=LAST_INSERT_ID(persoon_id)
             """, connection, tx);
         create.Parameters.AddWithValue("@token", hash);
         try
         {
-            if (await create.ExecuteNonQueryAsync(ct) != 1)
-                return false;
+            await create.ExecuteNonQueryAsync(ct);
+            if (create.LastInsertedId == 0) return false;
+            await using var eligible = new MySqlCommand("SELECT actief,EXISTS(SELECT 1 FROM ah_personen_wachtwoorden WHERE id=@actor) FROM ah_personen WHERE persoon_id=@actor FOR UPDATE",connection,tx);
+            eligible.Parameters.AddWithValue("@actor",create.LastInsertedId);
+            await using var reader = await eligible.ExecuteReaderAsync(ct);
+            if (!await reader.ReadAsync(ct) || !reader.GetBoolean(0) || reader.GetBoolean(1)) return false;
         }
-        catch (MySqlException ex) when (ex.Number == 1062)
+        catch (MySqlException ex) when (ex.Number is 1062 or 1213)
         {
             return false;
         }
@@ -77,14 +88,15 @@ public sealed class AccountRegistration(MySqlDataSource source, IConfiguration c
         await using var complete = new MySqlCommand("""
             INSERT INTO ah_personen_wachtwoorden(id,hash)
             VALUES(@actor,@password);
-            DELETE FROM mijn_account_activation WHERE email=(SELECT email FROM ah_personen WHERE persoon_id=@actor);
+            DELETE FROM mijn_account_activation WHERE token_hash=@token;
             INSERT INTO mijn_audit_log(occurred_at,actor_type,actor_id,action)
             VALUES(UTC_TIMESTAMP(6),'choir_person',@actor,'AccountActivated');
             """, connection, tx);
         complete.Parameters.AddWithValue("@password", BCrypt.Net.BCrypt.HashPassword(password, 11));
         complete.Parameters.AddWithValue("@actor", create.LastInsertedId);
-
-        await complete.ExecuteNonQueryAsync(ct);
+        complete.Parameters.AddWithValue("@token",hash);
+        try { await complete.ExecuteNonQueryAsync(ct); }
+        catch (MySqlException ex) when (ex.Number is 1062 or 1213) { return false; }
         await tx.CommitAsync(ct);
         return true;
     }
@@ -108,8 +120,9 @@ public sealed class AccountRegistration(MySqlDataSource source, IConfiguration c
                 !MailAddress.TryCreate(email, out var address) || address.Address != email)
                 return Results.LocalRedirect("/account/registreren?status=ongeldig");
 
-            await accounts.RequestAsync(first, last, email, context.RequestAborted);
-            return Results.LocalRedirect("/account/registreren?status=ontvangen");
+            var result = await accounts.RequestAsync(first, last, email, context.RequestAborted);
+            var status = result switch { RegistrationRequestResult.Sent => "ontvangen", RegistrationRequestResult.MailFailed => "mailfout", _ => "nietbeschikbaar" };
+            return Results.LocalRedirect("/account/registreren?status=" + status);
         }).RequireRateLimiting("login");
 
         app.MapPost("/account/activering-bevestigen", async (HttpContext context, IAntiforgery csrf, AccountRegistration accounts) =>

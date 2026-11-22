@@ -8,11 +8,13 @@
 }
 else if (Status == "ontvangen")
 {
-    <p role="status">Als dit adres beschikbaar is, ontvang je een e-mail waarmee je je account kunt activeren.</p>
+    <p role="status">De activatielink is verstuurd. Controleer ook je ongewenste mail. De link is 24 uur geldig.</p>
 }
 else
 {
     @if (Status == "ongeldig") { <p role="alert">Controleer je naam en e-mailadres.</p> }
+    @if (Status == "mailfout") { <p role="alert">De activatielink kon niet worden verstuurd. Probeer het later opnieuw of neem contact op met de organisatie.</p> }
+    @if (Status == "nietbeschikbaar") { <p role="alert">Voor dit e-mailadres kan geen nieuw account worden aangemaakt. Probeer in te loggen of kies <a href="/account/wachtwoord-vergeten">Wachtwoord vergeten</a>. Lukt dat niet, neem dan contact op met de organisatie.</p> }
     <form method="post" action="/account/registratie-aanvragen" data-enhance="false" class="profile-card">
         <AntiforgeryToken />
         <label for="first">Voornaam</label><input id="first" name="first" maxlength="40" autocomplete="given-name" required />
