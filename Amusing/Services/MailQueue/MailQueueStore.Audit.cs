@@ -13,15 +13,15 @@ public sealed partial class MailQueueStore
         var candidates=new List<string>();
         for(int scan=0;scan<2;scan++)
         {
-        await using(var query=Command(db,"""
-            SELECT c.id FROM beheer_mail_campaign c WHERE c.finished_logged_at IS NULL
-            AND c.id>@after
-            AND EXISTS(SELECT 1 FROM beheer_mail_message m WHERE m.campaign_id=c.id)
-            AND NOT EXISTS(SELECT 1 FROM beheer_mail_message m WHERE m.campaign_id=c.id AND m.state IN ('waiting','sending'))
-            ORDER BY c.id LIMIT 25
-            """,null,("after",_auditCursor)))
-        await using(var reader=await query.ExecuteReaderAsync(ct))
-            while(await reader.ReadAsync(ct))candidates.Add(reader.GetString(0));
+            await using(var query=Command(db,"""
+                SELECT c.id FROM beheer_mail_campaign c WHERE c.finished_logged_at IS NULL
+                AND c.id>@after
+                AND EXISTS(SELECT 1 FROM beheer_mail_message m WHERE m.campaign_id=c.id)
+                AND NOT EXISTS(SELECT 1 FROM beheer_mail_message m WHERE m.campaign_id=c.id AND m.state IN ('waiting','sending'))
+                ORDER BY c.id LIMIT 25
+                """,null,("after",_auditCursor)))
+            await using(var reader=await query.ExecuteReaderAsync(ct))
+                while(await reader.ReadAsync(ct))candidates.Add(reader.GetString(0));
             if(candidates.Count>0||_auditCursor.Length==0)break;
             _auditCursor="";
         }
