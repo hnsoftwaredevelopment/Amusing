@@ -1,0 +1,129 @@
+@page "/koor/{Id:long}/logboek"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using System.Security.Claims
+@using Amusing.Mijn.Services
+@inject ChoirAudit Audit
+@inject IHttpContextAccessor Context
+@inject ChoirAccounts Accounts
+
+<section lang="@language">
+    <PageTitle>@T("Koormutaties") — Mijn Amusing</PageTitle>
+@if (log is null)
+{
+    <a href="/">← @T("MijnKoren")</a>
+    <h1>@T("KoorNietBeschikbaar")</h1>
+}
+else
+{
+    <ChoirTabs Id="@Id" Name="@log.ChoirName" Active="logboek" />
+
+    @if (Before is not null)
+    {
+        <p><a href="/koor/@Id/logboek">@T("NieuwsteWijzigingen")</a></p>
+    }
+    @if (log.Entries.Count == 0)
+    {
+        <p>@T("ErZijnGeenWijzigingenOmTeTonen")</p>
+    }
+    else
+    {
+        <ol class="audit-log">
+            @foreach (var entry in log.Entries)
+            {
+                var localTime = TimeZoneInfo.ConvertTimeFromUtc(entry.TimeUtc, Amsterdam);
+                <li class="profile-card">
+                    <strong>@ActionLabel(entry.Action)</strong>
+                    <div><time datetime="@entry.TimeUtc.ToString("O")">@localTime.ToString("dd-MM-yyyy HH:mm")</time> · @ActorLabel(entry)</div>
+                    @if (Fields(entry) is { Length: > 0 } fields)
+                    {
+                        <div>@fields</div>
+                    }
+                </li>
+            }
+        </ol>
+    }
+    @if (log.Next is { } next)
+    {
+        <p><a href="/koor/@Id/logboek?voor=@next">@T("OudereWijzigingen")</a></p>
+    }
+}
+
+</section>
+
+@code {
+    private string language = "nl";
+    private string T(string key) => Amusing.Mijn.Services.UiText.Get(key, language);
+    [Parameter] public long Id { get; set; }
+    [SupplyParameterFromQuery(Name = "voor")] public string? Before { get; set; }
+
+    private static readonly TimeZoneInfo Amsterdam = TimeZoneInfo.FindSystemTimeZoneById("Europe/Amsterdam");
+    private ChoirAuditPage? log;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        log = null;
+        var request = Context.HttpContext!;
+        if (!request.User.IsAdministrator() && uint.TryParse(request.User.FindFirstValue(ClaimTypes.NameIdentifier), out var person))
+            language = await Accounts.LanguageAsync(person, request.RequestAborted);
+        if (Id is > 0 and <= uint.MaxValue &&
+            uint.TryParse(request.User.FindFirstValue(ClaimTypes.NameIdentifier), out var actor))
+        {
+            ulong? before = ulong.TryParse(Before, out var cursor) ? cursor : null;
+            log = await Audit.ReadAsync(actor, (uint)Id, before, request.RequestAborted);
+        }
+    }
+
+    private string ActorLabel(ChoirAuditEntry entry) => entry.ActorType == "system" ? "Mijn Amusing"
+        : entry.ActorType != "beheer" ? (string.IsNullOrEmpty(entry.By) ? T("Koorlid") : entry.By)
+        : string.IsNullOrEmpty(entry.By) ? T("Beheer")
+        : $"{entry.By} ({T("BeheerderAmusingHengelo")})";
+
+    private string ActionLabel(string action) => action switch
+    {
+        "ChoirCreated" => T("KoorAangemaakt"),
+        "ChoirProfileChanged" => T("KoorprofielGewijzigd"),
+        "ChoirImageChanged" => T("AfbeeldingGewijzigd"),
+        "ChoirImageRemoved" => T("AfbeeldingVerwijderd"),
+        "FestivalEnrolled" => T("FestivalinschrijvingAangemaakt"),
+        "FestivalEnrollmentUpdated" => T("FestivalinschrijvingGewijzigd"),
+        "FestivalEnrollmentConfirmed" => T("FestivalinschrijvingBevestigd"),
+        "FestivalWaitlistPlaced" => T("KoorVanafWachtlijstGeplaatst"),
+        "ParticipationNoteSent" => T("DeelnamenotaVerstuurd"),
+        "ParticipationNoteCopySent" => T("KopienotaVerstuurd"),
+        "RoleInvitationCreated" => T("UitnodigingAangemaakt"),
+        "RoleInvitationAccepted" => T("UitnodigingGeaccepteerd"),
+        "RoleInvitationCancelled" => T("UitnodigingIngetrokken"),
+        "FirstContactTransferred" => T("EersteContactpersoonOvergedragen"),
+        "RoleRemoved" => T("KoorrolVerwijderd"),
+        _ => T("KoorGewijzigd")
+    };
+
+    private string Fields(ChoirAuditEntry entry) => entry.Action switch
+    {
+        "ChoirProfileChanged" or "FestivalEnrollmentUpdated" or "ChoirImageChanged" or "ChoirImageRemoved" =>
+            string.Join(", ", entry.Fields.Split(',').Select(FieldLabel).OfType<string>()),
+        "ParticipationNoteSent" or "ParticipationNoteCopySent" => entry.Fields == "penningmeester"
+            ? T("Penningmeester")
+            : T("Contactpersoon1"),
+        _ => ""
+    };
+
+    private string? FieldLabel(string field) => field switch
+    {
+        "Name" => T("Koornaam2"),
+        "City" => T("Standplaats2"),
+        "Country" => T("Land2"),
+        "GenreId" => "Genre",
+        "Website" => "Website",
+        "Email" => T("Emailadres"),
+        "Description" => T("Omschrijving"),
+        "BankAccount" => "IBAN",
+        "Headcount" => T("AantalDeelnemers"),
+        "PodiumType" => T("Podiumtype"),
+        "Review" => T("Jurybeoordeling"),
+        "Preference" => T("VoorkeurOptredens"),
+        "foto" => T("Foto"),
+        "logo" => "Logo",
+        _ => null
+    };
+}

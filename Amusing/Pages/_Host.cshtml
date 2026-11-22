@@ -1,9 +1,10 @@
-﻿@page "/"
+@page "/"
 @using Amusing.Components
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @namespace Amusing.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
@@ -36,6 +37,8 @@
     <script src="_content/Bit.BlazorUI.Extras/scripts/bit.blazorui.extras.js"></script>
 </head>
 <body>
+    @{ var loginTokens = Antiforgery.GetAndStoreTokens(HttpContext); }
+    <input type="hidden" form="beheer-login-form" name="@loginTokens.FormFieldName" value="@loginTokens.RequestToken" />
     <component type="typeof( App )" render-mode="ServerPrerendered" />
 
     <div id="blazor-error-ui">
@@ -45,7 +48,7 @@
     </div>
 
     <script src="_content/Syncfusion.Blazor/scripts/syncfusion-blazor.min.js"></script>
-    <script src="js/rteHelpers.js"></script>
+    <script src="js/rteHelpers.js" asp-append-version="true"></script>
     <script src="_framework/blazor.server.js"></script>
 </body>
 </html>

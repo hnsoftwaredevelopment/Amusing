@@ -1,0 +1,30 @@
+[
+  {
+    "name": "ascii",
+    "phpPrefix": "$2y$10$",
+    "netPrefix": "$2a$11$",
+    "valid": true,
+    "wrong": false
+  },
+  {
+    "name": "unicode",
+    "phpPrefix": "$2y$10$",
+    "netPrefix": "$2a$11$",
+    "valid": true,
+    "wrong": false
+  },
+  {
+    "name": "boundary72",
+    "phpPrefix": "$2y$10$",
+    "netPrefix": "$2a$11$",
+    "valid": true,
+    "wrong": false
+  },
+  {
+    "name": "over72",
+    "phpPrefix": "$2y$10$",
+    "netPrefix": "$2a$11$",
+    "valid": true,
+    "wrong": false
+  }
+]

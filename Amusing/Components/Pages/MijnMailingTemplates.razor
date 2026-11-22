@@ -1,0 +1,326 @@
+@page "/MailTemplates/Mijn"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using System.Net
+@using Syncfusion.Blazor.RichTextEditor
+@using Syncfusion.Blazor.Popups
+@using System.Text.RegularExpressions
+@inject GenericDataService Database
+@inject ILogger<MijnMailingTemplates> Logger
+@inject IJSRuntime JSRuntime
+
+<div class="@(TemplateType is null ? "container py-3" : "mijn-template-editor")">
+    @if (TemplateType is null)
+    {
+        <PageTitle>Mailsjablonen van Mijn</PageTitle>
+        <p><a href="/MailTemplates">← Mailinglayouts</a></p>
+        <h1>Mailsjablonen van Mijn</h1>
+    }
+    @if (!loaded)
+    {
+        <p role="status">@(message ?? "Sjablonen laden…")</p>
+    }
+    else
+    {
+        @if (TemplateType is null)
+        {
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label" for="mail-kind">Sjabloon</label>
+                    <select class="form-select" id="mail-kind" disabled="@saving" @bind="kind" @bind:after="ClearMessage">
+                        <option value="aanmelding">Inschrijfbevestiging</option>
+                        <option value="wachtlijst">Wachtlijstbevestiging</option>
+                        <option value="plaatsing">Plaatsingsbericht na wachtlijst</option>
+                        <option value="organisatie">Inschrijfbevestiging organisatie</option>
+                        <option value="notamail">Mail met deelnamenota</option>
+                        <option value="nota_pdf">Deelname-nota PDF</option>
+                        <option value="kopienota">Kopienota</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="mail-language">Taal</label>
+                    <select class="form-select" id="mail-language" disabled="@saving" @bind="language" @bind:after="ClearMessage">
+                        <option value="nl">Nederlands</option>
+                        <option value="de">Deutsch</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+            </div>
+        }
+        <EditForm Model="Draft" OnSubmit="SaveAsync" @key="(kind, EffectiveLanguage)">
+            <fieldset disabled="@saving">
+                <div class="mail-template-toolbar d-flex align-items-center flex-wrap gap-3">
+                    <button type="submit" class="custom-toolbar-btn" title="Bewaar sjabloon" aria-label="Opslaan">
+                        <img src="icons/button-save.svg" class="icon" alt="" />
+                    </button>
+                    <button type="button" class="custom-toolbar-btn" title="Bekijk het geselecteerde sjabloon op het scherm" aria-label="Schermvoorbeeld" @onclick="ShowPreviewAsync">
+                        <img src="icons/sendpreview.svg" class="icon" alt="" height="30" />
+                    </button>
+                    @if (message is not null)
+                    {
+                        <span class="@(error ? "text-danger" : "text-success")" role="status">@message</span>
+                    }
+                </div>
+                <details class="mijn-variable-reference">
+                    <summary>Beschikbare variabelen en voorbeeldwaarden</summary>
+                    <p>Deze waarden zijn fictief. De kolom Betekenis legt uit welke gegevens bij de echte verzending worden gebruikt. Je kunt een variabele invoegen via de rechtermuisknop in het onderwerp of de berichteditor.</p>
+                    <div class="mijn-variable-table">
+                        <table class="table table-striped">
+                            <thead><tr><th scope="col">Variabele</th><th scope="col">Betekenis</th><th scope="col">Voorbeeld</th></tr></thead>
+                            <tbody>
+                                @{ var variableExamples = MijnTemplateReference.Examples(kind,EffectiveLanguage,scenario); }
+                                @foreach (var variable in MijnTemplateReference.ForKind(kind))
+                                {
+                                    <tr><th scope="row"><code>@($"{{{variable.Name}}}")</code></th><td>@variable.Explanation</td><td>@variableExamples[variable.Name]</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    @if (kind is "notamail" or "kopienota" or "nota_pdf")
+                    {
+                        <p>We registreren betaald of onbetaald. De nota toont de totale deelnamekosten. Er wordt geen reeds betaald bedrag of openstaand saldo berekend.</p>
+                    }
+                </details>
+                <div class="groupbox mijn-mail-content">
+                    <div class="groupbox-header">E-Mail sjabloon</div>
+                    <InputText class="form-control mijn-mail-subject" id="mail-subject" maxlength="250" placeholder="Onderwerp"
+                               aria-label="Onderwerp" @bind-Value="Draft.Subject" />
+                    <SfRichTextEditor @ref="editor" ID="mail-body" Height="390px" EnableHtmlSanitizer="true" @bind-Value="Draft.Html">
+                        <RichTextEditorImageSettings SaveFormat="SaveFormat.Base64" />
+                        @if (EditorToolbar is not null)
+                        {
+                            <RichTextEditorToolbarSettings Items="EditorToolbar" EnableFloating="true" />
+                        }
+                    </SfRichTextEditor>
+                </div>
+                @if (kind == "nota_pdf")
+                {
+                    <p>Deze tekst verschijnt onder de kostentabel van de PDF. De PDF gebruikt de tekstinhoud van de editor. De kostentabel en bedragen worden automatisch toegevoegd.</p>
+                }
+                @if (kind == "organisatie")
+                {
+                    <p>De organisatie ontvangt altijd de Nederlandse versie.</p>
+                }
+                @if (EffectiveLanguage != "nl")
+                {
+                    <p class="mt-2 mb-0">Laat onderwerp en bericht beide leeg om de Nederlandse versie te gebruiken.</p>
+                }
+            </fieldset>
+        </EditForm>
+    }
+</div>
+
+<SfDialog @bind-Visible="showPreview" Width="1100px" IsModal="true" ShowCloseIcon="true">
+    <DialogTemplates>
+        <Header>Schermvoorbeeld Mijn-sjabloon</Header>
+        <Content>
+            <p>Voorbeeld met fictieve gegevens en de tekst uit de editor. De voorbeeldknop slaat het sjabloon niet op en verstuurt geen mail.</p>
+            @if (previewKind != "wachtlijst")
+            {
+                <label for="mijn-preview-scenario">Voorbeeldsituatie</label>
+                <select id="mijn-preview-scenario" class="form-select mb-3" @bind="scenario">
+                    <option value="normaal">Nota naar penningmeester</option>
+                    <option value="contactpersoon1">Geen penningmeester, nota naar contactpersoon 1</option>
+                    @if (previewKind is "aanmelding" or "organisatie")
+                    {
+                        <option value="geennota">Geen nota beschikbaar</option>
+                    }
+                    @if (previewKind is "notamail" or "kopienota" or "nota_pdf")
+                    {
+                        <option value="vlakvoor">Inschrijving vlak voor sluiting</option>
+                    }
+                    @if (previewKind == "organisatie")
+                    {
+                        <option value="wachtlijst">Wachtlijstinschrijving, zonder nota</option>
+                    }
+                </select>
+            }
+            @if (previewFallback)
+            {
+                <p role="status">Deze taal is leeg. Het voorbeeld gebruikt de Nederlandse versie, zoals bij verzending.</p>
+            }
+            @if (UnknownPreviewVariables.Count > 0)
+            {
+                <p role="alert" class="text-danger">Deze variabelen zijn onbekend voor dit sjabloon en blijven letterlijk staan: @string.Join(", ",UnknownPreviewVariables.Select(name => $"{{{name}}}"))</p>
+            }
+            @if (previewKind == "nota_pdf")
+            {
+                <p>Dit is de tekst onder de PDF-kostentabel. De tabel en overige PDF-gegevens worden bij het maken van de nota toegevoegd.</p>
+            }
+            <h4>@PreviewSubject</h4>
+            <iframe class="mijn-message-preview" title="Voorbeeld van het Mijn-sjabloon" sandbox="" srcdoc="@PreviewDocument"></iframe>
+        </Content>
+        <FooterTemplate><button type="button" class="btn btn-secondary" @onclick="() => showPreview = false">Sluiten</button></FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+@code {
+    [Parameter] public string? TemplateType { get; set; }
+    [Parameter] public string SelectedLanguage { get; set; } = "nl";
+    [Parameter] public List<Syncfusion.Blazor.RichTextEditor.ToolbarItemModel>? EditorToolbar { get; set; }
+    private readonly Dictionary<(string Kind, string Language), MessageDraft> drafts = new();
+    private SfRichTextEditor? editor;
+    private string kind = "aanmelding";
+    private string language = "nl";
+    private bool loaded, saving, error;
+    private string? message;
+    private string EffectiveLanguage => kind == "organisatie" ? "nl" : TemplateType is null ? language : SelectedLanguage switch
+    {
+        "de" => "de",
+        "en" => "en",
+        _ => "nl"
+    };
+    private string? lastLanguage;
+    private MessageDraft Draft => drafts[(kind, EffectiveLanguage)];
+    private bool showPreview, previewFallback;
+    private string scenario = "normaal", previewKind = "aanmelding", previewLanguage = "nl";
+    private string previewSubjectTemplate = "", previewHtmlTemplate = "";
+    private IReadOnlyDictionary<string,string> PreviewValues => MijnTemplateReference.Examples(previewKind,previewLanguage,scenario);
+    private string PreviewSubject => MijnTemplateReference.Expand(previewSubjectTemplate,PreviewValues,false);
+    private IReadOnlyList<string> UnknownPreviewVariables => MijnTemplateReference.Unknown(previewSubjectTemplate + "\n" + previewHtmlTemplate,PreviewValues);
+    private string PreviewDocument => "<!doctype html><html><head><meta charset=\"utf-8\"><meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; img-src data:; style-src 'unsafe-inline'\"><style>body{font-family:Arial,sans-serif;padding:16px;color:#222}pre{white-space:pre-wrap;font:inherit}img{max-width:100%}</style></head><body>" +
+        MijnTemplateReference.Expand(previewHtmlTemplate,PreviewValues,true) + "</body></html>";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (TemplateType is "aanmelding" or "wachtlijst" or "plaatsing" or "organisatie" or "notamail" or "nota_pdf" or "kopienota") kind = TemplateType;
+        foreach (var type in new[] { "aanmelding", "wachtlijst", "plaatsing", "organisatie", "notamail", "nota_pdf", "kopienota" })
+            foreach (var locale in new[] { "nl", "de", "en" })
+                drafts[(type, locale)] = new();
+
+        try
+        {
+            var layouts = await Database.ExecuteQueryAsync("SELECT soort,taal,onderwerp,bericht,opmaak_html FROM mijn_mailingsjablonen",
+                row => (Kind: row.GetString(0), Language: row.GetString(1), Subject: row.GetString(2), Body: row.GetString(3),
+                    Html: row.IsDBNull(4) ? null : row.GetString(4)));
+            foreach (var layout in layouts)
+                drafts[(layout.Kind, layout.Language)] = new()
+                {
+                    Subject = ConvertFields(layout.Subject),
+                    Html = ConvertFields(layout.Html ?? WebUtility.HtmlEncode(layout.Body).Replace("\n", "<br>", StringComparison.Ordinal))
+                };
+            loaded = true;
+        }
+        catch (MySqlConnector.MySqlException ex)
+        {
+            Logger.LogWarning(ex, "De inschrijfbevestigingen konden niet worden geladen.");
+            message = "De sjablonen konden niet worden geladen. Probeer het later opnieuw.";
+        }
+    }
+
+    private void ClearMessage()
+    {
+        message = null;
+        showPreview = false;
+        scenario = "normaal";
+        if (kind == "organisatie") language = "nl";
+    }
+
+    private async Task ShowPreviewAsync()
+    {
+        if (editor is not { } currentEditor || saving) return;
+        try
+        {
+            var selectedKind = kind;
+            var selectedLanguage = EffectiveLanguage;
+            var subject = ConvertFields(Draft.Subject.Trim());
+            var text = ConvertFields((await currentEditor.GetTextAsync() ?? "").Trim());
+            var html = ConvertFields((await currentEditor.GetXhtmlAsync() ?? "").Trim());
+            previewFallback = selectedLanguage != "nl" && subject.Length == 0 && text.Length == 0;
+            if (previewFallback)
+            {
+                var fallback = drafts[(selectedKind,"nl")];
+                subject = ConvertFields(fallback.Subject);
+                html = ConvertFields(fallback.Html);
+                text = WebUtility.HtmlDecode(Regex.Replace(Regex.Replace(html,"<br\\s*/?>|</(?:p|div)>","\n",RegexOptions.IgnoreCase),"<[^>]+>",""));
+                selectedLanguage = "nl";
+            }
+            previewKind = selectedKind;
+            previewLanguage = selectedLanguage;
+            previewSubjectTemplate = subject;
+            previewHtmlTemplate = selectedKind == "nota_pdf" ? "<pre>" + WebUtility.HtmlEncode(text) + "</pre>" : html;
+            showPreview = true;
+        }
+        catch (JSException ex)
+        {
+            Logger.LogWarning(ex,"Het schermvoorbeeld van het Mijn-sjabloon kon niet worden geopend.");
+            error = true;
+            message = "Het voorbeeld kon niet worden geopend. Probeer het opnieuw.";
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (lastLanguage != EffectiveLanguage)
+        {
+            ClearMessage();
+            lastLanguage = EffectiveLanguage;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!loaded) return;
+        var bodyFields = FieldsForKind();
+        await JSRuntime.InvokeVoidAsync("rteHelpers.updateContextMenu", "mail-body", bodyFields.Select(field => new { text = field }));
+        await JSRuntime.InvokeVoidAsync("rteHelpers.updateContextMenu", "mail-subject", bodyFields.Select(field => new { text = field }));
+    }
+
+    private async Task SaveAsync()
+    {
+        var selectedKind = kind;
+        var selectedLanguage = EffectiveLanguage;
+        if (editor is not { } currentEditor || saving) return;
+        var subject = ConvertFields(Draft.Subject.Trim());
+        saving = true;
+        error = true;
+        try
+        {
+            var body = ConvertFields((await currentEditor.GetTextAsync() ?? "").Trim());
+            var html = ConvertFields((await currentEditor.GetXhtmlAsync() ?? "").Trim());
+            var empty = subject.Length == 0 && body.Length == 0;
+            if ((!empty || selectedLanguage == "nl") && (subject.Length is 0 or > 250 || body.Length is 0 or > 10000 || html.Length > 1000000))
+            {
+                message = "Geef een onderwerp en bericht op binnen de toegestane lengte.";
+                return;
+            }
+            if (!empty && (selectedKind is "aanmelding" or "plaatsing") && !HasNoteRecipient(body))
+            {
+                message = "Voeg {Notamelding} toe, of gebruik {RolNotaOntvanger} en {MailNotaOntvanger}.";
+                return;
+            }
+            await Database.ExecuteNonQueryAsync(@"
+                INSERT INTO mijn_mailingsjablonen (soort,taal,onderwerp,bericht,opmaak_html) VALUES (@kind,@language,@subject,@body,@html)
+                ON DUPLICATE KEY UPDATE onderwerp=VALUES(onderwerp),bericht=VALUES(bericht),opmaak_html=VALUES(opmaak_html)
+                ", new() { ["@kind"] = selectedKind, ["@language"] = selectedLanguage, ["@subject"] = subject, ["@body"] = body,
+                    ["@html"] = empty ? DBNull.Value : html });
+            error = false;
+            message = empty ? "Opgeslagen. Mijn gebruikt voor deze taal de Nederlandse versie." : "Sjabloon opgeslagen.";
+        }
+        catch (Exception ex) when (ex is MySqlConnector.MySqlException or JSException)
+        {
+            Logger.LogWarning(ex, "Een inschrijfbevestiging kon niet worden opgeslagen.");
+            message = "Opslaan is niet gelukt. Probeer het opnieuw.";
+        }
+        finally { saving = false; }
+    }
+
+    private static string ConvertFields(string text) => text
+        .Replace("[koor]", "{Groepsnaam}", StringComparison.OrdinalIgnoreCase)
+        .Replace("[jaar]", "{Editie}", StringComparison.OrdinalIgnoreCase)
+        .Replace("[festivaldatum]", "{Festivaldatum}", StringComparison.OrdinalIgnoreCase)
+        .Replace("[deelnemers]", "{Aantal zangers}", StringComparison.OrdinalIgnoreCase)
+        .Replace("[podiumtype]", "{Podiumtype}", StringComparison.OrdinalIgnoreCase)
+        .Replace("[inschrijflink]", "{Inschrijflink}", StringComparison.OrdinalIgnoreCase)
+        .Replace("[notamelding]", "{Notamelding}", StringComparison.OrdinalIgnoreCase);
+
+    private IEnumerable<string> FieldsForKind() => MijnTemplateReference.ForKind(kind).Select(variable => $"{{{variable.Name}}}");
+
+    private static bool HasNoteRecipient(string body) => body.Contains("{Notamelding}",StringComparison.OrdinalIgnoreCase)
+        || (body.Contains("{RolNotaOntvanger}",StringComparison.OrdinalIgnoreCase) && body.Contains("{MailNotaOntvanger}",StringComparison.OrdinalIgnoreCase));
+
+    private sealed class MessageDraft
+    {
+        public string Subject { get; set; } = "";
+        public string Html { get; set; } = "";
+    }
+}

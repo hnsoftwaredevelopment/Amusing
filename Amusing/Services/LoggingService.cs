@@ -83,14 +83,14 @@ public class LoggingService
         } );
     }
 
-    public async Task WriteUserLoginAttemptAsync( string _status, string _report )
+    public async Task WriteUserLoginAttemptAsync( string _status, string _report, int? verifiedUserId = null )
     {
         if ( _report == "" )
         {
             return;
         }
 
-        int _userId = _userContextHelper.GetUserId();
+        int _userId = verifiedUserId ?? _userContextHelper.GetUserId();
         string _userIp = _userContextHelper.GetUserIp();
 
         Dictionary<string, object> parameters = new()
@@ -130,9 +130,7 @@ public class LoggingService
             return;
         }
 
-        var authState = await _authProvider.GetAuthenticationStateAsync();
-        var claimUser = authState.User;
-        string? _userId = claimUser.FindFirst("UserId")?.Value;
+        var _userId = _userContextHelper.GetUserId();
         
         string _userIp = _userContextHelper.GetUserIp();
 

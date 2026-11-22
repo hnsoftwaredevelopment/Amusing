@@ -1,0 +1,100 @@
+@page "/account/contactgegevens"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using System.Security.Claims
+@using Amusing.Mijn.Services
+@inject PersonalContacts Contacts
+@inject ChoirAccounts Accounts
+@inject IHttpContextAccessor Context
+@inject IConfiguration Configuration
+
+<PageTitle>@Title — Mijn Amusing</PageTitle>
+<section class="card sign-in-card account-page" lang="@language">
+<a href="/">← @T("MijnKoren")</a>
+<h1>@Title</h1>
+@if (Input is not null)
+{
+    @if (message is not null) { <p role="status">@message</p> }
+    <EditForm Model="Input" FormName="personal-contact" OnSubmit="SaveAsync">
+        <DataAnnotationsValidator />
+        @if (language == "nl") { <ValidationSummary /> }
+        <label for="first-name">@T("Voornaam")</label>
+        <InputText id="first-name" @bind-Value="Input.FirstName" maxlength="40" autocomplete="given-name" />
+        <label for="prefix">@T("Tussenvoegsel")</label>
+        <InputText id="prefix" @bind-Value="Input.Prefix" maxlength="20" />
+        <label for="last-name">@T("Achternaam")</label>
+        <InputText id="last-name" @bind-Value="Input.LastName" maxlength="50" autocomplete="family-name" />
+        <label for="phone">@T("VastTelefoonnummer")</label>
+        <InputText id="phone" @bind-Value="Input.Phone" type="tel" maxlength="15" />
+        <label for="mobile">@T("MobielNummer")</label>
+        <InputText id="mobile" @bind-Value="Input.Mobile" type="tel" maxlength="15" />
+        <p>@T("VoorEenFestivalinschrijvingHeeftIedereEersteContactpersoon")</p>
+        <button type="submit">@T("ContactgegevensOpslaan")</button>
+    </EditForm>
+    <hr />
+    <h2>@T("Emailadres")</h2>
+    <label for="current-email">@T("HuidigEmailadres")</label>
+    <input id="current-email" type="email" value="@currentEmail" readonly />
+    @if (EmailMessage is { } emailMessage)
+    {
+        <p role="status">@emailMessage</p>
+    }
+    <form method="post" action="/account/e-mail-aanvragen">
+        <AntiforgeryToken />
+        <label for="new-email">@T("NieuwEmailadres")</label>
+        <input id="new-email" name="email" type="email" required maxlength="80" autocomplete="email" />
+        <p>@T("JeHuidigeAdresBlijftActiefTotdatJe")</p>
+        <button type="submit">@T("BevestigingslinkAanvragen")</button>
+    </form>
+}
+
+</section>
+
+@code {
+    [SupplyParameterFromForm(FormName = "personal-contact")] public PersonalContactInput? Input { get; set; }
+    [SupplyParameterFromQuery(Name = "email")] public string? EmailStatus { get; set; }
+    private string currentEmail = "";
+    private string? message;
+    private string language = "nl";
+    private string Title => T("MijnContactgegevens");
+    private string T(string key) => Amusing.Mijn.Services.UiText.Get(key, language);
+    private string? EmailMessage => EmailStatus switch
+    {
+        "klaargezet" => Configuration.GetValue<bool>("Mijn:IsTestEnvironment")
+            ? T("DeBevestigingslinkStaatInDeTestmailopvang")
+            : T("WeHebbenEenBevestigingslinkNaarJeNieuwe"),
+        "gewijzigd" => T("JeEmailadresIsGewijzigdGebruikHetNieuwe"),
+        "in-gebruik" => T("DatEmailadresIsAlInGebruik"),
+        "zelfde" => T("DitIsJeHuidigeEmailadres"),
+        "ongeldig" => T("VulEenGeldigEmailadresIn"),
+        "verlopen" => T("DezeLinkIsVerlopenAlGebruiktOf"),
+        "mailfout" => T("DeBevestigingsmailKonNietWordenVerstuurdProbeer"),
+        _ => null
+    };
+
+    private uint? Actor => Context.HttpContext!.User.FindFirstValue("actor_type") == "choir_person" &&
+        uint.TryParse(Context.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Actor is not { } actor) { Input = null; return; }
+        var ct = Context.HttpContext!.RequestAborted;
+        language = await Accounts.LanguageAsync(actor, ct);
+        var saved = await Contacts.ReadAsync(actor, ct);
+        currentEmail = saved?.Email ?? "";
+        Input ??= saved;
+    }
+
+    private async Task SaveAsync(EditContext editContext)
+    {
+        if (Actor is not { } actor || Input is null) return;
+        var ct = Context.HttpContext!.RequestAborted;
+        if (!editContext.Validate())
+        {
+            message = T("ControleerDeIngevuldeGegevens2");
+            return;
+        }
+        var saved = await Contacts.SaveAsync(actor, Input, ct);
+        message = saved ? T("JeContactgegevensZijnOpgeslagen") : T("DeContactgegevensKondenNietWordenOpgeslagen");
+        if (saved) Input = await Contacts.ReadAsync(actor, ct);
+    }
+}

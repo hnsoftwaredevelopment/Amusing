@@ -367,3 +367,22 @@ FodyWeavers.xsd
 # Local agent worktrees
 .worktrees/
 
+
+# Mijn uses its own stylesheet; omit unused template Bootstrap assets.
+/Amusing.Mijn/wwwroot/lib/bootstrap/
+
+# Local Syncfusion license file
+SyncfusionLicense.txt
+SynfusionLicense.txt
+
+# Local secrets and captured mail
+.env
+.env.*
+!.env.example
+*.eml
+*.sql.gz
+.playwright-cli/
+
+# Versioned source release records
+!docs/releases/
+!docs/releases/**

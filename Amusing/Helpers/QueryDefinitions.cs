@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 
 namespace Amusing.Helpers;
 
@@ -821,7 +821,25 @@ public static class QueryDefinitions
             BoeteOnderbrekingOptredens = @BoeteOnderbrekingOptredens
         WHERE festival_id = @festivalid";
     public static readonly string InsertNewFestival = @"
-        INSERT INTO ah_festivals (festivaldatum, start_inschrijving, eind_inschrijving) VALUES (@festivaldatum, @StartSubscriptionDate, @EndSubscriptionDate);
+        START TRANSACTION;
+        INSERT INTO ah_festivals (festivaldatum, start_inschrijving, eind_inschrijving, btw_percentage)
+        VALUES (@festivaldatum, @StartSubscriptionDate, @EndSubscriptionDate,
+            COALESCE((SELECT f.btw_percentage FROM ah_festivals f WHERE f.festivaldatum < @festivaldatum
+                      ORDER BY f.festivaldatum DESC, f.festival_id DESC LIMIT 1),
+                     (SELECT percentage FROM ah_btw_tarieven WHERE code = 'deelname')));
+        INSERT INTO ah_festival_deelnemerstarieven (festival_id, vanaf_deelnemers, bedrag_incl_btw)
+        WITH vorig_festival AS (
+            SELECT festival_id FROM ah_festivals WHERE festivaldatum < @festivaldatum
+            ORDER BY festivaldatum DESC, festival_id DESC LIMIT 1
+        ), vorige_staffels AS (
+            SELECT t.vanaf_deelnemers, t.bedrag_incl_btw
+            FROM ah_festival_deelnemerstarieven t JOIN vorig_festival f USING (festival_id)
+        )
+        SELECT LAST_INSERT_ID(), vanaf_deelnemers, bedrag_incl_btw FROM vorige_staffels
+        UNION ALL
+        SELECT LAST_INSERT_ID(), vanaf_deelnemers, bedrag_incl_btw
+        FROM ah_deelnemerstarieven WHERE NOT EXISTS (SELECT 1 FROM vorige_staffels);
+        COMMIT;
         SELECT LAST_INSERT_ID();";
     public static readonly string InsertNewCondition = @"
         INSERT INTO amusing.planner_voorwaarden 
@@ -1295,22 +1313,26 @@ public static class QueryDefinitions
         SELECT 
             usr.user_id AS UserId,
             usr.username AS UserName,
+            usr.weergavenaam AS DisplayName,
+            usr.herstel_email AS RecoveryEmail,
             usr.role AS ROLE,
             DATE(MAX(log.date)) AS LastLoginDate
         FROM amusing.ah_beheer usr
         LEFT JOIN amusing.ah_beheer_log log 
             ON usr.user_id = log.user_id
-        GROUP BY usr.user_id, usr.username, usr.password, usr.role;";
+        GROUP BY usr.user_id, usr.username, usr.password, usr.role, usr.weergavenaam, usr.herstel_email;";
     public static readonly string AddNewUser = @"
         INSERT INTO amusing.ah_beheer
-            (username, password, role)
-        VALUES (@UserName, @Password, @Role);
+            (username, password, role, weergavenaam, herstel_email)
+        VALUES (@UserName, @Password, @Role, NULLIF(@DisplayName, ''), NULLIF(@RecoveryEmail, ''));
         SELECT LAST_INSERT_ID();
         ";
     public static readonly string ModifyUserByUserId = @"
         UPDATE amusing.ah_beheer
         SET 
             username = @UserName,
+            weergavenaam = NULLIF(@DisplayName, ''),
+            herstel_email = NULLIF(@RecoveryEmail, ''),
             role = @Role
         WHERE user_id = @UserId;";
     public static readonly string ModifyPasswordByUserId = @"
@@ -1580,7 +1602,7 @@ public static class QueryDefinitions
 	                    source 	AS ListSource,
 	                    filter	AS ListFilter,
                         query	AS ListQuery
-                    FROM amusing.ah_recipient_lists
+                    FROM ah_recipient_lists
                     ORDER BY name;";
 
     public static readonly string GetRecipientListById = @"
@@ -1592,7 +1614,7 @@ public static class QueryDefinitions
                         source 	AS ListSource,
                         filter	AS ListFilter,
                         query	AS ListQuery
-                    FROM amusing.ah_recipient_lists
+                    FROM ah_recipient_lists
                     WHERE id = @ListId;";
 
     private static readonly HashSet<string> EditableRegistrationGridFields = new(StringComparer.OrdinalIgnoreCase)
@@ -1624,7 +1646,7 @@ public static class QueryDefinitions
 
 
     public static readonly string ModifyRecipientQueryById = @"
-    UPDATE amusing.ah_recipient_lists
+    UPDATE ah_recipient_lists
     SET 
         name = @ListName,
         source = @ListSource,
@@ -1632,13 +1654,13 @@ public static class QueryDefinitions
         query = @ListQuery
     WHERE id = @ListId;";
     public static readonly string AddNewRecipientQuery = @"
-        INSERT INTO amusing.ah_recipient_lists
+        INSERT INTO ah_recipient_lists
             (name, source, filter, query)
         VALUES (@Name, @Source, @Filter, @Query);
         SELECT LAST_INSERT_ID();
         ";
     public static readonly string DeleteRecipientQuery = @"
-        DELETE FROM amusing.ah_recipient_lists 
+        DELETE FROM ah_recipient_lists
         WHERE id = @QueryId;";
 
     public static readonly string GetAllEmailTemplates = @"
@@ -1654,11 +1676,11 @@ public static class QueryDefinitions
 	        tpl.name 			AS TemplateName,
 	        COALESCE(NULLIF(tpl.templatesubject, ''), tpl.subject) AS TemplateSubject,
 	        COALESCE(NULLIF(tpl.templatecontent, ''), tpl.content) AS TemplateContent
-        FROM amusing.ah_mailing_templates tpl
-        LEFT JOIN amusing.ah_recipient_lists rec ON tpl.recipientlist = rec.id
+        FROM ah_mailing_templates tpl
+        LEFT JOIN ah_recipient_lists rec ON tpl.recipientlist = rec.id
         ORDER BY tpl.name ;";
     public static readonly string ModifyTemplateQueryById = @"
-    UPDATE amusing.ah_mailing_templates
+    UPDATE ah_mailing_templates
     SET 
         name = @TemplateName,
         templatesubject = @TemplateSubject,
@@ -1666,13 +1688,13 @@ public static class QueryDefinitions
         recipientlist = @RecipientListId
     WHERE id = @TemplateId;";
     public static readonly string AddNewTemplateQuery = @"
-        INSERT INTO amusing.ah_mailing_templates
+        INSERT INTO ah_mailing_templates
             (name, templatesubject, templatecontent, recipientlist, subject)
         VALUES (@TemplateName, @TemplateSubject, @TemplateContent, @RecipientListId, '');
         SELECT LAST_INSERT_ID();
         ";
     public static readonly string DeleteTemplateQuery = @"
-        DELETE FROM amusing.ah_mailing_templates 
+        DELETE FROM ah_mailing_templates
         WHERE id = @QueryId;";
 
     #region Dashboard queries

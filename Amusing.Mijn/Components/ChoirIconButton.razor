@@ -1,0 +1,21 @@
+<button type="submit" form="@Form" class="choir-icon-button @(Delete ? "choir-icon-delete" : null) @(Text is null ? null : "choir-icon-with-text")" title="@Tooltip" aria-label="@(Label ?? Tooltip)">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+        @if (Delete)
+        {
+            <path d="M3 6h18m-13 0V3h8v3M6 6l1 15h10l1-15m-8 4v7m4-7v7" />
+        }
+        else
+        {
+            <path d="M3 3h14l4 4v14H3V3Zm4 0v7h10V3M7 21v-7h10v7" />
+        }
+    </svg>
+    @if (Text is not null) { <span>@Text</span> }
+</button>
+
+@code {
+    [Parameter, EditorRequired] public string Tooltip { get; set; } = "";
+    [Parameter] public string? Text { get; set; }
+    [Parameter] public string? Label { get; set; }
+    [Parameter] public string? Form { get; set; }
+    [Parameter] public bool Delete { get; set; }
+}

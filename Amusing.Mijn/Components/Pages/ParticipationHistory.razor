@@ -1,0 +1,95 @@
+@page "/koor/{Id:long}/deelnamehistorie"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using Amusing.Mijn.Services
+@using System.Globalization
+@using System.Security.Claims
+@inject ChoirEnrollments Enrollments
+@inject IHttpContextAccessor Context
+@inject ChoirAccounts Accounts
+@inject IConfiguration Configuration
+
+<section lang="@language">
+<PageTitle>@T("Deelnamehistorie") — Mijn Amusing</PageTitle>
+@if (history is null)
+{
+    <a href="/">← @T("MijnKoren")</a>
+    <h1>@T("KoorNietBeschikbaar")</h1>
+    <p>@T("DitKoorIsNietAanJeAccount")</p>
+}
+else
+{
+    <ChoirTabs Id="@Id" Name="@history.ChoirName" Active="historie" />
+    @if (NoteMessage is { } noteMessage)
+    {
+        <p role="status" class="@(CopyStatus is "klaargezet" or "al-klaargezet" ? "success" : "error")">@noteMessage</p>
+    }
+
+    @if (history.Editions.Count == 0)
+    {
+        <p>@T("ErZijnNogGeenFestivalinschrijvingenVoorDit")</p>
+    }
+    @foreach (var edition in history.Editions)
+    {
+        <section class="profile-card">
+            <h2>Amusing @edition.Date.Year</h2>
+            <p>@edition.Date.ToString("d MMMM yyyy", CultureInfo.GetCultureInfo(language)) · <span class="@(edition.Status == ParticipationStatus.Withdrawn ? "withdrawn-status" : null)">@StatusText(edition.Status)</span></p>
+            @if (edition.Performances.Count > 0)
+            {
+                <h3>@T("Optredens")</h3>
+                <ul>
+                    @foreach (var performance in edition.Performances)
+                    {
+                        <li>@performance.Start–@performance.End · @performance.Stage</li>
+                    }
+                </ul>
+            }
+            @if (history.CanSendNoteCopy && edition.Status == ParticipationStatus.Registered)
+            {
+                <form method="post" action="/koor/@Id/deelnamehistorie/@edition.Id/kopie-nota">
+                    <AntiforgeryToken />
+                    <button type="submit">@T("KopienotaVersturen")</button>
+                </form>
+            }
+        </section>
+    }
+}
+
+</section>
+
+@code {
+    private string language = "nl";
+    private string T(string key) => Amusing.Mijn.Services.UiText.Get(key, language);
+    [Parameter] public long Id { get; set; }
+    [SupplyParameterFromQuery(Name = "nota")] public string? CopyStatus { get; set; }
+    private ChoirParticipationHistory? history;
+    private string? NoteMessage => CopyStatus switch
+    {
+        "klaargezet" => Configuration.GetValue<bool>("Mijn:IsTestEnvironment")
+            ? T("DeKopienotaIsKlaargezetVoorVerzendingNaar")
+            : T("DeKopienotaIsKlaargezetVoorVerzendingNaar2"),
+        "al-klaargezet" => T("ErStaatAlEenKopienotaKlaarVoor"),
+        "geen-penningmeester" => T("DitKoorHeeftGeenActievePenningmeesterMet"),
+        "geen-tarief" => T("VoorDezeEditieOntbrekenGegevensOmEen"),
+        "niet-beschikbaar" => T("VoorDezeInschrijvingIsGeenKopienotaBeschikbaar"),
+        "geen-toegang" => T("JeMagVoorDitKoorGeenKopienota"),
+        _ => null
+    };
+
+    protected override async Task OnParametersSetAsync()
+    {
+        history = null;
+        var request = Context.HttpContext!;
+        if (!request.User.IsAdministrator() && uint.TryParse(request.User.FindFirstValue(ClaimTypes.NameIdentifier), out var person))
+            language = await Accounts.LanguageAsync(person, request.RequestAborted);
+        if (Id is > 0 and <= uint.MaxValue &&
+            uint.TryParse(request.User.FindFirstValue(ClaimTypes.NameIdentifier), out var actor))
+            history = await Enrollments.HistoryAsync(actor, (uint)Id, request.RequestAborted);
+    }
+
+    private string StatusText(ParticipationStatus status) => status switch
+    {
+        ParticipationStatus.Withdrawn => T("Afgemeld"),
+        ParticipationStatus.Waitlisted => T("OpDeWachtlijst"),
+        _ => T("Ingeschreven")
+    };
+}

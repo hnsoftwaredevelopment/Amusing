@@ -1,0 +1,317 @@
+{
+  "site": "https://hnsoftwaredevelopment.atlassian.net",
+  "project": "KAN",
+  "team": "DevTeam",
+  "status": "synced-and-verified",
+  "verifiedOn": "2026-11-19",
+  "reused": [
+    {
+      "key": "KAN-6",
+      "subtaskKeys": [
+        "KAN-13",
+        "KAN-14"
+      ]
+    }
+  ],
+  "stories": [
+    {
+      "label": "Amusing.Beheer",
+      "parent": "KAN-3",
+      "summary": "Deelnemersstaffels en btw per festivaleditie beheren",
+      "role": "Als festivalbeheerder wil ik deelnemersstaffels en btw per editie onderhouden, zodat Mijn en Beheer dezelfde juiste deelnamekosten berekenen.",
+      "criteria": [
+        "Staffels en btw zijn in Beheer per editie te bekijken en te wijzigen door bevoegde beheerders.",
+        "Bij een nieuwe editie kunnen de tarieven van de vorige editie worden overgenomen; historische edities blijven behouden.",
+        "Berekening, actuele nota en historische kopienota gebruiken de juiste editiegegevens; de factuurtekst blijft de nieuwste layout.",
+        "Validatie voorkomt onvolledige/overlappende staffels en ongeldige btw; bestaande gegevens worden niet ongecontroleerd overschreven."
+      ],
+      "subtasks": [
+        "Editietarieven en kopiëren van vorige editie in Beheer bouwen",
+        "Rechten, validatie en berekening/nota over meerdere edities testen"
+      ],
+      "also": "Amusing.Mijn",
+      "key": "KAN-15",
+      "subtaskKeys": [
+        "KAN-16",
+        "KAN-17"
+      ]
+    },
+    {
+      "label": "Amusing.Beheer",
+      "parent": "KAN-3",
+      "summary": "Beoordeling of competitie per festival configureerbaar maken",
+      "role": "Als festivalbeheerder wil ik per editie bepalen of beoordeling of competitie mogelijk is en welke vraag Mijn toont, zodat geen niet-bestaande competitie wordt aangeboden.",
+      "criteria": [
+        "Beheer bewaart per festival een aan/uit-instelling en de bijbehorende vraagtekst.",
+        "Mijn toont de keuze uitsluitend wanneer die voor de editie is ingeschakeld; de vaste mysteryjurytekst keert niet terug.",
+        "Een aangepast verzoek kan geen nieuwe beoordelingskeuze opslaan wanneer de optie uitstaat.",
+        "Omgang met bestaande keuzes en vertalingen van de ingestelde tekst worden bij deze slice afgestemd."
+      ],
+      "subtasks": [
+        "Instelling, vraagtekst en migratiebeleid in Beheer uitwerken",
+        "Voorwaardelijke Mijn-keuze en servervalidatie testen"
+      ],
+      "also": "Amusing.Mijn",
+      "source": "MIJN-21",
+      "key": "KAN-18",
+      "subtaskKeys": [
+        "KAN-19",
+        "KAN-20"
+      ]
+    },
+    {
+      "label": "Amusing.Beheer",
+      "parent": "KAN-3",
+      "summary": "Wachtwoordherstel beschikbaar maken op de Beheer-login",
+      "role": "Als beheerder wil ik via mijn persoonlijke hersteladres een nieuw wachtwoord kunnen instellen, zodat ik bij verlies weer toegang krijg.",
+      "criteria": [
+        "De login van Beheer bevat een begrijpelijke herstelroute die het bestaande hersteladres per beheeraccount gebruikt.",
+        "Een link is eenmalig, verloopt en geeft alleen toegang tot het bedoelde account; ontbrekende/onbekende adressen lekken geen accountinformatie.",
+        "Na herstel werkt het nieuwe wachtwoord en zijn oude herstelcodes ongeldig.",
+        "Bestaande hersteladresvelden en gedeelde herstellogica worden hergebruikt; dev-mail blijft veilig omgeleid."
+      ],
+      "subtasks": [
+        "Beheer-herstelroute aansluiten op bestaande adres- en tokenlogica",
+        "Herstelmail, verlopen codes en opnieuw inloggen controleren"
+      ],
+      "key": "KAN-21",
+      "subtaskKeys": [
+        "KAN-22",
+        "KAN-23"
+      ]
+    },
+    {
+      "label": "Amusing.Beheer",
+      "parent": "KAN-3",
+      "summary": "Amusingdev wekelijks veilig verversen uit productie",
+      "role": "Als technisch beheerder wil ik iedere vrijdagnacht om 03:00 een gecontroleerde kopie van amusing naar amusingdev, zodat testers met vergelijkbare gegevens werken zonder productie te raken.",
+      "criteria": [
+        "Verversing draait op vrijdag 03:00 volgens Europe/Amsterdam met back-up, foutmelding en herstelmogelijkheid.",
+        "Alle dev-apps en relevante databasekoppelingen blijven amusingdev gebruiken; productie wordt niet aangepast.",
+        "Dev-mailbescherming blijft gelden: geen berichten naar oorspronkelijke productieontvangers; omleiding of afgeschermde opvang blijft intact.",
+        "Benodigde dev-schema's, accountrechten en toepassing van nieuwere migraties worden na kopiëren gecontroleerd.",
+        "Een mislukte verversing laat een bruikbare testomgeving of aantoonbare herstelroute achter."
+      ],
+      "subtasks": [
+        "Herhaalbaar verversingsscript met back-up en bescherming ontwerpen",
+        "Vrijdagplanning en controles voor database, rechten en mail inrichten"
+      ],
+      "also": "Amusing.Mijn",
+      "key": "KAN-24",
+      "subtaskKeys": [
+        "KAN-25",
+        "KAN-26"
+      ]
+    },
+    {
+      "label": "Amusing.Beheer",
+      "parent": "KAN-3",
+      "summary": "WordPress-plugin en gegevenskoppeling inventariseren",
+      "role": "Als technisch beheerder wil ik weten hoe de actieve WordPress-plugin koor- en festivalgegevens ophaalt, zodat we kunnen beslissen of een C#-API nodig is.",
+      "criteria": [
+        "Actieve plugin, versie, gebruikte endpoints/databasekoppelingen en benodigde velden worden op de VPS geverifieerd.",
+        "De werkelijke situatie wordt vergeleken met amusing-hengelo/amusing-wordpress-plugin.",
+        "Afhankelijkheden van de oude PHP-API en beveiligingsgrenzen worden vastgelegd.",
+        "Er ligt een onderbouwd voorstel; implementatie van een vervangende API vereist een vervolgbesluit en bestaande functionaliteit blijft werken."
+      ],
+      "subtasks": [
+        "Actieve WordPress-koppeling en PHP-afhankelijkheden onderzoeken",
+        "Advies en eventuele vervolgslices voor C#-API documenteren"
+      ],
+      "key": "KAN-27",
+      "subtaskKeys": [
+        "KAN-28",
+        "KAN-29"
+      ]
+    },
+    {
+      "label": "Amusing.Beheer",
+      "parent": "KAN-3",
+      "summary": "Bestaande dubbele contact- en penningmeesterrollen beoordelen",
+      "role": "Als koorbeheerder wil ik een betrouwbaar overzicht van reeds bestaande dubbele unieke rollen, zodat de organisatie deze gericht kan herstellen.",
+      "criteria": [
+        "Een inventaris toont koren met meerdere contactpersonen 1, contactpersonen 2 of penningmeesters; bestaande gegevens worden niet automatisch verwijderd.",
+        "De organisatie bepaalt per geval wie de rol behoudt; een koor houdt altijd een eerste contactpersoon.",
+        "Eventueel herstel bewaart relevante historie en houdt rekening met uitnodigingen en juiste notaontvanger.",
+        "Nieuwe koppelingen blijven de al ingevoerde unieke-rolvalidatie gebruiken."
+      ],
+      "subtasks": [
+        "Alleen-lezen inventaris en herstelvoorstel voor dubbele rollen maken",
+        "Goedgekeurde correcties met logging en ontvangercontrole uitvoeren"
+      ],
+      "also": "Amusing.Mijn",
+      "key": "KAN-30",
+      "subtaskKeys": [
+        "KAN-31",
+        "KAN-32"
+      ]
+    },
+    {
+      "label": "Amusing.Mijn",
+      "parent": "KAN-2",
+      "summary": "Opnieuw aanmelden na afmelding vanuit Beheer mogelijk maken",
+      "role": "Als koorcontact wil ik een afgemelde inschrijving opnieuw kunnen aanmelden, zodat ik dit zonder handmatige database-ingreep kan regelen.",
+      "criteria": [
+        "Een bevoegde contactpersoon kan voor dezelfde editie opnieuw aanmelden volgens de actuele inschrijfperiode en wachtlijstinstelling.",
+        "De eerdere afmelding blijft herleidbaar en er ontstaan geen dubbele actieve inschrijvingen.",
+        "Vóór implementatie wordt gedrag bij bestaande betaling, bevestiging, nota en mailhistorie afgesproken; er wordt geen fictief betaald bedrag berekend.",
+        "Berichten en nota volgen de nieuwe status; opnieuw opslaan veroorzaakt geen onbedoelde dubbele berichten."
+      ],
+      "subtasks": [
+        "Herinschrijfregels voor oude afmelding, betaling en nota vaststellen",
+        "Herinschrijving met wachtlijst, historie en mail testen"
+      ],
+      "also": "Amusing.Beheer",
+      "source": "MIJN-13",
+      "key": "KAN-33",
+      "subtaskKeys": [
+        "KAN-34",
+        "KAN-35"
+      ]
+    },
+    {
+      "label": "Amusing.Mijn",
+      "parent": "KAN-2",
+      "summary": "Koormutaties automatisch na vijf jaar opschonen",
+      "role": "Als gegevensbeheerder wil ik oude nieuwe-stijl-koormutaties gecontroleerd opschonen, zodat het logboek de afgesproken vijfjarige historie bevat.",
+      "criteria": [
+        "Nieuwe Blazor-koormutaties ouder dan vijf jaar worden automatisch opgeruimd; de grensdatum is getest.",
+        "Festivalinschrijvingen en volledige deelnamehistorie blijven behouden.",
+        "Accountbeveiligingslogs en bestaande PHP-logs worden niet onder dit beleid verwijderd; hun beleid wordt apart vastgesteld.",
+        "Opschoning is herhaalbaar, beperkt tot de bedoelde gegevens en heeft een veilige controle-/herstelprocedure; een Beheer-instelling is nu geen eis."
+      ],
+      "subtasks": [
+        "Opschoningsbeleid en begrenzing van koormutaties vastleggen",
+        "Geplande opschoning met grens- en historietests realiseren"
+      ],
+      "source": "MIJN-19",
+      "key": "KAN-36",
+      "subtaskKeys": [
+        "KAN-37",
+        "KAN-38"
+      ]
+    },
+    {
+      "label": "Amusing.Mijn",
+      "parent": "KAN-2",
+      "summary": "Verlopen aanvragen en testmailopvang gecontroleerd opruimen",
+      "role": "Als technisch beheerder wil ik tijdelijke accountgegevens en dev-testmails niet onbeperkt bewaren, zodat de database en mailopvang beheersbaar blijven.",
+      "criteria": [
+        "Activaties, wachtwoordherstel, e-mailwijzigingen en roluitnodigingen zijn geïnventariseerd; bewaartermijnen worden vóór verwijdering bevestigd.",
+        "Voor testmailopvang is veertien dagen slechts een voorstel; de organisatie bevestigt eerst de termijn.",
+        "Automatische opschoning verwijdert geen nog geldige aanvraag, actieve rol, onverwerkt mailverzoek of festivalhistorie.",
+        "De routine is herhaalbaar, rapporteert aantallen en raakt geen echte mailboxen of productieontvangers."
+      ],
+      "subtasks": [
+        "Bewaarbeleid voor tijdelijke aanvragen en dev-mailopvang afstemmen",
+        "Veilige opschoning en grensgevallen implementeren en testen"
+      ],
+      "also": "Amusing.Beheer",
+      "key": "KAN-39",
+      "subtaskKeys": [
+        "KAN-40",
+        "KAN-41"
+      ]
+    },
+    {
+      "label": "Amusing.Mijn",
+      "parent": "KAN-2",
+      "summary": "Resterende scherm- en validatieteksten volledig vertalen",
+      "role": "Als Nederlandstalige, Duitstalige of Engelstalige gebruiker wil ik ook foutmeldingen en resterende schermen in mijn voorkeurstaal zien.",
+      "criteria": [
+        "De nog vaste of eenzijdig Nederlandse scherm- en servervalidatieteksten worden geïnventariseerd; reeds geaccepteerde vertalingen blijven behouden.",
+        "Vaste UI-teksten gaan naar de bestaande NL/DE/EN-resources en volgen de opgeslagen taalvoorkeur.",
+        "Door gebruikers ingevoerde koorinhoud en centraal beheerde mailtemplates worden niet als UI-resource vertaald of overschreven.",
+        "Succes-, fout- en validatiesituaties zijn per taal gecontroleerd; sleutels verschijnen niet als zichtbare tekst."
+      ],
+      "subtasks": [
+        "Resterende vaste teksten en validatiemeldingen inventariseren",
+        "ResX-vertalingen aanvullen en drie talen controleren"
+      ],
+      "key": "KAN-42",
+      "subtaskKeys": [
+        "KAN-43",
+        "KAN-44"
+      ]
+    },
+    {
+      "label": "Amusing.Mijn",
+      "parent": "KAN-2",
+      "summary": "Mobiele bediening en toetsenbordtoegang van Mijn afronden",
+      "role": "Als koorlid wil ik Mijn op mijn telefoon en met het toetsenbord kunnen bedienen, zodat belangrijke acties steeds bereikbaar zijn.",
+      "criteria": [
+        "Belangrijkste reizen voor inloggen, profiel/afbeeldingen, rollen, inschrijving en nota worden op smalle schermen gecontroleerd.",
+        "Opslaan, tabbladen, waarschuwingen bij onopgeslagen wijzigingen en dialogen blijven bereikbaar zonder onbruikbare overlap.",
+        "Focusvolgorde, zichtbare focus en toegankelijke namen voor iconen/taalmenu worden gecontroleerd.",
+        "Gevonden tekortkomingen zijn hersteld of expliciet als vervolg vastgelegd en de praktijkcontrole is gedocumenteerd."
+      ],
+      "subtasks": [
+        "Mobiele en toetsenbordcontrole van de hoofdreizen uitvoeren",
+        "Gevonden bedieningsproblemen herstellen en laten accepteren"
+      ],
+      "source": "MIJN-20",
+      "key": "KAN-45",
+      "subtaskKeys": [
+        "KAN-46",
+        "KAN-47"
+      ]
+    },
+    {
+      "label": "Amusing.Mijn",
+      "parent": "KAN-2",
+      "summary": "Historische koorfoto's en logo's op compatibiliteit controleren",
+      "role": "Als koor wil ik mijn bestaande foto en logo blijven zien na de migratie, zonder opnieuw te moeten uploaden.",
+      "criteria": [
+        "Representatieve bestaande binaire afbeeldingen en historische base64/data-URL-opslag worden gecontroleerd.",
+        "Beheer en Mijn kunnen geldige oude afbeeldingen veilig tonen; bestaande data wordt bij de inventarisatie niet herschreven.",
+        "Voor afwijkende/beschadigde bestanden ligt een gecontroleerd herstelvoorstel; nieuwe uploads blijven volgens de afgesproken validatie werken.",
+        "De gegevenscontrole en eventuele aanpassing zijn met toestemming voor benodigde datacorrecties geverifieerd."
+      ],
+      "subtasks": [
+        "Historische afbeeldingsformaten en afwijkingen inventariseren",
+        "Compatibiliteit of gericht herstel testen met Beheer en Mijn"
+      ],
+      "source": "MIJN-10",
+      "key": "KAN-48",
+      "subtaskKeys": [
+        "KAN-49",
+        "KAN-50"
+      ]
+    },
+    {
+      "label": "Amusing.Mijn",
+      "parent": "KAN-1",
+      "summary": "Uitgeleverde broncode vastleggen en naar GitHub pushen",
+      "role": "Als projectbeheerder wil ik de reeds uitgeleverde Mijn- en Beheer-broncode in beoordeelbare commits op GitHub hebben, zodat de liveversie reproduceerbaar en veiliggesteld is.",
+      "criteria": [
+        "De hoofdcheckout en productie-/dev-worktrees worden vergeleken met de werkelijk gepubliceerde artefacten; geen wijziging gaat verloren.",
+        "169 lokale gewijzigde/nieuwe bestanden zijn bij deze inventarisatie nog niet gecommit; de huidige lokale branch heeft geen upstream en staat niet als branch op origin.",
+        "Wijzigingen worden logisch gesplitst, relevante controles uitgevoerd en commits naar de juiste GitHub-branch gepusht; dit verhaal geeft geen zelfstandige merge- of productie-deployopdracht.",
+        "Syncfusion-licentie, verbindingsgegevens, wachtwoorden en tijdelijke testdata komen niet in Git; de documentatiemirror blijft bijgewerkt.",
+        "Echte commit-/PR-links en de relatie met de productie-release worden geregistreerd; geen voltooiing claimen vóór controle op origin."
+      ],
+      "subtasks": [
+        "Ongecommitte wijzigingen en releaseverschillen veilig inventariseren",
+        "Gecontroleerde commits publiceren en koppelen aan releases en Jira"
+      ],
+      "also": "Amusing.Beheer",
+      "key": "KAN-51",
+      "subtaskKeys": [
+        "KAN-52",
+        "KAN-53"
+      ],
+      "status": "Gereed",
+      "completion": {
+        "licenseExcluded": true,
+        "testsPassed": 190,
+        "branch": "https://github.com/hnsoftwaredevelopment/Amusing/tree/kan-51-broncode-livegang",
+        "codeCommits": [
+          "c4e27a6",
+          "74f4d36",
+          "e22b82a"
+        ],
+        "releaseRecord": "docs/releases/2026-11-19/README.md"
+      }
+    }
+  ]
+}

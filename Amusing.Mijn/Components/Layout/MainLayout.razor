@@ -1,0 +1,58 @@
+@inject IConfiguration Configuration
+@using Amusing.Mijn.Services
+@inject IHttpContextAccessor Context
+@inject SiteLanguage SiteLanguage
+@inherits LayoutComponentBase
+@{
+    var returnTo = Context.HttpContext?.Request.Path.ToString() + Context.HttpContext?.Request.QueryString.ToString();
+    var isTest = Configuration.GetValue<bool>("Mijn:IsTestEnvironment");
+}
+<header class="site-header @(isTest ? "site-header-test" : "")">
+    <a href="/" class="brand">
+        <img src="@Assets[isTest ? "amusing.svg" : "amusing-transparent.svg"]" alt="" width="99" height="40" />
+        <span>Mijn Amusing Hengelo</span>
+    </a>
+    <details class="header-language">
+        <summary aria-label="@LanguageLabel" title="@LanguageLabel">
+            <img src="@Assets[$"flag-{language}.svg"]" width="32" height="20" alt="" />
+        </summary>
+        <form method="post" action="/account/taal" data-enhance="false">
+            <AntiforgeryToken />
+            <input type="hidden" name="terug" value="@returnTo" />
+            @foreach (var option in Languages)
+            {
+                <button type="submit" name="taal" value="@option.Code" lang="@option.Code" aria-current="@(language == option.Code ? "true" : null)">
+                    <img src="@Assets[$"flag-{option.Code}.svg"]" width="26" height="16" alt="" />
+                    @option.Name
+                </button>
+            }
+        </form>
+    </details>
+</header>
+@if (isTest) { <aside class="test-banner">@T("TestomgevingGebruikAlleenTestgegevensMailVolgtDe")</aside> }
+@if (Context.HttpContext?.User.IsAdministrator() == true)
+{
+    <aside class="notice">
+        Ondersteuningsmodus · @Context.HttpContext.User.Identity?.Name
+        @if (Context.HttpContext.User.FindFirst(SupportMode.GroupClaim) is not null)
+        {
+            <form method="post" action="/ondersteuning/koor" data-enhance="false">
+                <AntiforgeryToken />
+                <button type="submit" class="secondary">Ondersteuning verlaten of koor wisselen</button>
+            </form>
+        }
+    </aside>
+}
+<main id="main">@Body</main>
+<footer>Samen zingen in Hengelo</footer>
+
+
+@code {
+    private static readonly (string Code, string Name)[] Languages =
+        [("en", "English"), ("de", "Deutsch"), ("nl", "Nederlands")];
+
+    private string language = "nl";
+    private string LanguageLabel => $"{T("Taal")}: {Languages.First(option => option.Code == language).Name}";
+    protected override async Task OnParametersSetAsync() => language = await SiteLanguage.GetAsync();
+    private string T(string key) => Amusing.Mijn.Services.UiText.Get(key, language);
+}

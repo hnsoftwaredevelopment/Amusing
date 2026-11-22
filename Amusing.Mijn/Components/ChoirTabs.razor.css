@@ -1,0 +1,9 @@
+.choir-heading { margin-block: 1rem; }
+.choir-heading h1 { margin: 0; overflow-wrap: anywhere; }
+.choir-heading p { margin: .25rem 0 0; }
+.festival-action { display: inline-block; margin-block-start: .75rem; padding: .5rem .9rem; border-radius: .45rem; background: #014983; color: white; text-decoration: none; font-weight: 650; }
+.festival-action:hover { background: #003863; }
+.choir-tabs { display: flex; flex-wrap: wrap; gap: .35rem; border-bottom: 1px solid #b4c7d6; margin-block-end: 1.25rem; }
+.choir-tabs a { color: #014983; text-decoration: none; padding: .45rem .65rem; border-radius: .4rem .4rem 0 0; font-weight: 650; }
+.choir-tabs a:hover { background: #e7eefb; }
+.choir-tabs a[aria-current="page"] { background: #014983; color: white; }

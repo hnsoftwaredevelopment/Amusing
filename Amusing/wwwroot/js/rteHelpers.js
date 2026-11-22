@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 
 (function () {
     window.rteHelpers = window.rteHelpers || {};
@@ -315,127 +315,72 @@
             }
         };
     };
-    window.rteHelpers.updateContextMenu = function (rteId, items) {
-        try {
-            var rteEl = document.getElementById(rteId);
-            if (!rteEl) {
-                console.warn('rteHelpers.updateContextMenu: rte element not found', rteId);
-                return false;
-            }
+    window.rteHelpers.updateContextMenu = function (elementId, items) {
+        const target = document.getElementById(elementId);
+        if (!target) return false;
 
-            // try get the instance in multiple ways (robust)
-            var instance = rteEl?.ej2_instances?.[0] || null;
-            if (!instance) {
-                // scan children quickly for an instance
-                var children = rteEl.querySelectorAll('*');
-                for (var i = 0; i < children.length && !instance; i++) {
-                    var c = children[i];
-                    if (c && c.ej2_instances && c.ej2_instances[0]) instance = c.ej2_instances[0];
-                }
-            }
+        target._rteHelpersContextItems = Array.isArray(items) ? items.slice() : [];
+        if (target._rteHelpersContextHandlerAttached) return true;
+        target._rteHelpersContextHandlerAttached = true;
 
-            // Remove previously attached custom menu handler to avoid duplicates
-            // We store a flag on the element so we can know if we attached already.
-            if (rteEl._rteHelpersContextHandlerAttached) {
-                // update items only (menu recreated on open), still keep single handler
-                rteEl._rteHelpersContextItems = (Array.isArray(items) ? items.slice() : []);
-                return true;
-            }
+        target.addEventListener('contextmenu', event => {
+            const fields = target._rteHelpersContextItems;
+            const input = target.matches('input,textarea') ? target : target.querySelector('input,textarea');
+            const editable = event.target.closest('[contenteditable="true"]');
+            if (!fields.length || (!editable && (!input || !input.contains(event.target)))) return;
+            event.preventDefault();
+            document.getElementById('rteCustomContextMenu')?.remove();
 
-            // store items to be used by the handler
-            rteEl._rteHelpersContextItems = (Array.isArray(items) ? items.slice() : []);
+            const selection = document.getSelection();
+            const range = editable && selection?.rangeCount && editable.contains(selection.anchorNode)
+                ? selection.getRangeAt(0).cloneRange() : null;
+            const start = input?.selectionStart;
+            const end = input?.selectionEnd;
 
-            // Add the listener on the element (not on instance) so it survives instance internals
-            rteEl.addEventListener('contextmenu', function (ev) {
-                ev.preventDefault();
-
-                // get latest items (they may have been replaced)
-                var menuItems = rteEl._rteHelpersContextItems || [];
-                if (!menuItems || menuItems.length === 0) {
-                    return;
-                }
-
-                // remove existing custom menu if any
-                var existing = document.getElementById('rteCustomContextMenu');
-                if (existing) existing.remove();
-
-                // create menu DOM
-                var menu = document.createElement('ul');
-                menu.id = 'rteCustomContextMenu';
-                menu.style.position = 'absolute';
-                menu.style.top = (ev.pageY) + 'px';
-                menu.style.left = (ev.pageX) + 'px';
-                menu.style.background = '#fff';
-                menu.style.border = '1px solid rgba(0,0,0,0.12)';
-                menu.style.padding = '4px';
-                menu.style.zIndex = 2147483647; // very high
-                menu.style.listStyle = 'none';
-                menu.style.borderRadius = '4px';
-                menu.style.boxShadow = '0 2px 10px rgba(0,0,0,0.12)';
-                menu.style.minWidth = '160px';
-
-                // append items
-                menuItems.forEach(function (it) {
-                    var li = document.createElement('li');
-                    li.textContent = it.text || '';
-                    li.style.padding = '6px 10px';
-                    li.style.cursor = 'pointer';
-                    li.style.userSelect = 'none';
-                    li.onmouseenter = function () { li.style.background = 'rgba(0,0,0,0.04)'; };
-                    li.onmouseleave = function () { li.style.background = 'transparent'; };
-                    li.onclick = function (clickEv) {
-                        // prevent closing race
-                        clickEv.preventDefault();
-
-                        // determine instance on click (re-evaluate — instance might exist on a child element)
-                        var inst = instance;
-                        if (!inst) {
-                            inst = rteEl?.ej2_instances?.[0] || null;
-                            if (!inst) {
-                                // scan children quick
-                                var ch = rteEl.querySelectorAll('*');
-                                for (var k = 0; k < ch.length && !inst; k++) {
-                                    var cc = ch[k];
-                                    if (cc && cc.ej2_instances && cc.ej2_instances[0]) inst = cc.ej2_instances[0];
-                                }
-                            }
-                        }
-
-                        // try to insert using the best available API
-                        var inserted = false;
-                        if (inst) {
-                            inserted = _insertTextIntoRteInstance(inst, it.text);
-                        }
-
-                        // fallback: try document.execCommand
-                        if (!inserted) {
-                            try { document.execCommand('insertText', false, it.text); } catch (e) { /* ignore */ }
-                        }
-
-                        // remove menu
-                        menu.remove();
-                    };
-                    menu.appendChild(li);
-                });
-
-                document.body.appendChild(menu);
-
-                // remove when clicking elsewhere
-                var rmHandler = function () {
-                    var el = document.getElementById('rteCustomContextMenu');
-                    if (el) el.remove();
-                    document.removeEventListener('click', rmHandler);
-                };
-                setTimeout(function () { document.addEventListener('click', rmHandler); }, 0);
+            const menu = document.createElement('ul');
+            menu.id = 'rteCustomContextMenu';
+            Object.assign(menu.style, {
+                position: 'absolute', top: event.pageY + 'px', left: event.pageX + 'px',
+                background: '#fff', border: '1px solid rgba(0,0,0,.12)', padding: '4px',
+                zIndex: '2147483647', listStyle: 'none', borderRadius: '4px',
+                boxShadow: '0 2px 10px rgba(0,0,0,.12)', minWidth: '160px'
             });
 
-            rteEl._rteHelpersContextHandlerAttached = true;
-            return true;
-        } catch (err) {
-            console.debug('rteHelpers.updateContextMenu error', err);
-            return false;
-        }
+            for (const field of fields) {
+                const row = document.createElement('li');
+                const option = document.createElement('button');
+                option.type = 'button';
+                option.textContent = field.text;
+                Object.assign(option.style, { display: 'block', width: '100%', textAlign: 'left', padding: '6px 10px', border: '0', background: 'transparent' });
+                option.addEventListener('mousedown', click => click.preventDefault());
+                option.addEventListener('click', () => {
+                    menu.remove();
+                    if (editable) {
+                        editable.focus();
+                        if (range) {
+                            selection.removeAllRanges();
+                            selection.addRange(range);
+                        }
+                        const editor = _findRteInstance(elementId);
+                        if (!_insertTextIntoRteInstance(editor, field.text))
+                            document.execCommand('insertText', false, field.text);
+                    } else {
+                        input.focus();
+                        input.setRangeText(field.text, start ?? input.value.length, end ?? input.value.length, 'end');
+                        input.dispatchEvent(new Event('input', { bubbles: true }));
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                });
+                row.appendChild(option);
+                menu.appendChild(row);
+            }
+
+            document.body.appendChild(menu);
+            document.addEventListener('click', () => menu.remove(), { once: true });
+        });
+        return true;
     };
+
     window.rteHelpers.isRteReady = function (elementId) {
         const inst = _findRteInstance(elementId);
         return !!inst?.element;
@@ -473,90 +418,6 @@
             return _insertTextIntoRteInstance(instance, text);
         } catch (e) {
             console.debug('rteHelpers.insertTextAtCursor error', e);
-            return false;
-        }
-    };
-
-    // --- Add context menu support for Subject SfAutoComplete ---
-    window.rteHelpers.updateContextMenu = function (elementId, items) {
-        try {
-            var inputEl = document.getElementById(elementId);
-            if (!inputEl) {
-                console.warn('rteHelpers.updateContextMenu: element not found', elementId);
-                return false;
-            }
-
-            // Prevent duplicate binding
-            if (inputEl._rteHelpersContextHandlerAttached) {
-                inputEl._rteHelpersContextItems = (Array.isArray(items) ? items.slice() : []);
-                return true;
-            }
-
-            inputEl._rteHelpersContextItems = (Array.isArray(items) ? items.slice() : []);
-
-            inputEl.addEventListener('contextmenu', function (ev) {
-                ev.preventDefault();
-
-                // Remove any existing menu
-                var existing = document.getElementById('rteCustomContextMenu');
-                if (existing) existing.remove();
-
-                // Create custom context menu
-                var menu = document.createElement('ul');
-                menu.id = 'rteCustomContextMenu';
-                menu.style.position = 'absolute';
-                menu.style.top = ev.pageY + 'px';
-                menu.style.left = ev.pageX + 'px';
-                menu.style.background = '#fff';
-                menu.style.border = '1px solid rgba(0,0,0,0.12)';
-                menu.style.padding = '4px';
-                menu.style.zIndex = 2147483647;
-                menu.style.listStyle = 'none';
-                menu.style.borderRadius = '4px';
-                menu.style.boxShadow = '0 2px 10px rgba(0,0,0,0.12)';
-                menu.style.minWidth = '160px';
-
-                // Append menu items
-                (inputEl._rteHelpersContextItems || []).forEach(function (it) {
-                    var li = document.createElement('li');
-                    li.textContent = it.text || '';
-                    li.style.padding = '6px 10px';
-                    li.style.cursor = 'pointer';
-                    li.style.userSelect = 'none';
-
-                    // Highlight on hover
-                    li.onmouseenter = function () { li.style.background = 'rgba(0,0,0,0.04)'; };
-                    li.onmouseleave = function () { li.style.background = 'transparent'; };
-
-                    // On click, insert text at caret position
-                    li.onclick = function () {
-                        // remove menu first so it doesn't steal focus afterwards
-                        menu.remove();
-
-                        // small delay so the click handling finishes and focus can be restored
-                        setTimeout(function() {
-                            _insertTextAtCursor(elementId, it.text);
-                        }, 20);
-};
-
-                    menu.appendChild(li);
-                });
-
-                document.body.appendChild(menu);
-
-                // Remove menu when clicking elsewhere
-                var rmHandler = function () {
-                    var el = document.getElementById('rteCustomContextMenu');
-                    if (el) el.remove();
-                    document.removeEventListener('click', rmHandler);
-                };
-                setTimeout(function () { document.addEventListener('click', rmHandler); }, 0);
-            });
-
-            inputEl._rteHelpersContextHandlerAttached = true;
-            return true;
-        } catch (err) {
-            console.debug('rteHelpers.updateContextMenu error', err);
             return false;
         }
     };

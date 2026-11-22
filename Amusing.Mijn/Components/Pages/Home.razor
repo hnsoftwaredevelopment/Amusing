@@ -1,0 +1,134 @@
+@page "/"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using Amusing.Mijn.Services
+@using System.Security.Claims
+@inject ChoirAccounts Accounts
+@inject SupportAccounts Support
+@inject ChoirPeople People
+@inject ChoirEnrollments Enrollments
+@inject IHttpContextAccessor Context
+<PageTitle>@T("MijnKoren") — Mijn Amusing</PageTitle>
+@if (Context.HttpContext!.User.IsAdministrator())
+{
+    <h1>Koor ondersteunen</h1>
+    <form method="post" action="/ondersteuning/koor" data-enhance="false">
+        <AntiforgeryToken />
+        <label for="support-group">Kies een koor</label>
+        <select id="support-group" name="group" required>
+            <option value="">Kies een koor</option>
+            @foreach (var group in groups)
+            {
+                <option value="@group.Id">@group.Name</option>
+            }
+        </select>
+        <button type="submit">Open koor</button>
+    </form>
+}
+else
+{
+    <section lang="@language" aria-labelledby="choirs-title">
+        <div class="dashboard-heading">
+            <h1 id="choirs-title">@T("MijnKoren")</h1>
+            <div class="account-actions">
+                <details class="account-settings">
+                    <summary class="icon-button" title="@T("Instellingen")" aria-label="@T("Instellingen")">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm9 2h-2l-.8-2 1.4-1.4-2.2-2.2L16 5.8l-2-.8V3h-4v2l-2 .8-1.4-1.4-2.2 2.2L5.8 8 5 10H3v4h2l.8 2-1.4 1.4 2.2 2.2L8 18.2l2 .8v2h4v-2l2-.8 1.4 1.4 2.2-2.2-1.4-1.4.8-2h2Z"/></svg>
+                    </summary>
+                    <div class="settings-panel">
+                        <a href="/account/contactgegevens">@T("MijnContactgegevens")</a>
+                        <a href="/account/wachtwoord-wijzigen">@T("WachtwoordWijzigen")</a>
+                        <form method="post" action="/account/taal" data-enhance="false">
+                            <AntiforgeryToken />
+                            <label for="taal">@T("Voorkeurstaal")</label>
+                            <select id="taal" name="taal">
+                                <option value="nl" selected="@(language == "nl")" lang="nl">Nederlands</option>
+                                <option value="de" selected="@(language == "de")" lang="de">Deutsch</option>
+                                <option value="en" selected="@(language == "en")" lang="en">English</option>
+                            </select>
+                            <button type="submit">@T("TaalOpslaan")</button>
+                        </form>
+                    </div>
+                </details>
+                <form method="post" action="/account/logout" data-enhance="false">
+                    <AntiforgeryToken />
+                    <button class="icon-button" title="@T("Uitloggen")" aria-label="@T("Uitloggen")">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4H4v16h7m1-8h9m-4-4 4 4-4 4"/></svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+        <div class="choir-actions">
+            <form method="get" action="/nieuw-koor"><button class="register-button">@T("NieuwKoorRegistreren")</button></form>
+            <form method="get" action="/account/uitnodigingen">
+                <button class="icon-button" title="@T("MijnUitnodigingen")" aria-label="@InvitationLabel">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+                    @if (unread > 0) { <span class="invitation-badge" aria-hidden="true">@unread</span> }
+                </button>
+            </form>
+        </div>
+        @if (unread > 0)
+        {
+            <dialog class="invitation-notice" open aria-labelledby="unread-invitation-title">
+                <h2 id="unread-invitation-title">@(unread == 1 ? T("JeHebtEenOngelezenUitnodiging") : T("JeHebtOngelezenUitnodigingen"))</h2>
+                <p><a href="/account/uitnodigingen">@T("KlikOpOmJeUitnodigingenTeLezen")</a></p>
+                <form method="dialog"><button class="choir-primary" type="submit">@T("Sluiten")</button></form>
+            </dialog>
+        }
+        @if (groups.Count == 0)
+        {
+            <p>@T("ErZijnNogGeenKorenAanJe")</p>
+        }
+        <div class="choir-grid">
+            @foreach (var group in groups)
+            {
+                <div class="choir-tile">
+                <a class="choir-button" href="/koor/@group.Id">
+                    @if (group.HasLogo)
+                    {
+                        <img src="/koor/@group.Id/afbeelding/logo" alt="" loading="lazy" />
+                    }
+                    <span>@group.Name</span>
+                </a>
+                @if (shortcuts is { } available && available.Choirs.Contains(group.Id))
+                {
+                    var year = available.Festival.Date.Year;
+                    <a class="enrollment-shortcut" href="/koor/@group.Id/inschrijven">
+                        @(available.Festival.WaitingList
+                            ? T("AanmeldenVoorDeWachtlijst2")
+                            : UiText.Format("InschrijvenVoorEditie",language,year))
+                    </a>
+                }
+                </div>
+            }
+        </div>
+    </section>
+}
+@if (Context.HttpContext!.User.IsAdministrator())
+{
+    <form method="post" action="/account/logout" data-enhance="false"><AntiforgeryToken /><button class="secondary">Uitloggen</button></form>
+}
+@code {
+    private List<ChoirSummary> groups = [];
+    private string language = "nl";
+    private int unread;
+    private EnrollmentShortcuts? shortcuts;
+    private string T(string key) => Amusing.Mijn.Services.UiText.Get(key, language);
+    private string InvitationLabel => T("MijnUitnodigingen") +
+        (unread > 0 ? $" ({unread} {T("Ongelezen")})" : "");
+
+    protected override async Task OnInitializedAsync()
+    {
+        var request = Context.HttpContext!;
+        if (request.User.IsAdministrator())
+        {
+            groups = await Support.GroupsAsync(request.RequestAborted);
+            return;
+        }
+
+        var actor = uint.Parse(request.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        groups = await Accounts.GroupsAsync(actor, null, request.RequestAborted);
+        language = await Accounts.LanguageAsync(actor, request.RequestAborted);
+        shortcuts = await Enrollments.ShortcutsAsync(actor, request.RequestAborted);
+        unread = await People.UnreadCountAsync(actor, request.RequestAborted);
+    }
+}

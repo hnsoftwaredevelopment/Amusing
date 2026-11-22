@@ -1,0 +1,27 @@
+@page "/account/registreren"
+@inject IConfiguration Configuration
+<PageTitle>Account aanmaken — Mijn Amusing</PageTitle>
+<h1>Account aanmaken</h1>
+@if (!Configuration.GetValue<bool>("AccountRegistration:Enabled"))
+{
+    <p>Registreren is momenteel niet beschikbaar.</p>
+}
+else if (Status == "ontvangen")
+{
+    <p role="status">Als dit adres beschikbaar is, ontvang je een e-mail waarmee je je account kunt activeren.</p>
+}
+else
+{
+    @if (Status == "ongeldig") { <p role="alert">Controleer je naam en e-mailadres.</p> }
+    <form method="post" action="/account/registratie-aanvragen" data-enhance="false" class="profile-card">
+        <AntiforgeryToken />
+        <label for="first">Voornaam</label><input id="first" name="first" maxlength="40" autocomplete="given-name" required />
+        <label for="last">Achternaam</label><input id="last" name="last" maxlength="50" autocomplete="family-name" required />
+        <label for="email">E-mailadres</label><input id="email" name="email" type="email" maxlength="80" autocomplete="email" required />
+        <button>Stuur een activatielink</button>
+    </form>
+}
+<p><a href="/account/login">Terug naar inloggen</a></p>
+@code {
+    [SupplyParameterFromQuery] public string? Status { get; set; }
+}

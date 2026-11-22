@@ -66,6 +66,15 @@ public class GenericDataService
         return results;
     }
 
+    public async Task<IReadOnlyList<string>> ReadColumnNamesAsync(string query, CancellationToken cancellationToken)
+    {
+        await using var connection = new MySqlConnection(_connection.ConnectionString);
+        await connection.OpenAsync(cancellationToken);
+        await using var command = new MySqlCommand(UseConfiguredDatabase(query, _databaseName), connection);
+        await using var reader = await command.ExecuteReaderAsync(CommandBehavior.SchemaOnly, cancellationToken);
+        return Enumerable.Range(0, reader.FieldCount).Select(reader.GetName).ToArray();
+    }
+
     public async Task<int> ExecuteNonQueryAsync(
     string query,
     Dictionary<string, object>? parameters = null )

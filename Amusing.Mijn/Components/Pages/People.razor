@@ -1,0 +1,104 @@
+@page "/koor/{Id:long}/personen"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using System.Security.Claims
+@using Amusing.Mijn.Services
+@inject ChoirPeople Service
+@inject IHttpContextAccessor Context
+@inject ChoirAccounts Accounts
+@inject IConfiguration Configuration
+<section lang="@language">
+    <PageTitle>@T("GekoppeldePersonen") — Mijn Amusing</PageTitle>
+@if(roster is null){<h1>@T("KoorNietBeschikbaar")</h1><p>@T("DitKoorIsNietAanJeAccount")</p>}
+else
+{
+    <ChoirTabs Id="@Id" Name="@roster.Name" Active="personen" />
+    @if(Status is not null)
+    {
+        <p role="status" class="@(Status is "invited" or "removed" or "cancelled"?"success":"error")">@(Status switch {
+            "invited" => T("ErStaatEenUitnodigingKlaarDePersoon"),
+            "unknown" => T("DitEmailadresIsNietGekoppeldAanEen"),
+            "occupied" => T("DezeRolIsAlBezetOfEr"),
+            "cancelled" => T("DeUitnodigingIsIngetrokken"),
+            "limit" => T("MaximaalTweeKoren"),
+            "removed"=>T("DeRolIsVerwijderd"),
+            "last"=>T("ErMoetAltijdEenEersteContactpersoonBlijven"),
+            _=>T("ControleerHetEmailadresEnKiesEenGeldige")})</p>
+    }
+    @foreach(var person in roster.People)
+    {
+        <section class="profile-card person-card">
+            <h2>@person.Name</h2>
+            @if(person.Email is not null)
+            {
+                <dl><dt>@T("Emailadres")</dt><dd>@person.Email</dd><dt>@T("Telefoon")</dt><dd>@(string.IsNullOrEmpty(person.Phone)?T("NietIngevuld"):person.Phone)</dd><dt>@T("Mobiel")</dt><dd>@(string.IsNullOrEmpty(person.Mobile)?T("NietIngevuld"):person.Mobile)</dd></dl>
+            }
+            <ul>@foreach(var role in person.Roles)
+            {
+                <li><span>@RoleLabel(role)</span>
+                @if(roster.CanManage)
+                {
+                    <form class="role-action" method="post" action="/koor/@Id/personen/verwijderen" data-enhance="false">
+                        <AntiforgeryToken/><input type="hidden" name="person" value="@person.Id"/><input type="hidden" name="role" value="@role"/>
+                        <ChoirIconButton Delete="true" Tooltip="@RemoveRole" Label="@($"{RemoveRole}: {RoleLabel(role)} · {person.Name}")" />
+                    </form>
+                }
+                </li>
+            }</ul>
+        </section>
+    }
+    @if(roster.CanManage && (Configuration.GetValue<bool>("Mijn:IsTestEnvironment") || Configuration.GetValue<bool>("InvitationMail:Enabled")))
+    {
+            <section class="profile-card person-card">
+                <h2>@T("PersoonKoppelenAanKoor")</h2>
+                <p>@T("OmIemandAanJeKoorTeKoppelen")</p>
+                <p>@T("MusiciEnDirigentenMogenInVerbandMet") <a href="https://amusing-hengelo.nl/deelnemer-aanmelden/" target="_blank" rel="noopener">@T("Deelnamevoorwaarden")</a></p>
+        <form method="post" action="/koor/@Id/personen/uitnodigen" data-enhance="false">
+            <AntiforgeryToken/>
+            <label for="invite-email">@T("Emailadres")</label><input id="invite-email" name="email" type="email" maxlength="80" required/>
+            <label for="invite-role">@T("Rol")</label><select id="invite-role" name="role" required><option value="">@T("KiesEenRol")</option>@foreach(var role in ChoirPeople.Roles.Where(role => !Reserved(role.Key))){<option value="@role.Key">@RoleLabel(role.Key)</option>}<option value="@ChoirPeople.FirstContactTransfer" disabled="@outgoing.Any(i => i.Role == ChoirPeople.FirstContactTransfer && i.ExpiresAt > DateTime.UtcNow)">@T("EersteContactpersoonOverdragen")</option></select>
+            <button class="choir-primary" type="submit">@T("PersoonToevoegen")</button>
+            <p>@T("DeUitgenodigdePersoonZietDeUitnodigingNa")</p>
+        </form></section>
+        @if (outgoing.Count > 0)
+        {
+            <section class="profile-card person-card">
+                <h2>@T("LopendeUitnodigingen")</h2>
+                @foreach (var invitation in outgoing)
+                {
+                    <div class="pending-invitation">
+                        <p><strong>@(string.IsNullOrWhiteSpace(invitation.Name) ? T("AccountNietBeschikbaar") : invitation.Name)</strong> · @RoleLabel(invitation.Role)</p>
+                        <p>@(!invitation.AccountActive ? T("AccountNietBeschikbaar") : invitation.ExpiresAt <= DateTime.UtcNow ? T("UitnodigingVerlopen") : T("WachtOpAanvaarding"))</p>
+                        <form method="post" action="/koor/@Id/personen/uitnodiging-intrekken" data-enhance="false">
+                            <AntiforgeryToken /><input type="hidden" name="invitation" value="@invitation.Id" />
+                            <button type="submit" class="secondary">@T("UitnodigingIntrekken")</button>
+                        </form>
+                    </div>
+                }
+            </section>
+        }
+    }
+    else if(!roster.CanManage){<p>@T("AlleenEenEersteContactpersoonKanPersonenUitnodigen")</p>}
+}
+</section>
+
+@code{
+    private string RemoveRole => T("RolVerwijderen");
+    private string language = "nl";
+    private string T(string key) => Amusing.Mijn.Services.UiText.Get(key, language);
+    [Parameter] public long Id{get;set;}
+    [SupplyParameterFromQuery(Name="status")] public string? Status{get;set;}
+    private ChoirRoster? roster;
+    private List<OutgoingRoleInvitation> outgoing = [];
+    private bool Reserved(string role) => (role is "contactpersoon1" or "contactpersoon2" or "penningmeester") &&
+        (roster!.People.Any(person => person.Roles.Contains(role)) || outgoing.Any(i => i.Role == role && i.ExpiresAt > DateTime.UtcNow));
+    protected override async Task OnParametersSetAsync()
+    {
+        var request = Context.HttpContext!;
+        var actor = uint.Parse(request.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        if (!request.User.IsAdministrator()) language = await Accounts.LanguageAsync(actor, request.RequestAborted);
+        roster = await Service.RosterAsync(actor, Id is > 0 and <= uint.MaxValue ? (uint)Id : 0, request.RequestAborted);
+        if (roster?.CanManage == true) outgoing = await Service.OutgoingAsync(actor, (uint)Id, request.RequestAborted);
+    }
+
+    private string RoleLabel(string role) => ChoirRoleLabels.Get(role, language);
+}

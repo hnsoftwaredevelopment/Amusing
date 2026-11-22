@@ -1,0 +1,39 @@
+[Unit]
+Description=Amusing Mijn Blazor testomgeving
+After=network.target mariadb.service
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/amusing-mijn-dev/current
+ExecStart=/opt/amusing-mijn-dev/current/Amusing.Mijn --urls http://127.0.0.1:5002
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=Mijn__IsTestEnvironment=true
+Environment=AccountRegistration__Enabled=true
+Environment=AccountPasswords__ResetEnabled=true
+Environment=AccountRegistration__Origin=https://dev.mijn.amusing-hengelo.nl
+Environment=EnrollmentMail__Enabled=true
+Environment=EnrollmentMail__TestSmtpEnabled=true
+Environment=EnrollmentMail__AnonymousTestRecipient=beheer@amusing-hengelo.nl
+Environment=EnrollmentMail__Host=127.0.0.1
+Environment=EnrollmentMail__Port=25
+Environment=EnrollmentMail__EnableSsl=false
+Environment=InvitationMail__Enabled=true
+Environment=EnrollmentMail__PickupDirectory=/var/lib/amusing-mijn-dev/mailopvang
+Environment=Mijn__DataProtectionPath=/var/lib/amusing-mijn-dev/keys
+Environment=AllowedHosts=dev.mijn.amusing-hengelo.nl
+EnvironmentFile=/etc/amusing-mijn-dev.env
+StateDirectory=amusing-mijn-dev
+StateDirectoryMode=0700
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/amusing-mijn-dev
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

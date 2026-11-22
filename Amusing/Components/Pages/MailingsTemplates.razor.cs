@@ -151,11 +151,49 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
     ];
 
     [Inject] public MailingService MailingService { get; set; } = default!;
+    [Inject] public GenericDataService Database { get; set; } = default!;
     [Inject] public LoggingService LoggingService { get; set; } = default!;
     [Inject] public IJSRuntime JSRuntime { get; set; } = default!;
     [Inject] public ToastService ToastService { get; set; } = default!;
     [Inject] public IConfiguration Configuration { get; set; } = default!;
     [Inject] public IWebHostEnvironment HostEnvironment { get; set; } = default!;
+
+    private const uint MijnConfirmationTemplateId = uint.MaxValue;
+    private const uint MijnWaitlistTemplateId = uint.MaxValue - 1;
+    private const uint MijnOrganisationTemplateId = uint.MaxValue - 2;
+    private const uint MijnNoteMailTemplateId = uint.MaxValue - 3;
+    private const uint MijnNotePdfTemplateId = uint.MaxValue - 4;
+    private const uint MijnCopyNoteTemplateId = uint.MaxValue - 5;
+    private const uint MijnPlacementTemplateId = uint.MaxValue - 6;
+    private sealed record MijnMailLanguage(string Code, string Label);
+    private static readonly MijnMailLanguage[] MijnMailLanguages =
+        [new("nl", "Nederlands"), new("de", "Deutsch"), new("en", "English")];
+    private string mijnMailLanguage = "nl";
+
+    private string? SelectedMijnMailType => _selectedTemplatesList?.TemplateId switch
+    {
+        MijnConfirmationTemplateId => "aanmelding",
+        MijnWaitlistTemplateId => "wachtlijst",
+        MijnOrganisationTemplateId => "organisatie",
+        MijnNoteMailTemplateId => "notamail",
+        MijnNotePdfTemplateId => "nota_pdf",
+        MijnCopyNoteTemplateId => "kopienota",
+        MijnPlacementTemplateId => "plaatsing",
+        _ => null
+    };
+
+    private async Task<List<TemplatesListModel>> GetTemplatesForPageAsync()
+    {
+        var templates = await MailingService.GetMailTemplatesAsync();
+        templates.Add(new() { TemplateId = MijnConfirmationTemplateId, TemplateName = "Mijn · Inschrijfbevestiging", RecipientListName = "Automatisch" });
+        templates.Add(new() { TemplateId = MijnWaitlistTemplateId, TemplateName = "Mijn · Wachtlijstbevestiging", RecipientListName = "Automatisch" });
+        templates.Add(new() { TemplateId = MijnOrganisationTemplateId, TemplateName = "Mijn · Inschrijfbevestiging organisatie", RecipientListName = "Automatisch" });
+        templates.Add(new() { TemplateId = MijnNoteMailTemplateId, TemplateName = "Mijn · Mail met deelnamenota", RecipientListName = "Automatisch" });
+        templates.Add(new() { TemplateId = MijnNotePdfTemplateId, TemplateName = "Mijn · Deelname-nota PDF", RecipientListName = "Automatisch" });
+        templates.Add(new() { TemplateId = MijnCopyNoteTemplateId, TemplateName = "Mijn · Kopienota", RecipientListName = "Automatisch" });
+        templates.Add(new() { TemplateId = MijnPlacementTemplateId, TemplateName = "Mijn · Plaatsingsbericht na wachtlijst", RecipientListName = "Automatisch" });
+        return templates;
+    }
 
     private bool ShouldSendRealBulkMail
     {
@@ -177,7 +215,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
         _isLoading = true;
 
-        TemplatesList = await MailingService.GetMailTemplatesAsync();
+        TemplatesList = await GetTemplatesForPageAsync();
         RecipientsList = await MailingService.GetRecipientListsAsync();
 
         // Add a fictive None row
@@ -227,7 +265,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             uint savedId = await MailingService.AddTemplateQueryAsync(_selectedTemplatesList);
 
             // Refresh the list
-            TemplatesList = await MailingService.GetMailTemplatesAsync();
+            TemplatesList = await GetTemplatesForPageAsync();
 
             // Search the modified record
             int index = TemplatesList.FindIndex(s => s.TemplateId == savedId);
@@ -299,7 +337,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
         await ToastService.ShowSuccessAsync( $"Sjabloon {deletedTemplateName} is verwijderd." );
 
         // Refresh the list
-        TemplatesList = await MailingService.GetMailTemplatesAsync();
+        TemplatesList = await GetTemplatesForPageAsync();
         _selectedTemplatesList = TemplatesList.FirstOrDefault() ?? new TemplatesListModel();
 
         // Replace old DB tokens with internal template keys + NL labels
@@ -457,7 +495,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
     private async Task LoadTemplatesAsync(CancellationToken token)
     {
-        TemplatesList = await MailingService.GetMailTemplatesAsync();
+        TemplatesList = await GetTemplatesForPageAsync();
         RecipientsList = await MailingService.GetRecipientListsAsync();
         token.ThrowIfCancellationRequested();
 
@@ -475,6 +513,9 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
         _loadCts.Dispose();
         _loadCts = new CancellationTokenSource();
         CancellationToken token = _loadCts.Token;
+        AvailableFields.Clear();
+        SlashMenuItems.Clear();
+        _currentRecipientQuery = null;
 
         if (recipientListId == null)
         {
@@ -531,26 +572,10 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
             _currentRecipientQuery = QueryBuilderHelper.DetermineQueryFromRules(rules, sourceChecked);
 
-            List<ExpandoObject> dynamicRecipients = await MailingService.GetDynamicRecipientsAsync(_currentRecipientQuery);
-
-            // Get the available fields for the template, based on the selected RecipientList
-            // Banned fields are stripped from the list
-            // Fields are Translated for the user
-            if (dynamicRecipients.FirstOrDefault() is IDictionary<string, object> firstRow)
-            {
-                AvailableFields = _mappingService.GetAvailableLabels(firstRow.Keys);
-                SlashMenuItems = AvailableFields.Select(f => new SlashMenuItemModel { Text = f, IconCss = "e-icons e-named-set", GroupBy = "Variabelen:" }).ToList();
-
-                // update the client-side RTE slash menu items without re-creating the RTE
-                await UpdateRteSlashMenuAsync();
-
-                await InvokeAsync(StateHasChanged);
-            }
-            else
-            {
-                AvailableFields.Clear();
-                _currentRecipientQuery = null;
-            }
+            var columns = await Database.ReadColumnNamesAsync(_currentRecipientQuery, token);
+            token.ThrowIfCancellationRequested();
+            AvailableFields = _mappingService.GetAvailableLabels(columns);
+            SlashMenuItems = AvailableFields.Select(f => new SlashMenuItemModel { Text = f, IconCss = "e-icons e-named-set", GroupBy = "Variabelen:" }).ToList();
 
             await InvokeAsync(StateHasChanged);
         }
@@ -1040,12 +1065,6 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             })
             .ToArray();
 
-            if (jsItems.Length == 0)
-            {
-                Debug.WriteLine("UpdateRteSlashMenuAsync: no items available for the SlashMenu.");
-                return;
-            }
-
             // Call JS to refresh slash menu and context menu in one go
             await InvokeAsync(async () =>
             {
@@ -1055,6 +1074,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
                     await JSRuntime.InvokeVoidAsync("rteHelpers.updateSlashMenu", "rteContent", jsItems);
                     await JSRuntime.InvokeVoidAsync("rteHelpers.addInsertFieldHandler", "rteContent", jsItems);
                     await JSRuntime.InvokeVoidAsync("rteHelpers.updateContextMenu", "rteContent", SlashMenuItems.Select(s => new { text = s.Text, iconCss = s.IconCss }));
+                    await JSRuntime.InvokeVoidAsync("rteHelpers.updateContextMenu", "subjectAutoInput", jsItems);
 
                 }
                 catch (JSException jsEx)
@@ -1082,6 +1102,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
         if (templateId != null && templateId != 0)
         {
             SelectedTemplatesListId = templateId;
+            if (SelectedMijnMailType is not null) return;
             await LoadRecipientDataAsync(_selectedTemplatesList.RecipientListId);
             await Task.Delay(100); // Allow UI state to settle
             await UpdateRteSlashMenuAsync();

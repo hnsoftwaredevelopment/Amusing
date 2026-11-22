@@ -1,0 +1,108 @@
+@using Amusing.Mijn.Services
+@using System.Security.Claims
+@inject ChoirImagesStore Store
+@inject IHttpContextAccessor Context
+<section id="afbeeldingen" class="image-section" data-discard-message="@T("AndereWijzigingenZijnNogNietOpgeslagenWil")">
+
+@if(Status is not null)
+{
+    <p role="status" class="@(Status == "saved" ? "success" : "error")">@StatusText</p>
+}
+@if(CanEdit){<p>@T("JeKuntDeFotoEnHetLogo")</p>}
+<div class="image-grid">
+@foreach(var kind in new[]{"foto","logo"})
+{
+    var state=states.GetValueOrDefault(kind);
+    if(state is null) continue;
+    var available=ChoirImageProcessor.ReadLegacy(state.Stored) is not null;
+    var deleteLabel = kind == "foto" ? T("KoorfotoVerwijderen") : T("KoorlogoVerwijderen");
+    <section class="profile-card" data-image-card="@kind">
+        <h3>@(kind=="foto"? T("Koorfoto"):"Logo")</h3>
+        @if(available){<img class="choir-image @kind" src="/koor/@GroupId/afbeelding/@kind?v=@state.Version" alt="@(kind=="foto"? T("FotoVanHetKoor"):T("LogoVanHetKoor"))" loading="lazy" />}
+        else{<p>@T("ErIsNogGeenGeldigeAfbeeldingBeschikbaar")</p>}
+        @if(CanEdit)
+        {
+            <form data-image-upload method="post" enctype="multipart/form-data" action="/koor/@GroupId/afbeelding/@kind" data-enhance="false">
+                <AntiforgeryToken />
+                <input type="hidden" name="version" value="@state.Version" />
+                <div class="file-choice" data-image-drop>
+                    <label class="file-picker" title="@ChooseFile">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h7l2 2h9v12H3z" /></svg>
+                        <span data-file-name role="status">@(kind == "foto" ? T("SelecteerUwKoorafbeelding") : T("SelecteerUwKoorlogo"))</span>
+                        <input name="image" type="file" accept="image/png,image/jpeg,image/webp" aria-label="@ChooseFile" data-choir-file required />
+                    </label>
+
+                </div>
+                <small>@ImageLimits(kind)</small>
+                <img class="choir-image pending-preview" data-image-preview alt="@T("VoorbeeldVanDeGeselecteerdeAfbeelding")" hidden />
+                <p class="unsaved-warning" data-image-error role="alert" hidden></p>
+                <noscript><button type="submit">@T("AfbeeldingOpslaan")</button></noscript>
+                @if (available)
+                {
+                    <div class="image-actions">
+                        <ChoirIconButton Tooltip="@deleteLabel" Delete="true" Form="@($"delete-{kind}")" />
+                    </div>
+                }
+            </form>
+            @if (available)
+            {
+                <form id="@($"delete-{kind}")" method="post" action="/koor/@GroupId/afbeelding/@kind" data-enhance="false">
+                    <AntiforgeryToken />
+                    <input type="hidden" name="version" value="@state.Version" />
+                    <input type="hidden" name="operation" value="remove" />
+                </form>
+            }
+        }
+    </section>
+}
+</div>
+@if (CanEdit)
+{
+    <form class="profile-save-bar is-dirty image-save-bar" data-image-save-bar
+        data-saving="@T("AfbeeldingenOpslaan")"
+        data-conflict="@Conflict"
+        data-error="@UploadError"
+        data-size="@SizeError"
+        data-busy="@Busy"
+        data-server-detail="@(Language == "nl" ? "1" : "0")" hidden>
+        <span class="unsaved-warning" role="status" data-image-save-status>@T("JeHebtNietopgeslagenWijzigingen")</span>
+        <ChoirIconButton Tooltip="@T("GeselecteerdeAfbeeldingenOpslaan")" Text="@T("Opslaan")" />
+    </form>
+}
+</section>
+@code {
+    [Parameter] public string Language { get; set; } = "nl";
+    private string T(string key) => UiText.Get(key, Language);
+    private string ChooseFile => T("BestandKiezen");
+    private string Conflict => T("DeAfbeeldingIsOndertussenGewijzigdOpenHet");
+    private string UploadError => T("GebruikEenGeldigeStilstaandePNGJPEGOf");
+    private string SizeError => T("HetBestandIsTeGrootVerkleinDe");
+    private string Busy => T("ErWordenNuAndereAfbeeldingenVerwerktProbeer");
+    private string StatusText => Status switch
+    {
+        "saved" => T("DeAfbeeldingIsOpgeslagen"),
+        "invalid" or "size" when Language == "nl" && !string.IsNullOrEmpty(Detail) => Detail[..Math.Min(Detail.Length, 1000)],
+        "size" => SizeError,
+        "conflict" => Conflict,
+        "busy" => Busy,
+        _ => UploadError
+    };
+
+    private string ImageLimits(string kind)
+    {
+        var size = kind == "foto" ? "16" : "8";
+        var side = kind == "foto" ? "2560" : "1024";
+        return UiText.Format("Afbeeldingslimieten",Language,size,side);
+    }
+
+    [Parameter] public uint GroupId{get;set;}
+    [Parameter] public bool CanEdit{get;set;}
+    [Parameter] public string? Status{get;set;}
+    [Parameter] public string? Detail{get;set;}
+    private readonly Dictionary<string,ChoirImageState?> states=[];
+    protected override async Task OnParametersSetAsync()
+    {
+        var actor=uint.Parse(Context.HttpContext!.User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        foreach(var kind in new[]{"foto","logo"}) states[kind]=await Store.GetAsync(actor,GroupId,kind,Context.HttpContext.RequestAborted);
+    }
+}

@@ -1,0 +1,6 @@
+.waitlist-page { padding: 1rem; }
+.waitlist-page .form-select, .waitlist-page .form-control { max-width: 24rem; margin-bottom: 1rem; }
+.waitlist-actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-block: 1rem; }
+.waitlist-table { overflow-x: auto; }
+.waitlist-table th, .waitlist-table td { vertical-align: middle; }
+.waitlist-page input[type=checkbox] { width: 1.2rem; height: 1.2rem; }

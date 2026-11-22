@@ -73,5 +73,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Amusing.Mobile.Shared\Amusing.Mobile.Shared.csproj" />
+    <ProjectReference Include="..\Amusing.Facturatie\Amusing.Facturatie.csproj" />
   </ItemGroup>
 </Project>

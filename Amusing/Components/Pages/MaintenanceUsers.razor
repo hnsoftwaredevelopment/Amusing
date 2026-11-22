@@ -1,4 +1,5 @@
-﻿@page "/Maintenance-Users"
+@page "/Maintenance-Users"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "admin")]
 @using Amusing.Models
 @using Amusing.Services
 @using Syncfusion.Blazor.Buttons
@@ -36,6 +37,8 @@ else
                     <div class="form-left"> 
                         <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
                             <SfTextBox Placeholder="Gebruikersnaam" FloatLabelType="FloatLabelType.Always" Width="120px" @bind-Value="UserUsername" />
+                            <label>Privéhersteladres <input type="email" maxlength="80" @bind="UserRecoveryEmail" /></label>
+                            <label>Weergavenaam voor koren <input maxlength="100" @bind="UserDisplayName" /></label>
                             <SfComboBox TValue="string" TItem="UserRoles" FloatLabelType="FloatLabelType.Always"
                                         Placeholder="Rol" DataSource="@Roles" Width="170px" @bind-Value="UserRole" >
                                 <ComboBoxFieldSettings Value="Role" Text="Role"></ComboBoxFieldSettings>

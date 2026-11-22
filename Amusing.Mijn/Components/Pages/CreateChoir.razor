@@ -1,0 +1,69 @@
+@page "/nieuw-koor"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@using System.Security.Claims
+@using Amusing.Mijn.Services
+@inject ChoirProfiles Profiles
+@inject NavigationManager Navigation
+@inject IHttpContextAccessor Context
+
+<PageTitle>Nieuw koor — Mijn Amusing</PageTitle>
+<a href="/">← Mijn koren</a>
+<h1>Nieuw koor aanmaken</h1>
+@if (Context.HttpContext!.User.IsAdministrator())
+{
+    <p>Log in met een kooraccount om een koor aan te maken.</p>
+}
+else
+{
+    <p>Bestaat je koor al? Vraag dan de eerste contactpersoon om een uitnodiging.</p>
+    @if (error is not null) { <p class="error" role="alert">@error</p> }
+    <EditForm Model="Input" FormName="new-choir" OnValidSubmit="CreateAsync" class="profile-card">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <label for="name">Koornaam *</label>
+        <InputText id="name" @bind-Value="Input!.Name" maxlength="80" />
+        <label for="city">Standplaats *</label>
+        <InputText id="city" @bind-Value="Input!.City" maxlength="50" />
+        <label for="country">Land *</label>
+        <InputSelect id="country" @bind-Value="Input!.Country">
+            <option value="">Kies een land</option>
+            @foreach (var item in countries) { <option value="@item.Id" selected="@(Input!.Country == item.Id)">@item.Name</option> }
+        </InputSelect>
+        <label for="genre">Genre *</label>
+        <InputSelect id="genre" @bind-Value="Input!.GenreId">
+            <option value="0">Kies een genre</option>
+            @foreach (var item in genres) { <option value="@item.Id" selected="@(Input!.GenreId.ToString() == item.Id)">@item.Name</option> }
+        </InputSelect>
+        <label for="email">E-mailadres koor</label>
+        <InputText id="email" @bind-Value="Input!.Email" maxlength="80" />
+        <label for="iban">IBAN</label>
+        <InputText id="iban" @bind-Value="Input!.BankAccount" maxlength="50" />
+        <button type="submit">Koor aanmaken</button>
+    </EditForm>
+}
+
+@code {
+    [SupplyParameterFromForm(FormName = "new-choir")] public ChoirProfileInput? Input { get; set; }
+    private List<ProfileOption> countries = [];
+    private List<ProfileOption> genres = [];
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var request = Context.HttpContext!;
+        if (request.User.IsAdministrator()) return;
+        countries = await Profiles.OptionsAsync(true, request.RequestAborted);
+        genres = await Profiles.OptionsAsync(false, request.RequestAborted);
+        Input ??= new() { Country = countries.FirstOrDefault(c => c.Id.Equals("NL", StringComparison.OrdinalIgnoreCase))?.Id ?? "" };
+    }
+
+    private async Task CreateAsync()
+    {
+        var request = Context.HttpContext!;
+        if (request.User.IsAdministrator() ||
+            !uint.TryParse(request.User.FindFirstValue(ClaimTypes.NameIdentifier), out var actor)) return;
+        var result = await Profiles.CreateAsync(actor, Input!, request.RequestAborted);
+        if (result.Id is { } id) Navigation.NavigateTo($"/koor/{id}");
+        error = result.Error;
+    }
+}
