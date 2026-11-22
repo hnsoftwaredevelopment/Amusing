@@ -7,4 +7,3 @@ public static class MailQueueEnvironment
         configuration.GetValue<bool>("MailQueue:Enabled") && configuration.GetValue<bool>("MailQueue:SendEnabled") &&
         string.Equals(configuration["Amusing:EnvironmentName"]??hostEnvironment,"Production",StringComparison.OrdinalIgnoreCase);
 }
-

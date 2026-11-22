@@ -32,4 +32,3 @@ public class BulkMailDraftTests
         Assert.NotEqual(Read(0),Read(1));Assert.Equal(Read(0),Read(0));
     }
 }
-

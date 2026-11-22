@@ -29,4 +29,3 @@ public sealed record BulkMailDraft(Guid Id, uint TemplateId, string TemplateName
         return new(id,template.TemplateId,template.TemplateName??"Onbekend sjabloon",messages);
     }
 }
-
