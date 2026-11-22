@@ -70,14 +70,25 @@
                                 <GridColumn Field="LogAction" HeaderText="Submenu/Actie" Width="160" />
                                 <GridColumn Field="LogReport" HeaderText="Omschrijving" Width="520">
                                     <Template Context="logEntry">
-                                        <div class="mailing-log-report" style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:24rem;overflow:auto">@((logEntry as LogModel)?.LogReport)</div>
+                                        <div style="white-space:pre-wrap">@((logEntry as LogModel)?.LogReport.Split('\n')[0])</div><SfButton CssClass="e-outline" OnClick="() => ShowReport((LogModel)logEntry)">Details bekijken</SfButton>
                                     </Template>
                                 </GridColumn>
-                                <GridColumn Field="LogStatus" HeaderText="Status" Width="120" />
+                                <GridColumn Field="LogStatus" HeaderText="Status" Width="170"><Template Context="statusEntry">@GetStatusLabel((LogModel)statusEntry)</Template></GridColumn>
                             </GridColumns>
                         </SfGrid>
                     </div>
                 </div>
+            </div>
+        }
+        @if (_selectedReport is not null)
+        {
+            <div role="dialog" aria-modal="true" aria-label="Details logmelding" style="position:fixed;inset:0;z-index:2000;background:#0006;display:flex;align-items:center;justify-content:center;padding:1rem">
+                <section style="background:white;color:#212529;padding:1.5rem;border-radius:.5rem;width:min(900px,100%);max-height:90vh;overflow:auto">
+                    <h4>Details logmelding</h4>
+                    <p>@_selectedReport.LogDate — @_selectedReport.LogUsername — <strong>@GetStatusLabel(_selectedReport)</strong></p>
+                    <div class="mailing-log-report" style="white-space:pre-wrap;overflow-wrap:anywhere">@_selectedReport.LogReport</div>
+                    <SfButton CssClass="e-primary mt-3" OnClick="CloseReport">Details sluiten</SfButton>
+                </section>
             </div>
         }
     </Authorized>

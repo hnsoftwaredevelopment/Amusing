@@ -17,3 +17,11 @@ Op dev is de omschrijving aangepast naar meerdere leesbare regels, met een eigen
 - De melders vragen opnieuw hun activatielink aan na KAN-60 en bevestigen ontvangst/activering.
 - Praktijkacceptatie van de leesbare logomschrijving op dev.
 - Domeinbrede quota-afhandeling en gecontroleerd herverzenden bepalen; geen automatische claim dat de vier ontvangers alsnog mail hebben gekregen.
+
+## Aanvulling: openklapbare meldingen
+
+De omschrijving heeft nu bij meerregelige berichten een knop Details bekijken die een afzonderlijk detailvenster opent, met Details sluiten. De eerste regel met aantallen blijft staan. Het statusscherm toont bij een gedeeltelijk geslaagde bulkverzending Gedeeltelijk verzonden, terwijl testmails en andere geslaagde acties Geslaagd tonen. De gegevens worden niet aangepast of samengevoegd: de succesvolle testmail van Pauline op 21 november 14:34:56 en de gedeeltelijk geslaagde bulkmail om 16:38:11 zijn verschillende acties.
+
+De ruwe foutlijst bevat vijf pogingen, niet vier unieke definitief gemiste ontvangers: het onderscheid met de vier adressen zonder enige geaccepteerde kopie blijft gelden. Alleen de werkelijke historische loggegevens worden getoond; geen foutregels worden verwijderd.
+
+De aanvullende browsercontrole op dev is geslaagd: juiste foutadres en status gedeeltelijk verzonden zichtbaar, detailvenster sluiten en opnieuw openen werken. Definitieve dev-DLL SHA256: a6c33d39c8d5e32e3652f7784ff0e54e981f6cf5ddc7041fc4ac6c629d7304b9. Productiepublicatie staat nog open.
