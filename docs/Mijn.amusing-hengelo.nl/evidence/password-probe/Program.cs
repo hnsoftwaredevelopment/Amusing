@@ -7,7 +7,7 @@ foreach(var f in fixtures) {
  if(!valid || wrong) throw new Exception("PHP verification failed: "+f.name);
  var upgraded=BCrypt.Net.BCrypt.HashPassword(f.password);
  if(!BCrypt.Net.BCrypt.Verify(f.password,upgraded)) throw new Exception("Second login failed");
- results.Add(new {f.name,f.password,hash=upgraded,phpPrefix=f.hash.Substring(0,7),netPrefix=upgraded.Substring(0,7),valid,wrong});
+ results.Add(new {f.name,phpPrefix=f.hash.Substring(0,7),netPrefix=upgraded.Substring(0,7),valid,wrong});
 }
 File.WriteAllText(args[1],JsonSerializer.Serialize(results));
 Console.WriteLine("PASS: PHP -> BCrypt.Net and second login, 4 cases; wrong passwords rejected.");

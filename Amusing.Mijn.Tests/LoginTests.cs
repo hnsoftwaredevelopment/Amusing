@@ -16,7 +16,7 @@ public sealed class DatabaseFactAttribute : FactAttribute
 }
 public partial class LoginTests : IAsyncLifetime
 {
-    private const string Password = "TestKoor-2026!";
+    private static readonly string Password = string.Concat("Aa0!", Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(24)));
     private MySqlDataSource source = null!;
     private WebApplicationFactory<Program> factory = null!;
     private HttpClient client = null!;
@@ -52,8 +52,9 @@ public partial class LoginTests : IAsyncLifetime
         if (hash is not null) Add(cmd, "@hash", hash);
         await cmd.ExecuteNonQueryAsync();
     }
-    private async Task<HttpResponseMessage> Login(string email="koor@example.invalid", string password=Password)
+    private async Task<HttpResponseMessage> Login(string email="koor@example.invalid", string? password=null)
     {
+        password ??= Password;
         var page = await client.GetStringAsync("/account/login");
         var token = WebUtility.HtmlDecode(Regex.Match(page, "name=\"__RequestVerificationToken\"[^>]*value=\"([^\"]+)\"").Groups[1].Value);
         Assert.NotEmpty(token);
