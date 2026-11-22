@@ -32,7 +32,7 @@ function setup() {
         WeakMap, JSON, FormData: class {}, Event: class {}
     });
     const input = new FakeInput();
-    return { preview, name, revoked, choose(file) { input.files = file ? [file] : []; listeners.get('change')({ target: input }); } };
+    return { preview, name, revoked, setPreview(element) { nodes['[data-image-preview]'] = element; }, choose(file) { input.files = file ? [file] : []; listeners.get('change')({ target: input }); } };
 }
 
 test('preview uses its generated object URL, never a URL read from the DOM', () => {
@@ -53,4 +53,10 @@ test('filename markup stays plain text and unsupported formats do not get a prev
     fixture.choose({ name, type: 'image/png' }); assert.equal(fixture.name.textContent, name);
     fixture.choose({ name: 'script.svg', type: 'image/svg+xml' });
     assert.equal(fixture.preview.src, undefined); assert.equal(fixture.preview.hidden, true);
+});
+
+test('a non-image element cannot become a preview URL sink', () => {
+    const fixture = setup(); const element = { dataset: {}, hidden: true };
+    fixture.setPreview(element); fixture.choose({ name: 'photo.png', type: 'image/png' });
+    assert.equal(element.src, undefined);
 });
