@@ -1,6 +1,6 @@
 # KAN-65 — Betrouwbare herhaling en foutisolatie
 
-Status: gebouwd, technisch gecontroleerd en gepubliceerd op dev op 22 november 2026. Nog niet op productie. Deze slice behandelt de drie afgesproken foutscenario's. KAN-65 blijft actief voor praktijkacceptatie en overige wachtrijverbeteringen.
+Status: gebouwd, technisch gecontroleerd en gepubliceerd op dev op 22 november 2026. Nog niet op productie. Deze slice behandelt de drie afgesproken foutscenario's. De praktijkcontrole van deze slice is akkoord; KAN-65 blijft actief voor de overige wachtrijverbeteringen.
 
 ## Veranderd gedrag
 
@@ -45,3 +45,8 @@ De eerdere punten blijven afzonderlijk open: verzendvlag tijdens runtime hercont
 - CodeQL signaleerde twee meldingen in de lokale TLS-testserver. De fixture gebruikt nu een vast TLS-transcript en maakt het certificaat alleen tijdens vertrouwde testopbouw. Geen melding onderdrukt. Alle 10 lokale SMTP/TLS-tests slagen opnieuw. De heranalyse van codeversie 9a14543 met publicatieverslag 8716ba8 is geslaagd: CodeQL, beide taalanalyses en GitGuardian hebben SUCCESS. De twee nieuwe CodeQL-meldingen zijn daarmee opgelost zonder onderdrukking.
 
 Praktijkacceptatie: controleer op dev dat kiezen, bewerken en opslaan van een gewoon sjabloon normaal werken. Voor de foutscenario's is geen echte proefmailing nodig; die zijn automatisch gesimuleerd.
+
+
+## Gebruikersacceptatie
+
+De gebruiker heeft kiezen, bewerken en opslaan op dev getest en akkoord bevonden, ook met een nieuw sjabloon. Deze slice is geaccepteerd en klaar voor samenvoegen via PR #54. Samenvoegen en productiepublicatie staan nog open. De resterende KAN-65-scope is daarmee niet automatisch afgerond.
