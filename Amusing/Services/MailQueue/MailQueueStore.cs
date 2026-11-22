@@ -22,6 +22,11 @@ public sealed class MailQueueStore(string connectionString, TimeProvider? clock 
         Hash(Encoding.UTF8.GetBytes($"{templateId}:{templateName}:{actorId}"));
         foreach (var item in messages)
         {
+            if(item.ValidationError is not null)
+            {
+                if(item.Mime.Length!=0)throw new ArgumentException("Ongeldig bericht mag geen MIME-inhoud hebben.");
+                Hash(Encoding.UTF8.GetBytes(item.Recipient));Hash(Encoding.UTF8.GetBytes(item.ValidationError));continue;
+            }
             using var stream = new MemoryStream(item.Mime, false);
             var mime = await MimeMessage.LoadAsync(stream, ct);
             if (mime.To.Mailboxes.Count() != 1 || mime.Cc.Count != 0 || mime.Bcc.Count != 0 ||
@@ -48,9 +53,9 @@ public sealed class MailQueueStore(string connectionString, TimeProvider? clock 
         {
             var item=messages[i];
             await using var insert=Command(db,"""
-                INSERT INTO beheer_mail_message(campaign_id,ordinal_no,recipient,mime,created_at,next_attempt)
-                VALUES(@id,@ordinal,@recipient,@mime,@now,@now) ON DUPLICATE KEY UPDATE ordinal_no=ordinal_no
-                """,tx,("id",id),("ordinal",i),("recipient",item.Recipient),("mime",item.Mime),("now",Now));
+                INSERT INTO beheer_mail_message(campaign_id,ordinal_no,recipient,mime,created_at,next_attempt,state,last_error)
+                VALUES(@id,@ordinal,@recipient,@mime,@now,@next,@state,@error) ON DUPLICATE KEY UPDATE ordinal_no=ordinal_no
+                """,tx,("id",id),("ordinal",i),("recipient",item.Recipient),("mime",item.Mime),("now",Now),("next",item.ValidationError is null?Now:null),("state",item.ValidationError is null?QueueState.Waiting:QueueState.Failed),("error",item.ValidationError));
             await insert.ExecuteNonQueryAsync(ct);
         }
         await tx.CommitAsync(ct); return id;

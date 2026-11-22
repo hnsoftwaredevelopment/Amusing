@@ -100,6 +100,12 @@ public class MailQueueStoreTests : IAsyncLifetime
         Assert.True(await store.ProcessNextAsync(transport));Assert.False(await store.ProcessNextAsync(transport));
         _clock.Advance(TimeSpan.FromSeconds(19));Assert.True(await store.ProcessNextAsync(transport));
     }
+    [QueueDatabaseFact] public async Task InvalidRecipientIsVisibleAsFailedAndNeverOfferedToSmtp()
+    {
+        var id=Guid.NewGuid();await Store.EnqueueAsync(id,22,"Test",1,[new("invalid",[],"Ongeldig e-mailadres"),Message()]);
+        var transport=new FakeTransport(new(MailOutcome.Accepted));Assert.True(await Store.ProcessNextAsync(transport));Assert.False(await Store.ProcessNextAsync(transport));
+        var progress=(await Store.CampaignsAsync()).Single();Assert.Equal(2,progress.Total);Assert.Equal(1,progress.Accepted);Assert.Equal(1,progress.Failed);Assert.Equal(1,transport.Calls);
+    }
     private sealed class TestClock:TimeProvider
     {
         private DateTimeOffset _now=new(2026,11,22,12,0,0,TimeSpan.Zero);
