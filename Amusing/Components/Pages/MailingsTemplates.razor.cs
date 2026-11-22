@@ -843,6 +843,13 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             await ToastService.ShowAsync(startMessage);
             await InvokeAsync(StateHasChanged);
 
+            if(sendRealMail && QueueEnabled && _queueSubmission.IsPending)
+            {
+                // Retry the frozen request, not a newly queried or edited recipient list.
+                await QueueCampaignAsync(_selectedTemplatesList,[]);
+                return;
+            }
+
             string? originalSubject = _selectedTemplatesList.TemplateSubject;
             string? originalContent = _selectedTemplatesList.TemplateContent;
 
@@ -914,11 +921,17 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             string templateName = _selectedTemplatesList?.TemplateName ?? "onbekend sjabloon";
             uint templateId = _selectedTemplatesList?.TemplateId ?? 0;
             string logMessage = $"<_userName> kon geen mailing versturen met sjabloon {templateName}: {ex.Message}";
+            try
+            {
             if ( templateId > 0 )
                 await LoggingService.WriteUserActionTemplateAsync( templateId, "Mailing", "Sjablonen", "unsuccessful", logMessage );
             else
                 await LoggingService.WriteUserActionAsync( "Mailing", "Sjablonen", "unsuccessful", logMessage );
-            await ToastService.ShowErrorAsync( $"Mailing met sjabloon {templateName} kon niet worden verzonden." );
+            }
+            catch(Exception logError){Debug.WriteLine($"Ook de foutmelding kon niet worden opgeslagen ({logError.GetType().Name}).");}
+            await ToastService.ShowErrorAsync(_queueSubmission.IsPending
+                ? "De verzendopdracht is nog niet bevestigd. Kies opnieuw Verzenden om dezelfde opdracht veilig te herhalen; de oorspronkelijke tekst en ontvangers blijven behouden."
+                : $"Mailing met sjabloon {templateName} kon niet worden verzonden.");
         }
         finally
         {
@@ -1105,6 +1118,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
     private async Task OnTemplateChanged(uint? templateId)
     {
+        if(QueueInputsLocked)return;
         if(templateId != SelectedTemplatesListId) ResetQueueRequest();
         if (templateId != null && templateId != 0)
         {
@@ -1118,6 +1132,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
     private async Task OnRecipientListChanged(uint? recipientListId)
     {
+        if(QueueInputsLocked)return;
         if (recipientListId != null && recipientListId != 0)
         {
             RecipientListId = recipientListId;

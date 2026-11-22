@@ -177,6 +177,21 @@ public class MailQueueStoreTests : IAsyncLifetime
         Assert.Contains("Healthy",(string)(await Scalar("SELECT report FROM user_log LIMIT 1"))!);
         Assert.Equal(0,transport.Calls);
     }
+    [QueueDatabaseFact] public async Task LostCommitReplyRetriesOneStoredCampaignWithoutDuplicatingMessages()
+    {
+        var submission=new BulkMailSubmission();var calls=0;
+        var draft=new BulkMailDraft(Guid.NewGuid(),22,"Original",[Message("koor1"),Message("koor2")]);
+        async Task<string> Enqueue(BulkMailDraft snapshot,uint actor)
+        {
+            var id=await Store.EnqueueAsync(snapshot.Id,snapshot.TemplateId,snapshot.TemplateName,actor,snapshot.Messages);
+            if(++calls==1)throw new IOException("Simulated lost commit reply");
+            return id;
+        }
+        await Assert.ThrowsAsync<IOException>(()=>submission.SubmitAsync(draft,1,Enqueue));
+        await submission.SubmitAsync(null,1,Enqueue);
+        Assert.Single(await Store.CampaignsAsync());
+        Assert.Equal(2,(await Store.MessagesAsync(submission.CampaignId!)).Count);
+    }
     private sealed class TestClock:TimeProvider
     {
         private DateTimeOffset _now=new(2026,11,22,12,0,0,TimeSpan.Zero);
