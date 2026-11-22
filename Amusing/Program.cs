@@ -135,6 +135,12 @@ builder.Services.AddBlazoredSessionStorage();
 // Email + HTTP related
 //builder.Services.AddScoped<TransipMailingService>();
 builder.Services.AddScoped<MailingService>();
+// Disabled until the explicit schema migration and per-environment rollout are completed.
+builder.Services.AddSingleton(sp => new Amusing.Services.MailQueue.MailQueueStore(
+    sp.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection")!));
+builder.Services.AddSingleton<Amusing.Services.MailQueue.IQueueMailTransport>(sp =>
+    new Amusing.Services.MailQueue.SmtpQueueTransport(sp.GetRequiredService<EmailSettings>()));
+builder.Services.AddHostedService<Amusing.Services.MailQueue.MailQueueWorker>();
 builder.Services.AddScoped<IParticipationInvoiceSender>(sp => sp.GetRequiredService<MailingService>());
 builder.Services.AddScoped<IParticipationInvoiceData, ParticipationInvoiceData>();
 builder.Services.AddScoped<ParticipationInvoiceService>();

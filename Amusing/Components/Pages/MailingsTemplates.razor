@@ -1,4 +1,4 @@
-﻿@page "/MailTemplates"
+@page "/MailTemplates"
 @using Amusing.Models
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.DropDowns
@@ -16,7 +16,17 @@
 }
 else
 {
-	<div class="page-container mail-template-page">
+	@if(QueueEnabled)
+    {
+        <p><a href="/MailQueue">Verzendwachtrij bekijken</a></p>
+        @if(_queuedCampaignId is not null)
+        {
+            <div class="alert alert-info">Deze mailing staat in de wachtrij. De verzendknop is geblokkeerd om een dubbele mailing te voorkomen.
+                <SfButton CssClass="e-outline" OnClick="ResetQueueRequest">Nieuwe mailing voorbereiden</SfButton>
+            </div>
+        }
+    }
+    <div class="page-container mail-template-page">
 		<div class="groupbox top-info">
 			<div class="groupbox-header">Template informatie</div>
 			<div class="groupbox-content top-info-content">
@@ -144,7 +154,7 @@ else
 						<Template>
 							<button class="custom-toolbar-btn @(_isSendingMail ? "disabled" : string.Empty)"
 									@onclick="MailSend"
-									disabled="@_isSendingMail"
+									disabled="@(_isSendingMail || _queuedCampaignId is not null)"
 									title="Verstuur de mail uit het geselecteerde sjabloon naar alle e-mail adressen uit de ontvangerslijst">
 								<img src="icons/send.svg" class="icon" alt="MAILSEND" Height="25"/>
 							</button>

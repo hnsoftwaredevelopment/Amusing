@@ -12,6 +12,7 @@ public partial class Logbook : ComponentBase
 {
     [Inject] private LoggingService LoggingService { get; set; } = default!;
 
+    private LogModel? _selectedReport;
     private bool _isLoading;
     private SfGrid<LogModel>? _grid;
     private List<LogModel> _logs = [];
@@ -25,6 +26,13 @@ public partial class Logbook : ComponentBase
         _logs = await LoggingService.GetUsersLogAsync();
         _isLoading = false;
     }
+
+    private void CloseReport() { _selectedReport = null; StateHasChanged(); }
+
+    private void ShowReport(LogModel entry) { _selectedReport = entry; StateHasChanged(); }
+
+    private static string GetStatusLabel(LogModel entry)
+        => Amusing.Services.MailQueue.MailQueueLogPresentation.Status(entry.LogReport,entry.LogStatus);
 
     private async Task OnInput( InputEventArgs args )
     {

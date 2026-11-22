@@ -16,6 +16,7 @@
             <div class="page-container maintenance-page">
                 <div class="fixed-header maintenance-page__header">
                     <h3>Logboek, toont alle wijzigingen van het afgelopen jaar</h3>
+                    <p>Bij mailings betekent ‘verzonden’ dat de mailserver het bericht accepteerde. De omschrijving toont eventuele niet-verzonden adressen met de foutreden.</p>
 
                     <SfToolbar Width="100%">
                         <ToolbarItems>
@@ -50,6 +51,7 @@
                                 AllowSorting="true"
                                 AllowGrouping="true"
                                 AllowResizing="true"
+                                AllowTextWrap="true"
                                 EnableStickyHeader="true"
                                 Height="100%"
                                 Width="100%">
@@ -66,12 +68,31 @@
                                 <GridColumn Field="LogUsername" HeaderText="Gebruiker" Width="140" />
                                 <GridColumn Field="LogArea" HeaderText="Menu" Width="140" />
                                 <GridColumn Field="LogAction" HeaderText="Submenu/Actie" Width="160" />
-                                <GridColumn Field="LogReport" HeaderText="Omschrijving" Width="520" />
-                                <GridColumn Field="LogStatus" HeaderText="Status" Width="120" />
+                                <GridColumn Field="LogReport" HeaderText="Omschrijving" Width="520">
+                                    <Template Context="logEntry">
+                                        <div style="white-space:pre-wrap">@((logEntry as LogModel)?.LogReport.Split('\n')[0])</div><SfButton CssClass="e-outline" OnClick="() => ShowReport((LogModel)logEntry)">Details bekijken</SfButton>
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn Field="LogStatus" HeaderText="Status" Width="170"><Template Context="statusEntry">@GetStatusLabel((LogModel)statusEntry)</Template></GridColumn>
                             </GridColumns>
                         </SfGrid>
                     </div>
                 </div>
+            </div>
+        }
+        @if (_selectedReport is not null)
+        {
+            <div role="dialog" aria-modal="true" aria-label="Details logmelding" style="position:fixed;inset:0;z-index:2000;background:#0006;display:flex;align-items:center;justify-content:center;padding:1rem">
+                <section style="background:white;color:#212529;padding:1.5rem;border-radius:.5rem;width:min(900px,100%);max-height:90vh;overflow:auto">
+                    <h4>Details logmelding</h4>
+                    <p>@_selectedReport.LogDate — @_selectedReport.LogUsername — <strong>@GetStatusLabel(_selectedReport)</strong></p>
+                    <div class="mailing-log-report" style="white-space:pre-wrap;overflow-wrap:anywhere">@_selectedReport.LogReport</div>
+                    @if(Amusing.Services.MailQueue.MailQueueLogPresentation.CampaignUrl(_selectedReport.LogReport) is {} campaignUrl)
+                    {
+                        <p class="mt-3"><a href="@campaignUrl">Bekijk deze mailing in de verzendwachtrij</a></p>
+                    }
+                    <SfButton CssClass="e-primary mt-3" OnClick="CloseReport">Details sluiten</SfButton>
+                </section>
             </div>
         }
     </Authorized>

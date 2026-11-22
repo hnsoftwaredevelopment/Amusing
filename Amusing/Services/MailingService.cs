@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Dynamic;
 
 using Amusing.Helpers;
@@ -41,6 +41,9 @@ public class MailingService : IParticipationInvoiceSender
         _dataService = dataService;
         _mappingService = mappingService;
     }
+
+    public MailQueue.BulkMailDraft PrepareQueuedBulkMail(TemplatesListModel template, IReadOnlyList<ExpandoObject> recipients)
+        => MailQueue.BulkMailDraft.Create(template, recipients, _emailSettings);
 
     public string GetBulkMailThrottleDescription()
     {
