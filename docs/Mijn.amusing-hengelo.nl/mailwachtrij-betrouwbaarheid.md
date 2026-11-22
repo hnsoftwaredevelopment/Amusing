@@ -1,6 +1,6 @@
 # KAN-65 — Betrouwbare herhaling en foutisolatie
 
-Status: gebouwd en technisch gecontroleerd; nog niet gepubliceerd op dev of productie. Deze slice behandelt de drie afgesproken foutscenario's. KAN-65 blijft actief voor praktijkacceptatie en overige wachtrijverbeteringen.
+Status: gebouwd, technisch gecontroleerd en gepubliceerd op dev op 22 november 2026. Nog niet op productie. Deze slice behandelt de drie afgesproken foutscenario's. KAN-65 blijft actief voor praktijkacceptatie en overige wachtrijverbeteringen.
 
 ## Veranderd gedrag
 
@@ -32,3 +32,16 @@ Controleer dat sjabloonkeuze, ontvangerslijst en editor normaal blijven werken e
 ## Resterend buiten deze slice
 
 De eerdere punten blijven afzonderlijk open: verzendvlag tijdens runtime hercontroleren, race bij campagneselectie, lege variabelen, dialoogfocus en Escape, hostgrens-tests, tunnelgereedheid, beheer van controlegevallen/blokkades, inhoudsopruiming en gedeeld domeinbudget voor overige Beheer/Mijn-mailstromen. Zie mailwachtrij-eindmelding.md en de review op PR #53.
+
+## Publicatie op dev
+
+- Gebruiker heeft publicatie expliciet goedgekeurd. PR: https://github.com/hnsoftwaredevelopment/Amusing/pull/54 .
+- Gebouwd vanuit een aparte kopie van de bestaande dev-bronvariant met de KAN-65-wijzigingen. De eerder op dev aanwezige KAN-57-editorverbeteringen blijven behouden. De oorspronkelijke bronvariant en stash zijn niet gewijzigd.
+- Alleen Amusing.dll vervangen; broncode en assembly-identiteit van Facturatie en Mobile.Shared gecontroleerd en bestaande serverbibliotheken behouden. Geen schemawijziging of databaseverversing.
+- Back-up: /var/backups/beheer-kan65-herstel-dev.oen7EKXm.
+- DLL SHA256 lokaal en VPS: a352b6f0f0b2cd51afd45a4857435b09b021f38bb9cccd6578ccafdca5ea2125.
+- Nieuw proces amusing-dev 67543 sinds 22 november 2026 20:15:40 CET; service en HTTP gecontroleerd. Procesconfiguratie blijft amusingdev en MailQueue:SendEnabled=false.
+- Browsercontrole: inloggen met tijdelijk controleaccount, sjabloonpagina met bereikbare opslaanknop, bewerkbare editor en beide keuzelijsten; wachtrij toont dat automatische verzending uitstaat. Geen mail ingediend; controleaccount en bijbehorende logregels verwijderd.
+- CodeQL signaleerde twee meldingen in de lokale TLS-testserver. De fixture gebruikt nu een vast TLS-transcript en maakt het certificaat alleen tijdens vertrouwde testopbouw. Geen melding onderdrukt. Alle 10 lokale SMTP/TLS-tests slagen opnieuw. De nieuwe GitHub-analyse moet de afhandeling bevestigen.
+
+Praktijkacceptatie: controleer op dev dat kiezen, bewerken en opslaan van een gewoon sjabloon normaal werken. Voor de foutscenario's is geen echte proefmailing nodig; die zijn automatisch gesimuleerd.
