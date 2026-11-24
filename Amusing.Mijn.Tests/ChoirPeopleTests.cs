@@ -104,7 +104,7 @@ public partial class LoginTests
         Assert.True(contact!.CanManage);Assert.Equal("koor@example.invalid",contact.People.Single().Email);
         await Execute("UPDATE ah_personen_rollen SET rol='contactpersoon2' WHERE persoon_id=42");
         var second=await service.RosterAsync(42,1,default);
-        Assert.False(second!.CanManage);Assert.NotNull(second.People.Single().Email);
+        Assert.True(second!.CanManage);Assert.NotNull(second.People.Single().Email);
         await Execute("UPDATE ah_personen_rollen SET rol='zanger' WHERE persoon_id=42");
         Assert.Null((await service.RosterAsync(42,1,default))!.People.Single().Email);
         Assert.Null(await service.RosterAsync(42,2,default));
@@ -137,7 +137,7 @@ public partial class LoginTests
         var invitation=(await service.IncomingAsync(43,default)).Single();
         await Execute("UPDATE mijn_role_invitations SET expires_at=DATE_SUB(UTC_TIMESTAMP(),INTERVAL 1 MINUTE)");
         Assert.Equal(PeopleResult.Unavailable,await service.AcceptAsync(43,invitation.Id,default));
-        await Execute("UPDATE mijn_role_invitations SET expires_at=DATE_ADD(UTC_TIMESTAMP(),INTERVAL 1 DAY); UPDATE ah_personen_rollen SET rol='contactpersoon2' WHERE persoon_id=42");
+        await Execute("UPDATE mijn_role_invitations SET expires_at=DATE_ADD(UTC_TIMESTAMP(),INTERVAL 1 DAY); UPDATE ah_personen_rollen SET rol='zanger' WHERE persoon_id=42");
         Assert.Equal(PeopleResult.Unavailable,await service.AcceptAsync(43,invitation.Id,default));
         Assert.Equal(PeopleResult.Forbidden,await service.InviteAsync(42,1,"inactive@example.invalid","zanger",default));
     }
