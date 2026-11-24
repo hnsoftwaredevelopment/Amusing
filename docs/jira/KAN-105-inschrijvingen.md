@@ -14,6 +14,8 @@ Story: https://hnsoftwaredevelopment.atlassian.net/browse/KAN-105
 
 - Vijf regressietests faalden vóór de wijziging en slagen erna.
 - Beheer-testsuite: 118 geslaagd, 14 bestaande mailwachtrij-databasetests overgeslagen omdat geen geïsoleerde testdatabase is ingesteld.
+- Linux Release-publicatiebuild geslaagd; pakket lokaal gereed.
+- Draft PR: https://github.com/hnsoftwaredevelopment/Amusing/pull/55
 - Browseracceptatie en publicatie staan nog open.
 
 ## Praktijktest
