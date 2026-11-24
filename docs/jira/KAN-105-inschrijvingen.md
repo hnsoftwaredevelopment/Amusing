@@ -16,7 +16,8 @@ Story: https://hnsoftwaredevelopment.atlassian.net/browse/KAN-105
 - Beheer-testsuite: 118 geslaagd, 14 bestaande mailwachtrij-databasetests overgeslagen omdat geen geïsoleerde testdatabase is ingesteld.
 - Linux Release-publicatiebuild geslaagd; pakket lokaal gereed.
 - Draft PR: https://github.com/hnsoftwaredevelopment/Amusing/pull/55
-- Browseracceptatie en publicatie staan nog open.
+- Testpublicatie uitgevoerd op 24 november 2026 om 08:26 CET. DLL-hash gelijk aan lokale release: `919d05263149c96a3e438e112333a04c18d31aa94b3a9394c058ebfa30c247c3`; nieuwe service-PID `81186`; HTTP 200.
+- Browsercontrole wacht op inloggen; gebruikersacceptatie staat nog open.
 
 ## Praktijktest
 
