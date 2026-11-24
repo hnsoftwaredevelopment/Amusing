@@ -69,23 +69,9 @@ public partial class MaintenanceSubscriptions : ComponentBase
             // Get the registrations for the selected edition
             RegistrationList = await RegistrationService.GetRegistrationsByFestivalIdAsync(Convert.ToUInt32(SelectedEditionId));
             await LoadAvailableGroupsAsync();
-            if (SelectedEditionId != null && RegistrationList.Count > 0)
-            {
-                await UpdateVisibleRowCount();
-            }
         }
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            if (Editions?.Count > 0)
-            {
-                await UpdateVisibleRowCount();
-            }
-        }
-    }
 
     protected async Task OnEditionChanged(string selectedId)
     {
@@ -100,7 +86,6 @@ public partial class MaintenanceSubscriptions : ComponentBase
         if (GridRef != null)
         {
             await GridRef.Refresh();
-            VisibleRowCount = RegistrationList.Count;
         }
     }
 
@@ -130,9 +115,6 @@ public partial class MaintenanceSubscriptions : ComponentBase
     {
         await GridRef.SearchAsync(args.Value);
 
-        // Count the Number of visible rows
-        await Task.Delay(200); // Short delay to handle fast typers
-        await UpdateVisibleRowCount();
     }
 
     protected async Task UpdateVisibleRowCount()
@@ -141,7 +123,12 @@ public partial class MaintenanceSubscriptions : ComponentBase
             return;
 
         var data = await GridRef.GetCurrentViewRecordsAsync();
-        VisibleRowCount = data?.Count ?? 0;
+        var count = data?.Count ?? 0;
+        if (VisibleRowCount != count)
+        {
+            VisibleRowCount = count;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     // Open dialog for a specific registration
@@ -351,7 +338,6 @@ public partial class MaintenanceSubscriptions : ComponentBase
             await GridRef.Refresh();
         }
 
-        VisibleRowCount = RegistrationList.Count;
         CloseAddGroupDialog();
         await ToastService.ShowSuccessAsync( $"{groupName} is ingeschreven voor editie {SelectedEditionText}." );
         StateHasChanged();

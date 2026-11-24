@@ -53,16 +53,6 @@ public partial class OverviewRegistrations : ComponentBase
         }
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            if (RegistrationList?.Count > 0)
-            {
-                await UpdateVisibleRowCount();
-            }
-        }
-    }
 
     // Whenever the selected edition changes the datagrid has to be updated
     protected async Task OnEditionChanged( string selectedId )
@@ -77,7 +67,6 @@ public partial class OverviewRegistrations : ComponentBase
         if ( GridRef != null )
         {
             await GridRef.Refresh();
-            VisibleRowCount = RegistrationList.Count;
         }
     }
 
@@ -94,9 +83,6 @@ public partial class OverviewRegistrations : ComponentBase
     {
         await GridRef.SearchAsync( args.Value );
 
-        // Count the Number of visible rows
-        await Task.Delay( 200 ); // Short delay to handle fast typers
-        await UpdateVisibleRowCount();
     }
 
     // Export functions
@@ -147,7 +133,15 @@ public partial class OverviewRegistrations : ComponentBase
     // Visible row count (Number of records on screen)
     protected async Task UpdateVisibleRowCount()
     {
+        if (GridRef == null)
+            return;
+
         var data = await GridRef.GetCurrentViewRecordsAsync();
-        VisibleRowCount = data?.Count ?? 0;
+        var count = data?.Count ?? 0;
+        if (VisibleRowCount != count)
+        {
+            VisibleRowCount = count;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 }
