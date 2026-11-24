@@ -115,5 +115,3 @@ Subtaken:
 
 - KAN-129: Waarschuwingsmoment, telling en twee meertalige mailteksten uitwerken.
 - KAN-128: Veilige verzending, ontdubbeling, dev-routing en logging controleren.
-
-
