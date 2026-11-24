@@ -1,6 +1,6 @@
 # KAN-57 — Betrouwbare opslag van Beheer-mailsjablonen
 
-Status 24 november 2026: gepubliceerd op dev en automatisch in de browser gecontroleerd; klaar voor gebruikersacceptatie. Nog niet gemerged of op productie. De oorspronkelijke stash blijft behouden.
+Status 24 november 2026: gepubliceerd op dev en automatisch in de browser gecontroleerd; datumverversing door de gebruiker akkoord bevonden. Nog niet gemerged of op productie. De oorspronkelijke stash blijft behouden.
 
 ## Oorzaak en wijziging
 
@@ -39,3 +39,7 @@ Voor deze publicatie was dev opnieuw gepubliceerd vanuit de KAN-105-werkstroom. 
 - Tijdelijke sjablonen, controleaccount en bijbehorende logregels verwijderd. Geen bestaande sjablonen gewijzigd en geen mail verstuurd.
 
 Gebruikerscontrole: kies op dev een gewoon sjabloon, pas tekst aan en sla één keer op. Controleer de wijzigingsdatum en open het sjabloon opnieuw. Een echte mailing is niet nodig.
+
+## Gebruikersakkoord — 24 november 2026
+
+De gebruiker bevestigt dat de datum nu correct wordt bijgewerkt. Samen met de geslaagde automatische opslag- en heropencontroles is deze slice klaar voor samenvoegen. PR #56 is afhankelijk van PR #54; merge en productiepublicatie staan nog open.
