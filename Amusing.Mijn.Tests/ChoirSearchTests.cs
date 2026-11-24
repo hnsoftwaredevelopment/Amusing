@@ -12,8 +12,11 @@ public partial class LoginTests
         { ["username"]="zoekbeheer", ["password"]=Password });
         var results = await client.GetStringAsync("/?zoek=ANDER");
         Assert.Contains("Verborgen Anderkoor", results);
-        Assert.DoesNotContain("Eigen Testkoor", results);
+        Assert.Matches("(?s)<tr[^>]*hidden[^>]*>.*?Eigen Testkoor", results);
         Assert.Contains("type=\"search\"", results);
+        Assert.Contains("id=\"support-grid\"", results);
+        Assert.Matches("<th[^>]*scope=\"col\"[^>]*>Standplaats</th>", results);
+        Assert.DoesNotContain("profile-card person-card", results);
         Assert.Equal(HttpStatusCode.BadRequest, (await client.PostAsync("/ondersteuning/koor",
             new FormUrlEncodedContent(new Dictionary<string,string> { ["group"]="2" }))).StatusCode);
         client.DefaultRequestHeaders.Add("Cookie", "Amusing.Mijn.Language=de");

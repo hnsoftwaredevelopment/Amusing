@@ -8,6 +8,8 @@ using MySqlConnector;
 
 namespace Amusing.Mijn.Services;
 
+public sealed record SupportChoir(uint Id, string Name, string City);
+
 public sealed class SupportAccounts(MySqlDataSource source)
 {
     private static readonly string DummyHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString(), 11);
@@ -55,18 +57,18 @@ public sealed class SupportAccounts(MySqlDataSource source)
         return account is not null && principal.FindFirstValue("credential_stamp") == ChoirAccounts.Stamp(account.Hash);
     }
 
-    public async Task<List<ChoirSummary>> GroupsAsync(CancellationToken ct, string? search = null)
+    public async Task<List<SupportChoir>> GroupsAsync(CancellationToken ct, string? search = null)
     {
         await using var cmd = source.CreateCommand("""
-            SELECT zanggroep_id, naam FROM ah_zanggroepen
+            SELECT zanggroep_id, naam, COALESCE(standplaats,'') FROM ah_zanggroepen
             WHERE LOCATE(LOWER(@search), LOWER(naam)) > 0
             ORDER BY naam, zanggroep_id
             """);
         Add(cmd, "@search", (search ?? "").Trim());
         await using var reader = await cmd.ExecuteReaderAsync(ct);
-        var groups = new List<ChoirSummary>();
+        var groups = new List<SupportChoir>();
         while (await reader.ReadAsync(ct))
-            groups.Add(new(reader.GetFieldValue<uint>(0), reader.GetString(1)));
+            groups.Add(new(reader.GetFieldValue<uint>(0), reader.GetString(1), reader.GetString(2)));
         return groups;
     }
 
