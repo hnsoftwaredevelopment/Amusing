@@ -23,3 +23,7 @@ KAN-111 blijft in deze ontwikkelversie behouden. Deze branch bouwt daarop voort.
 De eerste versie met een tegel per koor is afgekeurd. Deze is vervangen door de compacte, direct filterende datagrid. De eerdere technische controle geldt niet als praktijkacceptatie.
 
 Controle na correctie: drie integratietests geslaagd; dev-browsercontrole bevestigt direct filteren, leegmaken, begrensd scrollgebied en openen via toetsenbord bij mobiele schermbreedte. Tijdelijk beheeraccount na controle verwijderd. Praktijkacceptatie door gebruiker blijft open.
+
+## Acceptatie
+
+De gebruiker heeft de datagrid op 24 november 2026 getest en akkoord gegeven. KAN-112 is klaar voor merge via PR #58. De PR bouwt op KAN-111 (PR #57) voort; beide wijzigingen moeten na merge nog naar productie.
