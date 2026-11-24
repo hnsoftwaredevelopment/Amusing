@@ -2,6 +2,8 @@
 
 Datum: 5 november 2026. Herbert heeft het onderstaande basisvoorstel bevestigd. Profiel- en personenrechten zijn deels geïmplementeerd; beheerderondersteuning en overige open detailkeuzes volgen later.
 
+Actualisatie 24 november 2026 (KAN-111): contactpersoon 2 krijgt dezelfde koorrechten als contactpersoon 1, inclusief personen- en rollenbeheer. Deze wijziging staat op dev.mijn voor gebruikerscontrole; productiepublicatie staat nog open. Onderstaande rij is hierop aangepast. Oudere statusnotities verderop beschrijven het oorspronkelijke basisvoorstel.
+
 ## Bevestigde basisrechten
 
 Alle koorrechten gelden uitsluitend voor gekoppelde koren. Beheerders met toegang tot Beheer kunnen een koor selecteren en ondersteunen.
@@ -12,7 +14,7 @@ Alle koorrechten gelden uitsluitend voor gekoppelde koren. Beheerders met toegan
 | Koorprofiel, foto en logo wijzigen | Ja | Ja | Nee | Ja |
 | Inschrijving aanmaken, wijzigen en bevestigen | Ja | Ja | Nee | Ja |
 | E-mail/telefoon van gekoppelde personen zien | Ja | Ja | Nee | Ja |
-| Contactpersonen en koorrollen beheren | Ja | Nee | Nee | Ja |
+| Contactpersonen en koorrollen beheren | Ja | Ja | Nee | Ja |
 | Eigen accountgegevens wijzigen | Eigen account | Eigen account | Eigen account | Eigen beheeraccount |
 | Laatste eerste contactpersoon verwijderen zonder vervanging | Nee | Nee | Nee | Nee |
 

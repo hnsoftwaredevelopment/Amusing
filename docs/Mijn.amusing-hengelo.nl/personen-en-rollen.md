@@ -25,7 +25,7 @@ Herbert heeft op 5 november bevestigd:
 - Er blijft altijd minstens één eerste contactpersoon. De opslagcontrole vereist een andere actieve eerste contactpersoon voordat deze rol kan verdwijnen.
 - Alle gekoppelde personen zien namen en rollen binnen hun eigen koor.
 - Alleen eerste en tweede contactpersonen zien e-mailadressen en telefoonnummers. Deze gegevens worden voor andere rollen niet aan het paginamodel geleverd.
-- Alleen de eerste contactpersoon beheert uitnodigingen en verwijdert rollen. Beheerderondersteuning komt later.
+- Sinds KAN-111 (afspraak van 24 november 2026) beheren zowel de eerste als tweede contactpersoon uitnodigingen en rollen. Dit is op dev.mijn ingevoerd; productiepublicatie staat nog open. Beheerders kunnen via hun eigen koorcontext ondersteunen.
 
 Er is nog geen formulier om persoonlijke gegevens van een ander account te wijzigen. Eigen accountgegevens en beheerderondersteuning zijn aparte slices.
 
@@ -33,7 +33,7 @@ Er is nog geen formulier om persoonlijke gegevens van een ander account te wijzi
 
 De huidige uitnodigingsflow is expliciet voor de testomgeving. De ontvanger vindt de uitnodiging in zijn eigen ingelogde omgeving. In een niet als test geconfigureerde app weigert het uitnodiging-endpoint met 503; er wordt dus niet stilzwijgend een onbezorgde productie-uitnodiging aangemaakt. Productiemailbezorging is nog niet gebouwd.
 
-Een uitnodiging geldt 24 uur, is aan een persoon-ID gebonden en wordt met POST plus CSRF-token aangenomen. Alleen het juiste actieve account kan accepteren. Een ID kennen is onvoldoende; de ID is geen bearer-token of vervanging van een login. Bij aanvaarden wordt opnieuw gecontroleerd of de afzender nog een actieve eerste contactpersoon is. Verlopen uitnodigingen en uitnodigingen van een inmiddels onbevoegde afzender geven geen rechten. Herhaald aannemen voegt geen tweede rol toe en herstelt geen later verwijderde rol.
+Een uitnodiging geldt 24 uur, is aan een persoon-ID gebonden en wordt met POST plus CSRF-token aangenomen. Alleen het juiste actieve account kan accepteren. Een ID kennen is onvoldoende; de ID is geen bearer-token of vervanging van een login. Bij aanvaarden wordt opnieuw gecontroleerd of de afzender nog een actieve eerste of tweede contactpersoon is. Verlopen uitnodigingen en uitnodigingen van een inmiddels onbevoegde afzender geven geen rechten. Herhaald aannemen voegt geen tweede rol toe en herstelt geen later verwijderde rol.
 
 Rolwijziging en auditrecord worden samen gecommit. Het auditrecord bevat de echte actor, doelpersoon, koor en rol; geen e-mailadres of telefoonnummer. Bescherming van de laatste eerste contactpersoon is onder gelijktijdige mutaties getest. De transacties vergrendelen de koorrollen en het koor; iedere mutatie controleert de actuele bevoegdheid. Cookies, CSRF en koorisolatie blijven actief.
 
