@@ -12,7 +12,14 @@ async page => {
  await page.goto('https://dev.beheer.amusing-hengelo.nl/login');
  await page.locator('input[name=username]').fill(f.username);await page.locator('input[name=password]').fill(f.password);
  await page.getByRole('button',{name:'Inloggen',exact:true}).click();await page.waitForURL('https://dev.beheer.amusing-hengelo.nl/');
- const select=async name=>{await page.waitForTimeout(2500);await page.locator('.e-multi-column .e-ddl-icon').click();await page.getByText(name,{exact:true}).click();};
+ const select=async name=>{
+   await page.waitForTimeout(2500);await page.locator('.e-multi-column .e-ddl-icon').click();await page.getByText(name,{exact:true}).click();
+   for(let attempt=0;attempt<50;attempt++){
+     if(await page.getByRole('textbox',{name:'Sjabloonnaam',exact:true}).inputValue()===name){await page.waitForTimeout(300);return;}
+     await page.waitForTimeout(100);
+   }
+   throw new Error('Template selection did not finish');
+ };
  await page.goto('https://dev.beheer.amusing-hengelo.nl/MailTemplates');
  await page.getByTitle('Bewaar sjabloon',{exact:true}).waitFor();await select(f.marker);
  const before=await page.getByRole('textbox',{name:'Laatste wijziging',exact:true}).inputValue();
@@ -31,13 +38,14 @@ async page => {
  if(await page.getByPlaceholder('Onderwerp',{exact:true}).inputValue()!=='Nieuw onderwerp '+f.marker)throw new Error('Subject not persisted');
  if(!(await page.locator('[contenteditable=true]').first().textContent()).includes('Actuele editorinhoud '+f.marker))throw new Error('Editor text not persisted');
  await page.getByTitle('Voeg een nieuw sjabloon toe',{exact:true}).click();
+ await page.waitForFunction(()=>Array.from(document.querySelectorAll('label')).some(label=>label.textContent==='Sjabloonnaam'&&document.getElementById(label.getAttribute('for'))?.value==='')&&document.querySelector('[contenteditable=true]')?.textContent.trim()==='');
  await page.getByRole('textbox',{name:'Sjabloonnaam',exact:true}).fill(f.marker+' nieuw');
  await page.getByPlaceholder('Onderwerp',{exact:true}).fill('Nieuw sjabloon onderwerp');
  await page.locator('[contenteditable=true]').first().fill('Nieuw sjabloon inhoud '+f.marker);
  await page.getByTitle('Bewaar sjabloon',{exact:true}).click();
  await page.getByText('De wijzigingen voor sjabloon '+f.marker+' nieuw zijn opgeslagen.',{exact:true}).waitFor();
  await page.reload();await page.getByTitle('Bewaar sjabloon',{exact:true}).waitFor();await select(f.marker+' nieuw');
- if(!(await page.locator('[contenteditable=true]').first().textContent()).includes('Nieuw sjabloon inhoud '+f.marker))throw new Error('New template not persisted');
+ await page.waitForFunction(text=>document.querySelector('[contenteditable=true]')?.textContent.includes(text),'Nieuw sjabloon inhoud '+f.marker);
  return {oneClickSave:true,modificationDateRefreshed:true,existingTemplateReopened:true,newTemplateReopened:true,noMailSent:true};
 }
 '@
