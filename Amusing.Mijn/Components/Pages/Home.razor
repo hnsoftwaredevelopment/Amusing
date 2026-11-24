@@ -4,25 +4,36 @@
 @using System.Security.Claims
 @inject ChoirAccounts Accounts
 @inject SupportAccounts Support
+@inject SiteLanguage SiteLanguage
 @inject ChoirPeople People
 @inject ChoirEnrollments Enrollments
 @inject IHttpContextAccessor Context
 <PageTitle>@T("MijnKoren") — Mijn Amusing</PageTitle>
 @if (Context.HttpContext!.User.IsAdministrator())
 {
-    <h1>Koor ondersteunen</h1>
-    <form method="post" action="/ondersteuning/koor" data-enhance="false">
-        <AntiforgeryToken />
-        <label for="support-group">Kies een koor</label>
-        <select id="support-group" name="group" required>
-            <option value="">Kies een koor</option>
-            @foreach (var group in groups)
-            {
-                <option value="@group.Id">@group.Name</option>
-            }
-        </select>
-        <button type="submit">Open koor</button>
-    </form>
+    <section lang="@language" aria-labelledby="support-title">
+        <h1 id="support-title">@T("KoorOndersteunen")</h1>
+        <form method="get" action="/" data-enhance="false" role="search">
+            <label for="choir-search">@T("ZoekKoorOpNaam")</label>
+            <input id="choir-search" type="search" name="zoek" value="@Search" maxlength="100" />
+            <button class="choir-primary" type="submit">@T("KoorZoeken")</button>
+            <a href="/">@T("AlleKorenTonen")</a>
+        </form>
+        <p role="status">@UiText.Format("AantalKorenGevonden", language, groups.Count)</p>
+        @if (groups.Count == 0)
+        {
+            <p>@T("GeenKorenGevonden")</p>
+        }
+        @foreach (var group in groups)
+        {
+            <form class="profile-card person-card" method="post" action="/ondersteuning/koor" data-enhance="false">
+                <AntiforgeryToken />
+                <input type="hidden" name="group" value="@group.Id" />
+                <strong>@group.Name</strong>
+                <div><button class="choir-primary" type="submit" aria-label="@($"{T("OpenKoor")}: {group.Name}")">@T("OpenKoor")</button></div>
+            </form>
+        }
+    </section>
 }
 else
 {
@@ -105,9 +116,10 @@ else
 }
 @if (Context.HttpContext!.User.IsAdministrator())
 {
-    <form method="post" action="/account/logout" data-enhance="false"><AntiforgeryToken /><button class="secondary">Uitloggen</button></form>
+    <form method="post" action="/account/logout" data-enhance="false"><AntiforgeryToken /><button class="secondary">@T("Uitloggen")</button></form>
 }
 @code {
+    [SupplyParameterFromQuery(Name = "zoek")] public string? Search { get; set; }
     private List<ChoirSummary> groups = [];
     private string language = "nl";
     private int unread;
@@ -116,12 +128,13 @@ else
     private string InvitationLabel => T("MijnUitnodigingen") +
         (unread > 0 ? $" ({unread} {T("Ongelezen")})" : "");
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         var request = Context.HttpContext!;
         if (request.User.IsAdministrator())
         {
-            groups = await Support.GroupsAsync(request.RequestAborted);
+            language = await SiteLanguage.GetAsync();
+            groups = await Support.GroupsAsync(request.RequestAborted, Search);
             return;
         }
 

@@ -55,9 +55,14 @@ public sealed class SupportAccounts(MySqlDataSource source)
         return account is not null && principal.FindFirstValue("credential_stamp") == ChoirAccounts.Stamp(account.Hash);
     }
 
-    public async Task<List<ChoirSummary>> GroupsAsync(CancellationToken ct)
+    public async Task<List<ChoirSummary>> GroupsAsync(CancellationToken ct, string? search = null)
     {
-        await using var cmd = source.CreateCommand("SELECT zanggroep_id, naam FROM ah_zanggroepen ORDER BY naam, zanggroep_id");
+        await using var cmd = source.CreateCommand("""
+            SELECT zanggroep_id, naam FROM ah_zanggroepen
+            WHERE LOCATE(LOWER(@search), LOWER(naam)) > 0
+            ORDER BY naam, zanggroep_id
+            """);
+        Add(cmd, "@search", (search ?? "").Trim());
         await using var reader = await cmd.ExecuteReaderAsync(ct);
         var groups = new List<ChoirSummary>();
         while (await reader.ReadAsync(ct))

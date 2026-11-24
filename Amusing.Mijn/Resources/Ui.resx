@@ -825,4 +825,11 @@
   <data name="KoorVanafWachtlijstGeplaatst">
     <value>Koor vanaf wachtlijst geplaatst</value>
   </data>
+  <data name="KoorOndersteunen" xml:space="preserve"><value>Koor ondersteunen</value></data>
+  <data name="ZoekKoorOpNaam" xml:space="preserve"><value>Zoek op een deel van de koornaam</value></data>
+  <data name="KoorZoeken" xml:space="preserve"><value>Zoeken</value></data>
+  <data name="AlleKorenTonen" xml:space="preserve"><value>Alle koren tonen</value></data>
+  <data name="AantalKorenGevonden" xml:space="preserve"><value>{0} koren gevonden</value></data>
+  <data name="GeenKorenGevonden" xml:space="preserve"><value>Geen koren gevonden. Probeer een andere zoekterm.</value></data>
+  <data name="OpenKoor" xml:space="preserve"><value>Open koor</value></data>
 </root>
