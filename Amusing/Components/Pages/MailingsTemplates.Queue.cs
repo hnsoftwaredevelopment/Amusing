@@ -10,21 +10,34 @@ public partial class MailingsTemplates
 {
     [Inject] public MailQueueStore MailQueue {get;set;}=default!;
     [Inject] public AuthenticationStateProvider QueueAuthentication {get;set;}=default!;
-    private BulkMailDraft? _queueDraft;
-    private string? _queuedCampaignId;
+    private readonly BulkMailSubmission _queueSubmission=new();
+    private string? _queuedCampaignId=>_queueSubmission.CampaignId;
+    private bool QueueInputsLocked=>_isSaving||_isSendingMail||_queueSubmission.IsPending;
     private bool QueueEnabled => Configuration.GetValue<bool>("MailQueue:Enabled");
-    private void ResetQueueRequest(){_queueDraft=null;_queuedCampaignId=null;}
+    private void ResetQueueRequest(){if(!QueueInputsLocked)_queueSubmission.Reset();}
     private async Task QueueCampaignAsync(TemplatesListModel template,List<ExpandoObject> recipients)
     {
         if(_queuedCampaignId is not null)
         {await ToastService.ShowAsync("Deze mailing staat al in de wachtrij. Bekijk de voortgang in het wachtrijoverzicht.");return;}
         var user=(await QueueAuthentication.GetAuthenticationStateAsync()).User;
         if(!uint.TryParse(user.FindFirst("UserId")?.Value,out var actor)||actor==0)throw new InvalidOperationException("Beheeraccount ontbreekt.");
-        _queueDraft??=MailingService.PrepareQueuedBulkMail(template,recipients);
-        _queuedCampaignId=await MailQueue.EnqueueAsync(_queueDraft.Id,_queueDraft.TemplateId,_queueDraft.TemplateName,actor,_queueDraft.Messages);
-        int invalid=_queueDraft.Messages.Count(m=>m.ValidationError is not null);
-        await LoggingService.WriteUserActionTemplateAsync(_queueDraft.TemplateId,"Mailing","Wachtrij","success",
-            $"<_userName> heeft mailing {_queueDraft.TemplateName} in de wachtrij gezet. Campagne: {_queuedCampaignId}. Totaal: {_queueDraft.Messages.Count}, wachtend: {_queueDraft.Messages.Count-invalid}, ongeldig: {invalid}. Nog niet als verzonden bevestigd.");
+        var draft=_queueSubmission.IsPending?null:MailingService.PrepareQueuedBulkMail(template,recipients);
+        if(draft is {Messages.Count:0})
+        {await ToastService.ShowWarningAsync("Deze ontvangerslijst bevat geen ontvangers. Kies een andere lijst.");return;}
+        await _queueSubmission.SubmitAsync(draft,actor,(snapshot,owner)=>
+            MailQueue.EnqueueAsync(snapshot.Id,snapshot.TemplateId,snapshot.TemplateName,owner,snapshot.Messages));
+        var submitted=_queueSubmission.Draft!;
+        int invalid=submitted.Messages.Count(m=>m.ValidationError is not null);
+        try
+        {
+            await LoggingService.WriteUserActionTemplateAsync(submitted.TemplateId,"Mailing","Wachtrij","success",
+                $"<_userName> heeft mailing {submitted.TemplateName} in de wachtrij gezet. Campagne: {_queuedCampaignId}. Totaal: {submitted.Messages.Count}, wachtend: {submitted.Messages.Count-invalid}, ongeldig: {invalid}. Nog niet als verzonden bevestigd.");
+        }
+        catch
+        {
+            await ToastService.ShowWarningAsync("Mailing staat in de wachtrij, maar de startmelding kon niet worden opgeslagen. Verstuur deze mailing niet opnieuw; bekijk de verzendwachtrij.");
+            return;
+        }
         await ToastService.ShowSuccessAsync("Mailing staat in de wachtrij. Je kunt deze pagina sluiten; bekijk de voortgang in het wachtrijoverzicht.");
     }
 }
