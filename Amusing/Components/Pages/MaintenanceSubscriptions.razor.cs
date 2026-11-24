@@ -11,6 +11,7 @@ namespace Amusing.Components.Pages;
 
 public partial class MaintenanceSubscriptions : ComponentBase
 {
+    [Inject] protected NavigationManager Navigation { get; set; } = default!;
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected EditionService EditionService { get; set; } = default!;
     [Inject] protected RegistrationService RegistrationService { get; set; } = default!;
@@ -44,6 +45,14 @@ public partial class MaintenanceSubscriptions : ComponentBase
         selectedAvailableGroupId is not null &&
         selectedAantalDeelnemers is > 0 &&
         !string.IsNullOrWhiteSpace(selectedPodiumsoort);
+
+    protected void OnRegistrationDoubleClick(RecordDoubleClickEventArgs<RegistrationModel> args)
+    {
+        if (args.RowData is { GroepId: > 0 } registration)
+        {
+            Navigation.NavigateTo($"/Maintenance-Groups?groupId={registration.GroepId}");
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {

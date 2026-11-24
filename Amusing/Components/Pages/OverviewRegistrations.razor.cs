@@ -15,6 +15,7 @@ namespace Amusing.Components.Pages;
 
 public partial class OverviewRegistrations : ComponentBase
 {
+    [Inject] protected NavigationManager Navigation { get; set; } = default!;
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected EditionService EditionService { get; set; } = default!;
     [Inject] protected RegistrationService RegistrationService { get; set; } = default!;
@@ -27,6 +28,14 @@ public partial class OverviewRegistrations : ComponentBase
     protected int VisibleRowCount = 0;
 
     protected string SelectedEditionText => Editions.FirstOrDefault( e => e.ID == SelectedEditionId )?.Text ?? "Onbekende editie";
+
+    protected void OnRegistrationDoubleClick(RecordDoubleClickEventArgs<RegistrationModel> args)
+    {
+        if (args.RowData is { GroepId: > 0 } registration)
+        {
+            Navigation.NavigateTo($"/Maintenance-Groups?groupId={registration.GroepId}");
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
