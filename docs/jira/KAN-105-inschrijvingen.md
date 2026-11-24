@@ -28,3 +28,12 @@ Story: https://hnsoftwaredevelopment.atlassian.net/browse/KAN-105
 5. Open Beheer/Groepen rechtstreeks zonder queryparameter en controleer de normale selectie en bediening.
 
 Geen productiepublicatie of merge uitgevoerd.
+
+## Aanvullende correctie teller
+
+Na gebruikerstest bleek het aantal inschrijvingen niet betrouwbaar te verversen. De teller wordt nu in beide lijsten bijgewerkt na `DataBound`, op basis van de daadwerkelijk getoonde rijen. De te vroege eerste-rendercontrole en vaste zoekvertraging zijn verwijderd. Ook een leeg zoekresultaat moet nul tonen.
+
+Commit: https://github.com/hnsoftwaredevelopment/Amusing/commit/60956d1
+
+Beheer-testsuite na deze correctie: 118 geslaagd, 14 bestaande databaseafhankelijke tests overgeslagen.
+Testpublicatie van de tellercorrectie gecontroleerd: hash `430f6135d15164bd0ab5afa48b1b3ce661ca15995a109595b7d8f25560adeb59`, PID `81514`, HTTP 200. Na herstart vraagt de browser opnieuw om inloggen; visuele verificatie van de teller staat daarom nog open.
