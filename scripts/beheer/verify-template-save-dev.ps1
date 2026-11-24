@@ -20,7 +20,12 @@ async page => {
  await page.locator('[contenteditable=true]').first().fill('Actuele editorinhoud '+f.marker);
  await page.getByTitle('Bewaar sjabloon',{exact:true}).click();
  await page.getByText('De wijzigingen voor sjabloon '+f.marker+' zijn opgeslagen.',{exact:true}).waitFor();
- const after=await page.getByRole('textbox',{name:'Laatste wijziging',exact:true}).inputValue();
+ let after=before;
+ for(let attempt=0;attempt<20;attempt++){
+   after=await page.getByRole('textbox',{name:'Laatste wijziging',exact:true}).inputValue();
+   if(after!==before&&!after.includes('2020'))break;
+   await page.waitForTimeout(100);
+ }
  if(after===before||after.includes('2020'))throw new Error('Modification date did not refresh');
  await page.reload();await page.getByTitle('Bewaar sjabloon',{exact:true}).waitFor();await select(f.marker);
  if(await page.getByPlaceholder('Onderwerp',{exact:true}).inputValue()!=='Nieuw onderwerp '+f.marker)throw new Error('Subject not persisted');
