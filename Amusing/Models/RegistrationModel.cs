@@ -1,4 +1,4 @@
-﻿namespace Amusing.Models;
+namespace Amusing.Models;
 
 public class RegistrationModel
 {
@@ -12,7 +12,7 @@ public class RegistrationModel
     public string Podium { get; set; }
     public int Zangers { get; set; }
     public string Genre { get; set; }
-    public decimal TeBetalen { get; set; }
+    public decimal? TeBetalen { get; set; }
     public string Betaald { get; set; }
     public DateTime? Betaaldatum { get; set; }
     public string Bevestigd { get; set; }

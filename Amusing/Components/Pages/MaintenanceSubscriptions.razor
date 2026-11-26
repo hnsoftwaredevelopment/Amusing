@@ -1,4 +1,5 @@
-﻿@page "/Maintenance-Subscriptions"
+@page "/Maintenance-Subscriptions"
+@page "/Overview-Registrations"
 @using Amusing.Models
 @using Amusing.Services
 @using Syncfusion.Blazor
@@ -43,6 +44,10 @@
 
 							<SfToolbar>
 								<ToolbarItems>
+<ToolbarItem Type="ItemType.Button"><Template><button type="button" class="custom-toolbar-btn" @onclick="ExportToExcel" title="Exporteer naar Excel"><img src="icons/excel.svg" class="icon" alt="Excel" /></button></Template></ToolbarItem>
+<ToolbarItem Type="ItemType.Button"><Template><button type="button" class="custom-toolbar-btn" @onclick="ExportToCsv" title="Exporteer naar Csv"><img src="icons/csv.svg" class="icon" alt="Csv" /></button></Template></ToolbarItem>
+<ToolbarItem Type="ItemType.Button"><Template><button type="button" class="custom-toolbar-btn" @onclick="ExportToPdf" title="Exporteer naar Pdf"><img src="icons/pdf.svg" class="icon" alt="Pdf" /></button></Template></ToolbarItem>
+
 									<ToolbarItem Type="ItemType.Input" Align="ItemAlign.Left">
 										<Template>
 											<button class="btn btn-blue"
@@ -87,56 +92,25 @@
                                 <GridColumn Field="AvailableUntil" HeaderText="Beschikbaar tot" Width="135"><Template Context="row"><button type="button" class="btn btn-link p-0" @onclick="() => availabilityDialog.OpenAsync(((RegistrationModel)row).FestivalId,((RegistrationModel)row).GroepId)">@(((RegistrationModel)row).AvailableUntil)</button></Template></GridColumn>
                                 <GridColumn Field="Podium" HeaderText="Podium" Width="70" TextAlign="TextAlign.Center"></GridColumn>
 								<GridColumn Field="Zangers" HeaderText="Zangers" TextAlign="TextAlign.Center" Width="70"></GridColumn>
-								<GridColumn HeaderText="Betaald" Width="180" TextAlign="TextAlign.Center">
-									<Template Context="regObj">
-									@{
-										var data = (RegistrationModel)regObj;
 
-										bool showPayButton = data.Betaald == "Nee" && data.Afgehaakt == "Nee";
-										bool showReverseButton = data.Betaald == "Ja"; // altijd tonen als er betaald is
-									}
+ <GridColumn Field="Genre" HeaderText="Genre" Width="120" />
+ <GridColumn Field="TeBetalen" HeaderText="Te betalen (€)" Format="N2" Width="130" TextAlign="TextAlign.Right" />
+ <GridColumn Field="Betaald" HeaderText="Betaald" Width="100"><Template Context="row"><button class="btn btn-link p-0" @onclick="() => EditRegistrationAsync((RegistrationModel)row)">@(((RegistrationModel)row).Betaald)</button></Template></GridColumn>
+ <GridColumn Field="Bevestigd" HeaderText="Bevestigd" Width="100"><Template Context="row"><button class="btn btn-link p-0" @onclick="() => EditRegistrationAsync((RegistrationModel)row)">@(((RegistrationModel)row).Bevestigd)</button></Template></GridColumn>
+ <GridColumn Field="AcapellaBattle" HeaderText="AcapellaBattle" Width="120" />
+ <GridColumn Field="Beoordeling" HeaderText="Beoordeling" Width="110" />
+ <GridColumn Field="Binnen" HeaderText="Binnen" Width="70" TextAlign="TextAlign.Center" />
+ <GridColumn Field="Buiten" HeaderText="Buiten" Width="70" TextAlign="TextAlign.Center" />
+ <GridColumn Field="Afgehaakt" HeaderText="Afgehaakt" Width="110"><Template Context="row"><button class="btn btn-link p-0" @onclick="() => EditRegistrationAsync((RegistrationModel)row)">@(((RegistrationModel)row).Afgehaakt)</button></Template></GridColumn>
+ <GridColumn HeaderText="Wijzigen" Width="100"><Template Context="row"><button type="button" class="btn btn-outline-primary btn-sm" title="Inschrijving wijzigen" @onclick="() => EditRegistrationAsync((RegistrationModel)row)"><span class="fa-solid fa-pen" aria-hidden="true"></span><span class="visually-hidden">Inschrijving wijzigen</span></button></Template></GridColumn>
 
-									@if (showPayButton)
-									{
-										<button class="btn btn-blue" @onclick="() => OpenPaymentDialog(data)">Betaling</button>
-									}
-									else if (showReverseButton)
-									{
-										<button class="btn btn-red" @onclick="() => TogglePaymentAsync(data)">Gestorneerd</button>
-									}
-									</Template>
-								</GridColumn>
-
-								<SfDialog Width="400px"
-									  IsModal="true"
-									  @bind-Visible="showPaymentDialog"
-									  ShowCloseIcon="true"
-									  Header="Betaling registreren">
-
-								<DialogTemplates>
-									<Content>
-										<div class="p-3">
-											<p>Selecteer de betaaldatum:</p>
-											<SfDatePicker TValue="DateTime?"
-														  @bind-Value="selectedDate"
-														  Placeholder="Kies een datum..." />
-										</div>
-									</Content>
-
-									<FooterTemplate>
-										<div class="flex justify-end gap-2">
-											<button class="btn btn-green" @onclick="ConfirmPaymentDateAsync">
-												Opslaan
-											</button>
-											<button class="btn btn-gray" @onclick="ClosePaymentDialog">
-												Annuleren
-											</button>
-										</div>
-									</FooterTemplate>
-								</DialogTemplates>
-							</SfDialog>
-
-							<SfDialog Width="500px"
+							</GridColumns>
+						</SfGrid>
+					</div>
+				</div>
+			}
+		</div>
+	<SfDialog Width="500px"
 									  IsModal="true"
 									  @bind-Visible="showAddGroupDialog"
 									  ShowCloseIcon="true"
@@ -213,97 +187,17 @@
 								</DialogTemplates>
 							</SfDialog>
 
-							<SfDialog
-								Width="300px"
-								IsModal="true"
-								@bind-Visible="showYesNoDialog"
-								ShowCloseIcon="true"
-							    Header="@selectedYesNoHeaderText">
 
-								<DialogTemplates>
-										<Content>
-											<div class="p-3">
-												<p>
-													<strong>@selectedRegistration?.Naam</strong><br />
-													Wijzigen: <em>@selectedYesNoField</em>
-												</p>
-											</div>
-										</Content>
-
-										<FooterTemplate>
-											<div class="flex justify-end gap-2">
-												<button class="btn btn-green" @onclick="OnYesClicked">Ja</button>
-												<button class="btn btn-red" @onclick="OnNoClicked">Nee</button>
-												<button class="btn btn-gray" @onclick="CloseYesNoDialog">Annuleren</button>
-											</div>
-										</FooterTemplate>
-									</DialogTemplates>
-							</SfDialog>
-
-							<GridColumn Field="Bevestigd"
-										HeaderText="Bevestigd"
-										Width="90"
-										TextAlign="TextAlign.Center">
-
-								<Template Context="row">
-									@{
-										var reg = (RegistrationModel)row;
-									}
-
-									<span class="yesno-cell"
-											style="cursor:pointer; font-weight:600"
-											@onclick="@(() => OpenYesNoDialog(reg, nameof(RegistrationModel.Bevestigd), YesNoHeaders.Bevestigd ))"> @reg.Bevestigd
-									</span>
-								</Template>
-							</GridColumn>
-
-							<GridColumn
-								Field="AcapellaBattle"
-								HeaderText="AcapellaBattle"
-								Width="100"
-								TextAlign="TextAlign.Center">
-									<Template Context="row">
-										@{
-											var reg = (RegistrationModel)row;
-										}
-
-										<span class="yesno-cell"
-											  style="cursor:pointer; font-weight:600"
-											  @onclick="@(() => OpenYesNoDialog(reg, nameof(RegistrationModel.AcapellaBattle), YesNoHeaders.AcapellaBattle))">
-											@reg.AcapellaBattle
-										</span>
-									</Template>
-								</GridColumn>
-
-								<GridColumn Field="Binnen" HeaderText="Binnen" Width="70" TextAlign="TextAlign.Center"></GridColumn>
-								<GridColumn Field="Buiten" HeaderText="Buiten" Width="70" TextAlign="TextAlign.Center"></GridColumn>
-								<GridColumn HeaderText="Afgehaakt" Width="120" TextAlign="TextAlign.Center">
-									<Template Context="regObj">
-										@{
-											var data = (RegistrationModel)regObj;
-										}
-
-										@if ( data.Afgehaakt == "Nee" )
-										{
-											<button class="btn btn-red" @onclick="() => ToggleDropOutAsync( data )">Haakt af</button>
-										}
-										else
-										{
-											<button class="btn btn-blue" @onclick="() => ToggleDropOutAsync( data )">Haakt aan</button>
-										}
-									</Template>
-								</GridColumn>
-							</GridColumns>
-						</SfGrid>
-					</div>
-				</div>
-			}
-		</div>
-	</Authorized>
+</Authorized>
 	<NotAuthorized>
 		<p class="text-danger">Je hebt alleen toegang tot deze pagina wanneer je bent ingelogt</p>
 	</NotAuthorized>
 </AuthorizeView>
 
 <Amusing.Components.RegistrationAvailabilityDialog @ref="availabilityDialog" Saved="LoadRegistrationsAsync" />
-@code { private Amusing.Components.RegistrationAvailabilityDialog availabilityDialog = default!; }
+<Amusing.Components.RegistrationEditDialog @ref="registrationEditDialog" Saved="LoadRegistrationsAsync" />
+@code {
+ private Amusing.Components.RegistrationAvailabilityDialog availabilityDialog = default!;
+ private Amusing.Components.RegistrationEditDialog registrationEditDialog = default!;
+ private Task EditRegistrationAsync(RegistrationModel row)=>registrationEditDialog.OpenAsync(row.FestivalId,row.GroepId);
+}

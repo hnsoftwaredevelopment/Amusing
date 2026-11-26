@@ -1,0 +1,65 @@
+@using Amusing.Services
+@using Syncfusion.Blazor.Popups
+@inject RegistrationEditService Service
+@if(current is not null)
+{
+ <SfDialog Width="520px" IsModal="true" ShowCloseIcon="false" Visible="true">
+  <DialogTemplates>
+   <Header>Inschrijving wijzigen — @current.Name</Header>
+   <Content>
+    @if(message is not null){<p role="alert" class="alert alert-danger">@message</p>}
+    <p>Aantal deelnemers en podiumsoort worden via de inschrijving in Mijn gewijzigd, vanwege de facturatie.</p>
+    @if(current.Waitlisted){<p class="alert alert-info">Dit koor staat op de wachtlijst. Gebruik Wachtlijst beheren om het te plaatsen en de nota te versturen.</p>}
+    <div class="registration-edit-fields">
+     <label for="registration-date">Ingeschreven</label><input id="registration-date" type="datetime-local" class="form-control" @bind="registered" disabled="@busy" />
+     <label for="registration-preference">Optredens</label>
+     <select id="registration-preference" class="form-select" @bind="preference" disabled="@busy">
+      @if(preference!="11" && preference!="20" && preference!="02"){<option value="@preference">Huidig: @current.Inside binnen / @current.Outside buiten</option>}
+      <option value="11">1 binnen / 1 buiten</option><option value="20">2 binnen</option><option value="02">2 buiten</option>
+     </select>
+     <label><input type="checkbox" @bind="battle" disabled="@busy" /> AcapellaBattle</label>
+     <label><input type="checkbox" @bind="review" disabled="@busy" /> Beoordeling</label>
+     <label for="registration-paid">Betaald op (leeg = niet betaald)</label><input id="registration-paid" type="date" class="form-control" @bind="paid" disabled="@(busy || current.Waitlisted)" />
+     <label for="registration-confirmed">Bevestigd op (leeg = niet bevestigd)</label><input id="registration-confirmed" type="date" class="form-control" @bind="confirmed" disabled="@(busy || current.Waitlisted)" />
+     <label for="registration-cancelled">Afgehaakt op (leeg = niet afgehaakt)</label><input id="registration-cancelled" type="date" class="form-control" @bind="cancelled" disabled="@busy" />
+    </div>
+    <p class="mt-2">Beschikbaarheid wijzigt u via de tijden in het overzicht. Koornaam, stad en genre wijzigt u bij de algemene koorgegevens.</p>
+   </Content>
+   <FooterTemplate>
+    <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">Opslaan</button>
+    <button type="button" class="btn btn-secondary" disabled="@busy" @onclick="Close">Annuleren</button>
+   </FooterTemplate>
+  </DialogTemplates>
+ </SfDialog>
+}
+@code{
+ [Parameter]public EventCallback Saved{get;set;}
+ private RegistrationEdit? current;
+ private DateTime? registered,paid,confirmed,cancelled;
+ private string preference="11";
+ private bool battle,review,busy;
+ private string? message;
+ public async Task OpenAsync(uint festival,uint group)
+ {
+  if(busy)return;
+  current=await Service.ReadAsync(festival,group);message=null;
+  if(current is not null){registered=current.Registered;paid=current.Paid;confirmed=current.Confirmed;cancelled=current.Cancelled;preference=$"{current.Inside}{current.Outside}";battle=current.Battle;review=current.Review;}
+  StateHasChanged();
+ }
+ private void Close()=>current=null;
+ private async Task SaveAsync()
+ {
+  if(busy || current is null)return;
+  if(preference is not ("11" or "20" or "02") && preference!=$"{current.Inside}{current.Outside}"){message="Kies samen twee binnen- en buitenoptredens.";return;}
+  busy=true;
+  try
+  {
+   var changedPreference=preference is "11" or "20" or "02";
+   var edited=current with{Registered=registered,Paid=paid,Confirmed=confirmed,Cancelled=cancelled,Inside=changedPreference?preference[0]-'0':current.Inside,Outside=changedPreference?preference[1]-'0':current.Outside,Battle=battle,Review=review};
+   message=await Service.SaveAsync(current,edited);
+   if(message is null){current=null;await Saved.InvokeAsync();}
+  }
+  catch(Exception){message="Opslaan is niet gelukt. Open de inschrijving opnieuw en probeer het nogmaals.";}
+  finally{busy=false;}
+ }
+}

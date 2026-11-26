@@ -221,7 +221,7 @@ public static class QueryDefinitions
     GROUP BY ah_personen.email
     ORDER BY `Groep` ASC;";
 
-    public static readonly string GetRegistrationsByFestivalId = @"
+    public static readonly string GetRegistrationsByFestivalId = $@"
         SELECT
             i.festival_id AS festival_id,
             i.zanggroep_id AS zanggroep_id,
@@ -233,18 +233,7 @@ public static class QueryDefinitions
             i.podiumsoort AS podium,
             i.aantal_deelnemers AS zangers,
             COALESCE(gen.nl,'') AS genre,
-            ((CASE
-                i.podiumsoort WHEN 'B' THEN 25.00
-                              WHEN 'C' THEN 50.00
-                              WHEN 'D' THEN 75.00
-                              ELSE 0.00
-            END) + (CASE
-                WHEN (i.aantal_deelnemers BETWEEN 1 and 20) THEN 50.00
-                WHEN (i.aantal_deelnemers BETWEEN 21 and 50) THEN 75.00
-                WHEN (i.aantal_deelnemers BETWEEN 51 and 100) THEN 100.00
-                WHEN (i.aantal_deelnemers > 100) THEN 125.00
-                ELSE 0.00
-            END)) AS tebetalen,
+            ({Amusing.Facturatie.FestivalTariefSql.Deelnemersprijs} + p.prijs) AS tebetalen,
             IF(i.betaald IS NULL, 'Nee', 'Ja') AS betaald,
             IF(i.bevestigd IS NULL, 'Nee', 'Ja') AS bevestigd,
             IF(i.wens_1 IS NULL OR LOWER(i.wens_1)='', 'nee', i.wens_1) AS kleedkamer,
@@ -259,6 +248,7 @@ public static class QueryDefinitions
             JOIN amusing.ah_festivals f ON f.festival_id=i.festival_id
             LEFT JOIN amusing.ah_zanggroepen grp ON i.zanggroep_id = grp.zanggroep_id
             LEFT JOIN amusing.ah_genres gen ON grp.genre_id = gen.genre_id
+            {Amusing.Facturatie.FestivalTariefSql.PodiumtariefJoin}
         WHERE
             i.festival_id = @festivalId
         ORDER BY

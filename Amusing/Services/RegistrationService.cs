@@ -1,4 +1,4 @@
-﻿using Amusing.Helpers;
+using Amusing.Helpers;
 using Amusing.Models;
 
 namespace Amusing.Services;
@@ -23,7 +23,7 @@ public class RegistrationService(GenericDataService dataService)
                 Podium = reader["Podium"].ToString(),
                 Zangers = Convert.ToInt32(reader["Zangers"]),
                 Genre = reader["Genre"].ToString(),
-                TeBetalen = Convert.ToDecimal(reader["TeBetalen"]),
+                TeBetalen = reader["TeBetalen"] is DBNull ? null : Convert.ToDecimal(reader["TeBetalen"]),
                 Betaald = reader["Betaald"].ToString(),
                 Bevestigd = reader["Bevestigd"].ToString(),
                 Kleedkamer = reader["Kleedkamer"].ToString(),

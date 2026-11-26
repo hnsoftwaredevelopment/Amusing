@@ -118,6 +118,7 @@ builder.Services.AddScoped<GroupService>();
 builder.Services.AddScoped<PersonService>();
 builder.Services.AddScoped<RegistrationService>();
 builder.Services.AddScoped<RegistrationAvailabilityService>();
+builder.Services.AddScoped<RegistrationEditService>();
 builder.Services.AddScoped<WaitlistService>();
 builder.Services.AddScoped<StageService>();
 builder.Services.AddScoped<StageTypeService>();
