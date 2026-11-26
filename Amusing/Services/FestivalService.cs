@@ -35,6 +35,8 @@ public class FestivalService( GenericDataService dataService )
         Festivaldatum = DateOnly.FromDateTime( reader.GetDateTime( reader.GetOrdinal( "Datum" ) ) ),
         StartInschrijving = SafeGetDateOnly( reader, "StartInschrijving" ) ?? DateOnly.MinValue,
         EindeInschrijving = SafeGetDateOnly( reader, "EindeInschrijving" ) ?? DateOnly.MinValue,
+        EersteOptreden = TimeOnly.FromTimeSpan((TimeSpan)reader["EersteOptreden"]),
+        LaatsteOptreden = TimeOnly.FromTimeSpan((TimeSpan)reader["LaatsteOptreden"]),
         Wachtlijst = Convert.ToInt16( reader [ "Wachtlijst" ] ),
         PubliceerPlanning = Convert.ToInt16( reader [ "PubliceerPlanning" ] ),
         MinutenTussenOptredens = Convert.ToUInt16( reader [ "MinutenTussenOptredens" ] ),
@@ -77,8 +79,12 @@ public class FestivalService( GenericDataService dataService )
 
     public async Task ModifyFestivalAsync( FestivalModel model )
     {
+        if(!new Amusing.Shared.FestivalAvailability(model.EersteOptreden.ToTimeSpan(),model.LaatsteOptreden.ToTimeSpan()).IsValid)
+            throw new InvalidOperationException("Kies een geldig festivalvenster in stappen van een halfuur.");
         Dictionary<string, object> parameters = new()
             {
+                { "@EersteOptreden", model.EersteOptreden.ToTimeSpan() },
+                { "@LaatsteOptreden", model.LaatsteOptreden.ToTimeSpan() },
                 { "@festivalid", model.FestivalId },
                 { "@Festival", model.Festival },
                 { "@Festivaldatum", model.Festivaldatum.ToString("yyyy-MM-dd") },

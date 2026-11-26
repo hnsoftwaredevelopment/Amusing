@@ -832,4 +832,11 @@
   <data name="AantalKorenGevonden" xml:space="preserve"><value>{0} koren gevonden</value></data>
   <data name="GeenKorenGevonden" xml:space="preserve"><value>Geen koren gevonden. Probeer een andere zoekterm.</value></data>
   <data name="OpenKoor" xml:space="preserve"><value>Open koor</value></data>
+  <data name="Beschikbaarheid" xml:space="preserve"><value>Beschikbaarheid</value></data>
+  <data name="BeschikbaarVan" xml:space="preserve"><value>Beschikbaar van</value></data>
+  <data name="BeschikbaarTot" xml:space="preserve"><value>Beschikbaar tot</value></data>
+  <data name="BeschikbaarheidUitleg" xml:space="preserve"><value>Geef aan tussen welke tijden het koor beschikbaar is voor optredens.</value></data>
+  <data name="BeschikbaarheidBestaand" xml:space="preserve"><value>De opgeslagen tijden wijken af van het huidige festivalvenster. Bij een wijziging kiest u tijden binnen dat venster.</value></data>
+  <data name="BeschikbaarheidOpslaan" xml:space="preserve"><value>Beschikbaarheid opslaan</value></data>
+  <data name="ControleerInschrijvingEnBeschikbaarheid" xml:space="preserve"><value>Controleer de inschrijfgegevens en de beschikbaarheid. Kies tijden binnen het festivalvenster, in stappen van een halfuur en met minstens een halfuur tussen begin en eind.</value></data>
 </root>

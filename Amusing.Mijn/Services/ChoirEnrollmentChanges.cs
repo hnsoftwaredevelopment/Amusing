@@ -64,7 +64,10 @@ public sealed partial class ChoirEnrollments
                 (current.ForcedStage || !(await StagesAsync(connection, tx, festivalId, ct)).Any(stage => stage.Id == edit.PodiumType)))
                 return EnrollmentResult.Invalid;
 
+            if (!ResolveAvailability(festival,edit.AvailableFrom,edit.AvailableUntil,current,out var from,out var until)) return EnrollmentResult.Invalid;
             var changes = new List<string>();
+            if (from != current.AvailableFrom) changes.Add("AvailableFrom");
+            if (until != current.AvailableUntil) changes.Add("AvailableUntil");
             if (edit.Headcount != current.Headcount) changes.Add("Headcount");
             if (edit.PodiumType != current.PodiumType) changes.Add("PodiumType");
             if (edit.Review != current.Review) changes.Add("Review");
@@ -74,9 +77,10 @@ public sealed partial class ChoirEnrollments
 
             await using var update = Command(connection, tx, """
                 UPDATE ah_inschrijvingen
-                SET aantal_deelnemers=@count,podiumsoort=@stage,wens_4=@review,binnenoptredens=@inside,buitenoptredens=@outside
+                SET aantal_deelnemers=@count,podiumsoort=@stage,wens_4=@review,binnenoptredens=@inside,buitenoptredens=@outside,beschikbaar_van=@from,beschikbaar_tot=@until
                 WHERE festival_id=@festival AND zanggroep_id=@group
                 """);
+            Add(update,"@from",from);Add(update,"@until",until);
             Add(update, "@count", edit.Headcount);
             Add(update, "@stage", edit.PodiumType);
             Add(update, "@review", edit.Review ? "ja" : "nee");

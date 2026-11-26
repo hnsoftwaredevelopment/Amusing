@@ -2,6 +2,8 @@ namespace Amusing.Models;
 
 public class GroupRegistrationModel
 {
+    public string AvailableFrom {get;set;} = "";
+    public string AvailableUntil {get;set;} = "";
     public uint FestivalId { get; set; }
     public string Festival { get; set; } = string.Empty;
     public DateTime RegisteredAt { get; set; }

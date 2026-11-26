@@ -4,6 +4,8 @@ namespace Amusing.Models;
 
 public class FestivalModel
 {
+    [Display(Name="Eerste optreden")] public TimeOnly EersteOptreden {get;set;} = new(11,0);
+    [Display(Name="Laatste optreden")] public TimeOnly LaatsteOptreden {get;set;} = new(17,0);
     public uint FestivalId { get; set; }
 
     [Display( Name = "Editie" )]

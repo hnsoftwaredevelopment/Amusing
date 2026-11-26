@@ -226,6 +226,8 @@ public static class QueryDefinitions
             i.festival_id AS festival_id,
             i.zanggroep_id AS zanggroep_id,
             i.ingeschreven AS datum,
+            TIME_FORMAT(i.beschikbaar_van, '%H:%i') AS AvailableFrom,
+            TIME_FORMAT(i.beschikbaar_tot, '%H:%i') AS AvailableUntil,
             COALESCE(grp.naam,'') AS naam,
             COALESCE(grp.standplaats,'') AS stad,
             i.podiumsoort AS podium,
@@ -772,6 +774,7 @@ public static class QueryDefinitions
 	        DATE(f.eind_inschrijving) AS EindeInschrijving,
 	        f.wachtlijst AS Wachtlijst,
 	        f.planning_publiceren AS PubliceerPlanning,
+            f.eerste_optreden AS EersteOptreden, f.laatste_optreden AS LaatsteOptreden,
 	        IFNULL(pv.WensTijdTussenOptredens ,
                 (SELECT MAX(WensTijdTussenOptredens) FROM amusing.planner_voorwaarden)
             ) AS MinutenTussenOptredens,
@@ -807,6 +810,7 @@ public static class QueryDefinitions
             eind_inschrijving = @EindeInschrijving,
             wachtlijst = @Wachtlijst,
             planning_publiceren = @PubliceerPlanning,
+            eerste_optreden = @EersteOptreden, laatste_optreden = @LaatsteOptreden,
             start_festivaldag = @StartVrijwilligersTaken,
             einde_festivaldag = @EindeVrijwilligersTaken,
             begin_pauze = @StartVrijwilligersPauze,
@@ -917,14 +921,16 @@ public static class QueryDefinitions
         ORDER BY zg.naam, zg.standplaats;";
     public static readonly string AddRegistration = @"
         INSERT INTO amusing.ah_inschrijvingen
-            (festival_id, zanggroep_id, aantal_deelnemers, podiumsoort, ingeschreven)
-        VALUES
-            (@festivalId, @zanggroepId, @aantalDeelnemers, @podiumsoort, @ingeschreven);";
+            (festival_id, zanggroep_id, aantal_deelnemers, podiumsoort, ingeschreven, beschikbaar_van, beschikbaar_tot)
+        SELECT @festivalId, @zanggroepId, @aantalDeelnemers, @podiumsoort, @ingeschreven, eerste_optreden, laatste_optreden
+        FROM amusing.ah_festivals WHERE festival_id=@festivalId;";
     public static readonly string GetGroupRegistrationsByGroupId = @"
         SELECT
             i.festival_id AS FestivalId,
             YEAR(f.festivaldatum) AS Festival,
             i.ingeschreven AS RegisteredAt,
+            TIME_FORMAT(i.beschikbaar_van, '%H:%i') AS AvailableFrom,
+            TIME_FORMAT(i.beschikbaar_tot, '%H:%i') AS AvailableUntil,
             i.aantal_deelnemers AS Singers,
             i.podiumsoort AS StageType,
             IF(i.betaald IS NULL, 'nee', 'ja') AS Paid,
@@ -936,9 +942,9 @@ public static class QueryDefinitions
         ORDER BY f.festivaldatum DESC;";
     public static readonly string RegisterGroupForCurrentFestival = @"
         INSERT INTO amusing.ah_inschrijvingen
-            (festival_id, zanggroep_id, aantal_deelnemers, podiumsoort, ingeschreven)
+            (festival_id, zanggroep_id, aantal_deelnemers, podiumsoort, ingeschreven, beschikbaar_van, beschikbaar_tot)
         SELECT
-            @FestivalId, @GroupId, 0, '', NOW()
+            @FestivalId, @GroupId, 0, '', NOW(), f.eerste_optreden, f.laatste_optreden
         FROM amusing.ah_festivals f
         WHERE f.festival_id = @FestivalId
           AND NOT EXISTS (

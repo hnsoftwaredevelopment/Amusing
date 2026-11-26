@@ -832,4 +832,11 @@
   <data name="AantalKorenGevonden" xml:space="preserve"><value>{0} Chöre gefunden</value></data>
   <data name="GeenKorenGevonden" xml:space="preserve"><value>Keine Chöre gefunden. Versuchen Sie einen anderen Suchbegriff.</value></data>
   <data name="OpenKoor" xml:space="preserve"><value>Chor öffnen</value></data>
+  <data name="Beschikbaarheid" xml:space="preserve"><value>Verfügbarkeit</value></data>
+  <data name="BeschikbaarVan" xml:space="preserve"><value>Verfügbar ab</value></data>
+  <data name="BeschikbaarTot" xml:space="preserve"><value>Verfügbar bis</value></data>
+  <data name="BeschikbaarheidUitleg" xml:space="preserve"><value>Geben Sie an, in welchem Zeitraum der Chor für Auftritte verfügbar ist.</value></data>
+  <data name="BeschikbaarheidBestaand" xml:space="preserve"><value>Die gespeicherten Zeiten weichen vom aktuellen Festivalzeitraum ab. Wählen Sie bei einer Änderung Zeiten innerhalb dieses Zeitraums.</value></data>
+  <data name="BeschikbaarheidOpslaan" xml:space="preserve"><value>Verfügbarkeit speichern</value></data>
+  <data name="ControleerInschrijvingEnBeschikbaarheid" xml:space="preserve"><value>Prüfen Sie die Anmeldung und die Verfügbarkeit. Wählen Sie Zeiten innerhalb des Festivalzeitraums in halbstündigen Schritten mit mindestens einer halben Stunde zwischen Beginn und Ende.</value></data>
 </root>

@@ -1,0 +1,35 @@
+@using Amusing.Shared
+<fieldset data-availability>
+ <legend>@T("Beschikbaarheid")</legend>
+ <p>@T("BeschikbaarheidUitleg")</p>
+ @if (FromTime is { } a && UntilTime is { } b && !Window.Allows(a,b))
+ { <p class="notice">@T("BeschikbaarheidBestaand")</p> }
+ <div class="form-grid">
+  <div><label for="@(Prefix + "-from")">@T("BeschikbaarVan")</label>
+   <select id="@(Prefix + "-from")" name="@(Prefix + ".AvailableFrom")" data-availability-start required>
+    @if (FromTime is { } oldFrom && !Window.Starts.Contains(oldFrom))
+    { <option value="@FestivalAvailability.Format(oldFrom)" selected>@FestivalAvailability.Format(oldFrom) (@T("Huidig"))</option> }
+    @foreach (var time in Window.Starts)
+    { <option value="@FestivalAvailability.Format(time)" selected="@(time == FromTime)">@FestivalAvailability.Format(time)</option> }
+   </select>
+  </div>
+  <div><label for="@(Prefix + "-until")">@T("BeschikbaarTot")</label>
+   <select id="@(Prefix + "-until")" name="@(Prefix + ".AvailableUntil")" data-availability-end required>
+    @if (UntilTime is { } oldUntil && !Window.Ends(Window.First).Contains(oldUntil))
+    { <option value="@FestivalAvailability.Format(oldUntil)" selected>@FestivalAvailability.Format(oldUntil) (@T("Huidig"))</option> }
+    @foreach (var time in Window.Ends(Window.First))
+    { <option value="@FestivalAvailability.Format(time)" selected="@(time == UntilTime)">@FestivalAvailability.Format(time)</option> }
+   </select>
+  </div>
+ </div>
+</fieldset>
+@code {
+ [Parameter] public string Prefix { get; set; } = "Input";
+ [Parameter] public FestivalAvailability Window { get; set; } = new(TimeSpan.FromHours(11),TimeSpan.FromHours(17));
+ [Parameter] public string? From { get; set; }
+ [Parameter] public string? Until { get; set; }
+ [Parameter] public string Language { get; set; } = "nl";
+ private TimeSpan? FromTime => FestivalAvailability.TryTime(From,out var time) ? time : Window.First;
+ private TimeSpan? UntilTime => FestivalAvailability.TryTime(Until,out var time) ? time : Window.Last;
+ private string T(string key) => Amusing.Mijn.Services.UiText.Get(key,Language);
+}

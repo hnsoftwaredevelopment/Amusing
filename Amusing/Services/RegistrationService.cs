@@ -13,6 +13,8 @@ public class RegistrationService(GenericDataService dataService)
             QueryDefinitions.GetRegistrationsByFestivalId,
             reader => new RegistrationModel
             {
+                AvailableFrom = reader["AvailableFrom"].ToString() ?? "",
+                AvailableUntil = reader["AvailableUntil"].ToString() ?? "",
                 FestivalId = Convert.ToUInt32(reader["festival_id"]),
                 GroepId = Convert.ToUInt32(reader["zanggroep_id"]),
                 Datum = Convert.ToDateTime(reader["Datum"]),
@@ -195,6 +197,8 @@ public class RegistrationService(GenericDataService dataService)
             QueryDefinitions.GetGroupRegistrationsByGroupId,
             reader => new GroupRegistrationModel
             {
+                AvailableFrom = reader["AvailableFrom"].ToString() ?? "",
+                AvailableUntil = reader["AvailableUntil"].ToString() ?? "",
                 FestivalId = Convert.ToUInt32(reader["FestivalId"]),
                 Festival = reader["Festival"]?.ToString() ?? string.Empty,
                 RegisteredAt = Convert.ToDateTime(reader["RegisteredAt"]),
