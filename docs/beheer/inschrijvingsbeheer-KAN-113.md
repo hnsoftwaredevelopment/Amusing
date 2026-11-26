@@ -60,3 +60,8 @@ De actuele publicatie draait sinds 16:12 Nederlandse tijd met processen 116297 e
 
 
 De financiële kolommen zijn verder aangevuld op verzoek van de gebruiker: laatste factuurdatum, werkelijk betaald bedrag, betaaldatum, bevestigingsdatum en afhaakdatum. Beoordeling is uit scherm en exports verwijderd. Bronkeuze, betaaltermijn en rode signalering staan in [Factuurkolommen KAN-146](factuurkolommen-KAN-146.md).
+
+
+## Praktijkakkoord 26 november 2026
+
+De gebruiker heeft de volledige huidige dev-uitvoering goedgekeurd, inclusief de gecombineerde status-/datumkolommen en de datumvoorstellen. KAN-113 is klaar voor merge via PR62. De wijzigingen zijn op dev gepubliceerd; merge en productiepublicatie zijn nog niet uitgevoerd. Alle code is gecommit en gepusht. Het overige werk in KAN-146 (onder meer verdere rol-/boekingsafspraken) blijft apart staan. Volgende geplande uitvoeringsstap: KAN-114; vandaag wordt geen nieuw ticket gestart.

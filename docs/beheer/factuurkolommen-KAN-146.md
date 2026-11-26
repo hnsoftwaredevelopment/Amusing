@@ -32,3 +32,8 @@ Gepubliceerd op dev.beheer op 26 november 2026. De binary-hash, een nieuw servic
 Bij geen betaling staat Nee in plaats van het eerdere streepje. Een bekende betaling toont het bedrag; een historische betaaldatum zonder bekend bedrag toont Ja (bedrag onbekend). Bevestigd en Afgehaakt tonen hun opgeslagen datum of Nee, met dezelfde klikacties als voorheen. De exports behouden getypeerde bedragen en datums voor sorteren en rekenen en bevatten geen dubbele status-/datumkolommen.
 
 Bij het openen van Betaling, Bevestiging of Afhaken wordt alleen de datum van die actie vooraf ingevuld met vandaag volgens Europe/Amsterdam als nog geen datum bekend is. Een bestaande datum blijft behouden. Voorstellen worden pas bij Opslaan vastgelegd. Acht gerichte tests en ingelogde browsercontrole zijn geslaagd, inclusief het datumvoorstel en het ontbreken van dubbele kolommen. Gepubliceerd op dev.beheer; back-up /var/backups/kan146-columns.KLsxmGHJ. Productie ongewijzigd.
+
+
+## Praktijkakkoord 26 november 2026
+
+De gebruiker heeft de volledige huidige dev-uitvoering goedgekeurd, inclusief de gecombineerde status-/datumkolommen en de datumvoorstellen. KAN-113 is klaar voor merge via PR62. De wijzigingen zijn op dev gepubliceerd; merge en productiepublicatie zijn nog niet uitgevoerd. Alle code is gecommit en gepusht. Het overige werk in KAN-146 (onder meer verdere rol-/boekingsafspraken) blijft apart staan. Volgende geplande uitvoeringsstap: KAN-114; vandaag wordt geen nieuw ticket gestart.
