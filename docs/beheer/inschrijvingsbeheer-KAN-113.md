@@ -23,7 +23,7 @@ Mijn toont de extra auditveldnamen via bestaande Nederlandse, Duitse en Engelse 
 - Twee gerichte integratietests tegen een tijdelijke, geïsoleerde database zijn geslaagd: gedeelde bewerking, correcte editieprijzen, facturatiebescherming, statusbeperkingen, ongeautoriseerde toegang, verouderde formulieren en beschikbaarheid.
 - 36 gerichte Beheer-regressietests zijn geslaagd.
 - De publicatie wordt opgebouwd uit de bestaande samengestelde dev-bronnen, zodat onder andere KAN-105, KAN-110 en KAN-21 behouden blijven. De featurebranch bouwt voort op KAN-110; open voorgangers moeten bij een latere merge worden meegenomen.
-- Beide Linux-publicatiebuilds van de samengestelde bronnen zijn geslaagd. Dev- en productiepublicatie zijn nog niet uitgevoerd. Browsercontrole en onderstaande praktijktests volgen na toestemming voor dev-publicatie.
+- Beide Linux-publicatiebuilds van de samengestelde bronnen zijn geslaagd. Dev.beheer en dev.mijn zijn op 26 november 2026 gepubliceerd. Binary-hashes, nieuwe serviceprocessen, healthchecks en een anonieme browsercontrole van de betrokken routes zijn gecontroleerd. De ingelogde praktijktest staat nog open. Productie is niet gewijzigd.
 
 ## Praktijktest
 
@@ -37,3 +37,10 @@ Mijn toont de extra auditveldnamen via bestaande Nederlandse, Duitse en Engelse 
 ## Planning
 
 De gebruiker heeft KAN-143 als lage prioriteit aangemerkt. KAN-144 en KAN-146 moeten vóór de handleiding worden uitgevoerd. De eerder afgesproken volgorde na KAN-113 is KAN-114, KAN-30 en KAN-109; de nieuwe tickets worden vóór de handleiding ingepland.
+
+
+## Dev-publicatie 26 november 2026
+
+Back-up op VPS: /var/backups/kan113-dev.hEjAZ4Gg. Beide diensten zijn opnieuw gestart om 15:29 Nederlandse tijd, met nieuwe processen 115126 en 115127. Configuratiebestanden zijn behouden; er is geen databaseverversing uitgevoerd. Mailomleiding en de blokkade voor algemene dev-mail blijven behouden.
+
+Vaste gebruikersinstructie: routinepublicaties naar dev.beheer en dev.mijn zijn voortaan toegestaan zonder opnieuw akkoord te vragen. De gebruiker noemde dev.amusing; binnen dit project is dit opgevat als dev.mijn en zo teruggekoppeld. Productie, merges en databaseverversingen vallen buiten deze toestemming. Deze uitzondering staat ook in de publicatieskill.
