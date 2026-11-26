@@ -839,4 +839,5 @@
   <data name="BeschikbaarheidBestaand" xml:space="preserve"><value>Die gespeicherten Zeiten weichen vom aktuellen Festivalzeitraum ab. Wählen Sie bei einer Änderung Zeiten innerhalb dieses Zeitraums.</value></data>
   <data name="BeschikbaarheidOpslaan" xml:space="preserve"><value>Verfügbarkeit speichern</value></data>
   <data name="ControleerInschrijvingEnBeschikbaarheid" xml:space="preserve"><value>Prüfen Sie die Anmeldung und die Verfügbarkeit. Wählen Sie Zeiten innerhalb des Festivalzeitraums in halbstündigen Schritten mit mindestens einer halben Stunde zwischen Beginn und Ende.</value></data>
+  <data name="BetaaldBedrag" xml:space="preserve"><value>Gezahlter Betrag</value></data>
 </root>

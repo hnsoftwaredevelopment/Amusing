@@ -95,13 +95,13 @@
 
  <GridColumn Field="Genre" HeaderText="Genre" Width="120" />
  <GridColumn Field="TeBetalen" HeaderText="Te betalen (€)" Format="N2" Width="130" TextAlign="TextAlign.Right" />
- <GridColumn Field="Betaald" HeaderText="Betaald" Width="100"><Template Context="row"><button class="btn btn-link p-0" @onclick="() => EditRegistrationAsync((RegistrationModel)row)">@(((RegistrationModel)row).Betaald)</button></Template></GridColumn>
- <GridColumn Field="Bevestigd" HeaderText="Bevestigd" Width="100"><Template Context="row"><button class="btn btn-link p-0" @onclick="() => EditRegistrationAsync((RegistrationModel)row)">@(((RegistrationModel)row).Bevestigd)</button></Template></GridColumn>
+ <GridColumn Field="Betaald" HeaderText="Betaald" Width="100"><Template Context="row"><button class="btn btn-link p-0" @onclick="() => EditRegistrationAsync((RegistrationModel)row,RegistrationEditAction.Payment)">@(((RegistrationModel)row).Betaald)</button></Template></GridColumn>
+ <GridColumn Field="Bevestigd" HeaderText="Bevestigd" Width="100"><Template Context="row"><button class="btn btn-link p-0" @onclick="() => EditRegistrationAsync((RegistrationModel)row,RegistrationEditAction.Confirmation)">@(((RegistrationModel)row).Bevestigd)</button></Template></GridColumn>
  <GridColumn Field="AcapellaBattle" HeaderText="AcapellaBattle" Width="120" />
  <GridColumn Field="Beoordeling" HeaderText="Beoordeling" Width="110" />
  <GridColumn Field="Binnen" HeaderText="Binnen" Width="70" TextAlign="TextAlign.Center" />
  <GridColumn Field="Buiten" HeaderText="Buiten" Width="70" TextAlign="TextAlign.Center" />
- <GridColumn Field="Afgehaakt" HeaderText="Afgehaakt" Width="110"><Template Context="row"><button class="btn btn-link p-0" @onclick="() => EditRegistrationAsync((RegistrationModel)row)">@(((RegistrationModel)row).Afgehaakt)</button></Template></GridColumn>
+ <GridColumn Field="Afgehaakt" HeaderText="Afgehaakt" Width="110"><Template Context="row"><button class="btn btn-link p-0" @onclick="() => EditRegistrationAsync((RegistrationModel)row,RegistrationEditAction.Cancellation)">@(((RegistrationModel)row).Afgehaakt)</button></Template></GridColumn>
  <GridColumn HeaderText="Wijzigen" Width="100"><Template Context="row"><button type="button" class="btn btn-outline-primary btn-sm" title="Inschrijving wijzigen" @onclick="() => EditRegistrationAsync((RegistrationModel)row)"><span class="fa-solid fa-pen" aria-hidden="true"></span><span class="visually-hidden">Inschrijving wijzigen</span></button></Template></GridColumn>
 
 							</GridColumns>
@@ -199,5 +199,5 @@
 @code {
  private Amusing.Components.RegistrationAvailabilityDialog availabilityDialog = default!;
  private Amusing.Components.RegistrationEditDialog registrationEditDialog = default!;
- private Task EditRegistrationAsync(RegistrationModel row)=>registrationEditDialog.OpenAsync(row.FestivalId,row.GroepId);
+ private Task EditRegistrationAsync(RegistrationModel row,RegistrationEditAction action=RegistrationEditAction.Details)=>registrationEditDialog.OpenAsync(row.FestivalId,row.GroepId,action);
 }

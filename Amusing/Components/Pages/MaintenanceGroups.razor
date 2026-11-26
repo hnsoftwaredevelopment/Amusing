@@ -215,9 +215,9 @@ else
                                         <GridColumn Field="AvailableUntil" HeaderText="Beschikbaar tot" Width="135"><Template Context="row"><button type="button" class="btn btn-link p-0" @onclick="() => availabilityDialog.OpenAsync(((GroupRegistrationModel)row).FestivalId,SelectedGroup!.GroupId)">@(((GroupRegistrationModel)row).AvailableUntil)</button></Template></GridColumn>
                                         <GridColumn Field="Singers" HeaderText="Zangers" Width="90px" />
                                         <GridColumn Field="StageType" HeaderText="Podiumsoort" Width="110px" />
-                                        <GridColumn Field="Paid" HeaderText="Betaald" Width="90px" />
-                                        <GridColumn Field="Confirmed" HeaderText="Bevestigd" Width="100px" />
-                                        <GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100px" />
+                                        <GridColumn Field="Paid" HeaderText="Betaald" Width="110px"><Template Context="row"><button type="button" class="btn btn-link p-0" @onclick="() => groupRegistrationEditDialog.OpenAsync(((GroupRegistrationModel)row).FestivalId,SelectedGroup!.GroupId,RegistrationEditAction.Payment)">@(((GroupRegistrationModel)row).Paid)</button></Template></GridColumn>
+                                        <GridColumn Field="Confirmed" HeaderText="Bevestigd" Width="110px"><Template Context="row"><button type="button" class="btn btn-link p-0" @onclick="() => groupRegistrationEditDialog.OpenAsync(((GroupRegistrationModel)row).FestivalId,SelectedGroup!.GroupId,RegistrationEditAction.Confirmation)">@(((GroupRegistrationModel)row).Confirmed)</button></Template></GridColumn>
+                                        <GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="110px"><Template Context="row"><button type="button" class="btn btn-link p-0" @onclick="() => groupRegistrationEditDialog.OpenAsync(((GroupRegistrationModel)row).FestivalId,SelectedGroup!.GroupId,RegistrationEditAction.Cancellation)">@(((GroupRegistrationModel)row).DroppedOut)</button></Template></GridColumn>
                                         <GridColumn HeaderText="Factuur" Width="210px">
                                             <Template>
                                                 @if (context is GroupRegistrationModel registration)

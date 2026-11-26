@@ -1,29 +1,55 @@
 @using Amusing.Services
+@using Amusing.Shared
 @using Syncfusion.Blazor.Popups
 @inject RegistrationEditService Service
 @if(current is not null)
 {
  <SfDialog Width="520px" IsModal="true" ShowCloseIcon="false" Visible="true">
   <DialogTemplates>
-   <Header>Inschrijving wijzigen — @current.Name</Header>
+   <Header>@Title — @current.Name</Header>
    <Content>
     @if(message is not null){<p role="alert" class="alert alert-danger">@message</p>}
-    <p>Aantal deelnemers en podiumsoort worden via de inschrijving in Mijn gewijzigd, vanwege de facturatie.</p>
-    @if(current.Waitlisted){<p class="alert alert-info">Dit koor staat op de wachtlijst. Gebruik Wachtlijst beheren om het te plaatsen en de nota te versturen.</p>}
-    <div class="registration-edit-fields">
-     <label for="registration-date">Ingeschreven</label><input id="registration-date" type="datetime-local" class="form-control" @bind="registered" disabled="@busy" />
-     <label for="registration-preference">Optredens</label>
-     <select id="registration-preference" class="form-select" @bind="preference" disabled="@busy">
-      @if(preference!="11" && preference!="20" && preference!="02"){<option value="@preference">Huidig: @current.Inside binnen / @current.Outside buiten</option>}
-      <option value="11">1 binnen / 1 buiten</option><option value="20">2 binnen</option><option value="02">2 buiten</option>
+    <div class="d-grid gap-2">
+    @if(action==RegistrationEditAction.Payment)
+    {
+     <p>Een ingevulde betaaldatum betekent Betaald: Ja. Maak de datum leeg voor Betaald: Nee. U kunt datum en bedrag corrigeren of beide leegmaken.</p>
+     <label for="registration-paid">Betaaldatum</label><input id="registration-paid" type="date" class="form-control" @bind="paid" disabled="@(busy || current.Waitlisted)" />
+     <label for="registration-amount">Betaald bedrag (€)</label><input id="registration-amount" type="number" step="0.01" min="0" max="99999999.99" class="form-control" @bind="amount" disabled="@(busy || current.Waitlisted)" />
+     <button type="button" class="btn btn-outline-secondary" disabled="@(busy || current.Waitlisted)" @onclick="ClearPayment">Datum en bedrag leegmaken</button>
+     @if(current.Waitlisted){<p class="alert alert-info">Plaats dit koor eerst via Wachtlijst beheren. Daar worden het plaatsingsbericht en de nota verstuurd.</p>}
+    }
+    else if(action==RegistrationEditAction.Confirmation)
+    {
+     <label for="registration-confirmed">Datum bevestiging</label><input id="registration-confirmed" type="date" class="form-control" @bind="confirmed" disabled="@(busy || current.Waitlisted)" />
+     <p>Met een datum wordt Bevestigd: Ja. Maak de datum leeg voor Bevestigd: Nee.</p>
+     <button type="button" class="btn btn-outline-secondary" disabled="@(busy || current.Waitlisted)" @onclick="() => confirmed=null">Bevestiging leegmaken</button>
+     @if(current.Waitlisted){<p class="alert alert-info">Plaats dit koor eerst via Wachtlijst beheren.</p>}
+    }
+    else if(action==RegistrationEditAction.Cancellation)
+    {
+     <label for="registration-cancelled">Datum afhaken</label><input id="registration-cancelled" type="date" class="form-control" @bind="cancelled" disabled="@busy" />
+     <p>Met een datum wordt Afgehaakt: Ja. Maak de datum leeg voor Afgehaakt: Nee.</p>
+     <button type="button" class="btn btn-outline-secondary" disabled="@busy" @onclick="() => cancelled=null">Afhaakdatum leegmaken</button>
+    }
+    else
+    {
+     <p>Festivalvenster: @FestivalAvailability.Format(current.First) – @FestivalAvailability.Format(current.Last)</p>
+     <label for="registration-from">Beschikbaar van</label>
+     <select id="registration-from" class="form-select" @bind="from" @bind:after="AdjustUntil" disabled="@busy">
+      @if(!current.Window.Starts.Contains(current.From)){<option value="@FestivalAvailability.Format(current.From)">@FestivalAvailability.Format(current.From) (huidig)</option>}
+      @foreach(var time in current.Window.Starts){<option value="@FestivalAvailability.Format(time)">@FestivalAvailability.Format(time)</option>}
      </select>
-     <label><input type="checkbox" @bind="battle" disabled="@busy" /> AcapellaBattle</label>
-     <label><input type="checkbox" @bind="review" disabled="@busy" /> Beoordeling</label>
-     <label for="registration-paid">Betaald op (leeg = niet betaald)</label><input id="registration-paid" type="date" class="form-control" @bind="paid" disabled="@(busy || current.Waitlisted)" />
-     <label for="registration-confirmed">Bevestigd op (leeg = niet bevestigd)</label><input id="registration-confirmed" type="date" class="form-control" @bind="confirmed" disabled="@(busy || current.Waitlisted)" />
-     <label for="registration-cancelled">Afgehaakt op (leeg = niet afgehaakt)</label><input id="registration-cancelled" type="date" class="form-control" @bind="cancelled" disabled="@busy" />
+     <label for="registration-until">Beschikbaar tot</label>
+     <select id="registration-until" class="form-select" @bind="until" disabled="@busy">
+      @if(!EndOptions.Contains(current.Until) && from==FestivalAvailability.Format(current.From)){<option value="@FestivalAvailability.Format(current.Until)">@FestivalAvailability.Format(current.Until) (huidig)</option>}
+      @foreach(var time in EndOptions){<option value="@FestivalAvailability.Format(time)">@FestivalAvailability.Format(time)</option>}
+     </select>
+     <label><input type="checkbox" @bind="battle" disabled="@busy" /> Acapella battle</label>
+     <label for="registration-inside">Binnenoptredens</label><input id="registration-inside" type="number" class="form-control" min="0" max="2" @bind="inside" disabled="@busy" />
+     <label for="registration-outside">Buitenoptredens</label><input id="registration-outside" type="number" class="form-control" min="0" max="2" @bind="outside" disabled="@busy" />
+     <p>Kies samen twee optredens. Deelnemersaantal en podiumsoort blijven ongewijzigd.</p>
+    }
     </div>
-    <p class="mt-2">Beschikbaarheid wijzigt u via de tijden in het overzicht. Koornaam, stad en genre wijzigt u bij de algemene koorgegevens.</p>
    </Content>
    <FooterTemplate>
     <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">Opslaan</button>
@@ -35,31 +61,46 @@
 @code{
  [Parameter]public EventCallback Saved{get;set;}
  private RegistrationEdit? current;
- private DateTime? registered,paid,confirmed,cancelled;
- private string preference="11";
- private bool battle,review,busy;
+ private RegistrationEditAction action;
+ private DateTime? paid,confirmed,cancelled;
+ private decimal? amount;
+ private string from="",until="";
+ private int inside,outside;
+ private bool battle,busy;
  private string? message;
- public async Task OpenAsync(uint festival,uint group)
+ private string Title=>action switch{RegistrationEditAction.Payment=>"Betaling",RegistrationEditAction.Confirmation=>"Bevestiging",RegistrationEditAction.Cancellation=>"Afhaken",_=>"Inschrijving wijzigen"};
+ private IEnumerable<TimeSpan> EndOptions=>current is not null && FestivalAvailability.TryTime(from,out var start)?current.Window.Ends(start):[];
+ public async Task OpenAsync(uint festival,uint group,RegistrationEditAction selectedAction=RegistrationEditAction.Details)
  {
   if(busy)return;
-  current=await Service.ReadAsync(festival,group);message=null;
-  if(current is not null){registered=current.Registered;paid=current.Paid;confirmed=current.Confirmed;cancelled=current.Cancelled;preference=$"{current.Inside}{current.Outside}";battle=current.Battle;review=current.Review;}
+  current=await Service.ReadAsync(festival,group);message=null;action=selectedAction;
+  if(current is not null)
+  {
+   paid=current.Paid;amount=current.PaidAmount;confirmed=current.Confirmed;cancelled=current.Cancelled;
+   inside=current.Inside;outside=current.Outside;battle=current.Battle;
+   from=FestivalAvailability.Format(current.From);until=FestivalAvailability.Format(current.Until);
+  }
   StateHasChanged();
  }
+ private void AdjustUntil(){if(FestivalAvailability.TryTime(until,out var end) && !EndOptions.Contains(end))until=EndOptions.Select(FestivalAvailability.Format).FirstOrDefault()??"";}
+ private void ClearPayment(){paid=null;amount=null;}
  private void Close()=>current=null;
  private async Task SaveAsync()
  {
   if(busy || current is null)return;
-  if(preference is not ("11" or "20" or "02") && preference!=$"{current.Inside}{current.Outside}"){message="Kies samen twee binnen- en buitenoptredens.";return;}
-  busy=true;
-  try
+  var edited=current;
+  switch(action)
   {
-   var changedPreference=preference is "11" or "20" or "02";
-   var edited=current with{Registered=registered,Paid=paid,Confirmed=confirmed,Cancelled=cancelled,Inside=changedPreference?preference[0]-'0':current.Inside,Outside=changedPreference?preference[1]-'0':current.Outside,Battle=battle,Review=review};
-   message=await Service.SaveAsync(current,edited);
-   if(message is null){current=null;await Saved.InvokeAsync();}
+   case RegistrationEditAction.Payment:edited=current with{Paid=paid,PaidAmount=amount};break;
+   case RegistrationEditAction.Confirmation:edited=current with{Confirmed=confirmed};break;
+   case RegistrationEditAction.Cancellation:edited=current with{Cancelled=cancelled};break;
+   default:
+    if(!FestivalAvailability.TryTime(from,out var start) || !FestivalAvailability.TryTime(until,out var end)){message="Kies geldige beschikbaarheidstijden.";return;}
+    edited=current with{From=start,Until=end,Inside=inside,Outside=outside,Battle=battle};break;
   }
-  catch(Exception){message="Opslaan is niet gelukt. Open de inschrijving opnieuw en probeer het nogmaals.";}
+  busy=true;
+  try{message=await Service.SaveAsync(current,edited,action);if(message is null){current=null;await Saved.InvokeAsync();}}
+  catch(Exception){message="Opslaan is niet gelukt. Open deze actie opnieuw en probeer het nogmaals.";}
   finally{busy=false;}
  }
 }

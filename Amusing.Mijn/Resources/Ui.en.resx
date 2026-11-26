@@ -839,4 +839,5 @@
   <data name="BeschikbaarheidBestaand" xml:space="preserve"><value>The saved times differ from the current festival window. When changing them, choose times within that window.</value></data>
   <data name="BeschikbaarheidOpslaan" xml:space="preserve"><value>Save availability</value></data>
   <data name="ControleerInschrijvingEnBeschikbaarheid" xml:space="preserve"><value>Check the registration and availability. Choose times within the festival window in half-hour steps, allowing at least half an hour between start and end.</value></data>
+  <data name="BetaaldBedrag" xml:space="preserve"><value>Amount paid</value></data>
 </root>
