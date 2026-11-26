@@ -1,0 +1,132 @@
+--- a/Amusing/Components/Pages/MaintenanceUsers.razor
++++ b/Amusing/Components/Pages/MaintenanceUsers.razor
+@@ -37,6 +37,8 @@
+                     <div class="form-left"> 
+                         <div class="form-row" style="display:flex; align-items:flex-end; gap:8px;">
+                             <SfTextBox Placeholder="Gebruikersnaam" FloatLabelType="FloatLabelType.Always" Width="120px" @bind-Value="UserUsername" />
++                            <label>Privéhersteladres <input type="email" maxlength="80" @bind="UserRecoveryEmail" /></label>
++                            <label>Weergavenaam voor koren <input maxlength="100" @bind="UserDisplayName" /></label>
+                             <SfComboBox TValue="string" TItem="UserRoles" FloatLabelType="FloatLabelType.Always"
+                                         Placeholder="Rol" DataSource="@Roles" Width="170px" @bind-Value="UserRole" >
+                                 <ComboBoxFieldSettings Value="Role" Text="Role"></ComboBoxFieldSettings>
+--- a/Amusing/Components/Pages/MaintenanceUsers.razor.cs
++++ b/Amusing/Components/Pages/MaintenanceUsers.razor.cs
+@@ -47,6 +47,18 @@
+         set { if (SelectedUser != null) SelectedUser.UserId = value; }
+     }
+ 
++    public string UserRecoveryEmail
++    {
++        get => SelectedUser?.RecoveryEmail ?? "";
++        set { if (SelectedUser != null) SelectedUser.RecoveryEmail = value; }
++    }
++
++    public string UserDisplayName
++    {
++        get => SelectedUser?.DisplayName ?? "";
++        set { if (SelectedUser != null) SelectedUser.DisplayName = value; }
++    }
++
+     public string UserUsername
+     {
+         get => SelectedUser?.Username ?? string.Empty;
+@@ -95,6 +107,8 @@
+         {
+             UserId = SelectedUser.UserId,
+             Username = SelectedUser.Username,
++            DisplayName = SelectedUser.DisplayName,
++            RecoveryEmail = SelectedUser.RecoveryEmail,
+             Password = SelectedUser.Password,
+             PasswordHash = SelectedUser.PasswordHash,
+             Role = SelectedUser.Role
+@@ -135,7 +149,7 @@
+             var diffOptions = new DiffOptions
+             {
+                 ExcludedProperties = ["PasswordHash"],
+-                MaskedProperties = ["Password"]
++                MaskedProperties = ["Password", "RecoveryEmail"]
+             };
+ 
+             // Check the differences between the original and changed version
+@@ -163,7 +177,7 @@
+             var diffOptions = new DiffOptions
+             {
+                 ExcludedProperties = ["PasswordHash"],
+-                MaskedProperties = ["Password"]
++                MaskedProperties = ["Password", "RecoveryEmail"]
+             };
+ 
+             // Check the differences between the original and changed version
+--- a/Amusing/Models/UserModel.cs
++++ b/Amusing/Models/UserModel.cs
+@@ -8,6 +8,9 @@
+ 
+     [Display( Name = "Gebruikersnaam" )]
+     public string Username { get; set; } = null!;
++
++    public string RecoveryEmail { get; set; } = "";
++    public string DisplayName { get; set; } = "";
+ 
+     [Display( Name = "Wachtwoord" )]
+     public string Password { get; set; } = null!;
+--- a/Amusing/Services/UserService.cs
++++ b/Amusing/Services/UserService.cs
+@@ -15,6 +15,8 @@
+             {
+                 UserId = Convert.ToUInt32( reader [ "UserId" ] ),
+                 Username = reader [ "UserName" ].ToString() ?? string.Empty,
++                RecoveryEmail = reader["RecoveryEmail"].ToString() ?? "",
++                DisplayName = reader["DisplayName"].ToString() ?? "",
+                 Password = "",
+                 Role = reader [ "Role" ].ToString() ?? string.Empty,
+                 LastLoginDate = reader [ "LastLoginDate" ] == DBNull.Value
+@@ -29,6 +31,8 @@
+         {
+             { "@UserId", model.UserId },
+             { "@UserName", model.Username },
++            { "@DisplayName", model.DisplayName.Trim() },
++            { "@RecoveryEmail", model.RecoveryEmail.Trim() },
+             { "@Role", model.Role }
+             };
+ 
+@@ -52,6 +56,8 @@
+         Dictionary<string, object> parameters = new()
+     {
+         { "@UserName", model.Username },
++            { "@DisplayName", model.DisplayName.Trim() },
++            { "@RecoveryEmail", model.RecoveryEmail.Trim() },
+         { "@Password", model.Password },
+         { "@Role", model.Role }
+     };
+--- a/Amusing/Helpers/QueryDefinitions.cs
++++ b/Amusing/Helpers/QueryDefinitions.cs
+@@ -1295,22 +1295,26 @@
+         SELECT 
+             usr.user_id AS UserId,
+             usr.username AS UserName,
++            usr.weergavenaam AS DisplayName,
++            usr.herstel_email AS RecoveryEmail,
+             usr.role AS ROLE,
+             DATE(MAX(log.date)) AS LastLoginDate
+         FROM amusing.ah_beheer usr
+         LEFT JOIN amusing.ah_beheer_log log 
+             ON usr.user_id = log.user_id
+-        GROUP BY usr.user_id, usr.username, usr.password, usr.role;";
++        GROUP BY usr.user_id, usr.username, usr.password, usr.role, usr.weergavenaam, usr.herstel_email;";
+     public static readonly string AddNewUser = @"
+         INSERT INTO amusing.ah_beheer
+-            (username, password, role)
+-        VALUES (@UserName, @Password, @Role);
++            (username, password, role, weergavenaam, herstel_email)
++        VALUES (@UserName, @Password, @Role, NULLIF(@DisplayName, ''), NULLIF(@RecoveryEmail, ''));
+         SELECT LAST_INSERT_ID();
+         ";
+     public static readonly string ModifyUserByUserId = @"
+         UPDATE amusing.ah_beheer
+         SET 
+             username = @UserName,
++            weergavenaam = NULLIF(@DisplayName, ''),
++            herstel_email = NULLIF(@RecoveryEmail, ''),
+             role = @Role
+         WHERE user_id = @UserId;";
+     public static readonly string ModifyPasswordByUserId = @"
