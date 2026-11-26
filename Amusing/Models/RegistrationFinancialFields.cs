@@ -2,6 +2,9 @@ namespace Amusing.Models;
 
 public class RegistrationFinancialFields
 {
+ public string BetaaldTekst=>BetaaldBedrag?.ToString("N2",System.Globalization.CultureInfo.GetCultureInfo("nl-NL"))??(Betaaldatum is null?"Nee":"Ja (bedrag onbekend)");
+ public string BevestigdTekst=>Bevestigingsdatum?.ToString("dd-MM-yyyy")??"Nee";
+ public string AfgehaaktTekst=>Afhaakdatum?.ToString("dd-MM-yyyy")??"Nee";
  public decimal? TeBetalen {get;set;}
  public decimal? BetaaldBedrag {get;set;}
  public DateTime? Factuurdatum {get;set;}

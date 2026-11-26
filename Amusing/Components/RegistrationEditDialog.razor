@@ -76,7 +76,9 @@
   current=await Service.ReadAsync(festival,group);message=null;action=selectedAction;
   if(current is not null)
   {
-   paid=current.Paid;amount=current.PaidAmount;confirmed=current.Confirmed;cancelled=current.Cancelled;
+   var today=DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,TimeZoneInfo.FindSystemTimeZoneById("Europe/Amsterdam")));
+   var draft=RegistrationEditService.CreateDraft(current,action,today);
+   paid=draft.Paid;amount=current.PaidAmount;confirmed=draft.Confirmed;cancelled=draft.Cancelled;
    inside=current.Inside;outside=current.Outside;battle=current.Battle;
    from=FestivalAvailability.Format(current.From);until=FestivalAvailability.Format(current.Until);
   }

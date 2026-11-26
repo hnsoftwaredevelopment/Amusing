@@ -4,6 +4,24 @@ using Xunit;
 namespace Beheer.Tests;
 public class RegistrationFinancialTests
 {
+ [Fact]public void CombinedStatusColumnsShowNoOrTheirStoredValue()
+ {
+  var row=new RegistrationFinancialFields();Assert.Equal("Nee",row.BetaaldTekst);Assert.Equal("Nee",row.BevestigdTekst);Assert.Equal("Nee",row.AfgehaaktTekst);
+  row.BetaaldBedrag=75m;Assert.Equal("75,00",row.BetaaldTekst);
+  row.BetaaldBedrag=null;row.Betaaldatum=new(2026,11,25);Assert.Equal("Ja (bedrag onbekend)",row.BetaaldTekst);
+  row.Bevestigingsdatum=new(2026,11,24);row.Afhaakdatum=new(2026,11,25);Assert.Equal("24-11-2026",row.BevestigdTekst);Assert.Equal("25-11-2026",row.AfgehaaktTekst);
+ }
+ [Fact]public void DraftDefaultsOnlyTheSelectedDateAndKeepsExistingDates()
+ {
+  var row=new RegistrationEdit(1,2,"test",null,null,null,null,1,1,false,false,false);var today=new DateOnly(2026,11,26);
+  var payment=RegistrationEditService.CreateDraft(row,RegistrationEditAction.Payment,today);
+  Assert.Equal(today.ToDateTime(TimeOnly.MinValue),payment.Paid);Assert.Null(payment.Confirmed);Assert.Null(payment.Cancelled);Assert.Null(row.Paid);
+  var confirmed=RegistrationEditService.CreateDraft(row,RegistrationEditAction.Confirmation,today);Assert.NotNull(confirmed.Confirmed);Assert.Null(confirmed.Paid);Assert.Null(confirmed.Cancelled);
+  var cancelled=RegistrationEditService.CreateDraft(row,RegistrationEditAction.Cancellation,today);Assert.NotNull(cancelled.Cancelled);Assert.Null(cancelled.Paid);Assert.Null(cancelled.Confirmed);
+  Assert.Equal(row,RegistrationEditService.CreateDraft(row,RegistrationEditAction.Details,today));
+  var existing=row with{Paid=new(2026,11,20),Confirmed=new(2026,11,21),Cancelled=new(2026,11,22)};
+  foreach(var action in Enum.GetValues<RegistrationEditAction>())Assert.Equal(existing,RegistrationEditService.CreateDraft(existing,action,today));
+ }
  [Fact]public void DeadlineIsInclusiveAndFullyPaidInvoicesAreNotOverdue()
  {
   var row=new RegistrationFinancialFields{Factuurdatum=new(2026,11,1),UitersteBetaaldatum=new(2026,12,13),TeBetalen=100m};

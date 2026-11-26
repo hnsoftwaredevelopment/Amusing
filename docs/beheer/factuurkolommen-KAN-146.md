@@ -1,6 +1,6 @@
 # KAN-146 — Factuur- en betalingskolommen
 
-In beide inschrijvingsschermen staan Factuurdatum, Betaald (bedrag), Betaaldatum, Datum bevestiging en Datum afgehaakt. Het betaalde bedrag opent de bestaande betalingsdialoog. De andere statusacties en de beschikbaarheidsbewerking blijven behouden. Beoordeling is uit het overzicht en de exports verwijderd. De nieuwe financiële kolommen staan ook in Excel, CSV en PDF.
+In beide inschrijvingsschermen staan Factuurdatum, Betaald (bedrag of Nee), Betaaldatum, Bevestigd (datum of Nee) en Afgehaakt (datum of Nee). De dubbele losse datumkolommen voor bevestiging en afhaken zijn vervallen. Het betaalde bedrag opent de bestaande betalingsdialoog. De andere statusacties en de beschikbaarheidsbewerking blijven behouden. Beoordeling is uit het overzicht en de exports verwijderd. De nieuwe financiële kolommen staan ook in Excel, CSV en PDF.
 
 ## Bron en signalering
 
@@ -25,3 +25,10 @@ De wijzigingen bouwen voort op KAN-113 in PR62. Geen nieuwe databasemigratie nod
 ## Dev-publicatie
 
 Gepubliceerd op dev.beheer op 26 november 2026. De binary-hash, een nieuw serviceproces en de healthcheck zijn gecontroleerd. Back-up: /var/backups/kan146-columns.iN2sL9Xz. Ingelogde browsercontrole met een tijdelijk account bevestigt alle vijf kolommen, het ontbreken van Beoordeling en de vier afzonderlijke bewerkingsdialogen. Er zijn geen koorgegevens opgeslagen en het tijdelijke account is verwijderd. Dev.mijn hoefde voor deze weergavewijziging niet opnieuw gepubliceerd te worden. Geen database- of productieaanpassingen uitgevoerd in deze stap.
+
+
+## Compacte weergave en datumvoorstellen
+
+Bij geen betaling staat Nee in plaats van het eerdere streepje. Een bekende betaling toont het bedrag; een historische betaaldatum zonder bekend bedrag toont Ja (bedrag onbekend). Bevestigd en Afgehaakt tonen hun opgeslagen datum of Nee, met dezelfde klikacties als voorheen. De exports behouden getypeerde bedragen en datums voor sorteren en rekenen en bevatten geen dubbele status-/datumkolommen.
+
+Bij het openen van Betaling, Bevestiging of Afhaken wordt alleen de datum van die actie vooraf ingevuld met vandaag volgens Europe/Amsterdam als nog geen datum bekend is. Een bestaande datum blijft behouden. Voorstellen worden pas bij Opslaan vastgelegd. Acht gerichte tests en ingelogde browsercontrole zijn geslaagd, inclusief het datumvoorstel en het ontbreken van dubbele kolommen. Gepubliceerd op dev.beheer; back-up /var/backups/kan146-columns.KLsxmGHJ. Productie ongewijzigd.

@@ -18,6 +18,13 @@ public sealed record RegistrationEdit(uint FestivalId,uint GroupId,string Name,D
 
 public sealed class RegistrationEditService(IConfiguration config,UserContextHelper users)
 {
+ public static RegistrationEdit CreateDraft(RegistrationEdit current,RegistrationEditAction action,DateOnly today)=>action switch
+ {
+  RegistrationEditAction.Payment=>current with{Paid=current.Paid??today.ToDateTime(TimeOnly.MinValue)},
+  RegistrationEditAction.Confirmation=>current with{Confirmed=current.Confirmed??today.ToDateTime(TimeOnly.MinValue)},
+  RegistrationEditAction.Cancellation=>current with{Cancelled=current.Cancelled??today.ToDateTime(TimeOnly.MinValue)},
+  _=>current
+ };
  private MySqlConnection Connection()=>new(config.GetConnectionString("DefaultConnection"));
  private async Task<int> AuthorizeAsync(MySqlConnection connection,MySqlTransaction? tx)
  {

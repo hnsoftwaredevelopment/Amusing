@@ -16,13 +16,11 @@ public partial class MaintenanceSubscriptions
         new(){Field="Factuurdatum",HeaderText="Factuurdatum",Format="dd-MM-yyyy",Type=ColumnType.Date},
         new(){Field="BetaaldBedrag",HeaderText="Betaald",Format="N2",TextAlign=TextAlign.Right},
         new(){Field="Betaaldatum",HeaderText="Betaaldatum",Format="dd-MM-yyyy",Type=ColumnType.Date},
-        new(){Field="Bevestigingsdatum",HeaderText="Datum bevestiging",Format="dd-MM-yyyy",Type=ColumnType.Date},
-        new(){Field="Afhaakdatum",HeaderText="Datum afgehaakt",Format="dd-MM-yyyy",Type=ColumnType.Date},
-        new(){Field="Bevestigd",HeaderText="Bevestigd"},
+        new(){Field="Bevestigingsdatum",HeaderText="Bevestigd",Format="dd-MM-yyyy",Type=ColumnType.Date},
         new(){Field="AcapellaBattle",HeaderText="AcapellaBattle"},
         new(){Field="Binnen",HeaderText="Binnen"},
         new(){Field="Buiten",HeaderText="Buiten"},
-        new(){Field="Afgehaakt",HeaderText="Afgehaakt"},
+        new(){Field="Afhaakdatum",HeaderText="Afgehaakt",Format="dd-MM-yyyy",Type=ColumnType.Date},
     };
     // Export functions
     protected async Task ExportToExcel()
