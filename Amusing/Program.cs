@@ -175,7 +175,15 @@ builder.Services.AddScoped<CustomAuthenticationService>();
 builder.Services.AddSingleton<System.Data.Common.DbDataSource>(sp =>
     new MySqlConnector.MySqlDataSource(sp.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection")!));
 builder.Services.AddScoped<Amusing.Authentication.MySql.BeheerPasswordRecoveryStore>();
-builder.Services.AddScoped<BeheerPasswordRecoveryService>();
+builder.Services.AddScoped<BeheerPasswordRecoveryService>(sp=>
+{
+    var fallback=sp.GetRequiredService<EmailSettings>();
+    var settings=BeheerPasswordRecoveryService.ResolveMailSettings(builder.Configuration,fallback);
+    var transport=ReferenceEquals(settings,fallback)?sp.GetRequiredService<Amusing.Services.MailQueue.IQueueMailTransport>()
+        :new Amusing.Services.MailQueue.SmtpQueueTransport(settings);
+    return new BeheerPasswordRecoveryService(sp.GetRequiredService<Amusing.Authentication.MySql.BeheerPasswordRecoveryStore>(),builder.Configuration,
+        sp.GetRequiredService<IHostEnvironment>(),settings,transport,sp.GetRequiredService<ILogger<BeheerPasswordRecoveryService>>());
+});
 builder.Services.AddScoped<ProtectedSessionStorage>();
 
 builder.Services.AddAuthorizationCore();
@@ -239,3 +247,4 @@ app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
 app.Run();
+

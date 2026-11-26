@@ -8,6 +8,8 @@ namespace Amusing.Services;
 public sealed class BeheerPasswordRecoveryService(BeheerPasswordRecoveryStore store,IConfiguration configuration,
  IHostEnvironment environment,EmailSettings settings,IQueueMailTransport transport,ILogger<BeheerPasswordRecoveryService> logger)
 {
+ public static EmailSettings ResolveMailSettings(IConfiguration configuration,EmailSettings fallback)
+  =>configuration.GetSection("BeheerPasswordRecovery:Smtp").Get<EmailSettings>()??fallback;
  public bool Enabled=>configuration.GetValue<bool>("BeheerPasswordRecovery:Enabled");
  public bool IsTest=> !string.Equals(new MySqlConnectionStringBuilder(configuration.GetConnectionString("DefaultConnection")).Database,"amusing",StringComparison.Ordinal)
   || !string.Equals(configuration["Amusing:EnvironmentName"]??environment.EnvironmentName,"Production",StringComparison.OrdinalIgnoreCase);

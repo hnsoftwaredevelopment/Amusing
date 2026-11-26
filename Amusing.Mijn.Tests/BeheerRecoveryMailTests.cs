@@ -10,6 +10,17 @@ using MimeKit;
 namespace Amusing.Mijn.Tests;
 public partial class LoginTests
 {
+ [Fact]public void BeheerRecoverySmtpOverrideDoesNotEnableGlobalDevMail()
+ {
+  var blocked=new beheer::Amusing.Models.EmailSettings{SmtpHost="127.0.0.1",SmtpPort=1};
+  var config=new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string,string?>{
+   {"BeheerPasswordRecovery:Smtp:SmtpHost","relay.example.invalid"},{"BeheerPasswordRecovery:Smtp:SmtpPort","587"},
+   {"BeheerPasswordRecovery:Smtp:SenderAddress","sender@example.invalid"}}).Build();
+  var recovery=beheer::Amusing.Services.BeheerPasswordRecoveryService.ResolveMailSettings(config,blocked);
+  Assert.Equal("relay.example.invalid",recovery.SmtpHost);Assert.Equal(587,recovery.SmtpPort);
+  Assert.Equal("sender@example.invalid",recovery.SenderAddress);Assert.Equal(1,blocked.SmtpPort);
+  Assert.Same(blocked,beheer::Amusing.Services.BeheerPasswordRecoveryService.ResolveMailSettings(new ConfigurationBuilder().Build(),blocked));
+ }
  private sealed class RecoveryEnvironment:IHostEnvironment
  {
   public string EnvironmentName{get;set;}="Production";public string ApplicationName{get;set;}="Test";public string ContentRootPath{get;set;}="";public IFileProvider ContentRootFileProvider{get;set;}=new NullFileProvider();

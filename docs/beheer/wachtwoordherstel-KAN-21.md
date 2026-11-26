@@ -47,3 +47,9 @@ NGINX voegde op dev.beheer een tweede, minder strenge Referrer-Policy toe. Deze 
 ## Vervolgvolgorde
 
 Gebruiker heeft vastgelegd: KAN-21, daarna KAN-113, KAN-114, KAN-30 en tot slot KAN-109. Na benodigde praktijkacceptatie wordt de volgende slice voorgesteld. KAN-113 bouwt oude exports pas af wanneer de vervangende exportfunctionaliteit beschikbaar is.
+
+## Aanvulling: SMTP op dev
+
+De eerste echte hersteltest werd niet verzonden: de algemene dev.beheer-instellingen wijzen bewust naar 127.0.0.1:1. Alleen TestSmtpEnabled aanzetten is daarom onvoldoende. BeheerPasswordRecovery:Smtp kan nu een aparte, volledige EmailSettings-configuratie bevatten voor herstelmail. Zonder deze sectie blijft de bestaande transportregistratie gelden. De algemene dev-mail en queue blijven geblokkeerd; herstelmail blijft naar het vaste testadres gaan.
+
+De aparte instellingen zijn uitsluitend op de VPS opgeslagen in het afgeschermde configuratiebestand, zonder geheimen in Git. Een regressietest controleert dat de override de algemene geblokkeerde instellingen niet wijzigt. Deze test en de releasebuild zijn geslaagd. Na publicatie van de correctie is Herberts aanvraag opnieuw aangeboden en door SMTP geaccepteerd. Ontvangst en gebruik van de link moeten nog door de gebruiker worden bevestigd. Er is geen wachtwoord gewijzigd.
