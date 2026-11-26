@@ -22,7 +22,7 @@ KAN-144 blijft verantwoordelijk voor de gewenste afhaakcheckbox en verdere afmel
 
 De gedeelde service controleert het ingelogde Beheeraccount ook op de server. Opslag vergrendelt de inschrijving en vergelijkt de oorspronkelijke waarden. Een verouderd formulier wordt geweigerd. Alleen toegestane kolommen worden geschreven. De wijziging en de kooraudit worden in dezelfde transactie opgeslagen. Een ongewijzigd formulier voegt geen auditregel toe.
 
-Mijn toont de extra auditveldnamen via bestaande Nederlandse, Duitse en Engelse vertalingen. Vrij ingevoerde gegevens worden niet vertaald. Migratie 025-betaald-bedrag.sql voegt een nullable DECIMAL(10,2)-kolom betaald_bedrag toe. Historische bedragen blijven onbekend (NULL); bestaande betaaldatums worden behouden. Bedragen mogen niet negatief zijn en hebben maximaal twee decimalen. Er worden geen historische bedragen afgeleid of ingevuld.
+Mijn toont de extra auditveldnamen met Nederlandse, Duitse en Engelse labels. Vrij ingevoerde gegevens worden niet vertaald. Migratie 025-betaald-bedrag.sql voegt een nullable DECIMAL(10,2)-kolom betaald_bedrag toe. Historische bedragen blijven onbekend (NULL); bestaande betaaldatums worden behouden. Bedragen mogen niet negatief zijn en hebben maximaal twee decimalen. Er worden geen historische bedragen afgeleid of ingevuld.
 
 ## Verificatie en publicatie
 
@@ -50,3 +50,10 @@ De gebruiker heeft KAN-143 als lage prioriteit aangemerkt. KAN-144 en KAN-146 mo
 Back-up op VPS: /var/backups/kan113-dev.hEjAZ4Gg. Beide diensten zijn opnieuw gestart om 15:29 Nederlandse tijd, met nieuwe processen 115126 en 115127. Configuratiebestanden zijn behouden; er is geen databaseverversing uitgevoerd. Mailomleiding en de blokkade voor algemene dev-mail blijven behouden.
 
 Vaste gebruikersinstructie: routinepublicaties naar dev.beheer en dev.mijn zijn voortaan toegestaan zonder opnieuw akkoord te vragen. De gebruiker noemde dev.amusing; binnen dit project is dit opgevat als dev.mijn en zo teruggekoppeld. Productie, merges en databaseverversingen vallen buiten deze toestemming. Deze uitzondering staat ook in de publicatieskill.
+
+
+## Correctie na praktijktest: vier afzonderlijke acties
+
+Op 26 november zijn de vier gerichte dialogen gepubliceerd op dev.beheer, inclusief migratie 025 uitsluitend op amusingdev. Dev.mijn is bijgewerkt voor het loglabel van het betaalde bedrag. De ingelogde browsercontrole met een tijdelijk testaccount heeft de exacte velden van Betaling, Bevestigd, Afgehaakt en Wijzigen gecontroleerd. Er zijn daarbij geen koorwijzigingen opgeslagen en het testaccount is verwijderd. Database-updatebevoegdheid voor het betaalde bedrag is gecontroleerd. De status- en bedragcorrecties, het leegmaken, de actiescheiding en beschikbaarheid zijn met geïsoleerde tests gecontroleerd.
+
+De actuele publicatie draait sinds 16:12 Nederlandse tijd met processen 116297 en 116298. Bestanden en de dev-inschrijvingentabel zijn vooraf geback-upt onder /var/backups/kan113-actions.fJRyybsl. Beide binary-hashes en healthchecks zijn geslaagd. Productie en productiegegevens zijn ongewijzigd. Praktijkacceptatie van de correctie door de gebruiker staat nog open.

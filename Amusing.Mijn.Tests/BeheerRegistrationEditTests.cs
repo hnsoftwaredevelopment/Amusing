@@ -54,6 +54,12 @@ public partial class LoginTests
   Assert.NotNull(await service.SaveAsync(corrected,corrected with{PaidAmount=1.001m},Action.Payment));
   Assert.Null(await service.SaveAsync(corrected,edited,Action.Payment));
   Assert.Null((await service.ReadAsync(2027,1))!.PaidAmount);
+  Assert.Null((await service.ReadAsync(2027,1))!.Paid);
+  var confirmed=edited with{Confirmed=new DateTime(2026,11,26)};
+  Assert.Null(await service.SaveAsync(edited,confirmed,Action.Confirmation));
+  Assert.Equal(confirmed.Confirmed,(await service.ReadAsync(2027,1))!.Confirmed);
+  Assert.Null(await service.SaveAsync(confirmed,edited,Action.Confirmation));
+  Assert.Null((await service.ReadAsync(2027,1))!.Confirmed);
   var timed=edited with{From=TimeSpan.FromHours(13),Until=TimeSpan.FromHours(16)};
   Assert.Null(await service.SaveAsync(edited,timed));
   Assert.Equal(TimeSpan.FromHours(13),(await service.ReadAsync(2027,1))!.From);
