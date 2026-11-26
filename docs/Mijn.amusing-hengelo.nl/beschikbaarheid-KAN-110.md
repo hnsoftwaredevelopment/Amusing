@@ -54,3 +54,5 @@ Mijn en beide Beheer-overzichten lezen het effectieve festivalvenster voor stand
 Dertien gerichte tests geslaagd, inclusief alleen eindtijd wijzigen zonder de begintijd aan te raken, migratie met bewust gewijzigde tijden, meebewegen van standaardtijden en begrenzen van eigen intervallen aan beide zijden.
 
 De correctie is op beide dev-sites gepubliceerd. Browsercontroles bevestigen het opslaan van uitsluitend de eindtijd zonder voorafgaande beginwijziging, opslag vanuit beide Beheer-overzichten en teruglezen in Mijn. Tijdelijke testgegevens zijn verwijderd. Back-up vóór deze correctie: /var/backups/kan110-follow-dev.T1vj1Sz2. Productie is niet aangepast.
+
+De gebruiker heeft op 26 november 2026 de correctie op beide dev-sites getest en akkoord gegeven. Praktijkacceptatie is afgerond. PR #59 wacht op merge en de bijbehorende productiepublicatie; de losse gebruikersveldenpublicatie KAN-140 neemt deze wijziging niet mee.
