@@ -51,6 +51,7 @@ builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddJsonFile("appsettings.PasswordRecovery.json", optional: true, reloadOnChange: true)
     .AddUserSecrets<Program>(optional: true)
     .AddEnvironmentVariables();
 
@@ -161,12 +162,20 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy("beheer-recovery", context => HttpMethods.IsGet(context.Request.Method)
+        ? RateLimitPartition.GetNoLimiter("recovery-page")
+        : RateLimitPartition.GetFixedWindowLimiter(context.Connection.RemoteIpAddress?.ToString() ?? "onbekend",
+            _ => new FixedWindowRateLimiterOptions { PermitLimit = 12, Window = TimeSpan.FromMinutes(1) }));
     options.AddPolicy("beheer-login", context => RateLimitPartition.GetFixedWindowLimiter(
         context.Connection.RemoteIpAddress?.ToString() ?? "onbekend",
         _ => new FixedWindowRateLimiterOptions { PermitLimit = 12, Window = TimeSpan.FromMinutes(1) }));
 });
 
 builder.Services.AddScoped<CustomAuthenticationService>();
+builder.Services.AddSingleton<System.Data.Common.DbDataSource>(sp =>
+    new MySqlConnector.MySqlDataSource(sp.GetRequiredService<IConfiguration>().GetConnectionString("DefaultConnection")!));
+builder.Services.AddScoped<Amusing.Authentication.MySql.BeheerPasswordRecoveryStore>();
+builder.Services.AddScoped<BeheerPasswordRecoveryService>();
 builder.Services.AddScoped<ProtectedSessionStorage>();
 
 builder.Services.AddAuthorizationCore();

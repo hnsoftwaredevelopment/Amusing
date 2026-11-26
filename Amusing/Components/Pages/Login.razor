@@ -1,6 +1,8 @@
 @page "/login"
 
+@inject Amusing.Services.BeheerPasswordRecoveryService Recovery
 <h3>Login</h3>
+@if(PasswordStatus=="changed"){<p role="status" class="text-success">Uw wachtwoord is gewijzigd. Log in met uw nieuwe wachtwoord.</p>}
 
 <form id="beheer-login-form" method="post" action="/signin">
     <div class="mb-3" style="max-width: 300px;">
@@ -18,6 +20,8 @@
     <button class="btn btn-primary" type="submit">Inloggen</button>
 </form>
 
+@if(Recovery.Enabled){<p><a href="/wachtwoord-vergeten" target="_top">Wachtwoord vergeten?</a></p>}
+
 @if (Failed == "1")
 {
     <p class="text-danger" role="alert">Ongeldige gebruikersnaam of wachtwoord</p>
@@ -25,6 +29,7 @@
 
 @code {
     [SupplyParameterFromQuery(Name = "failed")] public string? Failed { get; set; }
+    [SupplyParameterFromQuery(Name="password")] public string? PasswordStatus{get;set;}
     private bool IsPasswordVisible;
     private string PasswordToggleTitle => IsPasswordVisible ? "Wachtwoord verbergen" : "Wachtwoord tonen";
 }
