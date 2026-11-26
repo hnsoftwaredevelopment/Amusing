@@ -29,6 +29,7 @@ public partial class LoginTests
   var config=new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string,string?>{{"ConnectionStrings:DefaultConnection",Environment.GetEnvironmentVariable("MIJN_TEST_CONNECTION")}}).Build();
   var service=new beheer::Amusing.Services.RegistrationEditService(config,new beheer::Amusing.Helpers.UserContextHelper(new AvailabilityAuth(),new HttpContextAccessor()));
   await Execute("UPDATE ah_festival_deelnemerstarieven SET bedrag_incl_btw=123.45 WHERE festival_id=2027; UPDATE ah_podia_typen SET prijs=17 WHERE type='A'");
+  await Execute("DELETE FROM mijn_deelname_notas; UPDATE mijn_inschrijfmail SET nota_gegevens=NULL");
   var registrationList=new beheer::Amusing.Services.RegistrationService(new beheer::Amusing.Services.GenericDataService(config));
   Assert.Equal(140.45m,Assert.Single(await registrationList.GetRegistrationsByFestivalIdAsync(2027)).TeBetalen);
   var original=(await service.ReadAsync(2027,1))!;

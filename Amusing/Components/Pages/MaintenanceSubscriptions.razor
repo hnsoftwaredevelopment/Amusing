@@ -95,13 +95,17 @@
 
  <GridColumn Field="Genre" HeaderText="Genre" Width="120" />
  <GridColumn Field="TeBetalen" HeaderText="Te betalen (€)" Format="N2" Width="130" TextAlign="TextAlign.Right" />
- <GridColumn Field="Betaald" HeaderText="Betaald" Width="100"><Template Context="row"><button class="btn btn-link p-0" @onclick="() => EditRegistrationAsync((RegistrationModel)row,RegistrationEditAction.Payment)">@(((RegistrationModel)row).Betaald)</button></Template></GridColumn>
+  <GridColumn Field="Factuurdatum" HeaderText="Factuurdatum" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="125"><Template Context="row"><Amusing.Components.RegistrationInvoiceDate Row="@((RegistrationModel)row)" /></Template></GridColumn>
+ <GridColumn Field="BetaaldBedrag" HeaderText="Betaald" Format="N2" TextAlign="TextAlign.Right" Width="110"><Template Context="row"><button type="button" class="btn btn-link p-0 @(((RegistrationModel)row).AfwijkendBetaaldBedrag?"text-danger fw-semibold":"")" title="Betaaldatum en bedrag wijzigen" @onclick="() => EditRegistrationAsync((RegistrationModel)row,RegistrationEditAction.Payment)">@(((RegistrationModel)row).BetaaldBedrag?.ToString("N2",System.Globalization.CultureInfo.GetCultureInfo("nl-NL"))??"—")</button></Template></GridColumn>
+ <GridColumn Field="Betaaldatum" HeaderText="Betaaldatum" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="125" />
  <GridColumn Field="Bevestigd" HeaderText="Bevestigd" Width="100"><Template Context="row"><button class="btn btn-link p-0" @onclick="() => EditRegistrationAsync((RegistrationModel)row,RegistrationEditAction.Confirmation)">@(((RegistrationModel)row).Bevestigd)</button></Template></GridColumn>
+ <GridColumn Field="Bevestigingsdatum" HeaderText="Datum bevestiging" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="155" />
  <GridColumn Field="AcapellaBattle" HeaderText="AcapellaBattle" Width="120" />
- <GridColumn Field="Beoordeling" HeaderText="Beoordeling" Width="110" />
+
  <GridColumn Field="Binnen" HeaderText="Binnen" Width="70" TextAlign="TextAlign.Center" />
  <GridColumn Field="Buiten" HeaderText="Buiten" Width="70" TextAlign="TextAlign.Center" />
  <GridColumn Field="Afgehaakt" HeaderText="Afgehaakt" Width="110"><Template Context="row"><button class="btn btn-link p-0" @onclick="() => EditRegistrationAsync((RegistrationModel)row,RegistrationEditAction.Cancellation)">@(((RegistrationModel)row).Afgehaakt)</button></Template></GridColumn>
+ <GridColumn Field="Afhaakdatum" HeaderText="Datum afgehaakt" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="145" />
  <GridColumn HeaderText="Wijzigen" Width="100"><Template Context="row"><button type="button" class="btn btn-outline-primary btn-sm" title="Inschrijving wijzigen" @onclick="() => EditRegistrationAsync((RegistrationModel)row)"><span class="fa-solid fa-pen" aria-hidden="true"></span><span class="visually-hidden">Inschrijving wijzigen</span></button></Template></GridColumn>
 
 							</GridColumns>

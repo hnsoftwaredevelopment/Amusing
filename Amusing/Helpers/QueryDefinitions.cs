@@ -226,6 +226,11 @@ public static class QueryDefinitions
             i.festival_id AS festival_id,
             i.zanggroep_id AS zanggroep_id,
             i.ingeschreven AS datum,
+            i.betaald_bedrag AS BetaaldBedrag,
+            CASE WHEN CAST(i.betaald AS CHAR) LIKE '0000-%' THEN NULL ELSE i.betaald END AS Betaaldatum,
+            CASE WHEN CAST(i.bevestigd AS CHAR) LIKE '0000-%' THEN NULL ELSE i.bevestigd END AS Bevestigingsdatum,
+            CASE WHEN CAST(i.afgehaakt AS CHAR) LIKE '0000-%' THEN NULL ELSE i.afgehaakt END AS Afhaakdatum,
+            COALESCE(wp.uiterste_betaaldatum,LEAST(DATE_ADD(DATE(NULLIF(CAST(i.ingeschreven AS CHAR),'0000-00-00 00:00:00')),INTERVAL 42 DAY),DATE(NULLIF(LEFT(CAST(f.eind_inschrijving AS CHAR),10),'0000-00-00')))) AS UitersteBetaaldatum,
             TIME_FORMAT(IF(i.beschikbaarheid_eigen=0,f.eerste_optreden,i.beschikbaar_van), '%H:%i') AS AvailableFrom,
             TIME_FORMAT(IF(i.beschikbaarheid_eigen=0,f.laatste_optreden,i.beschikbaar_tot), '%H:%i') AS AvailableUntil,
             COALESCE(grp.naam,'') AS naam,
@@ -246,6 +251,7 @@ public static class QueryDefinitions
         FROM
             amusing.ah_inschrijvingen i
             JOIN amusing.ah_festivals f ON f.festival_id=i.festival_id
+            LEFT JOIN mijn_wachtlijstplaatsingen wp ON wp.festival_id=i.festival_id AND wp.zanggroep_id=i.zanggroep_id
             LEFT JOIN amusing.ah_zanggroepen grp ON i.zanggroep_id = grp.zanggroep_id
             LEFT JOIN amusing.ah_genres gen ON grp.genre_id = gen.genre_id
             {Amusing.Facturatie.FestivalTariefSql.PodiumtariefJoin}
@@ -915,11 +921,17 @@ public static class QueryDefinitions
             (festival_id, zanggroep_id, aantal_deelnemers, podiumsoort, ingeschreven, beschikbaar_van, beschikbaar_tot)
         SELECT @festivalId, @zanggroepId, @aantalDeelnemers, @podiumsoort, @ingeschreven, eerste_optreden, laatste_optreden
         FROM amusing.ah_festivals WHERE festival_id=@festivalId;";
-    public static readonly string GetGroupRegistrationsByGroupId = @"
+    public static readonly string GetGroupRegistrationsByGroupId = $@"
         SELECT
             i.festival_id AS FestivalId,
             YEAR(f.festivaldatum) AS Festival,
             i.ingeschreven AS RegisteredAt,
+            ({Amusing.Facturatie.FestivalTariefSql.Deelnemersprijs}+p.prijs) AS TeBetalen,
+            i.betaald_bedrag AS BetaaldBedrag,
+            CASE WHEN CAST(i.betaald AS CHAR) LIKE '0000-%' THEN NULL ELSE i.betaald END AS Betaaldatum,
+            CASE WHEN CAST(i.bevestigd AS CHAR) LIKE '0000-%' THEN NULL ELSE i.bevestigd END AS Bevestigingsdatum,
+            CASE WHEN CAST(i.afgehaakt AS CHAR) LIKE '0000-%' THEN NULL ELSE i.afgehaakt END AS Afhaakdatum,
+            COALESCE(wp.uiterste_betaaldatum,LEAST(DATE_ADD(DATE(NULLIF(CAST(i.ingeschreven AS CHAR),'0000-00-00 00:00:00')),INTERVAL 42 DAY),DATE(NULLIF(LEFT(CAST(f.eind_inschrijving AS CHAR),10),'0000-00-00')))) AS UitersteBetaaldatum,
             TIME_FORMAT(IF(i.beschikbaarheid_eigen=0,f.eerste_optreden,i.beschikbaar_van), '%H:%i') AS AvailableFrom,
             TIME_FORMAT(IF(i.beschikbaarheid_eigen=0,f.laatste_optreden,i.beschikbaar_tot), '%H:%i') AS AvailableUntil,
             i.aantal_deelnemers AS Singers,
@@ -929,6 +941,8 @@ public static class QueryDefinitions
             IF(i.afgehaakt IS NULL, 'nee', 'ja') AS DroppedOut
         FROM amusing.ah_inschrijvingen i
         INNER JOIN amusing.ah_festivals f ON f.festival_id = i.festival_id
+        LEFT JOIN mijn_wachtlijstplaatsingen wp ON wp.festival_id=i.festival_id AND wp.zanggroep_id=i.zanggroep_id
+        {Amusing.Facturatie.FestivalTariefSql.PodiumtariefJoin}
         WHERE i.zanggroep_id = @GroupId
         ORDER BY f.festivaldatum DESC;";
     public static readonly string RegisterGroupForCurrentFestival = @"
