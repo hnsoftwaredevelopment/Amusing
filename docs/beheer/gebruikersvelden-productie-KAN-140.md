@@ -25,3 +25,5 @@ De publicatie en overdracht zijn geslaagd. Alle acht bestaande accounts hebben d
 Back-up: /var/backups/beheer-kan140-prod.xLizBIlS. Deze bevat de oude DLL, een beveiligde dump van ah_beheer en users-fields.json voor het gericht herstellen van uitsluitend de twee velden. De gegevens zelf staan niet in de repository.
 
 De functionaliteitscode stond al op master; deze publicatie sluit de achterstand van de productieversie voor deze velden. De PR bij dit ticket bewaart de gerichte releasepatch, het overdrachtscript en het publicatieverslag. KAN-21 blijft open voor de herstelroute.
+
+De review van het overdrachtscript is verwerkt: rollback weigert vooraf ontbrekende, dubbele of hernoemde accounts en verifieert de herstelde waarden vóór commit. Dev-waarden worden één keer in PHP genormaliseerd en daarna identiek gebruikt voor validatie, overdracht en nacontrole; witruimte wist geen productiegegevens. De regressietests via --self-test, PHP-syntaxcontrole en een nieuwe alleen-lezen preflight zijn geslaagd. De reeds overgenomen productiegegevens hoefden niet opnieuw te worden gewijzigd.
