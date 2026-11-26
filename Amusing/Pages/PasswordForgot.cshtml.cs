@@ -18,8 +18,10 @@ public sealed class PasswordForgotModel(BeheerPasswordRecoveryService recovery,I
  {
   PrivateResponse();if(!Enabled)return NotFound();
   Username=Username?.Trim()??"";Email=Email?.Trim()??"";
-  if(Username.Length is 0 or >100 || Email.Length is 0 or >80 || !MailAddress.TryCreate(Email,out var address) || address.Address!=Email)
-  {Error="Vul uw gebruikersnaam en een geldig privéhersteladres in.";return Page();}
+  if(Email.Length is 0 or >80 || !MailAddress.TryCreate(Email,out var address) || address.Address!=Email)
+  {Error="Vul een geldig e-mailadres in bij Privéhersteladres.";return Page();}
+  if(Username.Length is 0 or >100)
+  {Error="Vul uw gebruikersnaam in.";return Page();}
   try{await recovery.RequestAsync(Username,Email,HttpContext.RequestAborted);}
   catch(Exception ex) when(!HttpContext.RequestAborted.IsCancellationRequested)
   {logger.LogWarning("Beheer-herstelverzoek kon niet worden verwerkt ({ErrorType}).",ex.GetType().Name);}

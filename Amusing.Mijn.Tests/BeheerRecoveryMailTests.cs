@@ -10,6 +10,17 @@ using MimeKit;
 namespace Amusing.Mijn.Tests;
 public partial class LoginTests
 {
+ [Theory][InlineData("")][InlineData("geen-adres")][InlineData("naam <user@example.com>")]
+ public async Task BeheerRecoveryRejectsMissingOrMalformedEmailBeforeSending(string email)
+ {
+  var config=new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string,string?>{{"BeheerPasswordRecovery:Enabled","true"}}).Build();
+  var capture=new RecoveryCapture();
+  var service=new beheer::Amusing.Services.BeheerPasswordRecoveryService(null!,config,new RecoveryEnvironment(),new beheer::Amusing.Models.EmailSettings(),capture,NullLogger<beheer::Amusing.Services.BeheerPasswordRecoveryService>.Instance);
+  var page=new beheer::Amusing.Pages.PasswordForgotModel(service,NullLogger<beheer::Amusing.Pages.PasswordForgotModel>.Instance)
+   {Username=Guid.NewGuid().ToString("N"),Email=email,PageContext=new Microsoft.AspNetCore.Mvc.RazorPages.PageContext{HttpContext=new Microsoft.AspNetCore.Http.DefaultHttpContext()}};
+  await page.OnPostAsync();
+  Assert.False(page.Sent);Assert.Equal("Vul een geldig e-mailadres in bij Privéhersteladres.",page.Error);Assert.Empty(capture.Messages);
+ }
  [Fact]public void BeheerRecoverySmtpOverrideDoesNotEnableGlobalDevMail()
  {
   var blocked=new beheer::Amusing.Models.EmailSettings{SmtpHost="127.0.0.1",SmtpPort=1};
