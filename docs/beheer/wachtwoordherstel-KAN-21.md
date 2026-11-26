@@ -28,7 +28,13 @@ De bestaande migraties database/mijn/013-password-reset.sql en 014-beheer-wachtw
 
 De geheime linkwaarde staat in het URL-fragment en wordt na openen uit de adresbalk verwijderd. Daardoor komt de waarde niet in de HTTP-request-URL of referrer terecht. Herstelpagina's gebruiken no-store, no-referrer, antiforgery en een begrensd aantal POST-verzoeken. De database bewaart alleen de SHA-256-hash van de linkwaarde. Nieuwe schermen en mails verwijzen naar Beheer.
 
-Technisch geverifieerd: acht gerichte integratiecontroles (juiste combinatie, rol, verloop, gewijzigd hersteladres, eenmaligheid/concurrent gebruik, andere actorsoort, beide mailroutes en koppeling met Mijn), vijftien authenticatietests en 36 gerichte Beheer-regressietests. Beide Linux-releasebuilds zijn geslaagd. Browser- en praktijkcontrole volgen op dev; productiepublicatie is geen onderdeel van deze implementatiestap.
+Technisch geverifieerd: acht gerichte integratiecontroles (juiste combinatie, rol, verloop, gewijzigd hersteladres, eenmaligheid/concurrent gebruik, andere actorsoort, beide mailroutes en koppeling met Mijn), vijftien authenticatietests en 36 gerichte Beheer-regressietests. Beide Linux-releasebuilds zijn geslaagd.
+
+Op 26 november 2026 zijn dev.beheer en dev.mijn na toestemming bijgewerkt, met behoud van de bestaande dev-functionaliteit. Beide services zijn actief en de herstelroute en Mijn-healthcheck reageren succesvol. Applicatieback-ups staan op de VPS onder `/var/backups/kan21-dev.EP5fvnAG`. De database is niet ververst; productie is niet gewijzigd.
+
+Browsercontrole op dev bevestigt de link vanaf de login, de neutrale melding bij een onbekend account, antiforgery, het herstelformulier, verwijderen van het URL-fragment, het wachtwoordoog en de privacyheaders. Herhaalbare controle: `scripts/beheer/verify-password-recovery-dev.js` via Playwright CLI run-code, vanaf de pagina Wachtwoord vergeten. Er zijn daarbij geen bestaande wachtwoorden gewijzigd of echte herstelmails verstuurd. De volledige mail- en inlogroute wacht nog op de onderstaande praktijktest; de opslaglogica is met de integratietests gecontroleerd.
+
+NGINX voegde op dev.beheer een tweede, minder strenge Referrer-Policy toe. Deze dev-header is aangescherpt naar no-referrer, zodat de herstelpagina ook achter de proxy haar privacybeleid behoudt. De oude siteconfiguratie staat in dezelfde back-upmap als `nginx-dev-beheer.conf`; nginx -t en reload zijn geslaagd. Bij een latere productiepublicatie moet dit proxybeleid opnieuw worden gecontroleerd.
 
 ## Praktijktest op dev
 
