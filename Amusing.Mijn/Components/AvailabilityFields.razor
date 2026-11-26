@@ -18,7 +18,7 @@
     @if (UntilTime is { } oldUntil && !Window.Ends(Window.First).Contains(oldUntil))
     { <option value="@FestivalAvailability.Format(oldUntil)" selected>@FestivalAvailability.Format(oldUntil) (@T("Huidig"))</option> }
     @foreach (var time in Window.Ends(Window.First))
-    { <option value="@FestivalAvailability.Format(time)" selected="@(time == UntilTime)">@FestivalAvailability.Format(time)</option> }
+    { <option value="@FestivalAvailability.Format(time)" selected="@(time == UntilTime)" disabled="@(time < (FromTime ?? Window.First) + TimeSpan.FromMinutes(30))" hidden="@(time < (FromTime ?? Window.First) + TimeSpan.FromMinutes(30))">@FestivalAvailability.Format(time)</option> }
    </select>
   </div>
  </div>

@@ -20,6 +20,7 @@ try{
 async page => {
  const f=FIXTURE;const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});await page.context().clearCookies();
  await page.goto('https://dev.beheer.amusing-hengelo.nl/login');
+ await page.waitForTimeout(2500);
  await page.locator('input[name=username]').fill(f.username);await page.locator('input[name=password]').fill(f.password);
  await page.getByRole('button',{name:'Inloggen',exact:true}).click();try{await page.waitForURL('https://dev.beheer.amusing-hengelo.nl/',{timeout:6000});}catch{throw new Error('Login failed '+page.url()+' '+(await page.locator('body').innerText()).slice(0,250));}
  await page.goto('https://dev.beheer.amusing-hengelo.nl/Maintenance-Subscriptions');

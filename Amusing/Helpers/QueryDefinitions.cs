@@ -226,8 +226,8 @@ public static class QueryDefinitions
             i.festival_id AS festival_id,
             i.zanggroep_id AS zanggroep_id,
             i.ingeschreven AS datum,
-            TIME_FORMAT(i.beschikbaar_van, '%H:%i') AS AvailableFrom,
-            TIME_FORMAT(i.beschikbaar_tot, '%H:%i') AS AvailableUntil,
+            TIME_FORMAT(IF(i.beschikbaarheid_eigen=0,f.eerste_optreden,i.beschikbaar_van), '%H:%i') AS AvailableFrom,
+            TIME_FORMAT(IF(i.beschikbaarheid_eigen=0,f.laatste_optreden,i.beschikbaar_tot), '%H:%i') AS AvailableUntil,
             COALESCE(grp.naam,'') AS naam,
             COALESCE(grp.standplaats,'') AS stad,
             i.podiumsoort AS podium,
@@ -256,6 +256,7 @@ public static class QueryDefinitions
             IF(i.afgehaakt IS NULL, 'Nee', 'Ja') AS afgehaakt
         FROM
             amusing.ah_inschrijvingen i
+            JOIN amusing.ah_festivals f ON f.festival_id=i.festival_id
             LEFT JOIN amusing.ah_zanggroepen grp ON i.zanggroep_id = grp.zanggroep_id
             LEFT JOIN amusing.ah_genres gen ON grp.genre_id = gen.genre_id
         WHERE
@@ -929,8 +930,8 @@ public static class QueryDefinitions
             i.festival_id AS FestivalId,
             YEAR(f.festivaldatum) AS Festival,
             i.ingeschreven AS RegisteredAt,
-            TIME_FORMAT(i.beschikbaar_van, '%H:%i') AS AvailableFrom,
-            TIME_FORMAT(i.beschikbaar_tot, '%H:%i') AS AvailableUntil,
+            TIME_FORMAT(IF(i.beschikbaarheid_eigen=0,f.eerste_optreden,i.beschikbaar_van), '%H:%i') AS AvailableFrom,
+            TIME_FORMAT(IF(i.beschikbaarheid_eigen=0,f.laatste_optreden,i.beschikbaar_tot), '%H:%i') AS AvailableUntil,
             i.aantal_deelnemers AS Singers,
             i.podiumsoort AS StageType,
             IF(i.betaald IS NULL, 'nee', 'ja') AS Paid,

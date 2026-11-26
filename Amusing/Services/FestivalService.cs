@@ -99,7 +99,12 @@ public class FestivalService( GenericDataService dataService )
                 { "@EindeVasteVrijwilligersTaken", model.EindeVasteVrijwilligersTaken.ToTimeSpan() }
             };
 
-        await _dataService.ExecuteNonQueryAsync( QueryDefinitions.ModifyFestival, parameters );
+        await _dataService.ExecuteTransactionAsync([QueryDefinitions.ModifyFestival, """
+            UPDATE ah_inschrijvingen i JOIN ah_festivals f ON f.festival_id=i.festival_id
+            SET i.beschikbaar_van=IF(i.beschikbaarheid_eigen=0,f.eerste_optreden,SEC_TO_TIME(LEAST(GREATEST(TIME_TO_SEC(i.beschikbaar_van),TIME_TO_SEC(f.eerste_optreden)),TIME_TO_SEC(f.laatste_optreden)-1800))),
+            i.beschikbaar_tot=IF(i.beschikbaarheid_eigen=0,f.laatste_optreden,SEC_TO_TIME(GREATEST(LEAST(TIME_TO_SEC(i.beschikbaar_tot),TIME_TO_SEC(f.laatste_optreden)),LEAST(GREATEST(TIME_TO_SEC(i.beschikbaar_van),TIME_TO_SEC(f.eerste_optreden)),TIME_TO_SEC(f.laatste_optreden)-1800)+1800)))
+            WHERE i.festival_id=@festivalId
+            """], parameters);
     }
 
     public async Task ModifyConditionAsync( FestivalModel model )

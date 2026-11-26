@@ -77,9 +77,10 @@ public sealed partial class ChoirEnrollments
 
             await using var update = Command(connection, tx, """
                 UPDATE ah_inschrijvingen
-                SET aantal_deelnemers=@count,podiumsoort=@stage,wens_4=@review,binnenoptredens=@inside,buitenoptredens=@outside,beschikbaar_van=@from,beschikbaar_tot=@until
+                SET aantal_deelnemers=@count,podiumsoort=@stage,wens_4=@review,binnenoptredens=@inside,buitenoptredens=@outside,beschikbaar_van=@from,beschikbaar_tot=@until,beschikbaarheid_eigen=@custom
                 WHERE festival_id=@festival AND zanggroep_id=@group
                 """);
+            Add(update,"@custom",from!=festival.FirstPerformance || until!=festival.LastPerformance);
             Add(update,"@from",from);Add(update,"@until",until);
             Add(update, "@count", edit.Headcount);
             Add(update, "@stage", edit.PodiumType);

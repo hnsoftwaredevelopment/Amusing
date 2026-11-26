@@ -27,12 +27,13 @@ public sealed record FestivalEdition(uint Id,DateOnly Date,DateOnly Start,DateOn
 public sealed record EnrollmentStage(string Id,string Description);
 public sealed record FestivalRegistration(uint Headcount,string PodiumType,bool Review,int Indoors,int Outdoors,bool Waitlisted,bool Cancelled,bool Paid,bool Confirmed,bool ForcedStage)
 {
+    public bool CustomAvailability {get;init;}
     public TimeSpan AvailableFrom { get; init; } = TimeSpan.FromHours(11);
     public TimeSpan AvailableUntil { get; init; } = TimeSpan.FromHours(17);
     public bool CanEdit => !Cancelled && !Paid && !Confirmed;
     public bool CanConfirm => !Cancelled && !Confirmed && !Waitlisted;
     public string Version => Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
-        System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(new { Headcount, PodiumType, Review, Indoors, Outdoors, Waitlisted, Cancelled, Paid, Confirmed, ForcedStage, AvailableFrom, AvailableUntil })));
+        System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(new { Headcount, PodiumType, Review, Indoors, Outdoors, Waitlisted, Cancelled, Paid, Confirmed, ForcedStage, AvailableFrom, AvailableUntil, CustomAvailability })));
 }
 public sealed class EnrollmentConfirmation
 {

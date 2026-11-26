@@ -13,7 +13,7 @@ try{
  $group=Sql "INSERT INTO ah_zanggroepen(naam,standplaats,land,genre_id,beschrijving,rekeningnr,actief) VALUES('$name','Test','NL',1,'','',1);SELECT LAST_INSERT_ID();"
  $null=Sql "INSERT INTO ah_personen_wachtwoorden(id,hash) VALUES($second,'$hash');INSERT INTO ah_personen_rollen(persoon_id,zanggroep_id,rol) VALUES($first,$group,'contactpersoon1'),($first,$group,'zanger'),($second,$group,'contactpersoon2');"
  $festival=Sql "SELECT festival_id FROM ah_festivals WHERE festivaldatum>=CURDATE() ORDER BY festivaldatum,festival_id LIMIT 1;"
- $null=Sql "INSERT INTO ah_inschrijvingen(festival_id,zanggroep_id,aantal_deelnemers,podiumsoort,ingeschreven,betaald,bevestigd,beschikbaar_van,beschikbaar_tot) SELECT $festival,$group,20,'A',NOW(),NOW(),NOW(),eerste_optreden,laatste_optreden FROM ah_festivals WHERE festival_id=$festival;"
+ $null=Sql "INSERT INTO ah_inschrijvingen(festival_id,zanggroep_id,aantal_deelnemers,podiumsoort,ingeschreven,betaald,bevestigd,beschikbaar_van,beschikbaar_tot) SELECT $festival,$group,20,'A',NOW(),NOW(),NOW(),'11:00:00',laatste_optreden FROM ah_festivals WHERE festival_id=$festival;"
  $fixture=@{email=$email;password=$password;group=$group}|ConvertTo-Json -Compress
  $code=@'
 async page => {
@@ -26,6 +26,13 @@ async page => {
  const until=page.locator('select[name="AvailabilityInput.AvailableUntil"]');
  await from.waitFor();
  if(await from.locator('option').first().getAttribute('value')!=='12:00')throw new Error('Incorrect edition start');
+ // Change and save only the end time before ever touching the start selector.
+ if(await from.inputValue()!=='12:00')throw new Error('Untouched default does not follow festival start');
+ await until.selectOption('16:30');
+ await page.getByRole('button',{name:'Beschikbaarheid opslaan',exact:true}).click();
+ await page.waitForLoadState('networkidle');
+ await page.goto('https://dev.mijn.amusing-hengelo.nl/koor/'+f.group+'/inschrijven');
+ if(await from.inputValue()!=='12:00' || await until.inputValue()!=='16:30')throw new Error('Changing only end time failed');
  await from.selectOption('16:30');
  if(await until.locator('option:not([disabled])').count()!==1)throw new Error('End options not constrained');
  await from.selectOption('13:00');await until.selectOption('16:00');
@@ -37,7 +44,7 @@ async page => {
  if(await from.inputValue()!=='13:00' || await until.inputValue()!=='16:00')throw new Error('Times not persisted');
  await page.setViewportSize({width:390,height:844});
  if(await from.boundingBox()===null)throw new Error('Mobile field missing');
- return {secondContactCanEditPaidConfirmed:true,halfHourOptions:true,endTimesConstrained:true,savedAndReloaded:true,mobileFieldsVisible:true};
+ return {secondContactCanEditPaidConfirmed:true,endOnlySaveWithoutStartChange:true,halfHourOptions:true,endTimesConstrained:true,savedAndReloaded:true,mobileFieldsVisible:true};
 }
 '@
  [IO.File]::WriteAllText($runtime,$code.Replace('FIXTURE',$fixture))

@@ -19,7 +19,7 @@ public sealed class RegistrationAvailabilityService(IConfiguration config,UserCo
  private static async Task<RegistrationAvailability?> ReadAsync(MySqlConnection connection,MySqlTransaction? tx,uint festival,uint group)
  {
   await using var command=new MySqlCommand("""
-   SELECT i.beschikbaar_van,i.beschikbaar_tot,f.eerste_optreden,f.laatste_optreden,
+   SELECT IF(i.beschikbaarheid_eigen=0,f.eerste_optreden,i.beschikbaar_van),IF(i.beschikbaarheid_eigen=0,f.laatste_optreden,i.beschikbaar_tot),f.eerste_optreden,f.laatste_optreden,
     COALESCE(CAST(i.afgehaakt AS CHAR) NOT LIKE '0000-%',0)
    FROM ah_inschrijvingen i JOIN ah_festivals f ON f.festival_id=i.festival_id
    WHERE i.festival_id=@festival AND i.zanggroep_id=@group
@@ -39,7 +39,8 @@ public sealed class RegistrationAvailabilityService(IConfiguration config,UserCo
   if(current.From!=original.From || current.Until!=original.Until)return "De beschikbaarheid is inmiddels gewijzigd. Open de tijden opnieuw.";
   if(current.From==from && current.Until==until)return null;
   if(!current.Window.Allows(from,until))return "Kies tijden binnen het festivalvenster in stappen van een halfuur, met minimaal een halfuur tussen begin en eind.";
-  await using var update=new MySqlCommand("UPDATE ah_inschrijvingen SET beschikbaar_van=@from,beschikbaar_tot=@until WHERE festival_id=@festival AND zanggroep_id=@group",connection,tx);
+  await using var update=new MySqlCommand("UPDATE ah_inschrijvingen SET beschikbaar_van=@from,beschikbaar_tot=@until,beschikbaarheid_eigen=@custom WHERE festival_id=@festival AND zanggroep_id=@group",connection,tx);
+  update.Parameters.AddWithValue("@custom",from!=current.First || until!=current.Last);
   update.Parameters.AddWithValue("@from",from);update.Parameters.AddWithValue("@until",until);update.Parameters.AddWithValue("@festival",original.FestivalId);update.Parameters.AddWithValue("@group",original.GroupId);await update.ExecuteNonQueryAsync();
   await using var audit=new MySqlCommand("""
    INSERT INTO mijn_audit_log(occurred_at,actor_type,actor_id,action,group_id,festival_id,changed_fields)

@@ -31,7 +31,8 @@ public sealed partial class ChoirEnrollments
         if (input.AvailableFrom is null || input.AvailableUntil is null ||
             !ResolveAvailability(festival,input.AvailableFrom,input.AvailableUntil,current,out var from,out var until)) return EnrollmentResult.Invalid;
         if (from == current.AvailableFrom && until == current.AvailableUntil) return EnrollmentResult.Saved;
-        await using var update = Command(connection,tx,"UPDATE ah_inschrijvingen SET beschikbaar_van=@from,beschikbaar_tot=@until WHERE festival_id=@festival AND zanggroep_id=@group");
+        await using var update = Command(connection,tx,"UPDATE ah_inschrijvingen SET beschikbaar_van=@from,beschikbaar_tot=@until,beschikbaarheid_eigen=@custom WHERE festival_id=@festival AND zanggroep_id=@group");
+        Add(update,"@custom",from!=festival.FirstPerformance || until!=festival.LastPerformance);
         Add(update,"@from",from);Add(update,"@until",until);Add(update,"@festival",festival.Id);Add(update,"@group",group);
         await update.ExecuteNonQueryAsync(ct);
         await using var audit = Command(connection,tx,"""

@@ -7,6 +7,7 @@ public partial class LoginTests
         await Execute(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory,"enrollment-schema.sql")));
         await Execute(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "006-deelnemerstarieven.sql")));
         await Execute(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory,"023-beschikbaarheid.sql")));
+        await Execute(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory,"024-beschikbaarheid-volgt-festival.sql")));
         await Execute("DELETE FROM ah_inschrijvingen; DELETE FROM ah_podia_typen; DELETE FROM ah_festivals; INSERT INTO ah_festivals(festival_id,festivaldatum,start_inschrijving,eind_inschrijving,wachtlijst) VALUES(2027,'2027-06-05','2026-11-01 10:00:00','2027-02-28 10:00:00',0); INSERT INTO ah_podia_typen(type,versie,prijs,beschrijving) VALUES('A',2026,0,'Testpodium A'),('B',2026,0,'Testpodium B'),('C',2025,0,'Oud type'),('Z',2028,0,'Toekomstig type');");
         await Execute(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "008-inschrijfmail.sql")));
         await Execute(await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "009-deelname-notas.sql")));
