@@ -24,7 +24,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
     private bool _isLoading = false;
     private bool _isSendingMail = false;
     private bool _disposed = false;
-    private bool showSavedMessage = false;
+    private bool _isSaving;
     private string _testEmailAddress = "";
     private int _testRecipientCount = 15;
     private bool _showRTE = true;
@@ -235,63 +235,57 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
     protected async Task Save()
     {
-        if (_selectedTemplatesList is null)
+        if (QueueInputsLocked || _selectedTemplatesList is not { } editing) return;
+        if (_rte is not { } editor)
         {
+            await ToastService.ShowWarningAsync("De berichteditor wordt nog geladen. Probeer het opnieuw.");
             return;
         }
-
-        // Ensure the RTE has committed the latest changes
-        if (_rte is not null)
+        _isSaving = true;
+        try
         {
-            _selectedTemplatesList.TemplateContent = await _rte.GetXhtmlAsync();
-        }
-
-        //Convert Dutch labels to Englisch field keys.
-        string? _tempSubject = _selectedTemplatesList.TemplateSubject;
-        string _tempContent = _selectedTemplatesList.TemplateContent ?? string.Empty;
-        _selectedTemplatesList.TemplateSubject = _mappingService.ReplaceLabelsWithKeys(_selectedTemplatesList.TemplateSubject);
-        _selectedTemplatesList.TemplateContent = _mappingService.ReplaceLabelsWithKeys(_selectedTemplatesList.TemplateContent);
-
-        if (_selectedTemplatesList.TemplateId != 0)
-        {
-            await MailingService.UpdateTemplateQueryAsync(_selectedTemplatesList);
-            string logMessage = $"<_userName> heeft het mailingsjabloon {_selectedTemplatesList.TemplateName} aangepast.";
-            await LoggingService.WriteUserActionTemplateAsync( _selectedTemplatesList.TemplateId, "Mailing", "Sjablonen", "success", logMessage );
-            await ToastService.ShowSuccessAsync( $"De wijzigingen voor sjabloon {_selectedTemplatesList.TemplateName} zijn opgeslagen." );
-        }
-        else
-        {
-            // Save the new group and get the new group Id
-            uint savedId = await MailingService.AddTemplateQueryAsync(_selectedTemplatesList);
-
-            // Refresh the list
-            TemplatesList = await GetTemplatesForPageAsync();
-
-            // Search the modified record
-            int index = TemplatesList.FindIndex(s => s.TemplateId == savedId);
-            if (index >= 0)
+            // Syncfusion commits its current value on blur; read it only after that commit.
+            await editor.FocusOutAsync();
+            var html = await editor.GetXhtmlAsync();
+            var snapshot = new TemplatesListModel
             {
-                _selectedTemplatesList = TemplatesList[index];
+                TemplateId = editing.TemplateId,
+                TemplateName = editing.TemplateName,
+                RecipientListId = editing.RecipientListId,
+                TemplateSubject = _mappingService.ReplaceLabelsWithKeys(editing.TemplateSubject),
+                TemplateContent = _mappingService.ReplaceLabelsWithKeys(html ?? string.Empty)
+            };
+            var saved = await MailingService.SaveTemplateAsync(snapshot);
+
+            // Do not replace the editable text: the user may already be typing the next change.
+            editing.TemplateId = saved.TemplateId;
+            editing.TemplateCreated = saved.TemplateCreated;
+            editing.TemplateChanged = saved.TemplateChanged;
+            TemplatesList = TemplatesList.ToList();
+            string logMessage = $"<_userName> heeft het mailingsjabloon {saved.TemplateName} opgeslagen.";
+            try
+            {
+                await LoggingService.WriteUserActionTemplateAsync(saved.TemplateId, "Mailing", "Sjablonen", "success", logMessage);
             }
-
-            string logMessage = $"<_userName> heeft het mailingsjabloon {_selectedTemplatesList.TemplateName} toegevoegd.";
-            await LoggingService.WriteUserActionTemplateAsync( savedId, "Mailing", "Sjablonen", "success", logMessage );
-            await ToastService.ShowSuccessAsync( $"Sjabloon {_selectedTemplatesList.TemplateName} is opgeslagen." );
+            catch(Exception ex)
+            {
+                _logger.LogWarning("Sjabloon {TemplateId} opgeslagen, maar logboek kon niet worden bijgewerkt ({ErrorType}).",saved.TemplateId,ex.GetType().Name);
+                await ToastService.ShowWarningAsync("Het sjabloon is opgeslagen, maar de logmelding kon niet worden bewaard.");
+                return;
+            }
+            await ToastService.ShowSuccessAsync($"De wijzigingen voor sjabloon {saved.TemplateName} zijn opgeslagen.");
         }
-
-        showSavedMessage = true;
-
-        await Task.Delay(3000);
-        showSavedMessage = false;
-        await InvokeAsync(StateHasChanged);
-
-        // Restore the dutch fieldnames in the UI
-        _selectedTemplatesList.TemplateSubject = _tempSubject;
-        _selectedTemplatesList.TemplateContent = _tempContent;
+        catch (Exception ex) when (ex is MySqlConnector.MySqlException or JSException or InvalidOperationException)
+        {
+            _logger.LogWarning(ex, "Opslaan van mailsjabloon {TemplateId} kon niet worden bevestigd.", editing.TemplateId);
+            await ToastService.ShowErrorAsync(ex is InvalidOperationException ? ex.Message : "Opslaan is niet gelukt. Uw tekst staat nog in de editor. Probeer het opnieuw.");
+        }
+        finally { _isSaving = false; }
     }
 
     protected void AddNew()
     {
+        if(QueueInputsLocked)return;
         uint tempId = (uint)(TemplatesList.Count(t => t.TemplateId == 0) + 1);
 
         TemplatesListModel newTemplate = new()
@@ -324,11 +318,15 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
     protected async Task Delete()
     {
+        if(QueueInputsLocked)return;
         if (_selectedTemplatesList == null || _selectedTemplatesList.TemplateId == 0)
         {
             return;
         }
 
+        _isDeleting=true;
+        try
+        {
         uint deletedTemplateId = _selectedTemplatesList.TemplateId;
         string? deletedTemplateName = _selectedTemplatesList.TemplateName;
         await MailingService.DeleteTemplateQueryAsync(_selectedTemplatesList.TemplateId);
@@ -345,10 +343,13 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
         _selectedTemplatesList.TemplateContent = _mappingService.ReplaceKeysWithLabels(_selectedTemplatesList.TemplateContent);
 
         _editContext = new EditContext(_selectedTemplatesList);
+        }
+        finally{_isDeleting=false;}
     }
 
     protected async Task SelectTemplateListAsync(TemplatesListModel template)
     {
+        if(QueueInputsLocked)return;
         if (template == null)
         {
             return;
@@ -421,7 +422,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
                 Debug.WriteLine("RTE never ready, skipping slash menu.");
 
             // Load the available templates
-            await LoadTemplatesAsync(_cts.Token);
+            // Loaded during initialization; do not reset the active editor after rendering.
 
             // Select the first template if none is selected
             if (TemplatesList?.Any() == true && SelectedTemplatesListId == 0)
@@ -491,19 +492,6 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             _loadCts?.Dispose();
         }
         catch { }
-    }
-
-    private async Task LoadTemplatesAsync(CancellationToken token)
-    {
-        TemplatesList = await GetTemplatesForPageAsync();
-        RecipientsList = await MailingService.GetRecipientListsAsync();
-        token.ThrowIfCancellationRequested();
-
-        // Default selection
-        _selectedTemplatesList = TemplatesList.FirstOrDefault() ?? new TemplatesListModel();
-        _editContext = new EditContext(_selectedTemplatesList);
-
-        await InvokeAsync(StateHasChanged);
     }
 
     private async Task LoadRecipientDataAsync(uint? recipientListId)
@@ -826,8 +814,13 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
     protected async Task MailSend()
     {
-        if (_isSendingMail)
+        if (_isSendingMail || _isSaving || _isDeleting || _queuedCampaignId is not null)
             return;
+        if(_queueSubmission.IsPending && (!ShouldSendRealBulkMail || !QueueEnabled))
+        {
+            await ToastService.ShowWarningAsync("De oorspronkelijke verzendopdracht is nog niet bevestigd. Schakel de wachtrij weer in om dezelfde opdracht veilig te herhalen; directe verzending is geblokkeerd.");
+            return;
+        }
 
         // Send mail from selected template to recipients of the selected recipientlist
         try
@@ -842,6 +835,13 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
                 : $"TESTOMGEVING: mailing met sjabloon {_selectedTemplatesList.TemplateName} wordt gecontroleerd, maar niet echt verzonden.";
             await ToastService.ShowAsync(startMessage);
             await InvokeAsync(StateHasChanged);
+
+            if(sendRealMail && QueueEnabled && _queueSubmission.IsPending)
+            {
+                // Retry the frozen request, not a newly queried or edited recipient list.
+                await QueueCampaignAsync(_selectedTemplatesList,[]);
+                return;
+            }
 
             string? originalSubject = _selectedTemplatesList.TemplateSubject;
             string? originalContent = _selectedTemplatesList.TemplateContent;
@@ -914,11 +914,17 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             string templateName = _selectedTemplatesList?.TemplateName ?? "onbekend sjabloon";
             uint templateId = _selectedTemplatesList?.TemplateId ?? 0;
             string logMessage = $"<_userName> kon geen mailing versturen met sjabloon {templateName}: {ex.Message}";
+            try
+            {
             if ( templateId > 0 )
                 await LoggingService.WriteUserActionTemplateAsync( templateId, "Mailing", "Sjablonen", "unsuccessful", logMessage );
             else
                 await LoggingService.WriteUserActionAsync( "Mailing", "Sjablonen", "unsuccessful", logMessage );
-            await ToastService.ShowErrorAsync( $"Mailing met sjabloon {templateName} kon niet worden verzonden." );
+            }
+            catch(Exception logError){Debug.WriteLine($"Ook de foutmelding kon niet worden opgeslagen ({logError.GetType().Name}).");}
+            await ToastService.ShowErrorAsync(_queueSubmission.IsPending
+                ? "De verzendopdracht is nog niet bevestigd. Kies opnieuw Verzenden om dezelfde opdracht veilig te herhalen; de oorspronkelijke tekst en ontvangers blijven behouden."
+                : $"Mailing met sjabloon {templateName} kon niet worden verzonden.");
         }
         finally
         {
@@ -1105,6 +1111,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
     private async Task OnTemplateChanged(uint? templateId)
     {
+        if(QueueInputsLocked)return;
         if(templateId != SelectedTemplatesListId) ResetQueueRequest();
         if (templateId != null && templateId != 0)
         {
@@ -1118,6 +1125,7 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
     private async Task OnRecipientListChanged(uint? recipientListId)
     {
+        if(QueueInputsLocked)return;
         if (recipientListId != null && recipientListId != 0)
         {
             RecipientListId = recipientListId;
