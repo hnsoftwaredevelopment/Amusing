@@ -29,3 +29,13 @@ Praktijktest op dev.beheer:
 4. Zet het testkoor desgewenst opnieuw op de wachtlijst en plaats het nogmaals; controleer de meldingen en het logboek.
 
 Productiepublicatie valt niet onder deze dev-test.
+
+## Resultaat 28 november 2026
+
+Vijftien gerichte geïsoleerde tests zijn geslaagd zonder skips. Na de verduidelijking van de organisatietekst zijn twee aanvullende tests geslaagd: de dev-plaatsingsmails en de bestaande inschrijvingsbewerking met de uitgebreide gegevensquery. De Beheer-build slaagt zonder fouten of waarschuwingen. De browser heeft Nee → Ja daadwerkelijk gewijzigd en de opgeslagen databasewaarde gecontroleerd; het tijdelijke koor en controleaccount zijn verwijderd. Tijdens die browsercontrole is geen plaatsing of mail aangevraagd.
+
+Dev.beheer draait met DLL-SHA256 `a68283b814456c6efe79c179e789d96325c71b0f7462d2ffa5f310e9042f3238`, proces-ID 134804 en HTTP 200. Backup: `/home/groups/svp/dev.beheer.amusing-hengelo.nl/www/Amusing_backup_20261128-111732`.
+
+Dev.mijn draait met DLL-SHA256 `ae476be206c2b217e96336aef6fe9c24b49bdd12bebf11a2a1737722ecd98394`, proces-ID 134646 en een geslaagde healthcheck. Alleen de applicatie-DLL is vervangen; de configuratiechecksum is behouden. Backup: `/var/backups/kan154-mijn.7jom5e`. De database amusingdev is niet ververst en productie is ongewijzigd.
+
+[PR #64](https://github.com/hnsoftwaredevelopment/Amusing/pull/64) bouwt voort op de geaccepteerde planningexport in PR #63. De praktijkcontrole van plaatsing en ontvangst van mails door de gebruiker staat nog open.

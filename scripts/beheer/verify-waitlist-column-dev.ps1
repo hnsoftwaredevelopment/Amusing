@@ -13,7 +13,7 @@ php -r '$pw=trim(stream_get_contents(STDIN)); echo password_hash($pw, PASSWORD_B
  if($LASTEXITCODE -or !$hash.StartsWith('$2')){throw 'Password hashing failed'}
  $admin=Sql "INSERT INTO ah_beheer(username,password,role,PasswordHash) VALUES('$username','','admin','$hash');SELECT LAST_INSERT_ID();"
  $group=Sql "INSERT INTO ah_zanggroepen(naam,standplaats,land,genre_id,beschrijving,rekeningnr,actief) VALUES('$name','Test','NL',1,'','',1);SELECT LAST_INSERT_ID();"
- $festival=Sql "SELECT festival_id FROM ah_festivals WHERE festivaldatum>=CURDATE() ORDER BY festivaldatum,festival_id LIMIT 1;"
+ $festival=Sql "SELECT festival_id FROM ah_festivals WHERE festivaldatum>=CURDATE() ORDER BY festivaldatum DESC,festival_id DESC LIMIT 1;"
  if(!$festival){throw 'No future edition available'}
  $null=Sql "INSERT INTO ah_inschrijvingen(festival_id,zanggroep_id,aantal_deelnemers,podiumsoort,ingeschreven,wachtlijst) VALUES($festival,$group,20,'A',NOW(),0);"
  $fixture=@{username=$username;password=$password;name=$name}|ConvertTo-Json -Compress
