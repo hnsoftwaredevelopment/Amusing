@@ -27,7 +27,13 @@ public sealed class SmtpQueueTransport(EmailSettings settings) : IQueueMailTrans
             try { await client.DisconnectAsync(true, timeout.Token); } catch { /* Accepted already. */ }
             return new(MailOutcome.Accepted);
         }
-        catch (MailKit.Security.AuthenticationException) { return new(MailOutcome.ConfigurationFailure, "SMTP-aanmelding mislukt."); }
+        catch (MailKit.Security.AuthenticationException ex)
+        {
+            var command=FindCause<SmtpCommandException>(ex);
+            if(command is not null && (int)command.StatusCode is >=400 and <500)
+                return new(MailOutcome.TemporaryFailure,"SMTP-aanmelding tijdelijk niet beschikbaar.",(int)command.StatusCode);
+            return new(MailOutcome.ConfigurationFailure, "SMTP-aanmelding mislukt.");
+        }
         catch (SmtpCommandException ex)
         {
             int code = (int)ex.StatusCode;
@@ -35,14 +41,30 @@ public sealed class SmtpQueueTransport(EmailSettings settings) : IQueueMailTrans
             if (code is >= 400 and < 500)
                 return new(MailOutcome.TemporaryFailure, ex.Message, code,
                     ex.Message.Contains("quota", StringComparison.OrdinalIgnoreCase));
+            if(ex.ErrorCode==SmtpErrorCode.SenderNotAccepted)
+                return new(MailOutcome.ConfigurationFailure,"SMTP-afzender geweigerd; controleer de afzenderconfiguratie.",code);
             return new(code is >= 500 and < 600 ? MailOutcome.PermanentFailure : MailOutcome.Uncertain, ex.Message, code);
         }
-        catch (SslHandshakeException) { return new(MailOutcome.ConfigurationFailure, "SMTP TLS-verbinding mislukt."); }
+        catch (SslHandshakeException ex)
+        {
+            // Certificate failures remain blocked; only a transport interruption before DATA is retriable.
+            bool temporary=ex.ServerCertificate is null &&
+                (FindCause<IOException>(ex) is not null || FindCause<System.Net.Sockets.SocketException>(ex) is not null);
+            return new(temporary?MailOutcome.TemporaryFailure:MailOutcome.ConfigurationFailure,
+                temporary?"SMTP TLS-verbinding tijdelijk onderbroken.":"SMTP TLS-verbinding mislukt.");
+        }
         catch (Exception ex) when (ex is IOException or System.Net.Sockets.SocketException or OperationCanceledException or MailKit.ProtocolException)
         {
             return new(sending ? MailOutcome.Uncertain : MailOutcome.TemporaryFailure,
                 sending ? "SMTP-uitkomst onbekend; controleer voor opnieuw verzenden." : "SMTP tijdelijk niet bereikbaar.");
         }
         catch (Exception) { return new(MailOutcome.ConfigurationFailure, "SMTP-configuratie of bericht kon niet worden verwerkt."); }
+    }
+
+    private static T? FindCause<T>(Exception error) where T:Exception
+    {
+        for(Exception? cause=error.InnerException;cause is not null;cause=cause.InnerException)
+            if(cause is T match)return match;
+        return null;
     }
 }

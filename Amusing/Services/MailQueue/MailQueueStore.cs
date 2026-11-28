@@ -6,7 +6,8 @@ using MimeKit;
 namespace Amusing.Services.MailQueue;
 
 /// <summary>Durable bulk outbox. A non-pooled advisory-lock connection serializes all workers in this database.</summary>
-public sealed partial class MailQueueStore(string connectionString, TimeProvider? clock = null, TimeSpan? minimumSpacing = null)
+public sealed partial class MailQueueStore(string connectionString, TimeProvider? clock = null, TimeSpan? minimumSpacing = null,
+    ILogger<MailQueueStore>? logger = null)
 {
     private readonly TimeProvider _clock = clock ?? TimeProvider.System;
     private readonly TimeSpan _spacing = minimumSpacing ?? TimeSpan.FromSeconds(19);

@@ -19,13 +19,17 @@ else
 	@if(QueueEnabled)
     {
         <p><a href="/MailQueue">Verzendwachtrij bekijken</a></p>
+    }
+        @if(_queueSubmission.IsPending)
+        {
+            <div class="alert alert-warning" role="status">Deze verzendopdracht is nog niet bevestigd. @(QueueEnabled ? "Kies opnieuw Verzenden om dezelfde opdracht te controleren en zo nodig in de wachtrij te zetten." : "De wachtrij is uitgeschakeld. Schakel deze weer in om dezelfde verzendopdracht veilig te controleren.") De oorspronkelijke tekst en ontvangers blijven behouden; je kunt deze nu niet wijzigen.</div>
+        }
         @if(_queuedCampaignId is not null)
         {
-            <div class="alert alert-info">Deze mailing staat in de wachtrij. De verzendknop is geblokkeerd om een dubbele mailing te voorkomen.
-                <SfButton CssClass="e-outline" OnClick="ResetQueueRequest">Nieuwe mailing voorbereiden</SfButton>
+            <div class="alert alert-info">Deze mailing is al als verzendopdracht vastgelegd. De verzendknop is geblokkeerd om een dubbele mailing te voorkomen. @(!QueueEnabled ? "De wachtrij is momenteel uitgeschakeld." : "")
+                <SfButton CssClass="e-outline" Disabled="@QueueInputsLocked" OnClick="ResetQueueRequest">Nieuwe mailing voorbereiden</SfButton>
             </div>
         }
-    }
     <div class="page-container mail-template-page">
 		<div class="groupbox top-info">
 			<div class="groupbox-header">Template informatie</div>
@@ -34,6 +38,7 @@ else
 				{
 					<div class="inline-row template-selection-row">
 						<SfDropDownList TValue="uint?" TItem="TemplatesListModel"
+										Enabled="@(!QueueInputsLocked)"
 										DataSource="@TemplatesList"
 										Value="SelectedTemplatesListId"
 										ValueChanged="@(async ( uint? id ) => await OnTemplateChanged( id ))"
@@ -59,6 +64,7 @@ else
 						@if (SelectedMijnMailType is null)
 						{
 						<SfComboBox TValue="uint?" TItem="RecipientListModel"
+									Enabled="@(!QueueInputsLocked)"
 									DataSource="@RecipientsList"
 									Width="32%" FloatLabelType="FloatLabelType.Always"
 									Value="RecipientListId"
@@ -80,7 +86,7 @@ else
 				@if (SelectedMijnMailType is null)
 				{
 				<div class="inline-row template-detail-row">
-					<SfTextBox Placeholder="Sjabloonnaam" FloatLabelType="FloatLabelType.Always" Width="42%" @bind-Value="_selectedTemplatesList.TemplateName" />
+					<SfTextBox Placeholder="Sjabloonnaam" Readonly="@QueueInputsLocked" FloatLabelType="FloatLabelType.Always" Width="42%" @bind-Value="_selectedTemplatesList.TemplateName" />
 					<SfTextBox Placeholder="Aangemaakt" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="_selectedTemplatesList.TemplateCreated" />
 					<SfTextBox Placeholder="Laatste wijziging" Readonly=true FloatLabelType="FloatLabelType.Always" Width="150px" @bind-Value="_selectedTemplatesList.TemplateChanged" />
 				</div>
@@ -116,6 +122,7 @@ else
 						<Template>
 							<button class="custom-toolbar-btn"
 									@onclick="Save"
+									disabled="@QueueInputsLocked"
 									title="Bewaar sjabloon">
 								<img src="icons/button-save.svg" class="icon" alt="SAVE" />
 							</button>
@@ -123,14 +130,14 @@ else
 					</ToolbarItem>
 					<ToolbarItem Type="ItemType.Button">
 						<Template>
-							<button class="custom-toolbar-btn" @onclick="AddNew" title="Voeg een nieuw sjabloon toe">
+							<button class="custom-toolbar-btn" disabled="@QueueInputsLocked" @onclick="AddNew" title="Voeg een nieuw sjabloon toe">
 								<img src="icons/button-add.svg" class="icon" alt="ADD" />
 							</button>
 						</Template>
 					</ToolbarItem>
 					<ToolbarItem Type="ItemType.Button">
 						<Template>
-							<button class="custom-toolbar-btn" @onclick="Delete" title="verwijder de geselecteerde sjabloon">
+							<button class="custom-toolbar-btn" disabled="@QueueInputsLocked" @onclick="Delete" title="verwijder de geselecteerde sjabloon">
 								<img src="icons/button-del.svg" class="icon" alt="DELETE" />
 							</button>
 						</Template>
@@ -154,7 +161,7 @@ else
 						<Template>
 							<button class="custom-toolbar-btn @(_isSendingMail ? "disabled" : string.Empty)"
 									@onclick="MailSend"
-									disabled="@(_isSendingMail || _queuedCampaignId is not null)"
+									disabled="@(_isDeleting || _isSendingMail || _queuedCampaignId is not null)"
 									title="Verstuur de mail uit het geselecteerde sjabloon naar alle e-mail adressen uit de ontvangerslijst">
 								<img src="icons/send.svg" class="icon" alt="MAILSEND" Height="25"/>
 							</button>
@@ -169,6 +176,7 @@ else
 			<div class="groupbox-content rte-content">
 
 				<SfAutoComplete TValue="string" TItem="string"
+								Enabled="@(!QueueInputsLocked)"
 								@ref="_subjectAuto"
 								@bind-Value="_selectedTemplatesList.TemplateSubject"
 								Placeholder="Onderwerp"
@@ -187,6 +195,7 @@ else
 					@if (_showRTE)
 					{
 						<Syncfusion.Blazor.RichTextEditor.SfRichTextEditor
+							Readonly="@QueueInputsLocked"
 							@ref="_rte"
 							ID="rteContent"
 							EditorMode="EditorMode.HTML"
