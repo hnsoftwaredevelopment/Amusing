@@ -46,14 +46,29 @@ public sealed class RegistrationPlanningExportService(IConfiguration config, Use
             while (await r.ReadAsync(ct))
             {
                 DateTime? Date(int col) => r.IsDBNull(col) ? null : r.GetDateTime(col);
-                rows.Add(new PlanningRegistration {GroupId=r.GetUInt32(0),Name=r.GetString(1),City=r.GetString(2),Stage=r.GetString(3),
-                    Singers=r.GetInt32(4),Genre=r.GetString(5),RegisteredAt=Date(6),PaidOn=Date(7),PaidAmount=r.IsDBNull(8)?null:r.GetDecimal(8),
-                    ConfirmedOn=Date(9),Battle=r.GetBoolean(10),Inside=r.GetInt32(11),Outside=r.GetInt32(12),
-                    Waitlisted=r.GetBoolean(13),Cancelled=r.GetBoolean(14),IsNew=r.GetBoolean(15)});
+                rows.Add(new PlanningRegistration
+                {
+                    GroupId = r.GetUInt32(0),
+                    Name = r.GetString(1),
+                    City = r.GetString(2),
+                    Stage = r.GetString(3),
+                    Singers = r.GetInt32(4),
+                    Genre = r.GetString(5),
+                    RegisteredAt = Date(6),
+                    PaidOn = Date(7),
+                    PaidAmount = r.IsDBNull(8) ? null : r.GetDecimal(8),
+                    ConfirmedOn = Date(9),
+                    Battle = r.GetBoolean(10),
+                    Inside = r.GetInt32(11),
+                    Outside = r.GetInt32(12),
+                    Waitlisted = r.GetBoolean(13),
+                    Cancelled = r.GetBoolean(14),
+                    IsNew = r.GetBoolean(15)
+                });
             }
         }
-        var contacts = new Dictionary<uint,(string Name,string Email,string Mobile)>();
-        var conductors = new Dictionary<uint,List<string>>();
+        var contacts = new Dictionary<uint, (string Name, string Email, string Mobile)>();
+        var conductors = new Dictionary<uint, List<string>>();
         await using (var cmd = Command("""
             SELECT roles.zanggroep_id,roles.rol,
                 CONCAT_WS(' ',NULLIF(TRIM(p.voornaam),''),NULLIF(TRIM(p.tussenvoegsel),''),NULLIF(TRIM(p.achternaam),'')),
@@ -68,25 +83,26 @@ public sealed class RegistrationPlanningExportService(IConfiguration config, Use
         {
             while (await r.ReadAsync(ct))
             {
-                var id=r.GetUInt32(0);
-                if (r.GetString(1)=="contactpersoon1") contacts.TryAdd(id,(r.GetString(2),r.GetString(3),r.GetString(4)));
+                var id = r.GetUInt32(0);
+                if (r.GetString(1) == "contactpersoon1") contacts.TryAdd(id, (r.GetString(2), r.GetString(3), r.GetString(4)));
                 else
                 {
-                    if (!conductors.TryGetValue(id,out var names)) conductors[id]=names=[];
+                    if (!conductors.TryGetValue(id, out var names)) conductors[id] = names = [];
                     names.Add(r.GetString(2));
                 }
             }
         }
         await tx.CommitAsync(ct);
-        return new(year, rows.Select(row => {
-            contacts.TryGetValue(row.GroupId,out var contact);
-            return row with {Contact=contact.Name??"",Email=contact.Email??"",Mobile=contact.Mobile??"",Conductors=conductors.GetValueOrDefault(row.GroupId)??[]};
+        return new(year, rows.Select(row =>
+        {
+            contacts.TryGetValue(row.GroupId, out var contact);
+            return row with { Contact = contact.Name ?? "", Email = contact.Email ?? "", Mobile = contact.Mobile ?? "", Conductors = conductors.GetValueOrDefault(row.GroupId) ?? [] };
         }).ToArray());
 
         MySqlCommand Command(string sql)
         {
-            var cmd=new MySqlCommand(sql,connection,tx);
-            cmd.Parameters.AddWithValue("@festival",festival);
+            var cmd = new MySqlCommand(sql, connection, tx);
+            cmd.Parameters.AddWithValue("@festival", festival);
             return cmd;
         }
     }
