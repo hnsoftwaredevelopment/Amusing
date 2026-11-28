@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -57,8 +57,8 @@
   <data name="AlgemeneKoorgegevensOpslaan" xml:space="preserve">
     <value>Save general choir details</value>
   </data>
-  <data name="AlleenEenEersteContactpersoonKanPersonenUitnodigen" xml:space="preserve">
-    <value>Only a primary contact can invite people and remove roles.</value>
+  <data name="AlleenContactpersonenKunnenPersonenEnRollenBeheren" xml:space="preserve">
+    <value>Only a primary or secondary contact can invite people and remove roles.</value>
   </data>
   <data name="AlleenEenEersteOfTweedeContactpersoonKan" xml:space="preserve">
     <value>Only a primary or secondary contact can register the choir.</value>
@@ -232,7 +232,7 @@
     <value>This role is already assigned or has a pending invitation. Cancel the invitation or remove the current role first. Use the transfer option for the primary contact.</value>
   </data>
   <data name="DezeUitnodigingIsNietMeerBeschikbaarVraag" xml:space="preserve">
-    <value>This invitation is no longer available. Ask the primary contact for a new invitation.</value>
+    <value>This invitation is no longer available. Ask the primary or secondary contact for a new invitation.</value>
   </data>
   <data name="DitEmailadresIsNietGekoppeldAanEen" xml:space="preserve">
     <value>This email address is not linked to an active My Amusing account. Ask the person to create and activate an account first.</value>

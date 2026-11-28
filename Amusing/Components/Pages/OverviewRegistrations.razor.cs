@@ -15,6 +15,7 @@ namespace Amusing.Components.Pages;
 
 public partial class OverviewRegistrations : ComponentBase
 {
+    [Inject] protected NavigationManager Navigation { get; set; } = default!;
     [Inject] protected LoggingService LoggingService { get; set; } = default!;
     [Inject] protected EditionService EditionService { get; set; } = default!;
     [Inject] protected RegistrationService RegistrationService { get; set; } = default!;
@@ -27,6 +28,14 @@ public partial class OverviewRegistrations : ComponentBase
     protected int VisibleRowCount = 0;
 
     protected string SelectedEditionText => Editions.FirstOrDefault( e => e.ID == SelectedEditionId )?.Text ?? "Onbekende editie";
+
+    protected void OnRegistrationDoubleClick(RecordDoubleClickEventArgs<RegistrationModel> args)
+    {
+        if (args.RowData is { GroepId: > 0 } registration)
+        {
+            Navigation.NavigateTo($"/Maintenance-Groups?groupId={registration.GroepId}");
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -44,16 +53,6 @@ public partial class OverviewRegistrations : ComponentBase
         }
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            if (RegistrationList?.Count > 0)
-            {
-                await UpdateVisibleRowCount();
-            }
-        }
-    }
 
     // Whenever the selected edition changes the datagrid has to be updated
     protected async Task OnEditionChanged( string selectedId )
@@ -68,7 +67,6 @@ public partial class OverviewRegistrations : ComponentBase
         if ( GridRef != null )
         {
             await GridRef.Refresh();
-            VisibleRowCount = RegistrationList.Count;
         }
     }
 
@@ -85,9 +83,6 @@ public partial class OverviewRegistrations : ComponentBase
     {
         await GridRef.SearchAsync( args.Value );
 
-        // Count the Number of visible rows
-        await Task.Delay( 200 ); // Short delay to handle fast typers
-        await UpdateVisibleRowCount();
     }
 
     // Export functions
@@ -138,7 +133,15 @@ public partial class OverviewRegistrations : ComponentBase
     // Visible row count (Number of records on screen)
     protected async Task UpdateVisibleRowCount()
     {
+        if (GridRef == null)
+            return;
+
         var data = await GridRef.GetCurrentViewRecordsAsync();
-        VisibleRowCount = data?.Count ?? 0;
+        var count = data?.Count ?? 0;
+        if (VisibleRowCount != count)
+        {
+            VisibleRowCount = count;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 }

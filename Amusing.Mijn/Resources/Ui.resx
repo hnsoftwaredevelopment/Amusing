@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -57,8 +57,8 @@
   <data name="AlgemeneKoorgegevensOpslaan" xml:space="preserve">
     <value>Algemene koorgegevens opslaan</value>
   </data>
-  <data name="AlleenEenEersteContactpersoonKanPersonenUitnodigen" xml:space="preserve">
-    <value>Alleen een eerste contactpersoon kan personen uitnodigen en rollen verwijderen.</value>
+  <data name="AlleenContactpersonenKunnenPersonenEnRollenBeheren" xml:space="preserve">
+    <value>Alleen de eerste of tweede contactpersoon kan personen uitnodigen en rollen verwijderen.</value>
   </data>
   <data name="AlleenEenEersteOfTweedeContactpersoonKan" xml:space="preserve">
     <value>Alleen een eerste of tweede contactpersoon kan het koor inschrijven.</value>
@@ -232,7 +232,7 @@
     <value>Deze rol is al bezet of er staat al een uitnodiging voor klaar. Trek de uitnodiging in of verwijder eerst de huidige rol. Gebruik voor de eerste contactpersoon de overdracht.</value>
   </data>
   <data name="DezeUitnodigingIsNietMeerBeschikbaarVraag" xml:space="preserve">
-    <value>Deze uitnodiging is niet meer beschikbaar. Vraag de eerste contactpersoon om een nieuwe uitnodiging.</value>
+    <value>Deze uitnodiging is niet meer beschikbaar. Vraag de eerste of tweede contactpersoon om een nieuwe uitnodiging.</value>
   </data>
   <data name="DitEmailadresIsNietGekoppeldAanEen" xml:space="preserve">
     <value>Dit e-mailadres is niet gekoppeld aan een actief Mijn Amusing-account. Laat de persoon eerst een account aanmaken en activeren.</value>

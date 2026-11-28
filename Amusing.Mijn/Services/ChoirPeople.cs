@@ -38,7 +38,7 @@ public sealed partial class ChoirPeople(MySqlDataSource source, IHttpContextAcce
     public async Task<ChoirRoster?> RosterAsync(uint actor,uint group,CancellationToken ct)
     {
         string name;bool manage;
-        await using(var cmd=source.CreateCommand("SELECT g.naam,@support OR EXISTS(SELECT 1 FROM ah_personen_rollen ar JOIN ah_personen ap ON ap.persoon_id=ar.persoon_id WHERE ar.zanggroep_id=g.zanggroep_id AND ar.persoon_id=@actor AND ar.rol='contactpersoon1' AND ap.actief=1) FROM ah_zanggroepen g WHERE g.zanggroep_id=@group AND (@support OR EXISTS(SELECT 1 FROM ah_personen_rollen ar WHERE ar.zanggroep_id=g.zanggroep_id AND ar.persoon_id=@actor))"))
+        await using(var cmd=source.CreateCommand("SELECT g.naam,@support OR EXISTS(SELECT 1 FROM ah_personen_rollen ar JOIN ah_personen ap ON ap.persoon_id=ar.persoon_id WHERE ar.zanggroep_id=g.zanggroep_id AND ar.persoon_id=@actor AND ar.rol IN ('contactpersoon1','contactpersoon2') AND ap.actief=1) FROM ah_zanggroepen g WHERE g.zanggroep_id=@group AND (@support OR EXISTS(SELECT 1 FROM ah_personen_rollen ar WHERE ar.zanggroep_id=g.zanggroep_id AND ar.persoon_id=@actor))"))
         {
             Add(cmd,"@actor",actor);Add(cmd,"@group",group);Add(cmd,"@support",SupportMode.CanSupport(supportContext,actor,group));await using var reader=await cmd.ExecuteReaderAsync(ct);
             if(!await reader.ReadAsync(ct)) return null;name=reader.GetString(0);manage=reader.GetBoolean(1);
@@ -67,7 +67,7 @@ public sealed partial class ChoirPeople(MySqlDataSource source, IHttpContextAcce
         return new(name,manage,people.Values.ToList());
     }
     private sealed record LockedRole(uint Person,string Role,bool Active);
-    private static bool Manages(List<LockedRole> roles,uint person)=>roles.Any(r=>r.Person==person && r.Role=="contactpersoon1" && r.Active);
+    private static bool Manages(List<LockedRole> roles,uint person)=>roles.Any(r=>r.Person==person && r.Active && (r.Role is "contactpersoon1" or "contactpersoon2"));
     private static async Task<List<LockedRole>> LockAsync(DbConnection connection,DbTransaction tx,uint group,CancellationToken ct)
     {
         var roles=new List<LockedRole>();
