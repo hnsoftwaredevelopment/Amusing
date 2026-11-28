@@ -22,7 +22,7 @@ public class RegistrationPlanningExportTests
  }
  [Fact]public void WorkbookHasThreeNativeTablesWithTypedDatesAndEditablePlanningColumns()
  {
-  var rows=new[]{Row(1,"=1+1","Same"),Row(2,"Two","Same") with{Waitlisted=true,Inside=2,Outside=0},Row(3,"Three") with{Cancelled=true}};
+  var rows=new[]{Row(1,"=1+1","Same") with{IsNew=true,Mobile="0612345678"},Row(2,"Two","Same") with{Waitlisted=true,Inside=2,Outside=0},Row(3,"Three") with{Cancelled=true}};
   var bytes=RegistrationPlanningExport.CreateWorkbook(new(2027,rows));using var book=new XLWorkbook(new MemoryStream(bytes));var sheet=Assert.Single(book.Worksheets);
   Assert.Equal(3,sheet.Tables.Count());
   foreach(var table in sheet.Tables){Assert.True(table.ShowAutoFilter);Assert.Equal(RegistrationPlanningExport.Headers,table.Fields.Select(f=>f.Name));}
@@ -30,6 +30,9 @@ public class RegistrationPlanningExportTests
   Assert.Equal(XLDataType.DateTime,row.Cell(2).DataType);Assert.Equal("=1+1",row.Cell(3).GetString());Assert.False(row.Cell(3).HasFormula);
   Assert.Equal(row.Cell(3).GetString(),row.Cell(17).GetString());Assert.True(row.Cell(18).IsEmpty());Assert.Equal("Nee",row.Cell(8).GetString());
   Assert.Equal(XLColor.FromHtml("#FFF2CC").Color,row.Cell(16).Style.Fill.BackgroundColor.Color);
+  Assert.Equal("0612345678",row.Cell(15).GetString());Assert.Equal(XLDataType.Text,row.Cell(15).DataType);
+  Assert.Equal(XLColor.FromHtml("#D9EAF7").Color,row.Cell(1).Style.Fill.BackgroundColor.Color);
+  Assert.Equal(XLColor.FromHtml("#FCE4D6").Color,sheet.Tables.Single(t=>t.Name=="PlanningWachtlijst").DataRange!.FirstRow().Cell(1).Style.Fill.BackgroundColor.Color);
  }
  [Fact]public void EmptyCategoriesStillHaveTheirOwnFilterableTableWithoutInventedChoirs()
  {
