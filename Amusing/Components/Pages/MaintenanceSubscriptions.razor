@@ -21,6 +21,7 @@
 				<SfComboBox TValue="string"
 							TItem="Edition"
 							Placeholder="Kies een editie"
+							Value="@SelectedEditionId"
 							ValueChanged="OnEditionChanged"
 							DataSource="@Editions"
 							Width="150px">
@@ -41,6 +42,8 @@
 								AllowExcelExport="true" AllowPdfExport="true"
 								AllowSorting="true"
 								AllowMultiSorting="true">
+
+							<GridEvents TValue="RegistrationModel" OnRecordDoubleClick="OnRegistrationDoubleClick" DataBound="UpdateVisibleRowCount" />
 
 							<SfToolbar>
 								<ToolbarItems>
