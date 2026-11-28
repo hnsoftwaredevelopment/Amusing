@@ -97,7 +97,6 @@
 								<GridColumn Field="Zangers" HeaderText="Zangers" TextAlign="TextAlign.Center" Width="70"></GridColumn>
 
  <GridColumn Field="Genre" HeaderText="Genre" Width="120" />
- <GridColumn Field="Waitlisted" HeaderText="Wachtlijst" Width="105"><Template Context="row"><button type="button" class="btn btn-link p-0" disabled="@(waitlistBusy || pendingWaitlistPlacement is not null)" title="@(((RegistrationModel)row).Waitlisted ? "Koor toelaten tot het festival en berichten versturen" : "Koor op de wachtlijst plaatsen")" @onclick="() => ToggleWaitlistAsync((RegistrationModel)row)">@(((RegistrationModel)row).Waitlisted ? "Ja" : "Nee")</button></Template></GridColumn>
  <GridColumn Field="TeBetalen" HeaderText="Te betalen (€)" Format="N2" Width="130" TextAlign="TextAlign.Right" />
   <GridColumn Field="Factuurdatum" HeaderText="Factuurdatum" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="125"><Template Context="row"><Amusing.Components.RegistrationInvoiceDate Row="@((RegistrationModel)row)" /></Template></GridColumn>
  <GridColumn Field="BetaaldBedrag" HeaderText="Betaald" Format="N2" TextAlign="TextAlign.Right" Width="110"><Template Context="row"><button type="button" class="btn btn-link p-0 @(((RegistrationModel)row).AfwijkendBetaaldBedrag?"text-danger fw-semibold":"")" title="Betaaldatum en bedrag wijzigen" @onclick="() => EditRegistrationAsync((RegistrationModel)row,RegistrationEditAction.Payment)">@(((RegistrationModel)row).BetaaldTekst)</button></Template></GridColumn>
@@ -107,6 +106,7 @@
 
  <GridColumn Field="Binnen" HeaderText="Binnen" Width="70" TextAlign="TextAlign.Center" />
  <GridColumn Field="Buiten" HeaderText="Buiten" Width="70" TextAlign="TextAlign.Center" />
+ <GridColumn Field="Waitlisted" HeaderText="Wachtlijst" Width="105"><Template Context="row"><button type="button" class="btn btn-link p-0" disabled="@(waitlistBusy || pendingWaitlistPlacement is not null)" title="@(((RegistrationModel)row).Waitlisted ? "Koor toelaten tot het festival en berichten versturen" : "Koor op de wachtlijst plaatsen")" @onclick="() => ToggleWaitlistAsync((RegistrationModel)row)">@(((RegistrationModel)row).Waitlisted ? "Ja" : "Nee")</button></Template></GridColumn>
  <GridColumn Field="Afhaakdatum" HeaderText="Afgehaakt" Width="110"><Template Context="row"><button class="btn btn-link p-0" @onclick="() => EditRegistrationAsync((RegistrationModel)row,RegistrationEditAction.Cancellation)">@(((RegistrationModel)row).AfgehaaktTekst)</button></Template></GridColumn>
  <GridColumn HeaderText="Wijzigen" Width="100"><Template Context="row"><button type="button" class="btn btn-outline-primary btn-sm" title="Inschrijving wijzigen" @onclick="() => EditRegistrationAsync((RegistrationModel)row)"><span class="fa-solid fa-pen" aria-hidden="true"></span><span class="visually-hidden">Inschrijving wijzigen</span></button></Template></GridColumn>
 

@@ -1,6 +1,6 @@
 # KAN-154 — Wachtlijst vanuit Inschrijvingen
 
-In Beheer → Inschrijvingen staat de kolom **Wachtlijst** met een klikbare Ja/Nee-waarde.
+In Beheer → Inschrijvingen staat de kolom **Wachtlijst** direct vóór **Afgehaakt**, met een klikbare Ja/Nee-waarde.
 
 - **Nee → Ja:** het koor wordt op de wachtlijst gezet. Er worden hiervoor geen nieuwe berichten aangemaakt. De overige inschrijfgegevens, betaling en bevestiging blijven behouden.
 - **Ja → Nee:** het koor wordt geplaatst via dezelfde procedure als Wachtlijst beheren. Contactpersoon 1 ontvangt het plaatsingsbericht; de penningmeester ontvangt de nota (contactpersoon 1 als terugval). De organisatie ontvangt hetzelfde organisatiebericht en sjabloon als bij een directe inschrijving.
