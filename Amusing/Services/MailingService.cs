@@ -444,9 +444,26 @@ public class MailingService : IParticipationInvoiceSender
             {"@TemplateName", model.TemplateName},
             {"@TemplateSubject", model.TemplateSubject},
             {"@TemplateContent", model.TemplateContent},
-            {"@RecipientListId", model.RecipientListId}
+            {"@RecipientListId", model.RecipientListId.GetValueOrDefault() == 0 ? DBNull.Value : (object)model.RecipientListId!.Value}
         };
         return await _dataService.ExecuteScalarAsync<uint>(QueryDefinitions.AddNewTemplateQuery, parameters);
+    }
+
+    public async Task<TemplatesListModel> SaveTemplateAsync(TemplatesListModel snapshot)
+    {
+        var id = snapshot.TemplateId;
+        if (id == 0)
+            id = await AddTemplateQueryAsync(snapshot);
+        else
+            await UpdateTemplateQueryAsync(snapshot);
+
+        var saved = (await GetMailTemplatesAsync()).SingleOrDefault(template => template.TemplateId == id)
+            ?? throw new InvalidOperationException("Het sjabloon bestaat niet meer. Ververs de lijst.");
+        if (saved.TemplateName != snapshot.TemplateName || saved.TemplateSubject != snapshot.TemplateSubject
+            || saved.TemplateContent != snapshot.TemplateContent
+            || saved.RecipientListId.GetValueOrDefault() != snapshot.RecipientListId.GetValueOrDefault())
+            throw new InvalidOperationException("De opgeslagen inhoud wijkt af. Controleer het sjabloon opnieuw voordat u verdergaat.");
+        return saved;
     }
 
     public async Task UpdateTemplateQueryAsync(TemplatesListModel model)
@@ -457,7 +474,7 @@ public class MailingService : IParticipationInvoiceSender
             {"@TemplateName", model.TemplateName},
             {"@TemplateSubject", model.TemplateSubject},
             {"@TemplateContent", model.TemplateContent},
-            {"@RecipientListId", model.RecipientListId}
+            {"@RecipientListId", model.RecipientListId.GetValueOrDefault() == 0 ? DBNull.Value : (object)model.RecipientListId!.Value}
         };
         await _dataService.ExecuteNonQueryAsync(QueryDefinitions.ModifyTemplateQueryById, parameters);
     }

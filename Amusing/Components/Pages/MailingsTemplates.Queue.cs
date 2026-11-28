@@ -13,7 +13,7 @@ public partial class MailingsTemplates
     private readonly BulkMailSubmission _queueSubmission=new();
     private string? _queuedCampaignId=>_queueSubmission.CampaignId;
     private bool _isDeleting;
-    private bool QueueInputsLocked=>_isDeleting||_isSendingMail||_queueSubmission.IsPending;
+    private bool QueueInputsLocked=>_isSaving||_isDeleting||_isSendingMail||_queueSubmission.IsPending;
     private bool QueueEnabled => Configuration.GetValue<bool>("MailQueue:Enabled");
     private void ResetQueueRequest(){if(!QueueInputsLocked)_queueSubmission.Reset();}
     private async Task QueueCampaignAsync(TemplatesListModel template,List<ExpandoObject> recipients)
