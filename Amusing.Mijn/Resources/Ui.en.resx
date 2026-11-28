@@ -825,4 +825,11 @@
   <data name="KoorVanafWachtlijstGeplaatst">
     <value>Choir placed from the waiting list</value>
   </data>
+  <data name="KoorOndersteunen" xml:space="preserve"><value>Support a choir</value></data>
+  <data name="ZoekKoorOpNaam" xml:space="preserve"><value>Search by part of the choir name</value></data>
+  <data name="KoorZoeken" xml:space="preserve"><value>Search</value></data>
+  <data name="AlleKorenTonen" xml:space="preserve"><value>Show all choirs</value></data>
+  <data name="AantalKorenGevonden" xml:space="preserve"><value>{0} choirs found</value></data>
+  <data name="GeenKorenGevonden" xml:space="preserve"><value>No choirs found. Try another search term.</value></data>
+  <data name="OpenKoor" xml:space="preserve"><value>Open choir</value></data>
 </root>

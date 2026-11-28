@@ -825,4 +825,11 @@
   <data name="KoorVanafWachtlijstGeplaatst">
     <value>Chor von der Warteliste zugelassen</value>
   </data>
+  <data name="KoorOndersteunen" xml:space="preserve"><value>Chor unterstützen</value></data>
+  <data name="ZoekKoorOpNaam" xml:space="preserve"><value>Nach einem Teil des Chornamens suchen</value></data>
+  <data name="KoorZoeken" xml:space="preserve"><value>Suchen</value></data>
+  <data name="AlleKorenTonen" xml:space="preserve"><value>Alle Chöre anzeigen</value></data>
+  <data name="AantalKorenGevonden" xml:space="preserve"><value>{0} Chöre gefunden</value></data>
+  <data name="GeenKorenGevonden" xml:space="preserve"><value>Keine Chöre gefunden. Versuchen Sie einen anderen Suchbegriff.</value></data>
+  <data name="OpenKoor" xml:space="preserve"><value>Chor öffnen</value></data>
 </root>

@@ -4,25 +4,41 @@
 @using System.Security.Claims
 @inject ChoirAccounts Accounts
 @inject SupportAccounts Support
+@inject SiteLanguage SiteLanguage
 @inject ChoirPeople People
 @inject ChoirEnrollments Enrollments
 @inject IHttpContextAccessor Context
 <PageTitle>@T("MijnKoren") — Mijn Amusing</PageTitle>
 @if (Context.HttpContext!.User.IsAdministrator())
 {
-    <h1>Koor ondersteunen</h1>
-    <form method="post" action="/ondersteuning/koor" data-enhance="false">
-        <AntiforgeryToken />
-        <label for="support-group">Kies een koor</label>
-        <select id="support-group" name="group" required>
-            <option value="">Kies een koor</option>
-            @foreach (var group in groups)
-            {
-                <option value="@group.Id">@group.Name</option>
-            }
-        </select>
-        <button type="submit">Open koor</button>
-    </form>
+    <section lang="@language" aria-labelledby="support-title">
+        <h1 id="support-title">@T("KoorOndersteunen")</h1>
+        <form method="get" action="/" data-enhance="false" role="search">
+            <label for="choir-search">@T("ZoekKoorOpNaam")</label>
+            <input id="choir-search" type="search" name="zoek" value="@Search" maxlength="100" aria-controls="support-grid" data-support-search />
+            <button class="choir-primary" type="submit">@T("KoorZoeken")</button>
+            <a href="/">@T("AlleKorenTonen")</a>
+        </form>
+        <p role="status" data-support-count data-count-format="@T("AantalKorenGevonden")">@UiText.Format("AantalKorenGevonden", language, supportGroups.Count(MatchesSearch))</p>
+        <p data-support-empty hidden="@(supportGroups.Any(MatchesSearch))">@T("GeenKorenGevonden")</p>
+        <form method="post" action="/ondersteuning/koor" data-enhance="false">
+            <AntiforgeryToken />
+            <div class="support-grid-scroll" tabindex="0" role="region" aria-label="@T("KoorOndersteunen")">
+                <table id="support-grid" class="support-grid">
+                    <thead><tr><th scope="col">@T("Koornaam2")</th><th scope="col">@T("Standplaats2")</th></tr></thead>
+                    <tbody>
+                        @foreach (var group in supportGroups)
+                        {
+                            <tr data-support-row data-search-name="@group.Name" hidden="@(!MatchesSearch(group))">
+                                <td><button type="submit" name="group" value="@group.Id" aria-label="@($"{T("OpenKoor")}: {group.Name}, {group.City}")">@group.Name</button></td>
+                                <td>@group.City</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </section>
 }
 else
 {
@@ -105,10 +121,13 @@ else
 }
 @if (Context.HttpContext!.User.IsAdministrator())
 {
-    <form method="post" action="/account/logout" data-enhance="false"><AntiforgeryToken /><button class="secondary">Uitloggen</button></form>
+    <form method="post" action="/account/logout" data-enhance="false"><AntiforgeryToken /><button class="secondary">@T("Uitloggen")</button></form>
 }
 @code {
+    [SupplyParameterFromQuery(Name = "zoek")] public string? Search { get; set; }
     private List<ChoirSummary> groups = [];
+    private List<SupportChoir> supportGroups = [];
+    private bool MatchesSearch(SupportChoir group) => group.Name.Contains((Search ?? "").Trim(), StringComparison.OrdinalIgnoreCase);
     private string language = "nl";
     private int unread;
     private EnrollmentShortcuts? shortcuts;
@@ -116,12 +135,13 @@ else
     private string InvitationLabel => T("MijnUitnodigingen") +
         (unread > 0 ? $" ({unread} {T("Ongelezen")})" : "");
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         var request = Context.HttpContext!;
         if (request.User.IsAdministrator())
         {
-            groups = await Support.GroupsAsync(request.RequestAborted);
+            language = await SiteLanguage.GetAsync();
+            supportGroups = await Support.GroupsAsync(request.RequestAborted);
             return;
         }
 

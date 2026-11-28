@@ -100,3 +100,12 @@
     z-index: 100;
 }
 .invitation-notice h2 { font-size: 1.25rem; }
+.support-grid-scroll { max-height: 26rem; overflow: auto; border: 1px solid #bbc9d5; border-radius: .35rem; background: white; }
+.support-grid { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; }
+.support-grid th { position: sticky; top: 0; z-index: 1; background: #e7eefb; padding: .5rem .75rem; color: #014983; }
+.support-grid td { padding: .25rem .75rem; border-top: 1px solid #e1e6eb; overflow-wrap: anywhere; }
+.support-grid tr:hover td, .support-grid tr:focus-within td { background: #edf4fb; }
+.support-grid button { margin: 0; padding: .4rem 0; min-height: 44px; width: 100%; background: transparent; color: #014983; text-align: left; font-weight: 600; }
+.support-grid button:focus-visible { outline-offset: 0; }
+.support-grid td:first-child { width: 65%; }
+.support-grid [hidden] { display: none; }
