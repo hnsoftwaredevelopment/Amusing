@@ -45,7 +45,7 @@ public sealed partial class ChoirProfiles
             duplicate.Parameters.AddWithValue("@city", input.City);
             duplicate.Parameters.AddWithValue("@country", input.Country);
             if (Convert.ToBoolean(await duplicate.ExecuteScalarAsync(ct)))
-                return (null, "Er bestaat al een koor met deze naam en standplaats. Vraag de eerste contactpersoon om een uitnodiging of neem contact op met de organisatie.");
+                return (null, "Er bestaat al een koor met deze naam en standplaats. Vraag de eerste of tweede contactpersoon om een uitnodiging of neem contact op met de organisatie.");
 
             await using var insert = new MySqlCommand("""
                 INSERT INTO ah_zanggroepen(naam,standplaats,land,genre_id,beschrijving,rekeningnr,actief)

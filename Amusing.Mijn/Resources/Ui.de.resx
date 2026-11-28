@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -57,8 +57,8 @@
   <data name="AlgemeneKoorgegevensOpslaan" xml:space="preserve">
     <value>Allgemeine Chordaten speichern</value>
   </data>
-  <data name="AlleenEenEersteContactpersoonKanPersonenUitnodigen" xml:space="preserve">
-    <value>Nur eine erste Kontaktperson kann Personen einladen und Rollen entfernen.</value>
+  <data name="AlleenContactpersonenKunnenPersonenEnRollenBeheren" xml:space="preserve">
+    <value>Nur die erste oder zweite Kontaktperson darf Personen einladen und Rollen entfernen.</value>
   </data>
   <data name="AlleenEenEersteOfTweedeContactpersoonKan" xml:space="preserve">
     <value>Nur eine erste oder zweite Kontaktperson kann den Chor anmelden.</value>
@@ -232,7 +232,7 @@
     <value>Diese Rolle ist bereits besetzt oder eine Einladung ist noch offen. Ziehe die Einladung zurück oder entferne die bisherige Rolle. Nutze für die erste Kontaktperson die Übergabe.</value>
   </data>
   <data name="DezeUitnodigingIsNietMeerBeschikbaarVraag" xml:space="preserve">
-    <value>Diese Einladung ist nicht mehr verfügbar. Bitte die erste Kontaktperson um eine neue Einladung.</value>
+    <value>Diese Einladung ist nicht mehr verfügbar. Bitte die erste oder zweite Kontaktperson um eine neue Einladung.</value>
   </data>
   <data name="DitEmailadresIsNietGekoppeldAanEen" xml:space="preserve">
     <value>Diese E-Mail-Adresse gehört zu keinem aktiven Mein-Amusing-Konto. Die Person muss zuerst ein Konto erstellen und aktivieren.</value>
