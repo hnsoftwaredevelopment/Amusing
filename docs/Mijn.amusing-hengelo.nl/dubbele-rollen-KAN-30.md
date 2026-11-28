@@ -54,15 +54,15 @@ De detailrapporten bevatten een invulbaar beslisoverzicht, namen, persoons-IDs, 
 
 Een nieuwe inventaris krijgt unieke bestandsnamen en overschrijft geen eerder ingevulde besluiten.
 
-De organisatie kiest per geval welk persoons-ID de rol behoudt. Ook een wijziging naar bijvoorbeeld tweede contactpersoon moet expliciet worden besloten en op de unieke-rolregels worden gecontroleerd. Alleen een koppeling verwijderen kan iemand zonder andere rollen zijn toegang tot het koor kosten. Personenaccounts worden niet verwijderd en historische deelname of auditregels blijven behouden.
+De organisatie heeft inmiddels de automatische regels bovenaan dit document goedgekeurd. Alleen uitzonderingen die deze regels blokkeren vragen nog een individueel besluit. Personenaccounts worden niet verwijderd en historische deelname of auditregels blijven behouden.
 
-**KAN-31:** inventaris en herstelvoorstel opgeleverd. **KAN-32:** nog niet uitgevoerd; concrete besluiten van de organisatie ontbreken. De bovenliggende KAN-30 blijft daarom Actief.
+**KAN-31:** inventaris en herstelvoorstel opgeleverd. **KAN-32:** de goedgekeurde correctie is op dev uitgevoerd en wacht op praktijktest en de latere productiegang.
 
 ## Ontvangercontrole
 
 Volgens de huidige broncode kiest de applicatie bij meerdere bereikbare actieve kandidaten het laagste persoons-ID. Voor inschrijfbevestiging is dat contactpersoon 1; een nieuwe nota kiest de penningmeester, met contactpersoon 1 als terugval. Een kopienota vereist een bereikbare penningmeester. De rapporten tonen deze technische keuze om het effect van een correctie vooraf te kunnen beoordelen; ze bewijzen niet dat eerdere mail is afgeleverd.
 
-Relevant: ChoirEnrollmentMail.cs, ChoirParticipationNoteCopy.cs en ChoirPeopleInvitations.cs. Nieuwe uitnodigingen en acceptatie gebruiken de bestaande unieke-rolcontrole. Die code is voor deze inventaris niet aangepast.
+Relevant: ChoirEnrollmentMail.cs, ChoirParticipationNoteCopy.cs en ChoirPeopleInvitations.cs. Nieuwe uitnodigingen en acceptatie behouden de unieke-rolcontrole voor eerste contactpersoon en penningmeester; tweede contactpersonen zijn niet langer uniek.
 
 Na een concreet herstelbesluit:
 
@@ -85,3 +85,17 @@ Het SQL-bestand bevat uitsluitend read-only transactie-instellingen, SELECTs en 
 Een synthetische rapporttest controleert de telling van unieke personen per rol, inactieve accounts, ongeldige e-mailadressen, deterministische ontvangerkeuze, uitnodigingen en veilige Markdown-weergave. De inventaris is daarna daadwerkelijk op beide databases uitgevoerd; de directe telquery en het detailrapport geven dezelfde aantallen.
 
 Er is voor deze slice geen applicatiepublicatie of databasecorrectie nodig.
+
+## Resultaat KAN-32 op dev
+
+De aanvullende herstelstap vereist wel applicatie- en datawijzigingen; die zijn uitsluitend op dev uitgevoerd. In amusingdev zijn bij 23 koren 24 eerste-contactrollen omgezet naar tweede-contactrollen. De nacontrole vindt geen verdere wijzigingen of dubbele unieke rollen. Alle 47 unieke contactadressen bij deze koren zijn behouden; de audit bevat 24 regels voor 23 koren. Personenaccounts, overige rollen en koppelingen bij andere koren zijn behouden. Er zijn geen mails aangemaakt of verstuurd; de rollentabel heeft geen triggers die dat indirect zouden doen.
+
+De toekomstige bevestigingsontvanger verandert bij de 23 koren naar de gekozen nieuwe eerste contactpersoon. Bij acht koren verandert daardoor ook de terugvalontvanger voor een nieuwe nota omdat er geen bereikbare penningmeester is. Er zijn nul gewijzigde penningmeester-/kopienotaontvangers. Bestaande nota's en mail blijven ongewijzigd.
+
+Technische controle: zeven beleidstests en acht gerichte integratie-/regressietests zijn gecontroleerd. De laatste gecombineerde run had veertien geslaagde tests en één te brede HTML-assertie; die assertie is beperkt tot de uitnodigingskeuzelijst en de gerichte hertest slaagt. Gecontroleerd zijn onder meer hoogste ID, behoud van adressen/andere rollen, gelijke e-mail, actieve eerste contactpersoon, gewijzigde plannen, volledige batchrollback, auditfouten, autorisatie, herhaalde uitvoering, uitnodigingsacceptatie en vertaalde logboekweergave.
+
+Dev.mijn is gecontroleerd met DLL-hash `16b8dbff32e4d33bb82b09d44da9d174800683d812a241e0f968f0168bb22c65`, nieuwe PID 137012 en HTTP 200. Backup: `/var/backups/dev-assembly-2b029017ca1048178d5137c33cb6b98b.EBODR4`.
+
+Dev.beheer is gecontroleerd met DLL-hash `ea3d5a0c7fe3c306de0c451c5b60286e0d98bb515e9aa7314f014dc4bc922eef`, nieuwe PID 137176 en HTTP 200. Backup: `/var/backups/dev-assembly-50c3dfa5c8554a898f28a216848903e9.ltkgJS`.
+
+Alleen de applicatie-DLL's zijn vervangen; databasekeuze en configuratiechecksums zijn gecontroleerd. De productiegegevens zijn nog ongewijzigd: de read-only nacontrole telt daar nog 23 koren met meerdere eerste contactpersonen. Het productieplan is voorbereid, niet uitgevoerd. Eerst de praktijkcontrole op dev en de code-/productiegang afronden.
