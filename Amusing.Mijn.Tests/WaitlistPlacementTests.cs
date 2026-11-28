@@ -49,7 +49,7 @@ public partial class LoginTests
         Assert.Equal(0,repeated.Placed); Assert.Equal(1,repeated.Skipped);
         var processing=await Task.WhenAll(mail.ProcessNextPlacementAsync(default),mail.ProcessNextPlacementAsync(default));
         Assert.Single(processing,value=>value);
-        await using(var read=source.CreateCommand("SELECT soort,onderwerp,nota_gegevens,aanvrager_type,aanvrager_id FROM mijn_inschrijfmail WHERE verzonden IS NULL ORDER BY soort"))
+        await using(var read=source.CreateCommand("SELECT soort,onderwerp,nota_gegevens,aanvrager_type,aanvrager_id FROM mijn_inschrijfmail WHERE verzonden IS NULL AND soort<>'organisatie' ORDER BY soort"))
         await using(var reader=await read.ExecuteReaderAsync())
         {
             Assert.True(await reader.ReadAsync());
@@ -111,7 +111,7 @@ public partial class LoginTests
         Assert.True(await mail.ProcessNextPlacementAsync(default));
         Assert.False(await mail.ProcessNextPlacementAsync(default));
         await using var count=source.CreateCommand("SELECT COUNT(*) FROM mijn_inschrijfmail WHERE verzonden IS NULL");
-        Assert.Equal(2,Convert.ToInt32(await count.ExecuteScalarAsync()));
+        Assert.Equal(4,Convert.ToInt32(await count.ExecuteScalarAsync()));
     }
 
     [DatabaseFact]

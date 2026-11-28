@@ -17,6 +17,7 @@ public class RegistrationService(GenericDataService dataService)
                 AvailableFrom = reader["AvailableFrom"].ToString() ?? "",
                 AvailableUntil = reader["AvailableUntil"].ToString() ?? "",
                 FestivalId = Convert.ToUInt32(reader["festival_id"]),
+                Waitlisted = Convert.ToBoolean(reader["Wachtlijst"]),
                 GroepId = Convert.ToUInt32(reader["zanggroep_id"]),
                 Datum = Convert.ToDateTime(reader["Datum"]),
                 Naam = reader["Naam"].ToString(),

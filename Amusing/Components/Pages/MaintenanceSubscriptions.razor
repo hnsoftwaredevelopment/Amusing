@@ -106,6 +106,7 @@
 
  <GridColumn Field="Binnen" HeaderText="Binnen" Width="70" TextAlign="TextAlign.Center" />
  <GridColumn Field="Buiten" HeaderText="Buiten" Width="70" TextAlign="TextAlign.Center" />
+ <GridColumn Field="Waitlisted" HeaderText="Wachtlijst" Width="105"><Template Context="row"><button type="button" class="btn btn-link p-0" disabled="@(waitlistBusy || pendingWaitlistPlacement is not null)" title="@(((RegistrationModel)row).Waitlisted ? "Koor toelaten tot het festival en berichten versturen" : "Koor op de wachtlijst plaatsen")" @onclick="() => ToggleWaitlistAsync((RegistrationModel)row)">@(((RegistrationModel)row).Waitlisted ? "Ja" : "Nee")</button></Template></GridColumn>
  <GridColumn Field="Afhaakdatum" HeaderText="Afgehaakt" Width="110"><Template Context="row"><button class="btn btn-link p-0" @onclick="() => EditRegistrationAsync((RegistrationModel)row,RegistrationEditAction.Cancellation)">@(((RegistrationModel)row).AfgehaaktTekst)</button></Template></GridColumn>
  <GridColumn HeaderText="Wijzigen" Width="100"><Template Context="row"><button type="button" class="btn btn-outline-primary btn-sm" title="Inschrijving wijzigen" @onclick="() => EditRegistrationAsync((RegistrationModel)row)"><span class="fa-solid fa-pen" aria-hidden="true"></span><span class="visually-hidden">Inschrijving wijzigen</span></button></Template></GridColumn>
 
@@ -200,6 +201,15 @@
 </AuthorizeView>
 
 <Amusing.Components.RegistrationAvailabilityDialog @ref="availabilityDialog" Saved="LoadRegistrationsAsync" />
+<SfDialog Visible="@(pendingWaitlistPlacement is not null)" IsModal="true" Width="450px" CloseOnEscape="false" ShowCloseIcon="false" Header="Uiterste betaaldatum bij plaatsing">
+ <DialogTemplates><Content>
+  <p>De inschrijving is gesloten. Kies de uiterste betaaldatum voor @pendingWaitlistPlacement?.Naam.</p>
+  <label for="placement-due">Uiterste betaaldatum</label>
+  <InputDate id="placement-due" class="form-control" @bind-Value="waitlistDue" min="@WaitlistColumn.Today.ToString("yyyy-MM-dd")" disabled="@waitlistBusy" />
+  <div class="mt-3"><button type="button" class="btn btn-primary" disabled="@waitlistBusy" @onclick="ConfirmWaitlistPlacementAsync">Plaatsen en berichten versturen</button>
+  <button type="button" class="btn btn-secondary" disabled="@waitlistBusy" @onclick="() => pendingWaitlistPlacement=null">Annuleren</button></div>
+ </Content></DialogTemplates>
+</SfDialog>
 <Amusing.Components.RegistrationEditDialog @ref="registrationEditDialog" Saved="LoadRegistrationsAsync" />
 @code {
  private Amusing.Components.RegistrationAvailabilityDialog availabilityDialog = default!;
