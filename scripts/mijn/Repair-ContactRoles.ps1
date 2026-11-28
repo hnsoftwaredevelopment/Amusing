@@ -45,7 +45,10 @@ try{
  dotnet $cli @parameters
  if($LASTEXITCODE){throw 'Contactcorrectie niet voltooid; controleer de bovenstaande melding.'}
 }finally{
- $env:AMUSING_ROLE_REPAIR_CONNECTION=$previous
- if($tunnel -and !$tunnel.HasExited){Stop-Process -Id $tunnel.Id}
- if($created){"DROP USER IF EXISTS '$account'@'127.0.0.1';"|ssh -o BatchMode=yes -i $key $server 'sudo mysql' 2>$null;if($LASTEXITCODE){Write-Warning 'Opruimen tijdelijke verbinding mislukt.'}}
+ try{
+  $env:AMUSING_ROLE_REPAIR_CONNECTION=$previous
+  if($tunnel -and !$tunnel.HasExited){Stop-Process -Id $tunnel.Id}
+ }finally{
+  if($created){"DROP USER IF EXISTS '$account'@'127.0.0.1';"|ssh -o BatchMode=yes -i $key $server 'sudo mysql' 2>$null;if($LASTEXITCODE){Write-Warning 'Opruimen tijdelijke verbinding mislukt.'}}
+ }
 }
