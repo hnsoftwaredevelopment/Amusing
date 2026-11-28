@@ -841,4 +841,5 @@
   <data name="ControleerInschrijvingEnBeschikbaarheid" xml:space="preserve"><value>Controleer de inschrijfgegevens en de beschikbaarheid. Kies tijden binnen het festivalvenster, in stappen van een halfuur en met minstens een halfuur tussen begin en eind.</value></data>
   <data name="BetaaldBedrag" xml:space="preserve"><value>Betaald bedrag</value></data>
   <data name="KoorOpWachtlijstGeplaatst" xml:space="preserve"><value>Koor op de wachtlijst geplaatst</value></data>
+  <data name="ContactrollenHersteld" xml:space="preserve"><value>Contactrollen hersteld</value></data>
 </root>

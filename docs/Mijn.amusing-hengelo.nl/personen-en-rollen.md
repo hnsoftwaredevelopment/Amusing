@@ -1,5 +1,7 @@
 # Personen, rollen en uitnodigingen
 
+Actuele aanvulling KAN-30, 28 november 2026: een koor heeft maximaal één eerste contactpersoon en één penningmeester; meerdere tweede contactpersonen zijn toegestaan. Dezelfde persoon mag bij verschillende koren gekoppeld zijn. Het goedgekeurde herstel van oude dubbele eerste contacten behoudt ieder uniek contactadres en minstens één actieve eerste contactpersoon. Zie [dubbele-rollen-KAN-30.md](dubbele-rollen-KAN-30.md) voor de actuele regels en controles. Oudere gedateerde beschrijvingen hieronder zijn historische testinformatie.
+
 Status 5 november 2026: eerste testbare versie op dev.mijn. Technisch getest en hands-on geaccepteerd door Herbert. Geen productiewijziging en geen echte e-mailverzending.
 
 ## Zelf testen

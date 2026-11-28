@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Amusing.Mijn\Amusing.Mijn.csproj" />
+    <ProjectReference Include="..\tools\Amusing.ContactRepair\Amusing.ContactRepair.csproj" />
     <ProjectReference Include="..\Amusing\Amusing.csproj" Aliases="beheer" />
   </ItemGroup>
 

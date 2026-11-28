@@ -9,7 +9,7 @@ public sealed record OutgoingRoleInvitation(string Id, string Name, string Role,
 public sealed partial class ChoirPeople(MySqlDataSource source, IHttpContextAccessor? supportContext = null, IConfiguration? configuration = null, ILogger<ChoirPeople>? logger = null)
 {
     public const string FirstContactTransfer = "overdracht_contactpersoon1";
-    private static bool Exclusive(string role) => role is "contactpersoon1" or "contactpersoon2" or "penningmeester";
+    private static bool Exclusive(string role) => role is "contactpersoon1" or "penningmeester";
     private static async Task<bool> AtChoirLimitAsync(DbConnection connection, DbTransaction tx, uint person, uint group, string role, CancellationToken ct)
     {
         if (role is not ("muzikant" or "dirigent")) return false;

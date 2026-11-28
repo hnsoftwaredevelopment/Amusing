@@ -22,7 +22,7 @@ public sealed class ChoirAudit(MySqlDataSource source, IHttpContextAccessor cont
                 AND l.actor_type IN ('beheer','choir_person','system')
                 AND l.action IN ('ChoirCreated','ChoirProfileChanged','ChoirImageChanged','ChoirImageRemoved',
                     'FestivalEnrolled','FestivalEnrollmentUpdated','FestivalEnrollmentConfirmed','FestivalWaitlistPlaced','FestivalWaitlistRestored','ParticipationNoteSent','ParticipationNoteCopySent',
-                    'RoleInvitationCreated','RoleInvitationAccepted','RoleInvitationCancelled','FirstContactTransferred','RoleRemoved')
+                    'RoleInvitationCreated','RoleInvitationAccepted','RoleInvitationCancelled','FirstContactTransferred','RoleRemoved','ContactRolesNormalized')
                 AND (@before IS NULL OR l.id < @before)
             LEFT JOIN ah_beheer b ON l.actor_type='beheer' AND b.user_id=l.actor_id
             LEFT JOIN ah_personen p ON l.actor_type='choir_person' AND p.persoon_id=l.actor_id
