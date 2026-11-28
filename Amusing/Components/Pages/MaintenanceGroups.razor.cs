@@ -32,6 +32,10 @@ public partial class MaintenanceGroups : ComponentBase
     [Inject] protected RegistrationService RegistrationService { get; set; } = default!;
     [Inject] protected ToastService ToastService { get; set; } = default!;
 
+    [SupplyParameterFromQuery(Name = "groupId")]
+    public long? RequestedGroupId { get; set; }
+
+    private long? _appliedGroupId;
     private bool _initialLoadDone = false;
     private bool _selectFirstRowActivePending;
     private bool _selectFirstRowUnrelatedPending;
@@ -271,6 +275,19 @@ public partial class MaintenanceGroups : ComponentBase
         IsLoading = false;
     }
 
+    protected override void OnParametersSet()
+    {
+        if (!_initialLoadDone || _appliedGroupId != RequestedGroupId)
+        {
+            _appliedGroupId = RequestedGroupId;
+            _initialLoadDone = false;
+            SelectedGroup = RequestedGroupId is long groupId
+                ? Groups.FirstOrDefault(group => group.GroupId == groupId)
+                : Groups.FirstOrDefault();
+            SelectedGroupOriginal = CloneGroup(SelectedGroup);
+        }
+    }
+
     // Helper to create ContextSubmenu based on roles
     private List<MenuItem> CreateRoleMenuItems()
     {
@@ -312,7 +329,12 @@ public partial class MaintenanceGroups : ComponentBase
         {
             _initialLoadDone = true;
             await UpdateVisibleRowCountAsync();
-            await GridRef.SelectRowAsync(0);
+            if (SelectedGroup is not null)
+            {
+                var rowIndex = await GridRef.GetRowIndexByPrimaryKeyAsync(SelectedGroup.GroupId);
+                if (rowIndex >= 0)
+                    await GridRef.SelectRowAsync(rowIndex);
+            }
         }
     }
 
