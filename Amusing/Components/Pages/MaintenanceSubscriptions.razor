@@ -47,6 +47,7 @@
 
 							<SfToolbar>
 								<ToolbarItems>
+<ToolbarItem Type="ItemType.Button"><Template><button type="button" class="btn btn-outline-primary" disabled="@planningExportBusy" @onclick="ExportPlanningAsync" title="Planningexport van alle inschrijvingen voor de gekozen editie">@(planningExportBusy ? "Export wordt gemaakt…" : "Planningexport")</button></Template></ToolbarItem>
 <ToolbarItem Type="ItemType.Button"><Template><button type="button" class="custom-toolbar-btn" @onclick="ExportToExcel" title="Exporteer naar Excel"><img src="icons/excel.svg" class="icon" alt="Excel" /></button></Template></ToolbarItem>
 <ToolbarItem Type="ItemType.Button"><Template><button type="button" class="custom-toolbar-btn" @onclick="ExportToCsv" title="Exporteer naar Csv"><img src="icons/csv.svg" class="icon" alt="Csv" /></button></Template></ToolbarItem>
 <ToolbarItem Type="ItemType.Button"><Template><button type="button" class="custom-toolbar-btn" @onclick="ExportToPdf" title="Exporteer naar Pdf"><img src="icons/pdf.svg" class="icon" alt="Pdf" /></button></Template></ToolbarItem>
