@@ -37,4 +37,5 @@
   </ItemGroup>
   <ItemGroup><None Include="..\database\mijn\023-beschikbaarheid.sql" Link="023-beschikbaarheid.sql" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
   <ItemGroup><None Include="..\database\mijn\024-beschikbaarheid-volgt-festival.sql" Link="024-beschikbaarheid-volgt-festival.sql" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
+  <ItemGroup><None Include="..\database\mijn\025-betaald-bedrag.sql" Link="025-betaald-bedrag.sql" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
 </Project>

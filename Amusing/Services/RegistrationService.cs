@@ -1,15 +1,16 @@
-﻿using Amusing.Helpers;
+using Amusing.Helpers;
 using Amusing.Models;
 
 namespace Amusing.Services;
 
 public class RegistrationService(GenericDataService dataService)
 {
+    private static DateTime? ReadDate(System.Data.Common.DbDataReader reader,string name)=>reader[name] is DBNull?null:Convert.ToDateTime(reader[name]);
     private readonly GenericDataService _dataService = dataService;
 
-    public Task<List<RegistrationModel>> GetRegistrationsByFestivalIdAsync(uint festivalId)
+    public async Task<List<RegistrationModel>> GetRegistrationsByFestivalIdAsync(uint festivalId)
     {
-        return _dataService.ExecuteQueryAsync(
+        var rows=await _dataService.ExecuteQueryAsync(
             QueryDefinitions.GetRegistrationsByFestivalId,
             reader => new RegistrationModel
             {
@@ -23,7 +24,9 @@ public class RegistrationService(GenericDataService dataService)
                 Podium = reader["Podium"].ToString(),
                 Zangers = Convert.ToInt32(reader["Zangers"]),
                 Genre = reader["Genre"].ToString(),
-                TeBetalen = Convert.ToDecimal(reader["TeBetalen"]),
+                TeBetalen = reader["TeBetalen"] is DBNull ? null : Convert.ToDecimal(reader["TeBetalen"]),
+                BetaaldBedrag=reader["BetaaldBedrag"] is DBNull?null:Convert.ToDecimal(reader["BetaaldBedrag"]),
+                Betaaldatum=ReadDate(reader,"Betaaldatum"),Bevestigingsdatum=ReadDate(reader,"Bevestigingsdatum"),Afhaakdatum=ReadDate(reader,"Afhaakdatum"),UitersteBetaaldatum=ReadDate(reader,"UitersteBetaaldatum"),
                 Betaald = reader["Betaald"].ToString(),
                 Bevestigd = reader["Bevestigd"].ToString(),
                 Kleedkamer = reader["Kleedkamer"].ToString(),
@@ -36,6 +39,9 @@ public class RegistrationService(GenericDataService dataService)
             },
             new Dictionary<string, object> { { "@festivalId", festivalId } }
             );
+        var notes=await RegistrationInvoiceMetadata.LoadAsync(_dataService,festival:festivalId);
+        foreach(var row in rows)if(notes.TryGetValue((festivalId,row.GroepId),out var note))note.Apply(row);
+        return rows;
     }
 
     public async Task<List<FestivalParticipationDynamicViewModel>> GetRegistrationPerFestivalAsync(bool filterOutOldGroups = false)
@@ -191,9 +197,9 @@ public class RegistrationService(GenericDataService dataService)
             });
     }
 
-    public Task<List<GroupRegistrationModel>> GetGroupRegistrationsByGroupIdAsync(uint groupId)
+    public async Task<List<GroupRegistrationModel>> GetGroupRegistrationsByGroupIdAsync(uint groupId)
     {
-        return _dataService.ExecuteQueryAsync(
+        var rows=await _dataService.ExecuteQueryAsync(
             QueryDefinitions.GetGroupRegistrationsByGroupId,
             reader => new GroupRegistrationModel
             {
@@ -204,6 +210,9 @@ public class RegistrationService(GenericDataService dataService)
                 RegisteredAt = Convert.ToDateTime(reader["RegisteredAt"]),
                 Singers = Convert.ToInt32(reader["Singers"]),
                 StageType = reader["StageType"]?.ToString() ?? string.Empty,
+                TeBetalen=reader["TeBetalen"] is DBNull?null:Convert.ToDecimal(reader["TeBetalen"]),
+                BetaaldBedrag=reader["BetaaldBedrag"] is DBNull?null:Convert.ToDecimal(reader["BetaaldBedrag"]),
+                Betaaldatum=ReadDate(reader,"Betaaldatum"),Bevestigingsdatum=ReadDate(reader,"Bevestigingsdatum"),Afhaakdatum=ReadDate(reader,"Afhaakdatum"),UitersteBetaaldatum=ReadDate(reader,"UitersteBetaaldatum"),
                 Paid = reader["Paid"]?.ToString() ?? string.Empty,
                 Confirmed = reader["Confirmed"]?.ToString() ?? string.Empty,
                 DroppedOut = reader["DroppedOut"]?.ToString() ?? string.Empty
@@ -212,6 +221,9 @@ public class RegistrationService(GenericDataService dataService)
             {
                 ["@GroupId"] = groupId
             });
+        var notes=await RegistrationInvoiceMetadata.LoadAsync(_dataService,group:groupId);
+        foreach(var row in rows)if(notes.TryGetValue((row.FestivalId,groupId),out var note))note.Apply(row);
+        return rows;
     }
 
     public async Task<PersonFestivalModel?> GetLatestFestivalForMaintenanceAsync()

@@ -1,4 +1,4 @@
-﻿@page "/Maintenance-Groups"
+@page "/Maintenance-Groups"
 @using Amusing.Models
 @attribute [Microsoft.AspNetCore.Authorization.Authorize]
 @using Amusing.Services
@@ -208,15 +208,19 @@ else
                                         AllowSorting="true"
                                         Height="250px">
                                     <GridColumns>
-                                        <GridColumn Field="Festival" HeaderText="Festival" Width="90px" />
+                                        <GridColumn HeaderText="Wijzigen" Width="100"><Template Context="row"><button type="button" class="btn btn-outline-primary btn-sm" title="Inschrijving wijzigen" @onclick="() => groupRegistrationEditDialog.OpenAsync(((GroupRegistrationModel)row).FestivalId,SelectedGroup!.GroupId)"><span class="fa-solid fa-pen" aria-hidden="true"></span><span class="visually-hidden">Inschrijving wijzigen</span></button></Template></GridColumn>
+<GridColumn Field="Festival" HeaderText="Festival" Width="90px" />
                                         <GridColumn Field="RegisteredAt" HeaderText="Ingeschreven" Format="dd-MM-yyyy" Type="ColumnType.Date" Width="130px" />
                                         <GridColumn Field="AvailableFrom" HeaderText="Beschikbaar van" Width="135"><Template Context="row"><button type="button" class="btn btn-link p-0" @onclick="() => availabilityDialog.OpenAsync(((GroupRegistrationModel)row).FestivalId,SelectedGroup!.GroupId)">@(((GroupRegistrationModel)row).AvailableFrom)</button></Template></GridColumn>
                                         <GridColumn Field="AvailableUntil" HeaderText="Beschikbaar tot" Width="135"><Template Context="row"><button type="button" class="btn btn-link p-0" @onclick="() => availabilityDialog.OpenAsync(((GroupRegistrationModel)row).FestivalId,SelectedGroup!.GroupId)">@(((GroupRegistrationModel)row).AvailableUntil)</button></Template></GridColumn>
                                         <GridColumn Field="Singers" HeaderText="Zangers" Width="90px" />
                                         <GridColumn Field="StageType" HeaderText="Podiumsoort" Width="110px" />
-                                        <GridColumn Field="Paid" HeaderText="Betaald" Width="90px" />
-                                        <GridColumn Field="Confirmed" HeaderText="Bevestigd" Width="100px" />
-                                        <GridColumn Field="DroppedOut" HeaderText="Afgehaakt" Width="100px" />
+                                         <GridColumn Field="TeBetalen" HeaderText="Te betalen (€)" Format="N2" TextAlign="TextAlign.Right" Width="120" />
+ <GridColumn Field="Factuurdatum" HeaderText="Factuurdatum" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="125"><Template Context="row"><Amusing.Components.RegistrationInvoiceDate Row="@((GroupRegistrationModel)row)" /></Template></GridColumn>
+ <GridColumn Field="BetaaldBedrag" HeaderText="Betaald" Format="N2" TextAlign="TextAlign.Right" Width="110"><Template Context="row"><button type="button" class="btn btn-link p-0 @(((GroupRegistrationModel)row).AfwijkendBetaaldBedrag?"text-danger fw-semibold":"")" title="Betaaldatum en bedrag wijzigen" @onclick="() => groupRegistrationEditDialog.OpenAsync(((GroupRegistrationModel)row).FestivalId,SelectedGroup!.GroupId,RegistrationEditAction.Payment)">@(((GroupRegistrationModel)row).BetaaldTekst)</button></Template></GridColumn>
+ <GridColumn Field="Betaaldatum" HeaderText="Betaaldatum" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="125" />
+                                        <GridColumn Field="Bevestigingsdatum" HeaderText="Bevestigd" Width="110px"><Template Context="row"><button type="button" class="btn btn-link p-0" @onclick="() => groupRegistrationEditDialog.OpenAsync(((GroupRegistrationModel)row).FestivalId,SelectedGroup!.GroupId,RegistrationEditAction.Confirmation)">@(((GroupRegistrationModel)row).BevestigdTekst)</button></Template></GridColumn>
+                                        <GridColumn Field="Afhaakdatum" HeaderText="Afgehaakt" Width="110px"><Template Context="row"><button type="button" class="btn btn-link p-0" @onclick="() => groupRegistrationEditDialog.OpenAsync(((GroupRegistrationModel)row).FestivalId,SelectedGroup!.GroupId,RegistrationEditAction.Cancellation)">@(((GroupRegistrationModel)row).AfgehaaktTekst)</button></Template></GridColumn>
                                         <GridColumn HeaderText="Factuur" Width="210px">
                                             <Template>
                                                 @if (context is GroupRegistrationModel registration)
@@ -357,3 +361,6 @@ else
  private Amusing.Components.RegistrationAvailabilityDialog availabilityDialog = default!;
  private async Task ReloadAvailabilityAsync(){if(SelectedGroup is not null)GroupRegistrations=await RegistrationService.GetGroupRegistrationsByGroupIdAsync(SelectedGroup.GroupId);}
 }
+
+<Amusing.Components.RegistrationEditDialog @ref="groupRegistrationEditDialog" Saved="ReloadAvailabilityAsync" />
+@code { private Amusing.Components.RegistrationEditDialog groupRegistrationEditDialog = default!; }

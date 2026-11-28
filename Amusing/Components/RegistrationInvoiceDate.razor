@@ -1,0 +1,6 @@
+@using Amusing.Models
+<span class="@(Row.FactuurTeLaat?"text-danger fw-semibold":"")" title="@Tooltip">@(Row.Factuurdatum?.ToString("dd-MM-yyyy")??"—")</span>
+@code{
+ [Parameter,EditorRequired]public RegistrationFinancialFields Row{get;set;}=default!;
+ private string Tooltip=>Row.UitersteBetaaldatum is {} due?$"Uiterste betaaldatum: {due:dd-MM-yyyy}":"Betaaltermijn onbekend";
+}

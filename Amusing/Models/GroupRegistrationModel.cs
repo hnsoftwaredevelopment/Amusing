@@ -1,6 +1,6 @@
 namespace Amusing.Models;
 
-public class GroupRegistrationModel
+public class GroupRegistrationModel : RegistrationFinancialFields
 {
     public string AvailableFrom {get;set;} = "";
     public string AvailableUntil {get;set;} = "";

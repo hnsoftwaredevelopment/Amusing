@@ -9,9 +9,16 @@ namespace Beheer.Tests;
 
 public class RegistrationNavigationTests
 {
+    [Fact]
+    public void BothRegistrationUrlsUseTheConsolidatedPage()
+    {
+        var routes=typeof(MaintenanceSubscriptions).GetCustomAttributes<RouteAttribute>().Select(r=>r.Template);
+        Assert.Contains("/Maintenance-Subscriptions",routes);
+        Assert.Contains("/Overview-Registrations",routes);
+    }
+
     [Theory]
     [InlineData(typeof(MaintenanceSubscriptions))]
-    [InlineData(typeof(OverviewRegistrations))]
     public void DoubleClickOpensTheClickedChoir(Type pageType)
     {
         var page = Activator.CreateInstance(pageType)!;
