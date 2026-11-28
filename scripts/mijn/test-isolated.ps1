@@ -19,8 +19,12 @@ try{
  }until($ready -or (Get-Date) -gt $deadline)
  if(!$ready){throw 'Testtunnel did not become ready'}
  $env:MIJN_TEST_CONNECTION="Server=127.0.0.1;Port=$port;Database=$db;User ID=$db;Password=$secret;Allow User Variables=true;SslMode=None"
- dotnet test (Join-Path $repo 'Amusing.Mijn.Tests/Amusing.Mijn.Tests.csproj') --no-restore --filter $Filter -v q --logger "trx;LogFileName=mijn-$tag.trx" --results-directory "$env:TEMP/amusing-mijn-test-results"
+ dotnet test (Join-Path $repo 'Amusing.Mijn.Tests/Amusing.Mijn.Tests.csproj') --filter $Filter -v q --logger "trx;LogFileName=mijn-$tag.trx" --results-directory "$env:TEMP/amusing-mijn-test-results"
  if($LASTEXITCODE){throw 'Mijn tests failed'}
+ $result=Join-Path "$env:TEMP/amusing-mijn-test-results" "mijn-$tag.trx"
+ if(!(Test-Path -LiteralPath $result)){throw 'No test report was produced'}
+ [xml]$report=Get-Content -Raw -LiteralPath $result
+ if([int]$report.TestRun.ResultSummary.Counters.executed -le 0){throw 'No tests were executed'}
 }finally{
  if($tunnel -and !$tunnel.HasExited){Stop-Process -Id $tunnel.Id}
  $env:MIJN_TEST_CONNECTION=$previous
