@@ -56,7 +56,7 @@ Een nieuwe inventaris krijgt unieke bestandsnamen en overschrijft geen eerder in
 
 De organisatie heeft inmiddels de automatische regels bovenaan dit document goedgekeurd. Alleen uitzonderingen die deze regels blokkeren vragen nog een individueel besluit. Personenaccounts worden niet verwijderd en historische deelname of auditregels blijven behouden.
 
-**KAN-31:** inventaris en herstelvoorstel opgeleverd. **KAN-32:** de goedgekeurde correctie is op dev uitgevoerd en wacht op praktijktest en de latere productiegang.
+**KAN-31:** inventaris en herstelvoorstel opgeleverd. **KAN-32:** praktijkcontrole geaccepteerd; de databasecorrectie is op dev en productie uitgevoerd. De applicatieaanpassingen staan nog in PR #65 voor merge/publicatie.
 
 ## Ontvangercontrole
 
@@ -99,3 +99,12 @@ Dev.mijn is gecontroleerd met DLL-hash `16b8dbff32e4d33bb82b09d44da9d174800683d8
 Dev.beheer is gecontroleerd met DLL-hash `ea3d5a0c7fe3c306de0c451c5b60286e0d98bb515e9aa7314f014dc4bc922eef`, nieuwe PID 137176 en HTTP 200. Backup: `/var/backups/dev-assembly-50c3dfa5c8554a898f28a216848903e9.ltkgJS`.
 
 Alleen de applicatie-DLL's zijn vervangen; databasekeuze en configuratiechecksums zijn gecontroleerd. De productiegegevens zijn nog ongewijzigd: de read-only nacontrole telt daar nog 23 koren met meerdere eerste contactpersonen. Het productieplan is voorbereid, niet uitgevoerd. Eerst de praktijkcontrole op dev en de code-/productiegang afronden.
+## Productiedatabase hersteld — 28 november 2026
+
+Na expliciete toestemming van Herbert is het vooraf vastgelegde plan op **amusing** uitgevoerd. De uitvoerder heeft de actuele koor-, account- en rolgegevens binnen de transactie opnieuw met het plan vergeleken. De correctie is onder Beheeraccount herbert gelogd.
+
+Resultaat: 23 koren aangepast, 24 eerste-contactrollen omgezet, alle 47 unieke contactadressen behouden. Er staan 24 auditregels voor 23 koren. De onafhankelijke nacontrole telt nul dubbele eerste contactpersonen en het onderhoudsprogramma stelt geen verdere wijzigingen voor. Ook de actuele unieke-rolinventaris is leeg. De rollentabel heeft geen triggers; de correctie heeft geen mail aangemaakt of verstuurd.
+
+Het oorspronkelijke productieplan blijft als herstelbewijs buiten Git bewaard. Het leesbare productieoverzicht in Obsidian is bijgewerkt naar uitgevoerd. Personenaccounts, andere rollen, andere koren en historische gegevens zijn behouden.
+
+Dit was de databasecorrectie. Er zijn bij deze actie geen productie-applicaties vervangen of herstart. De bijbehorende applicatiewijzigingen voor meerdere tweede contacten en de nieuwe logboekweergave staan nog in PR #65; die merge/publicatie blijft afzonderlijk open. Jira blijft daarom bij de codestap Ready for merge, met expliciete vermelding dat de data al op productie is gecorrigeerd.
