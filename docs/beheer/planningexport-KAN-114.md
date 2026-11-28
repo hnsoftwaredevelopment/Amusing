@@ -1,6 +1,6 @@
 # KAN-114 — Planningexport
 
-Bij Inschrijvingen staat naast de algemene exports een knop **Planningexport**. Deze export gebruikt alle inschrijvingen van de gekozen editie, onafhankelijk van het zoekfilter in het scherm.
+Bij Inschrijvingen maakt het bestaande **Excel-icoon** de planningexport. De aparte tekstknop en de vroegere algemene Excel-export zijn vervallen; CSV en PDF blijven ongewijzigd. Deze export gebruikt alle inschrijvingen van de gekozen editie, onafhankelijk van het zoekfilter in het scherm.
 
 ## Indeling
 
@@ -29,7 +29,7 @@ Vier gerichte workbooktests controleren categorieën, naamvergelijking, nummerin
 
 Praktijktest op dev.beheer:
 
-1. Open Inschrijvingen, kies een editie en klik Planningexport.
+1. Open Inschrijvingen, kies een editie en klik het Excel-icoon.
 2. Open het bestand in Excel en controleer de drie tabellen en hun filters.
 3. Controleer contactgegevens, dirigenten en kleuren aan de hand van bekende koren.
 4. Bewerk Eigenlijke naam en Bijzonderheden in Excel; controleer ook een eerdere editie.
@@ -43,3 +43,4 @@ Het aangeleverde voorbeeldbestand is alleen gelezen. Persoonlijke contactgegeven
 Dev.beheer is gepubliceerd met DLL-SHA256 `f2b6e7ec9e0834810fe5b76f7c36d202ab08cee8cac9567706a527fe75a46406`, nieuwe proces-ID 132490 en HTTP 200. De voorafgaande applicatie staat in `/home/groups/svp/dev.beheer.amusing-hengelo.nl/www/Amusing_backup_20261128-102030`. Database amusingdev en uitgeschakelde wachtrijverzending zijn gecontroleerd; productie en database-inhoud zijn niet vervangen.
 
 De browsercontrole heeft via een tijdelijk dev-controleaccount daadwerkelijk een Excelbestand gedownload en de drie native tabellen met 18 kolommen gecontroleerd. Het account, bijbehorende testlog en tijdelijke download zijn daarna verwijderd. De controle wacht tot de Blazor-knop interactief is; een eerdere poging klikte te vroeg. `scripts/beheer/verify-planning-export-dev.ps1` maakt deze controle herhaalbaar. De technische controles zijn voltooid; praktische gebruikersacceptatie staat nog open.
+

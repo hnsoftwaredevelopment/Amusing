@@ -49,21 +49,6 @@ public partial class MaintenanceSubscriptions
         new(){Field="Afhaakdatum",HeaderText="Afgehaakt",Format="dd-MM-yyyy",Type=ColumnType.Date},
     };
     // Export functions
-    protected async Task ExportToExcel()
-    {
-        var exportProps = new ExcelExportProperties
-        {
-            Columns = RegistrationExportColumns(),
-            FileName = $"Inschrijvingen {SelectedEditionText}-{DateTime.Now:yyyyMMdd}-{DateTime.Now:HHmm}.xlsx"
-        };
-
-        await ToastService.ShowExportStartedAsync(exportProps.FileName);
-        await GridRef!.ExportToExcelAsync(exportProps);
-        await ToastService.ShowExportCompletedAsync(exportProps.FileName, "Excel");
-        string _report = $"<_userName> heeft \"{exportProps.FileName}\" geexporteerd";
-        await LoggingService.WriteUserActionAsync("Beheer", "Inschrijvingen", "success", _report);
-    }
-
     protected async Task ExportToCsv()
     {
         var exportProps = new ExcelExportProperties
@@ -97,3 +82,4 @@ public partial class MaintenanceSubscriptions
     }
 
 }
+

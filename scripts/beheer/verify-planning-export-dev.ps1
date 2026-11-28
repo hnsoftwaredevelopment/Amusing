@@ -30,7 +30,7 @@ async page => {
     await page.getByRole('button',{name:'Inloggen',exact:true}).click();
     await page.waitForURL('https://dev.beheer.amusing-hengelo.nl/');
     await page.goto('https://dev.beheer.amusing-hengelo.nl/Maintenance-Subscriptions');
-    const button=page.getByRole('button',{name:'Planningexport',exact:true});
+    const button=page.getByTitle('Exporteer planning naar Excel',{exact:true});
     await button.waitFor();
     // The prerendered button exists before the Blazor circuit attaches its handler.
     await page.waitForTimeout(2500);
@@ -69,3 +69,4 @@ async page => {
     if($id){$null=Sql "DELETE FROM user_log WHERE user_id=$id; DELETE FROM ah_beheer WHERE user_id=$id AND username='$username';"}
     Remove-Item -LiteralPath $runtime,$download -ErrorAction SilentlyContinue
 }
+
