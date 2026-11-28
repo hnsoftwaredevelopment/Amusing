@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -75,4 +75,5 @@
     <ProjectReference Include="..\Amusing.Mobile.Shared\Amusing.Mobile.Shared.csproj" />
     <ProjectReference Include="..\Amusing.Facturatie\Amusing.Facturatie.csproj" />
   </ItemGroup>
+  <ItemGroup><ProjectReference Include="..\Amusing.Authentication.MySql\Amusing.Authentication.MySql.csproj" /></ItemGroup>
 </Project>
