@@ -30,12 +30,14 @@ public sealed class WaitlistService(IConfiguration configuration,TimeProvider? t
             await placement.ExecuteScalarAsync();
         }
         await using var update=new MySqlCommand("""
-            UPDATE ah_inschrijvingen i JOIN ah_festivals f USING(festival_id) SET i.wachtlijst=1
-            WHERE i.festival_id=@festival AND i.zanggroep_id=@group AND COALESCE(i.wachtlijst,0)=0 AND DATE(f.festivaldatum)>=@today;
+            UPDATE ah_inschrijvingen i JOIN ah_festivals f USING(festival_id)
+            JOIN ah_zanggroepen g ON g.zanggroep_id=i.zanggroep_id SET i.wachtlijst=1
+            WHERE i.festival_id=@festival AND i.zanggroep_id=@group AND COALESCE(i.wachtlijst,0)=0 AND DATE(f.festivaldatum)>=@today
+                AND g.actief=1 AND (i.afgehaakt IS NULL OR CAST(i.afgehaakt AS CHAR) LIKE '0000-%');
             """,connection,tx);
         update.Parameters.AddWithValue("@festival",festival);update.Parameters.AddWithValue("@group",group);
         update.Parameters.AddWithValue("@today",Today.ToDateTime(TimeOnly.MinValue));
-        if(await update.ExecuteNonQueryAsync()!=1)return "De inschrijving is inmiddels gewijzigd, bestaat niet meer of de festivaleditie is voorbij. Ververs de lijst.";
+        if(await update.ExecuteNonQueryAsync()!=1)return "Op de wachtlijst zetten is niet mogelijk. Ververs de lijst en controleer of het koor actief is, niet is afgehaakt en de editie nog niet voorbij is.";
         await using var audit=new MySqlCommand("""
             INSERT INTO mijn_audit_log(occurred_at,actor_type,actor_id,action,group_id,festival_id,changed_fields)
             VALUES(UTC_TIMESTAMP(6),'beheer',@actor,'FestivalWaitlistRestored',@group,@festival,'WaitingList');

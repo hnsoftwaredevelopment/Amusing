@@ -40,8 +40,17 @@ async page => {
  if((Sql "SELECT wachtlijst FROM ah_inschrijvingen WHERE festival_id=$festival AND zanggroep_id=$group") -ne '1'){throw 'Waitlist change was not persisted'}
  'Wachtlijstkolom Nee naar Ja in browser en database gecontroleerd; geen plaatsing of mail aangevraagd.'
 }finally{
- $null=npx.cmd --yes --package @playwright/cli playwright-cli --session=kan154-dev close
- if($group){$null=Sql "DELETE FROM mijn_audit_log WHERE group_id=$group;DELETE FROM ah_inschrijvingen WHERE zanggroep_id=$group;DELETE FROM ah_zanggroepen WHERE zanggroep_id=$group AND naam='$name';"}
- if($admin){$null=Sql "DELETE FROM user_log WHERE user_id=$admin;DELETE FROM ah_beheer WHERE user_id=$admin AND username='$username';"}
- Remove-Item -LiteralPath $runtime -ErrorAction SilentlyContinue
+ try{
+  try{
+   $null=npx.cmd --yes --package @playwright/cli playwright-cli --session=kan154-dev close
+  }finally{
+   try{
+    if($group){$null=Sql "DELETE FROM mijn_audit_log WHERE group_id=$group;DELETE FROM ah_inschrijvingen WHERE zanggroep_id=$group;DELETE FROM ah_zanggroepen WHERE zanggroep_id=$group AND naam='$name';"}
+   }finally{
+    if($admin){$null=Sql "DELETE FROM user_log WHERE user_id=$admin;DELETE FROM ah_beheer WHERE user_id=$admin AND username='$username';"}
+   }
+  }
+ }finally{
+  Remove-Item -LiteralPath $runtime -ErrorAction SilentlyContinue
+ }
 }

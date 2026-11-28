@@ -3,6 +3,19 @@ using Microsoft.Extensions.Configuration;
 namespace Amusing.Mijn.Tests;
 public partial class LoginTests
 {
+ [DatabaseFact] public async Task WaitlistCannotBeRestoredForInactiveOrCancelledChoir()
+ {
+  var clock=new FixedFestivalClock();await ReadyWaitlistedChoir(clock);var service=PlacementService(clock);
+  Assert.Null((await service.PlaceAsync(PlacementAdmin(),2027,new uint[]{1},null)).Error);
+  await Execute("UPDATE ah_zanggroepen SET actief=0 WHERE zanggroep_id=1");
+  Assert.NotNull(await service.ReturnToWaitlistAsync(PlacementAdmin(),2027,1));
+  await Execute("UPDATE ah_zanggroepen SET actief=1 WHERE zanggroep_id=1; UPDATE ah_inschrijvingen SET afgehaakt='2026-11-06' WHERE zanggroep_id=1");
+  Assert.NotNull(await service.ReturnToWaitlistAsync(PlacementAdmin(),2027,1));
+  await Execute("UPDATE ah_inschrijvingen SET afgehaakt=NULL WHERE zanggroep_id=1");
+  Assert.Null(await service.ReturnToWaitlistAsync(PlacementAdmin(),2027,1));
+  await using var count=source.CreateCommand("SELECT COUNT(*) FROM mijn_audit_log WHERE action='FestivalWaitlistRestored'");
+  Assert.Equal(1,Convert.ToInt32(await count.ExecuteScalarAsync()));
+ }
  [DatabaseFact] public async Task PlacementInDevQueuesThreeMessageKindsWithThePlacingAdminAsActor()
  {
   var clock=new FixedFestivalClock();await ReadyWaitlistedChoir(clock);var service=PlacementService(clock);
