@@ -19,17 +19,17 @@ else
 	@if(QueueEnabled)
     {
         <p><a href="/MailQueue">Verzendwachtrij bekijken</a></p>
+    }
         @if(_queueSubmission.IsPending)
         {
-            <div class="alert alert-warning" role="status">Deze verzendopdracht is nog niet bevestigd. Kies opnieuw Verzenden om dezelfde opdracht te controleren en zo nodig in de wachtrij te zetten. De oorspronkelijke tekst en ontvangers blijven behouden; je kunt deze nu niet wijzigen.</div>
+            <div class="alert alert-warning" role="status">Deze verzendopdracht is nog niet bevestigd. @(QueueEnabled ? "Kies opnieuw Verzenden om dezelfde opdracht te controleren en zo nodig in de wachtrij te zetten." : "De wachtrij is uitgeschakeld. Schakel deze weer in om dezelfde verzendopdracht veilig te controleren.") De oorspronkelijke tekst en ontvangers blijven behouden; je kunt deze nu niet wijzigen.</div>
         }
         @if(_queuedCampaignId is not null)
         {
-            <div class="alert alert-info">Deze mailing staat in de wachtrij. De verzendknop is geblokkeerd om een dubbele mailing te voorkomen.
+            <div class="alert alert-info">Deze mailing is al als verzendopdracht vastgelegd. De verzendknop is geblokkeerd om een dubbele mailing te voorkomen. @(!QueueEnabled ? "De wachtrij is momenteel uitgeschakeld." : "")
                 <SfButton CssClass="e-outline" Disabled="@QueueInputsLocked" OnClick="ResetQueueRequest">Nieuwe mailing voorbereiden</SfButton>
             </div>
         }
-    }
     <div class="page-container mail-template-page">
 		<div class="groupbox top-info">
 			<div class="groupbox-header">Template informatie</div>

@@ -41,5 +41,7 @@ public class MailTemplateOperationTests
   var page=CreatePage();Select(page);var submitted=(BulkMailSubmission)Field("_queueSubmission").GetValue(page)!;
   await submitted.SubmitAsync(new(Guid.NewGuid(),22,"Test",[new("test@example.invalid",[1])]),1,(draft,_)=>Task.FromResult(draft.Id.ToString("N")));
   await page.Send();Assert.NotNull(submitted.CampaignId);
+  typeof(MailingsTemplates).GetMethod("ResetQueueRequest",BindingFlags.Instance|BindingFlags.NonPublic)!.Invoke(page,null);
+  Assert.Null(submitted.CampaignId);
  }
 }
