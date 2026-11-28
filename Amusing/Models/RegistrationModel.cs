@@ -2,6 +2,8 @@
 
 public class RegistrationModel
 {
+    public string AvailableFrom {get;set;} = "";
+    public string AvailableUntil {get;set;} = "";
     public uint FestivalId { get; set; }
     public uint GroepId { get; set; }
     public DateTime Datum { get; set; }

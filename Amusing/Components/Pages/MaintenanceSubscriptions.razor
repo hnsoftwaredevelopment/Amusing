@@ -86,7 +86,9 @@
 								<GridColumn Field="Datum" HeaderText="Datum" TextAlign="TextAlign.Center" Type="ColumnType.Date" Format="dd-MM-yyyy" Width="90"></GridColumn>
 								<GridColumn Field="Naam" HeaderText="Naam" Width="200"></GridColumn>
 								<GridColumn Field="Stad" HeaderText="Stad" Width="180"></GridColumn>
-								<GridColumn Field="Podium" HeaderText="Podium" Width="70" TextAlign="TextAlign.Center"></GridColumn>
+								<GridColumn Field="AvailableFrom" HeaderText="Beschikbaar van" Width="135"><Template Context="row"><button type="button" class="btn btn-link p-0" @onclick="() => availabilityDialog.OpenAsync(((RegistrationModel)row).FestivalId,((RegistrationModel)row).GroepId)">@(((RegistrationModel)row).AvailableFrom)</button></Template></GridColumn>
+                                <GridColumn Field="AvailableUntil" HeaderText="Beschikbaar tot" Width="135"><Template Context="row"><button type="button" class="btn btn-link p-0" @onclick="() => availabilityDialog.OpenAsync(((RegistrationModel)row).FestivalId,((RegistrationModel)row).GroepId)">@(((RegistrationModel)row).AvailableUntil)</button></Template></GridColumn>
+                                <GridColumn Field="Podium" HeaderText="Podium" Width="70" TextAlign="TextAlign.Center"></GridColumn>
 								<GridColumn Field="Zangers" HeaderText="Zangers" TextAlign="TextAlign.Center" Width="70"></GridColumn>
 								<GridColumn HeaderText="Betaald" Width="180" TextAlign="TextAlign.Center">
 									<Template Context="regObj">
@@ -305,3 +307,6 @@
 		<p class="text-danger">Je hebt alleen toegang tot deze pagina wanneer je bent ingelogt</p>
 	</NotAuthorized>
 </AuthorizeView>
+
+<Amusing.Components.RegistrationAvailabilityDialog @ref="availabilityDialog" Saved="LoadRegistrationsAsync" />
+@code { private Amusing.Components.RegistrationAvailabilityDialog availabilityDialog = default!; }

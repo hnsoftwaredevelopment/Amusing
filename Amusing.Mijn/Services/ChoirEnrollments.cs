@@ -29,9 +29,9 @@ public sealed partial class ChoirEnrollments(MySqlDataSource source,IFestivalClo
     }
     private static async Task<FestivalEdition?> FestivalAsync(DbConnection connection,DbTransaction? tx,DateOnly today,bool locked,CancellationToken ct)
     {
-        await using var cmd=Command(connection,tx,"SELECT festival_id,festivaldatum,start_inschrijving,eind_inschrijving,wachtlijst FROM ah_festivals WHERE festivaldatum>=@today ORDER BY festivaldatum,festival_id LIMIT 1"+(locked?" FOR UPDATE":""));
+        await using var cmd=Command(connection,tx,"SELECT festival_id,festivaldatum,start_inschrijving,eind_inschrijving,wachtlijst,eerste_optreden,laatste_optreden FROM ah_festivals WHERE festivaldatum>=@today ORDER BY festivaldatum,festival_id LIMIT 1"+(locked?" FOR UPDATE":""));
         Add(cmd,"@today",today.ToDateTime(TimeOnly.MinValue));await using var reader=await cmd.ExecuteReaderAsync(ct);
-        return await reader.ReadAsync(ct)?new(reader.GetFieldValue<uint>(0),DateOnly.FromDateTime(reader.GetDateTime(1)),DateOnly.FromDateTime(reader.GetDateTime(2)),DateOnly.FromDateTime(reader.GetDateTime(3)),reader.GetBoolean(4)):null;
+        return await reader.ReadAsync(ct)?new FestivalEdition(reader.GetFieldValue<uint>(0),DateOnly.FromDateTime(reader.GetDateTime(1)),DateOnly.FromDateTime(reader.GetDateTime(2)),DateOnly.FromDateTime(reader.GetDateTime(3)),reader.GetBoolean(4)) { FirstPerformance = reader.GetFieldValue<TimeSpan>(5), LastPerformance = reader.GetFieldValue<TimeSpan>(6) }:null;
     }
     private static async Task<List<EnrollmentStage>> StagesAsync(DbConnection connection,DbTransaction? tx,uint festival,CancellationToken ct)
     {
@@ -43,15 +43,18 @@ public sealed partial class ChoirEnrollments(MySqlDataSource source,IFestivalClo
     private static async Task<FestivalRegistration?> RegistrationAsync(DbConnection connection,DbTransaction? tx,uint festival,uint group,CancellationToken ct,bool locked=false)
     {
         await using var cmd=Command(connection,tx,"""
-            SELECT aantal_deelnemers,podiumsoort,wens_4,binnenoptredens,buitenoptredens,wachtlijst,
+            SELECT i.aantal_deelnemers,i.podiumsoort,i.wens_4,i.binnenoptredens,i.buitenoptredens,i.wachtlijst,
                    COALESCE(CAST(afgehaakt AS CHAR) NOT LIKE '0000-%',0),
                    COALESCE(CAST(betaald AS CHAR) NOT LIKE '0000-%',0),
                    COALESCE(CAST(bevestigd AS CHAR) >= '2000-01-01',0),
-                   podiumkeuze_geforceerd
-            FROM ah_inschrijvingen WHERE festival_id=@festival AND zanggroep_id=@group
+                   podiumkeuze_geforceerd,
+                   IF(i.beschikbaarheid_eigen=0,f.eerste_optreden,i.beschikbaar_van),
+                   IF(i.beschikbaarheid_eigen=0,f.laatste_optreden,i.beschikbaar_tot),i.beschikbaarheid_eigen
+            FROM ah_inschrijvingen i JOIN ah_festivals f ON f.festival_id=i.festival_id
+            WHERE i.festival_id=@festival AND i.zanggroep_id=@group
             """+(locked?" FOR UPDATE":""));
         Add(cmd,"@festival",festival);Add(cmd,"@group",group);await using var reader=await cmd.ExecuteReaderAsync(ct);
-        return await reader.ReadAsync(ct)?new(reader.GetFieldValue<uint>(0),reader.GetString(1),reader.GetString(2)=="ja",Convert.ToInt32(reader.GetValue(3)),Convert.ToInt32(reader.GetValue(4)),reader.GetBoolean(5),reader.GetBoolean(6),reader.GetBoolean(7),reader.GetBoolean(8),reader.GetBoolean(9)):null;
+        return await reader.ReadAsync(ct)?new FestivalRegistration(reader.GetFieldValue<uint>(0),reader.GetString(1),reader.GetString(2)=="ja",Convert.ToInt32(reader.GetValue(3)),Convert.ToInt32(reader.GetValue(4)),reader.GetBoolean(5),reader.GetBoolean(6),reader.GetBoolean(7),reader.GetBoolean(8),reader.GetBoolean(9)) { AvailableFrom = reader.GetFieldValue<TimeSpan>(10), AvailableUntil = reader.GetFieldValue<TimeSpan>(11), CustomAvailability=reader.GetBoolean(12) }:null;
     }
     private static bool Contact(List<Role> roles,uint actor)=>roles.Any(r=>r.Person==actor && r.Active && r.Name is "contactpersoon1" or "contactpersoon2");
     private static List<string> Missing(Group group,List<Role> roles)
@@ -98,17 +101,19 @@ public sealed partial class ChoirEnrollments(MySqlDataSource source,IFestivalClo
         if(Missing(info,roles).Count>0) return EnrollmentResult.Incomplete;
         input.PodiumType=input.PodiumType?.Trim().ToUpperInvariant() ?? "";
         if(!Validator.TryValidateObject(input,new ValidationContext(input),new List<ValidationResult>(),true)) return EnrollmentResult.Invalid;
+        if (!ResolveAvailability(festival, input.AvailableFrom, input.AvailableUntil, null, out var from, out var until)) return EnrollmentResult.Invalid;
         var stages=await StagesAsync(connection,tx,festival.Id,ct);
         if(!stages.Any(p=>p.Id==input.PodiumType)) return EnrollmentResult.Invalid;
         var now=clock.Now;var today=DateOnly.FromDateTime(now);
         if(festival.Date<today) return EnrollmentResult.EditionChanged;
         if(!festival.IsOpen(today)) return EnrollmentResult.Closed;
-        await using(var cmd=Command(connection,tx,"INSERT INTO ah_inschrijvingen(festival_id,zanggroep_id,aantal_deelnemers,podiumsoort,wens_4,ingeschreven,wachtlijst,binnenoptredens,buitenoptredens) VALUES(@festival,@group,@count,@stage,@review,@now,@waiting,@inside,@outside)"))
+        await using(var cmd=Command(connection,tx,"INSERT INTO ah_inschrijvingen(festival_id,zanggroep_id,aantal_deelnemers,podiumsoort,wens_4,ingeschreven,wachtlijst,binnenoptredens,buitenoptredens,beschikbaar_van,beschikbaar_tot,beschikbaarheid_eigen) VALUES(@festival,@group,@count,@stage,@review,@now,@waiting,@inside,@outside,@from,@until,@custom)"))
         {
             Add(cmd,"@festival",festival.Id);Add(cmd,"@group",group);Add(cmd,"@count",input.Headcount);Add(cmd,"@stage",input.PodiumType);Add(cmd,"@review",input.Review?"ja":"nee");Add(cmd,"@now",now);Add(cmd,"@waiting",festival.WaitingList);Add(cmd,"@inside",input.Preference[0]-'0');Add(cmd,"@outside",input.Preference[1]-'0');
+            Add(cmd,"@from",from);Add(cmd,"@until",until);Add(cmd,"@custom",from!=festival.FirstPerformance || until!=festival.LastPerformance);
             try{await cmd.ExecuteNonQueryAsync(ct);}catch(MySqlException error) when(error.Number==1062){return EnrollmentResult.AlreadyRegistered;}
         }
-        await using(var cmd=Command(connection,tx,"INSERT INTO mijn_audit_log(occurred_at,actor_type,actor_id,action,group_id,festival_id,changed_fields) VALUES(UTC_TIMESTAMP(6),@actorType,@actor,'FestivalEnrolled',@group,@festival,'Registration,Headcount,PodiumType,Preference,Review,WaitingList')"))
+        await using(var cmd=Command(connection,tx,"INSERT INTO mijn_audit_log(occurred_at,actor_type,actor_id,action,group_id,festival_id,changed_fields) VALUES(UTC_TIMESTAMP(6),@actorType,@actor,'FestivalEnrolled',@group,@festival,'Registration,Headcount,PodiumType,Preference,Review,WaitingList,AvailableFrom,AvailableUntil')"))
         {
             Add(cmd,"@actorType",SupportMode.AuditType(supportContext,actor,group));Add(cmd,"@actor",actor);Add(cmd,"@group",group);Add(cmd,"@festival",festival.Id);await cmd.ExecuteNonQueryAsync(ct);
         }

@@ -136,6 +136,8 @@ public partial class MaintenanceFestivals : ComponentBase
         set { if (SelectedFestival != null) SelectedFestival.EindeVasteVrijwilligersTaken = value; }
     }
 
+    public TimeOnly SelectedFestivalEersteOptreden {get=>SelectedFestival?.EersteOptreden??new(11,0);set {if(SelectedFestival is not null)SelectedFestival.EersteOptreden=value;}}
+    public TimeOnly SelectedFestivalLaatsteOptreden {get=>SelectedFestival?.LaatsteOptreden??new(17,0);set {if(SelectedFestival is not null)SelectedFestival.LaatsteOptreden=value;}}
     protected override async Task OnInitializedAsync()
     {
         IsLoading = true;
@@ -186,6 +188,7 @@ public partial class MaintenanceFestivals : ComponentBase
         // Clone the selected row, to compare changed values with the original values
         SelectedFestivalOriginal = new FestivalModel
         {
+            EersteOptreden=SelectedFestival.EersteOptreden, LaatsteOptreden=SelectedFestival.LaatsteOptreden,
             FestivalId = args.Data.FestivalId,
             Festival = args.Data.Festival,
             Festivaldatum = args.Data.Festivaldatum,
@@ -212,6 +215,9 @@ public partial class MaintenanceFestivals : ComponentBase
     {
         if ( SelectedFestival is null )
             return;
+
+        if(!new Amusing.Shared.FestivalAvailability(SelectedFestival.EersteOptreden.ToTimeSpan(),SelectedFestival.LaatsteOptreden.ToTimeSpan()).IsValid)
+        { await ToastService.ShowErrorAsync("Kies een geldig festivalvenster in stappen van een halfuur, met minimaal een halfuur tussen begin en eind.");return; }
 
         // Check the differences between the original and cjhanged version
         var differences = ObjectDiffHelper.GetDifferences(SelectedFestivalOriginal, SelectedFestival);

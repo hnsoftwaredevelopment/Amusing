@@ -1,0 +1,57 @@
+@using Amusing.Services
+@using Amusing.Shared
+@using Syncfusion.Blazor.Popups
+@inject RegistrationAvailabilityService Service
+@if (current is not null)
+{
+ <SfDialog Width="440px" IsModal="true" ShowCloseIcon="false" Visible="true">
+  <DialogTemplates>
+   <Header>Beschikbaarheid van het koor</Header>
+   <Content>
+    @if(message is not null){<p role="alert" class="alert alert-warning">@message</p>}
+    <p>Festivalvenster: @FestivalAvailability.Format(current.First) – @FestivalAvailability.Format(current.Last)</p>
+    @if(!current.Window.Allows(current.From,current.Until)){<p>De bestaande tijden wijken af van dit venster. Kies bij een wijziging tijden binnen het venster.</p>}
+    <label for="admin-availability-from">Beschikbaar van</label>
+    <select id="admin-availability-from" class="form-select" @bind="from" @bind:after="AdjustUntil" disabled="@busy">
+     @if(!current.Window.Starts.Contains(current.From)){<option value="@FestivalAvailability.Format(current.From)">@FestivalAvailability.Format(current.From) (huidig)</option>}
+     @foreach(var time in current.Window.Starts){<option value="@FestivalAvailability.Format(time)">@FestivalAvailability.Format(time)</option>}
+    </select>
+    <label for="admin-availability-until">Beschikbaar tot</label>
+    <select id="admin-availability-until" class="form-select" @bind="until" disabled="@busy">
+     @if(!EndOptions.Contains(current.Until) && from==FestivalAvailability.Format(current.From)){<option value="@FestivalAvailability.Format(current.Until)">@FestivalAvailability.Format(current.Until) (huidig)</option>}
+     @foreach(var time in EndOptions){<option value="@FestivalAvailability.Format(time)">@FestivalAvailability.Format(time)</option>}
+    </select>
+   </Content>
+   <FooterTemplate>
+    <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">Opslaan</button>
+    <button type="button" class="btn btn-secondary" disabled="@busy" @onclick="Close">Annuleren</button>
+   </FooterTemplate>
+  </DialogTemplates>
+ </SfDialog>
+}
+@code {
+ [Parameter] public EventCallback Saved {get;set;}
+ private RegistrationAvailability? current;
+ private string from="",until="";
+ private string? message;
+ private bool busy;
+ private IEnumerable<TimeSpan> EndOptions => current is not null && FestivalAvailability.TryTime(from,out var start)? current.Window.Ends(start):[];
+ public async Task OpenAsync(uint festival,uint group)
+ {
+  if(busy)return;
+  current=await Service.ReadAsync(festival,group);message=null;
+  if(current is not null){from=FestivalAvailability.Format(current.From);until=FestivalAvailability.Format(current.Until);}
+  StateHasChanged();
+ }
+ private void AdjustUntil(){if(FestivalAvailability.TryTime(until,out var end) && !EndOptions.Contains(end))until=EndOptions.Select(FestivalAvailability.Format).FirstOrDefault()??"";}
+ private void Close(){current=null;}
+ private async Task SaveAsync()
+ {
+  if(busy || current is null)return;
+  if(!FestivalAvailability.TryTime(from,out var start) || !FestivalAvailability.TryTime(until,out var end)){message="Kies geldige tijden.";return;}
+  busy=true;
+  try{message=await Service.SaveAsync(current,start,end);if(message is null){current=null;await Saved.InvokeAsync();}}
+  catch(Exception){message="Opslaan is niet gelukt. Open de beschikbaarheid opnieuw en probeer het nogmaals.";}
+  finally{busy=false;}
+ }
+}

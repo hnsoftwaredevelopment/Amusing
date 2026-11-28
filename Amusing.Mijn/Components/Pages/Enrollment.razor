@@ -43,6 +43,8 @@ else
     <dl>
      <dt>@T("AantalDeelnemers")</dt><dd>@registered.Headcount</dd>
      <dt>@T("Podiumtype")</dt><dd>@registered.PodiumType</dd>
+     <dt>@T("BeschikbaarVan")</dt><dd>@Amusing.Shared.FestivalAvailability.Format(registered.AvailableFrom)</dd>
+     <dt>@T("BeschikbaarTot")</dt><dd>@Amusing.Shared.FestivalAvailability.Format(registered.AvailableUntil)</dd>
      <dt>@T("VoorkeurOptredens")</dt><dd>@PreferenceLabel(registered.Indoors,registered.Outdoors)</dd>
      @if(registered.Paid){<dt>@T("Betaling")</dt><dd>@T("Betaald")</dd>}
     </dl>
@@ -127,9 +129,19 @@ else
       </select>
       <small>@T("DitIsEenVoorkeurDeOrganisatieKan")</small>
       @if (language == "nl") { <ValidationMessage For="()=>Input.Preference"/> }
+      <AvailabilityFields Prefix="Input" Window="festival.Availability" From="@Input.AvailableFrom" Until="@Input.AvailableUntil" Language="@language" />
       @if(Configuration.GetValue<bool>("Mijn:IsTestEnvironment")){<p>@T("BijEenNieuweTestinschrijvingGaatDeTestmail")</p>}
       <button type="submit">@(view.CanEdit ? T("WijzigingenOpslaan") : festival.WaitingList ? T("AanmeldenVoorDeWachtlijst") : T("KoorInschrijven"))</button>
      }
+    </EditForm>
+   }
+   @if(view.CanEditAvailability && !view.CanEdit && AvailabilityInput is not null)
+   {
+    <EditForm Model="AvailabilityInput" FormName="festival-availability" OnSubmit="SaveAvailabilityAsync">
+     <input type="hidden" name="AvailabilityInput.FestivalId" value="@AvailabilityInput.FestivalId" />
+     <input type="hidden" name="AvailabilityInput.Version" value="@AvailabilityInput.Version" />
+     <AvailabilityFields Prefix="AvailabilityInput" Window="festival.Availability" From="@AvailabilityInput.AvailableFrom" Until="@AvailabilityInput.AvailableUntil" Language="@language" />
+     <button type="submit">@T("BeschikbaarheidOpslaan")</button>
     </EditForm>
    }
    @if(Confirmation is not null)
@@ -152,6 +164,7 @@ else
 @code {
  [Parameter] public long Id{get;set;}
  [SupplyParameterFromForm(FormName="festival-enrollment")] public EnrollmentInput? Input{get;set;}
+ [SupplyParameterFromForm(FormName="festival-availability")] public EnrollmentAvailabilityInput? AvailabilityInput{get;set;}
  [SupplyParameterFromForm(FormName="confirm-enrollment")] public EnrollmentConfirmation? Confirmation{get;set;}
  private string language = "nl";
  private CultureInfo Culture => CultureInfo.GetCultureInfo(language switch { "de" => "de-DE", "en" => "en-IE", _ => "nl-NL" });
@@ -182,11 +195,13 @@ else
  {
   if(view?.Festival is not { } festival) return;
   var registration=view.Registration;
-  Input??=registration is null ? new(){FestivalId=festival.Id} : new()
+  Input??=registration is null ? new(){FestivalId=festival.Id,AvailableFrom=Amusing.Shared.FestivalAvailability.Format(festival.FirstPerformance),AvailableUntil=Amusing.Shared.FestivalAvailability.Format(festival.LastPerformance)} : new()
   {
    FestivalId=festival.Id, Version=registration.Version, Headcount=registration.Headcount <= int.MaxValue ? (int)registration.Headcount : 0,
+   AvailableFrom=Amusing.Shared.FestivalAvailability.Format(registration.AvailableFrom), AvailableUntil=Amusing.Shared.FestivalAvailability.Format(registration.AvailableUntil),
    PodiumType=registration.PodiumType, Preference=$"{registration.Indoors}{registration.Outdoors}", Review=registration.Review
   };
+  if(registration is not null) AvailabilityInput??=new(){FestivalId=festival.Id,Version=registration.Version,AvailableFrom=Amusing.Shared.FestivalAvailability.Format(registration.AvailableFrom),AvailableUntil=Amusing.Shared.FestivalAvailability.Format(registration.AvailableUntil)};
   Confirmation??=new(){FestivalId=festival.Id,Version=registration?.Version};
  }
  private async Task RegisterAsync(EditContext editContext)
@@ -198,6 +213,11 @@ else
   var ct=Context.HttpContext!.RequestAborted;
   var result=edit ? await Service.UpdateAsync(Actor,Group,Input,ct) : await Service.RegisterAsync(Actor,Group,Input,ct);
   await ShowResultAsync(result,edit);
+ }
+ private async Task SaveAvailabilityAsync()
+ {
+  var result=await Service.UpdateAvailabilityAsync(Actor,Group,AvailabilityInput!,Context.HttpContext!.RequestAborted);
+  await ShowResultAsync(result,true);
  }
  private async Task ConfirmAsync()
  {
@@ -220,13 +240,14 @@ else
    EnrollmentResult.Forbidden=>T("JeHebtGeenToestemmingOmDitKoor2"),
    EnrollmentResult.Closed=>T("DeInschrijfperiodeIsGeslotenJeAanmeldingIs"),
    EnrollmentResult.Incomplete=>T("DeGegevensVanHetKoorZijnNog"),
-   EnrollmentResult.Invalid=>T("ControleerHetAantalDeelnemersHetPodiumtypeEn"),
+   EnrollmentResult.Invalid=>T("ControleerInschrijvingEnBeschikbaarheid"),
    _=>T("DeActueleFestivaleditieIsGewijzigdOfNiet")
   };
   showCompletion = result is EnrollmentResult.Saved or EnrollmentResult.Confirmed;
   await LoadViewAsync();
   if (showCompletion) return;
   Input=null;
+  AvailabilityInput=null;
   Confirmation=null;
   InitializeForms();
  }

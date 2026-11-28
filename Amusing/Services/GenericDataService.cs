@@ -75,6 +75,20 @@ public class GenericDataService
         return Enumerable.Range(0, reader.FieldCount).Select(reader.GetName).ToArray();
     }
 
+    public async Task ExecuteTransactionAsync(IReadOnlyList<string> queries, Dictionary<string,object> parameters)
+    {
+        await using var connection=new MySqlConnection(_connection.ConnectionString);
+        await connection.OpenAsync();
+        await using var transaction=await connection.BeginTransactionAsync();
+        foreach(var query in queries)
+        {
+            await using var command=new MySqlCommand(UseConfiguredDatabase(query,_databaseName),connection,transaction);
+            foreach(var parameter in parameters)command.Parameters.AddWithValue(parameter.Key,parameter.Value);
+            await command.ExecuteNonQueryAsync();
+        }
+        await transaction.CommitAsync();
+    }
+
     public async Task<int> ExecuteNonQueryAsync(
     string query,
     Dictionary<string, object>? parameters = null )

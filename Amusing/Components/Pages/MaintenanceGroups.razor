@@ -210,6 +210,8 @@ else
                                     <GridColumns>
                                         <GridColumn Field="Festival" HeaderText="Festival" Width="90px" />
                                         <GridColumn Field="RegisteredAt" HeaderText="Ingeschreven" Format="dd-MM-yyyy" Type="ColumnType.Date" Width="130px" />
+                                        <GridColumn Field="AvailableFrom" HeaderText="Beschikbaar van" Width="135"><Template Context="row"><button type="button" class="btn btn-link p-0" @onclick="() => availabilityDialog.OpenAsync(((GroupRegistrationModel)row).FestivalId,SelectedGroup!.GroupId)">@(((GroupRegistrationModel)row).AvailableFrom)</button></Template></GridColumn>
+                                        <GridColumn Field="AvailableUntil" HeaderText="Beschikbaar tot" Width="135"><Template Context="row"><button type="button" class="btn btn-link p-0" @onclick="() => availabilityDialog.OpenAsync(((GroupRegistrationModel)row).FestivalId,SelectedGroup!.GroupId)">@(((GroupRegistrationModel)row).AvailableUntil)</button></Template></GridColumn>
                                         <GridColumn Field="Singers" HeaderText="Zangers" Width="90px" />
                                         <GridColumn Field="StageType" HeaderText="Podiumsoort" Width="110px" />
                                         <GridColumn Field="Paid" HeaderText="Betaald" Width="90px" />
@@ -348,4 +350,10 @@ else
             </div>
         </div>
     </div>
+}
+
+<Amusing.Components.RegistrationAvailabilityDialog @ref="availabilityDialog" Saved="ReloadAvailabilityAsync" />
+@code {
+ private Amusing.Components.RegistrationAvailabilityDialog availabilityDialog = default!;
+ private async Task ReloadAvailabilityAsync(){if(SelectedGroup is not null)GroupRegistrations=await RegistrationService.GetGroupRegistrationsByGroupIdAsync(SelectedGroup.GroupId);}
 }

@@ -26,4 +26,5 @@
     <EmbeddedResource Include="..\Amusing.Mobile\Resources\Fonts\OpenSans-Regular.ttf" LogicalName="Amusing.Mijn.OpenSans-Regular.ttf" />
   </ItemGroup>
 
+  <ItemGroup><Compile Include="..\Shared\FestivalAvailability.cs" Link="Shared\FestivalAvailability.cs" /></ItemGroup>
 </Project>

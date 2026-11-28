@@ -75,5 +75,6 @@
     <ProjectReference Include="..\Amusing.Mobile.Shared\Amusing.Mobile.Shared.csproj" />
     <ProjectReference Include="..\Amusing.Facturatie\Amusing.Facturatie.csproj" />
   </ItemGroup>
+  <ItemGroup><Compile Include="..\Shared\FestivalAvailability.cs" Link="Shared\FestivalAvailability.cs" /></ItemGroup>
   <ItemGroup><ProjectReference Include="..\Amusing.Authentication.MySql\Amusing.Authentication.MySql.csproj" /></ItemGroup>
 </Project>

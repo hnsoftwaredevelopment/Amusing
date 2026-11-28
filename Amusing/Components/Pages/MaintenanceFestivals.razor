@@ -33,6 +33,9 @@ else
                     <Syncfusion.Blazor.Calendars.SfDatePicker TValue="DateOnly" @bind-Value="SelectedFestivalStartInschrijving" Placeholder="Start inschrijving" Format="dd-MM-yyyy" FloatLabelType="FloatLabelType.Always" Width="150px" WeekNumber="true" />
                     <Syncfusion.Blazor.Calendars.SfDatePicker TValue="DateOnly" @bind-Value="SelectedFestivalEindeInschrijving" Placeholder="Einde inschrijving" Format="dd-MM-yyyy" FloatLabelType="FloatLabelType.Always" Width="150px" WeekNumber="true" />
                     <hr />
+                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="SelectedFestivalEersteOptreden" Placeholder="Eerste optreden" Format="HH:mm" Step="30" Width="180px" FloatLabelType="FloatLabelType.Always" />
+                    <Syncfusion.Blazor.Calendars.SfTimePicker TValue="TimeOnly" @bind-Value="SelectedFestivalLaatsteOptreden" Placeholder="Laatste optreden" Format="HH:mm" Step="30" Width="180px" FloatLabelType="FloatLabelType.Always" />
+                    <hr />
                     <SfCheckBox @bind-Checked="WaitlistChecked">Wachtlijst</SfCheckBox>
                     <SfCheckBox @bind-Checked="PublicateChecked">Publiceer planning</SfCheckBox>
                     <hr />
