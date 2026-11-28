@@ -32,9 +32,13 @@ async page => {
     await page.goto('https://dev.beheer.amusing-hengelo.nl/Maintenance-Subscriptions');
     const button=page.getByRole('button',{name:'Planningexport',exact:true});
     await button.waitFor();
-    const pending=page.waitForEvent('download');
+    // The prerendered button exists before the Blazor circuit attaches its handler.
+    await page.waitForTimeout(2500);
+    const pending=page.waitForEvent('download',{timeout:15000});
     await button.click();
-    const download=await pending;
+    let download;
+    try { download=await pending; }
+    catch { throw new Error('No download; helper='+await page.evaluate(()=>typeof window.downloadFile)+'; toast='+await page.locator('.e-toast-content').allTextContents()); }
     await download.saveAs(f.download);
     if(await download.failure())throw new Error('Workbook download failed');
     return {planningExportDownloaded:true};
@@ -43,7 +47,11 @@ async page => {
     [IO.File]::WriteAllText($runtime,$code.Replace('FIXTURE',$fixture))
     $null=npx.cmd --yes --package @playwright/cli playwright-cli --session=kan114-dev open https://dev.beheer.amusing-hengelo.nl/login
     $output=npx.cmd --yes --package @playwright/cli playwright-cli --session=kan114-dev run-code --filename $runtime 2>&1
-    if($LASTEXITCODE -or $output -contains '### Error'){throw 'Planningexport browser check failed'}
+    if($LASTEXITCODE -or $output -contains '### Error'){
+        $errorIndex=[array]::IndexOf($output,'### Error')
+        $detail=if($errorIndex -ge 0 -and $errorIndex+1 -lt $output.Count){[string]$output[$errorIndex+1]}else{'CLI failed'}
+        throw ('Planningexport browser check failed: '+$detail.Replace($password,'[redacted]'))
+    }
     if(!(Test-Path -LiteralPath $download)){throw 'No workbook downloaded'}
     $zip=[IO.Compression.ZipFile]::OpenRead($download)
     try {
