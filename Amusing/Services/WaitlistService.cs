@@ -12,6 +12,37 @@ public sealed record WaitlistResult(int Placed,int Skipped,string? Error);
 
 public sealed class WaitlistService(IConfiguration configuration,TimeProvider? timeProvider=null)
 {
+    public async Task<string?> ReturnToWaitlistAsync(ClaimsPrincipal user,uint festival,uint group)
+    {
+        if(user.Identity?.IsAuthenticated!=true || !uint.TryParse(user.FindFirstValue(ClaimTypes.NameIdentifier),out var actor))
+            return "Log opnieuw in op Beheer.";
+        await using var connection=Connection();await connection.OpenAsync();
+        await using var tx=await connection.BeginTransactionAsync();
+        await using(var auth=new MySqlCommand("SELECT user_id FROM ah_beheer WHERE user_id=@actor AND NULLIF(TRIM(role),'') IS NOT NULL AND COALESCE(NULLIF(PasswordHash,''),NULLIF(password,'')) IS NOT NULL",connection,tx))
+        {
+            auth.Parameters.AddWithValue("@actor",actor);
+            if(await auth.ExecuteScalarAsync() is null)return "Je hebt geen toegang tot Beheer.";
+        }
+        // Match the placement worker's lock order before changing the registration.
+        await using(var placement=new MySqlCommand("SELECT festival_id FROM mijn_wachtlijstplaatsingen WHERE festival_id=@festival AND zanggroep_id=@group FOR UPDATE",connection,tx))
+        {
+            placement.Parameters.AddWithValue("@festival",festival);placement.Parameters.AddWithValue("@group",group);
+            await placement.ExecuteScalarAsync();
+        }
+        await using var update=new MySqlCommand("""
+            UPDATE ah_inschrijvingen i JOIN ah_festivals f USING(festival_id) SET i.wachtlijst=1
+            WHERE i.festival_id=@festival AND i.zanggroep_id=@group AND COALESCE(i.wachtlijst,0)=0 AND DATE(f.festivaldatum)>=@today;
+            """,connection,tx);
+        update.Parameters.AddWithValue("@festival",festival);update.Parameters.AddWithValue("@group",group);
+        update.Parameters.AddWithValue("@today",Today.ToDateTime(TimeOnly.MinValue));
+        if(await update.ExecuteNonQueryAsync()!=1)return "De inschrijving is inmiddels gewijzigd, bestaat niet meer of de festivaleditie is voorbij. Ververs de lijst.";
+        await using var audit=new MySqlCommand("""
+            INSERT INTO mijn_audit_log(occurred_at,actor_type,actor_id,action,group_id,festival_id,changed_fields)
+            VALUES(UTC_TIMESTAMP(6),'beheer',@actor,'FestivalWaitlistRestored',@group,@festival,'WaitingList');
+            """,connection,tx);
+        audit.Parameters.AddWithValue("@festival",festival);audit.Parameters.AddWithValue("@group",group);audit.Parameters.AddWithValue("@actor",actor);
+        await audit.ExecuteNonQueryAsync();await tx.CommitAsync();return null;
+    }
     private MySqlConnection Connection() => new(configuration.GetConnectionString("DefaultConnection"));
     public DateOnly Today => DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc((timeProvider ?? TimeProvider.System).GetUtcNow().UtcDateTime,TimeZoneInfo.FindSystemTimeZoneById("Europe/Amsterdam")));
 
@@ -111,6 +142,11 @@ public sealed class WaitlistService(IConfiguration configuration,TimeProvider? t
         var placed=0; var skipped=0;
         foreach(var group in groups)
         {
+            await using(var placementLock=new MySqlCommand("SELECT festival_id FROM mijn_wachtlijstplaatsingen WHERE festival_id=@festival AND zanggroep_id=@group FOR UPDATE",connection,tx))
+            {
+                placementLock.Parameters.AddWithValue("@festival",festival);placementLock.Parameters.AddWithValue("@group",group);
+                await placementLock.ExecuteScalarAsync();
+            }
             await using(var groupLock=new MySqlCommand("SELECT zanggroep_id FROM ah_zanggroepen WHERE zanggroep_id=@group FOR UPDATE",connection,tx))
             {
                 groupLock.Parameters.AddWithValue("@group",group);
@@ -130,7 +166,10 @@ public sealed class WaitlistService(IConfiguration configuration,TimeProvider? t
             await using var update=new MySqlCommand("""
                 UPDATE ah_inschrijvingen SET wachtlijst=0 WHERE festival_id=@festival AND zanggroep_id=@group;
                 INSERT INTO mijn_wachtlijstplaatsingen(festival_id,zanggroep_id,beheerder_id,geplaatst_op,betaalvanaf,uiterste_betaaldatum,volgende_poging)
-                VALUES(@festival,@group,@actor,UTC_TIMESTAMP(6),@today,@due,UTC_TIMESTAMP(6));
+                VALUES(@festival,@group,@actor,UTC_TIMESTAMP(6),@today,@due,UTC_TIMESTAMP(6))
+                ON DUPLICATE KEY UPDATE beheerder_id=VALUES(beheerder_id),geplaatst_op=VALUES(geplaatst_op),
+                    betaalvanaf=VALUES(betaalvanaf),uiterste_betaaldatum=VALUES(uiterste_betaaldatum),
+                    volgende_poging=VALUES(volgende_poging),verwerkt_op=NULL,foutmelding=NULL;
                 INSERT INTO mijn_audit_log(occurred_at,actor_type,actor_id,action,group_id,festival_id,changed_fields)
                 VALUES(UTC_TIMESTAMP(6),'beheer',@actor,'FestivalWaitlistPlaced',@group,@festival,'WaitingList');
                 """,connection,tx);
