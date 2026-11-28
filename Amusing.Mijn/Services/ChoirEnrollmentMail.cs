@@ -72,7 +72,7 @@ public sealed partial class ChoirEnrollments
         if (placement && (noteMailId is null || primaryContact is null))
             throw new InvalidOperationException("Voor plaatsing ontbreken een nota of contactpersoon.");
         if (noteOnly) return;
-        string[] organisationMailboxes = ["koren", "penningmeester", "voorzitter"];
+        string[] organisationMailboxes = ["koren", "info"];
         ulong? confirmationId = null;
         if (primaryContact is not null)
         {
@@ -101,8 +101,6 @@ public sealed partial class ChoirEnrollments
             confirmationId = await QueueAsync("koor", primaryContact, confirmation.Subject, confirmation.Body,
                 dependsOn: noteMailId, html: confirmation.Html);
         }
-        if (placement) return;
-
         var organisationStatus = registration.Waitlisted
             ? $"Zojuist heeft {choirName} zich aangemeld voor de wachtlijst van het komende festival."
             : $"Zojuist heeft {choirName} zich ingeschreven voor het komende festival.";

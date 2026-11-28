@@ -191,7 +191,7 @@ public partial class LoginTests
             Assert.Equal(4, pdfText.Count(character => character == '€'));
             await CheckWorkerAsync("soort='koor' AND verzonden IS NOT NULL");
             await using var count = source.CreateCommand("SELECT COUNT(*) FROM mijn_inschrijfmail");
-            Assert.Equal(5, Convert.ToInt32(await count.ExecuteScalarAsync()));
+            Assert.Equal(4, Convert.ToInt32(await count.ExecuteScalarAsync()));
 
             var confirmation = Assert.Single(Directory.GetFiles(directory, "*.eml").Select(path => MimeKit.MimeMessage.Load(path)),
                 message => !message.Attachments.Any());
@@ -205,7 +205,7 @@ public partial class LoginTests
                   AND o.bericht LIKE '%Bevestigingsmail is verstuurd naar: koor@example.invalid (contactpersoon 1)%'
                   AND o.bericht LIKE '%Nota is verstuurd naar: penningmeester@example.invalid (penningmeester)%'
                 """);
-            Assert.Equal(3, Convert.ToInt32(await organisation.ExecuteScalarAsync()));
+            Assert.Equal(2, Convert.ToInt32(await organisation.ExecuteScalarAsync()));
             await using var audit = source.CreateCommand("SELECT COUNT(*) FROM mijn_audit_log WHERE action='ParticipationNoteSent' AND role_name='penningmeester'");
             Assert.Equal(1, Convert.ToInt32(await audit.ExecuteScalarAsync()));
         }

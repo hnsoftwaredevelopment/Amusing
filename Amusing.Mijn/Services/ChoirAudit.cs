@@ -21,7 +21,7 @@ public sealed class ChoirAudit(MySqlDataSource source, IHttpContextAccessor cont
             LEFT JOIN mijn_audit_log l ON l.group_id=g.zanggroep_id
                 AND l.actor_type IN ('beheer','choir_person','system')
                 AND l.action IN ('ChoirCreated','ChoirProfileChanged','ChoirImageChanged','ChoirImageRemoved',
-                    'FestivalEnrolled','FestivalEnrollmentUpdated','FestivalEnrollmentConfirmed','FestivalWaitlistPlaced','ParticipationNoteSent','ParticipationNoteCopySent',
+                    'FestivalEnrolled','FestivalEnrollmentUpdated','FestivalEnrollmentConfirmed','FestivalWaitlistPlaced','FestivalWaitlistRestored','ParticipationNoteSent','ParticipationNoteCopySent',
                     'RoleInvitationCreated','RoleInvitationAccepted','RoleInvitationCancelled','FirstContactTransferred','RoleRemoved')
                 AND (@before IS NULL OR l.id < @before)
             LEFT JOIN ah_beheer b ON l.actor_type='beheer' AND b.user_id=l.actor_id

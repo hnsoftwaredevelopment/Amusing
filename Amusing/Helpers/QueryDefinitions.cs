@@ -227,6 +227,7 @@ public static class QueryDefinitions
             i.zanggroep_id AS zanggroep_id,
             i.ingeschreven AS datum,
             i.betaald_bedrag AS BetaaldBedrag,
+            COALESCE(i.wachtlijst,0) AS Wachtlijst,
             CASE WHEN CAST(i.betaald AS CHAR) LIKE '0000-%' THEN NULL ELSE i.betaald END AS Betaaldatum,
             CASE WHEN CAST(i.bevestigd AS CHAR) LIKE '0000-%' THEN NULL ELSE i.bevestigd END AS Bevestigingsdatum,
             CASE WHEN CAST(i.afgehaakt AS CHAR) LIKE '0000-%' THEN NULL ELSE i.afgehaakt END AS Afhaakdatum,
