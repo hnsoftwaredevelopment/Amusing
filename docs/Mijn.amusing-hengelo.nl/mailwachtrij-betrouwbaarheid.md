@@ -50,3 +50,8 @@ Praktijkacceptatie: controleer op dev dat kiezen, bewerken en opslaan van een ge
 ## Gebruikersacceptatie
 
 De gebruiker heeft kiezen, bewerken en opslaan op dev getest en akkoord bevonden, ook met een nieuw sjabloon. Deze slice is geaccepteerd en klaar voor samenvoegen via PR #54. Samenvoegen en productiepublicatie staan nog open. De resterende KAN-65-scope is daarmee niet automatisch afgerond.
+
+
+## PR-review 28 november 2026
+
+De twee open CodeRabbit-bevindingen op PR54 zijn gereproduceerd met vier falende tests en opgelost: Delete en MailSend delen een bewerkingsslot; een onbevestigde wachtrijopdracht kan bij een gewijzigde verzendvlag nooit direct of als simulatie worden verstuurd. Ook een reeds geaccepteerde campagne kan niet opnieuw direct worden verstuurd. Het slot komt vrij bij een verwijderfout. Achttien gerichte tests zijn geslaagd, uitsluitend met lokale SMTP-proeven of zonder transport; geen echte mail verstuurd.

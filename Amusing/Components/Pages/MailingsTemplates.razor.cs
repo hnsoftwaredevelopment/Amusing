@@ -324,6 +324,9 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
             return;
         }
 
+        _isDeleting=true;
+        try
+        {
         uint deletedTemplateId = _selectedTemplatesList.TemplateId;
         string? deletedTemplateName = _selectedTemplatesList.TemplateName;
         await MailingService.DeleteTemplateQueryAsync(_selectedTemplatesList.TemplateId);
@@ -340,6 +343,8 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
         _selectedTemplatesList.TemplateContent = _mappingService.ReplaceKeysWithLabels(_selectedTemplatesList.TemplateContent);
 
         _editContext = new EditContext(_selectedTemplatesList);
+        }
+        finally{_isDeleting=false;}
     }
 
     protected async Task SelectTemplateListAsync(TemplatesListModel template)
@@ -809,8 +814,13 @@ public partial class MailingsTemplates(ILogger<MailingsTemplates> logger) : Comp
 
     protected async Task MailSend()
     {
-        if (_isSendingMail || _isSaving)
+        if (_isSendingMail || _isSaving || _isDeleting || _queuedCampaignId is not null)
             return;
+        if(_queueSubmission.IsPending && (!ShouldSendRealBulkMail || !QueueEnabled))
+        {
+            await ToastService.ShowWarningAsync("De oorspronkelijke verzendopdracht is nog niet bevestigd. Schakel de wachtrij weer in om dezelfde opdracht veilig te herhalen; directe verzending is geblokkeerd.");
+            return;
+        }
 
         // Send mail from selected template to recipients of the selected recipientlist
         try
