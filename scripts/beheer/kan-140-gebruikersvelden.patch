@@ -1,0 +1,62 @@
+--- a/Amusing/Components/Pages/MaintenanceUsers.razor
++++ b/Amusing/Components/Pages/MaintenanceUsers.razor
+@@ -39,0 +40,2 @@
++                            <label>Privéhersteladres <input type="email" maxlength="80" @bind="UserRecoveryEmail" /></label>
++                            <label>Weergavenaam voor koren <input maxlength="100" @bind="UserDisplayName" /></label>
+--- a/Amusing/Components/Pages/MaintenanceUsers.razor.cs
++++ b/Amusing/Components/Pages/MaintenanceUsers.razor.cs
+@@ -49,0 +50,12 @@
++    public string UserRecoveryEmail
++    {
++        get => SelectedUser?.RecoveryEmail ?? "";
++        set { if (SelectedUser != null) SelectedUser.RecoveryEmail = value; }
++    }
++
++    public string UserDisplayName
++    {
++        get => SelectedUser?.DisplayName ?? "";
++        set { if (SelectedUser != null) SelectedUser.DisplayName = value; }
++    }
++
+@@ -97,0 +110,2 @@
++            DisplayName = SelectedUser.DisplayName,
++            RecoveryEmail = SelectedUser.RecoveryEmail,
+@@ -138 +152 @@
+-                MaskedProperties = ["Password"]
++                MaskedProperties = ["Password", "RecoveryEmail"]
+@@ -166 +180 @@
+-                MaskedProperties = ["Password"]
++                MaskedProperties = ["Password", "RecoveryEmail"]
+--- a/Amusing/Models/UserModel.cs
++++ b/Amusing/Models/UserModel.cs
+@@ -10,0 +11,3 @@
++
++    public string RecoveryEmail { get; set; } = "";
++    public string DisplayName { get; set; } = "";
+--- a/Amusing/Services/UserService.cs
++++ b/Amusing/Services/UserService.cs
+@@ -17,0 +18,2 @@
++                RecoveryEmail = reader["RecoveryEmail"].ToString() ?? "",
++                DisplayName = reader["DisplayName"].ToString() ?? "",
+@@ -31,0 +34,2 @@
++            { "@DisplayName", model.DisplayName.Trim() },
++            { "@RecoveryEmail", model.RecoveryEmail.Trim() },
+@@ -54,0 +59,2 @@
++            { "@DisplayName", model.DisplayName.Trim() },
++            { "@RecoveryEmail", model.RecoveryEmail.Trim() },
+--- a/Amusing/Helpers/QueryDefinitions.cs
++++ b/Amusing/Helpers/QueryDefinitions.cs
+@@ -1297,0 +1298,2 @@
++            usr.weergavenaam AS DisplayName,
++            usr.herstel_email AS RecoveryEmail,
+@@ -1303 +1305 @@
+-        GROUP BY usr.user_id, usr.username, usr.password, usr.role;";
++        GROUP BY usr.user_id, usr.username, usr.password, usr.role, usr.weergavenaam, usr.herstel_email;";
+@@ -1306,2 +1308,2 @@
+-            (username, password, role)
+-        VALUES (@UserName, @Password, @Role);
++            (username, password, role, weergavenaam, herstel_email)
++        VALUES (@UserName, @Password, @Role, NULLIF(@DisplayName, ''), NULLIF(@RecoveryEmail, ''));
+@@ -1313,0 +1316,2 @@
++            weergavenaam = NULLIF(@DisplayName, ''),
++            herstel_email = NULLIF(@RecoveryEmail, ''),

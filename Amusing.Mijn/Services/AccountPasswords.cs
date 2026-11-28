@@ -9,56 +9,37 @@ public sealed class AccountPasswords(MySqlDataSource source, IConfiguration conf
     ChoirAccounts accounts, ChoirPasswordVerifier verifier, ILogger<AccountPasswords> logger)
 {
     public static bool ValidPassword(string password, string repeated) =>
-        password.Length >= 12 && Encoding.UTF8.GetByteCount(password) <= 72 && password == repeated;
+        PasswordRecoveryRules.ValidPassword(password,repeated);
 
-    public static bool ValidToken(string token) => token.Length == 64 && token.All(Uri.IsHexDigit);
+    public static bool ValidToken(string token) => PasswordRecoveryRules.ValidToken(token);
 
     public async Task RequestAsync(string email, CancellationToken ct, string? username = null, string language = "nl")
     {
         var beheer = username is not null;
-        var actorType = beheer ? SupportMode.ActorType : "choir_person";
-        await using var connection = await source.OpenConnectionAsync(ct);
-        uint actor;
-        string stamp;
+        var origin = new Uri(configuration["AccountRegistration:Origin"]!, UriKind.Absolute);
+        if (origin.Scheme != Uri.UriSchemeHttps) throw new InvalidOperationException("The reset origin must use HTTPS.");
+        string token;
         if (beheer)
         {
-            await using var find = new MySqlCommand("""
-                SELECT user_id, COALESCE(NULLIF(PasswordHash,''), password), herstel_email
-                FROM ah_beheer WHERE username=@username AND herstel_email=@email
-                AND NULLIF(TRIM(role),'') IS NOT NULL LIMIT 2
-                """, connection);
-            find.Parameters.AddWithValue("@username", username);
-            find.Parameters.AddWithValue("@email", email);
-            await using var reader = await find.ExecuteReaderAsync(ct);
-            if (!await reader.ReadAsync(ct)) return;
-            actor = reader.GetUInt32(0);
-            email = reader.GetString(2);
-            stamp = ChoirAccounts.Stamp(reader.GetString(1) + "|" + email);
-            if (await reader.ReadAsync(ct)) return;
+            var request = await new Amusing.Authentication.MySql.BeheerPasswordRecoveryStore(source).IssueAsync(username!,email,ct);
+            if (request is null) return;
+            token=request.Token;email=request.Recipient;
         }
         else
         {
-            var account = await accounts.FindAsync(email, ct);
-            if (account is null) return;
-            actor = account.Id;
-            email = account.Email;
-            stamp = ChoirAccounts.Stamp(account.Hash + "|" + email);
+            var account=await accounts.FindAsync(email,ct);
+            if(account is null)return;
+            email=account.Email;
+            token=Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+            await using var connection=await source.OpenConnectionAsync(ct);
+            await using var command=new MySqlCommand("""
+                INSERT INTO mijn_password_reset(token_hash,person_id,actor_type,credential_stamp,expires_at)
+                VALUES(@token,@actor,'choir_person',@stamp,DATE_ADD(UTC_TIMESTAMP(6),INTERVAL 1 HOUR))
+                """,connection);
+            command.Parameters.AddWithValue("@token",HashToken(token));command.Parameters.AddWithValue("@actor",account.Id);
+            command.Parameters.AddWithValue("@stamp",ChoirAccounts.Stamp(account.Hash+"|"+email));
+            await command.ExecuteNonQueryAsync(ct);
         }
-
-        var origin = new Uri(configuration["AccountRegistration:Origin"]!, UriKind.Absolute);
-        if (origin.Scheme != Uri.UriSchemeHttps)
-            throw new InvalidOperationException("The reset origin must use HTTPS.");
-
-        var token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
-        await using var command = new MySqlCommand("""
-            INSERT INTO mijn_password_reset(token_hash,person_id,actor_type,credential_stamp,expires_at)
-            VALUES(@token,@actor,@type,@stamp,DATE_ADD(UTC_TIMESTAMP(6), INTERVAL 1 HOUR))
-            """, connection);
-        command.Parameters.AddWithValue("@token", HashToken(token));
-        command.Parameters.AddWithValue("@actor", actor);
-        command.Parameters.AddWithValue("@type", actorType);
-        command.Parameters.AddWithValue("@stamp", stamp);
-        await command.ExecuteNonQueryAsync(ct);
 
         try
         {
@@ -82,6 +63,7 @@ public sealed class AccountPasswords(MySqlDataSource source, IConfiguration conf
 
     public async Task<bool> ResetAsync(string token, string password, CancellationToken ct, bool beheer = false)
     {
+        if (beheer) return await new Amusing.Authentication.MySql.BeheerPasswordRecoveryStore(source).ResetAsync(token,password,ct);
         if (!ValidToken(token)) return false;
 
         await using var connection = await source.OpenConnectionAsync(ct);
@@ -91,7 +73,7 @@ public sealed class AccountPasswords(MySqlDataSource source, IConfiguration conf
             WHERE token_hash=@token AND actor_type=@type AND expires_at>UTC_TIMESTAMP(6)
             """, connection, tx);
         lookup.Parameters.AddWithValue("@token", HashToken(token));
-        lookup.Parameters.AddWithValue("@type", beheer ? SupportMode.ActorType : "choir_person");
+        lookup.Parameters.AddWithValue("@type", "choir_person");
         uint actor;
         string stamp;
         await using (var reader = await lookup.ExecuteReaderAsync(ct))
@@ -101,14 +83,14 @@ public sealed class AccountPasswords(MySqlDataSource source, IConfiguration conf
             stamp = reader.GetString(1);
         }
 
-        var current = await LockPasswordAsync(connection, tx, actor, ct, beheer, includeEmail: true);
+        var current = await LockPasswordAsync(connection, tx, actor, ct, includeEmail: true);
         if (current is null) return false;
         // Accept older reset links as long as the address change has not removed their token.
-        var legacyStamp = !beheer && ChoirAccounts.Stamp(current[..current.IndexOf('|')]) == stamp;
+        var legacyStamp = ChoirAccounts.Stamp(current[..current.IndexOf('|')]) == stamp;
         if (ChoirAccounts.Stamp(current) != stamp && !legacyStamp) return false;
         lookup.CommandText = "SELECT 1 FROM mijn_password_reset WHERE token_hash=@token AND actor_type=@type AND expires_at>UTC_TIMESTAMP(6) FOR UPDATE";
         if (await lookup.ExecuteScalarAsync(ct) is null) return false;
-        await StoreAsync(connection, tx, actor, password, "PasswordReset", ct, beheer);
+        await StoreAsync(connection, tx, actor, password, "PasswordReset", ct);
         return true;
     }
 
@@ -123,12 +105,9 @@ public sealed class AccountPasswords(MySqlDataSource source, IConfiguration conf
     }
 
     private static async Task<string?> LockPasswordAsync(MySqlConnection connection, MySqlTransaction tx,
-        uint actor, CancellationToken ct, bool beheer = false, bool includeEmail = false)
+        uint actor, CancellationToken ct, bool includeEmail = false)
     {
-        await using var command = new MySqlCommand(beheer ? """
-            SELECT CONCAT(COALESCE(NULLIF(PasswordHash, ''), password), '|', herstel_email)
-            FROM ah_beheer WHERE user_id=@actor AND NULLIF(TRIM(role),'') IS NOT NULL FOR UPDATE
-            """ : $"""
+        await using var command = new MySqlCommand($"""
             SELECT {(includeEmail ? "CONCAT(w.hash, '|', COALESCE(p.email,''))" : "w.hash")}
             FROM ah_personen_wachtwoorden w JOIN ah_personen p ON p.persoon_id=w.id
             WHERE w.id=@actor AND p.actief=1 FOR UPDATE
@@ -138,11 +117,9 @@ public sealed class AccountPasswords(MySqlDataSource source, IConfiguration conf
     }
 
     private static async Task StoreAsync(MySqlConnection connection, MySqlTransaction tx, uint actor,
-        string password, string action, CancellationToken ct, bool beheer = false)
+        string password, string action, CancellationToken ct)
     {
-        var update = beheer
-            ? "UPDATE ah_beheer SET PasswordHash=@hash,password='' WHERE user_id=@actor;"
-            : "UPDATE ah_personen_wachtwoorden SET hash=@hash WHERE id=@actor;";
+        const string update = "UPDATE ah_personen_wachtwoorden SET hash=@hash WHERE id=@actor;";
         await using var command = new MySqlCommand(update + """
             DELETE FROM mijn_password_reset WHERE person_id=@actor AND actor_type=@type;
             INSERT INTO mijn_audit_log(occurred_at,actor_type,actor_id,action)
@@ -150,7 +127,7 @@ public sealed class AccountPasswords(MySqlDataSource source, IConfiguration conf
             """, connection, tx);
         command.Parameters.AddWithValue("@actor", actor);
         command.Parameters.AddWithValue("@hash", BCrypt.Net.BCrypt.HashPassword(password, 11));
-        command.Parameters.AddWithValue("@type", beheer ? SupportMode.ActorType : "choir_person");
+        command.Parameters.AddWithValue("@type", "choir_person");
         command.Parameters.AddWithValue("@action", action);
         await command.ExecuteNonQueryAsync(ct);
         await tx.CommitAsync(ct);
