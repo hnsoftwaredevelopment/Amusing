@@ -65,8 +65,14 @@ async page => {
         'Browserdownload geslaagd; drie native Exceltabellen met 18 kolommen gecontroleerd.'
     } finally {$zip.Dispose()}
 } finally {
-    $null=npx.cmd --yes --package @playwright/cli playwright-cli --session=kan114-dev close
-    if($id){$null=Sql "DELETE FROM user_log WHERE user_id=$id; DELETE FROM ah_beheer WHERE user_id=$id AND username='$username';"}
-    Remove-Item -LiteralPath $runtime,$download -ErrorAction SilentlyContinue
+    try {
+        $null=npx.cmd --yes --package @playwright/cli playwright-cli --session=kan114-dev close
+    } finally {
+        try {
+            if($id){$null=Sql "DELETE FROM user_log WHERE user_id=$id; DELETE FROM ah_beheer WHERE user_id=$id AND username='$username';"}
+        } finally {
+            Remove-Item -LiteralPath $runtime,$download -ErrorAction SilentlyContinue
+        }
+    }
 }
 
