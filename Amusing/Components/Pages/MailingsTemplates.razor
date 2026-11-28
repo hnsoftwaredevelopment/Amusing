@@ -161,7 +161,7 @@ else
 						<Template>
 							<button class="custom-toolbar-btn @(_isSendingMail ? "disabled" : string.Empty)"
 									@onclick="MailSend"
-									disabled="@(_isSendingMail || _queuedCampaignId is not null)"
+									disabled="@(_isDeleting || _isSendingMail || _queuedCampaignId is not null)"
 									title="Verstuur de mail uit het geselecteerde sjabloon naar alle e-mail adressen uit de ontvangerslijst">
 								<img src="icons/send.svg" class="icon" alt="MAILSEND" Height="25"/>
 							</button>
