@@ -306,7 +306,6 @@ public partial class MaintenanceGroups : ComponentBase
         var exclusiveRoles = new HashSet<string>
         {
             "contactpersoon1",
-            "contactpersoon2",
             "penningmeester",
             "dirigent"
         };

@@ -841,4 +841,5 @@
   <data name="ControleerInschrijvingEnBeschikbaarheid" xml:space="preserve"><value>Check the registration and availability. Choose times within the festival window in half-hour steps, allowing at least half an hour between start and end.</value></data>
   <data name="BetaaldBedrag" xml:space="preserve"><value>Amount paid</value></data>
   <data name="KoorOpWachtlijstGeplaatst" xml:space="preserve"><value>Choir placed on the waiting list</value></data>
+  <data name="ContactrollenHersteld" xml:space="preserve"><value>Contact roles corrected</value></data>
 </root>

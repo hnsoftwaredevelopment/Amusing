@@ -19,7 +19,7 @@ $meta=@($data|Where-Object kind -EQ meta)
 if($meta.Count -ne 1){throw 'Snapshot must contain one metadata record'}
 $roles=@($data|Where-Object kind -EQ role)
 $invitations=@($data|Where-Object kind -EQ invitation)
-$cases=@($roles|Group-Object groupId,role|Where-Object {@($_.Group.personId|Sort-Object -Unique).Count -gt 1})
+$cases=@($roles|Where-Object {$_.role -in @('contactpersoon1','penningmeester')}|Group-Object groupId,role|Where-Object {@($_.Group.personId|Sort-Object -Unique).Count -gt 1})
 $activeConflicts=@($cases|Where-Object {@($_.Group|Where-Object {$_.personActive -eq 1 -and $_.personExists -eq 1}|Select-Object -ExpandProperty personId -Unique).Count -gt 1}).Count
 $groups=@($roles|Group-Object groupId|Sort-Object {[uint]$_.Name})
 function Cell($value){[Net.WebUtility]::HtmlEncode([string]$value).Replace('|','&#124;').Replace('`','&#96;').Replace("`r",' ').Replace("`n",' ')}

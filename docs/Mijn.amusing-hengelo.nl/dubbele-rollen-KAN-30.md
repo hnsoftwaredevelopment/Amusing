@@ -1,5 +1,36 @@
 # KAN-30 — Bestaande dubbele unieke rollen
 
+## Actuele organisatieafspraak — 28 november 2026
+
+De organisatie heeft het individuele keuzetraject vervangen door onderstaande goedgekeurde regels. De inventaris verderop beschrijft de situatie vóór dit besluit; meerdere tweede contactpersonen zijn nu toegestaan en vormen op zichzelf geen conflict.
+
+- Per koor blijft één eerste contactpersoon: de kandidaat met het **hoogste persoons-ID**. Dit is de expliciet gekozen regel; er zijn geen betrouwbare historische aanmaak- of koppelingsdatums beschikbaar.
+- Andere eerste contacten worden tweede contactpersonen, zodat ieder uniek contactadres gekoppeld blijft.
+- Bij hetzelfde e-mailadres binnen dezelfde contactrol blijft de koppeling met het hoogste persoons-ID.
+- Heeft bij meerdere eerste contacten één ervan hetzelfde adres als een bestaande tweede contactpersoon, dan vervalt die eerste-contactkoppeling en blijft de bestaande tweede-contactkoppeling behouden.
+- Iedere unieke e-mail blijft via een contactrol gekoppeld; een voorheen actief adres mag niet uitsluitend aan een inactief account overblijven. Er blijft minstens één actieve eerste contactpersoon. Als de regels dit niet toelaten, stopt de correctie zonder wijzigingen.
+- Alleen contactrolkoppelingen binnen het betreffende koor veranderen. Andere rollen, personenaccounts, andere koren, uitnodigingen, historische deelname en bestaande nota's worden niet verwijderd.
+
+De nieuwe plannen voor amusingdev en amusing bevatten elk 23 koren, met 24 omzettingen en 47 unieke contactadressen vóór én na herstel. De twee gevallen met meerdere tweede contacten hoeven niet gewijzigd te worden. De concrete vóór/na-plannen staan buiten Git als JSON en als leesbare Markdown in Obsidian.
+
+### Uitvoering en controles
+
+`tools/Amusing.ContactRepair` bevat een apart onderhoudsprogramma, zonder web-endpoint. Het maakt standaard alleen een plan. Uitvoering vereist een bestaand plan en een bevoegd Beheeraccount voor de auditregistratie. Voor uitvoering worden actuele koorgegevens, rolkoppelingen en accountgegevens onder database-locks opnieuw vergeleken. Een gewijzigd of aangepast plan, openstaande contactuitnodiging of overtreden veiligheidsregel blokkeert de uitvoering. De hele batch is één transactie; ook een mislukte auditinsert draait alle wijzigingen terug.
+
+Iedere gewijzigde persoon krijgt een auditregel met actor, tijd, rolwijziging en planreferentie. Het koorlogboek toont de handeling vertaald. Bestaande mail wordt niet opnieuw verzonden. Een nieuwe nota gebruikt na herstel de geldende ontvangerselectie; een bestaande penningmeesterrol blijft ongewijzigd.
+
+De Mijn-validatie en uitnodigingskeuze laten nu meerdere tweede contactpersonen toe. Ook het Beheer-rolmenu wordt hierop aangepast. Eerste contactpersoon en penningmeester blijven uniek. De inventarishelper behandelt verschillende tweede contacten niet meer als dubbele unieke rol.
+
+```powershell
+# Alleen een privéplan maken; geen correcties:
+pwsh -NoProfile -File scripts/mijn/Repair-ContactRoles.ps1 -Database amusingdev
+
+# Een concreet gecontroleerd dev-plan uitvoeren:
+pwsh -NoProfile -File scripts/mijn/Repair-ContactRoles.ps1 -Database amusingdev -PlanPath <privéplan.json> -Execute
+```
+
+Productie heeft een aanvullende expliciete uitvoerschakelaar. Een testpublicatie of dev-correctie voert geen productiecorrectie uit. Het plan bewaart de oorspronkelijke rolkoppelingen als herstelbewijs; veranderde productiegegevens moeten opnieuw worden beoordeeld in plaats van blind een oude snapshot terug te zetten.
+
 ## Uitkomst inventaris 28 november 2026
 
 De databases amusing (productie) en amusingdev zijn uitsluitend gelezen, ieder in een read-only transactie met consistente snapshot. Er zijn geen rollen, accounts, uitnodigingen, inschrijvingen of mailgegevens gewijzigd. Er is geen mail aangemaakt of verstuurd.

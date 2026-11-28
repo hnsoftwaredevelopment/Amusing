@@ -89,7 +89,7 @@ else
     [SupplyParameterFromQuery(Name="status")] public string? Status{get;set;}
     private ChoirRoster? roster;
     private List<OutgoingRoleInvitation> outgoing = [];
-    private bool Reserved(string role) => (role is "contactpersoon1" or "contactpersoon2" or "penningmeester") &&
+    private bool Reserved(string role) => (role is "contactpersoon1" or "penningmeester") &&
         (roster!.People.Any(person => person.Roles.Contains(role)) || outgoing.Any(i => i.Role == role && i.ExpiresAt > DateTime.UtcNow));
     protected override async Task OnParametersSetAsync()
     {

@@ -20,7 +20,7 @@ LEFT JOIN ah_festivals f ON f.festival_id=(SELECT festival_id FROM ah_festivals 
 LEFT JOIN ah_inschrijvingen i ON i.festival_id=f.festival_id AND i.zanggroep_id=r.zanggroep_id
 WHERE r.rol IN ('contactpersoon1','contactpersoon2','penningmeester') AND EXISTS(
     SELECT 1 FROM ah_personen_rollen d WHERE d.zanggroep_id=r.zanggroep_id
-        AND d.rol IN ('contactpersoon1','contactpersoon2','penningmeester')
+        AND d.rol IN ('contactpersoon1','penningmeester')
     GROUP BY d.rol HAVING COUNT(DISTINCT d.persoon_id)>1)
 ORDER BY r.zanggroep_id,r.rol,r.persoon_id;
 
@@ -29,7 +29,7 @@ SELECT JSON_OBJECT('kind','invitation','groupId',v.group_id,'personId',v.person_
 FROM mijn_role_invitations v WHERE v.accepted_at IS NULL AND v.cancelled_at IS NULL AND v.expires_at>UTC_TIMESTAMP(6)
     AND v.role_name IN ('contactpersoon1','contactpersoon2','penningmeester','overdracht_contactpersoon1') AND EXISTS(
         SELECT 1 FROM ah_personen_rollen d WHERE d.zanggroep_id=v.group_id
-            AND d.rol IN ('contactpersoon1','contactpersoon2','penningmeester')
+            AND d.rol IN ('contactpersoon1','penningmeester')
         GROUP BY d.rol HAVING COUNT(DISTINCT d.persoon_id)>1)
 ORDER BY v.group_id,v.role_name,v.person_id;
 
